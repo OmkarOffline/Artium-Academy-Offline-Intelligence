@@ -153,7 +153,13 @@ const CENTRES=[
 
 /* ── Monthly targets, by month and centre. Filled in once the targets sheet is connected.
    e.g. TARGETS['2026-10']['Alwarpet']={leads:600, appts:240, visits:150, conv:45, fscol:900000, spend:300000, due:120, renewed:100, rncol:700000} */
-const TARGETS={};
+const TARGETS={
+  '2026-10':{
+    'Alwarpet':     {conv:40, fscol:360000, renewed:108, rncol:864000},
+    'Thoraipakkam': {conv:50, fscol:510000, renewed:105, rncol:1050000},
+    'Borewell Road':{conv:60, fscol:810000, renewed:2,   rncol:25000}
+  }
+};
 
 /* ── Metrics ──
    kind 'base'  : a number counted or summed for the month → gets Run-rate and Goal per day
@@ -181,9 +187,9 @@ const SECTIONS=[
     {id:'roas',  label:'ROAS',                        kind:'ratio',fmt:'x',   num:'fscol', den:'spend'}
   ]},
   {id:'rn',title:'Renewals Overview',rows:[
-    {id:'due',    label:'No. of renewals due',        kind:'base', fmt:'n',   src:'dueAll', fixed:true},   // known at the start of the month, so no run-rate
+    {id:'due',    label:'No. of renewals due',        kind:'base', fmt:'n',   src:'dueAll', fixed:true, noTarget:true},   // known at the start of the month, so no run-rate
     {id:'renewed',label:'Renewed',                    kind:'base', fmt:'n',   src:'rnCount'},
-    {id:'eff',    label:'Renewal collection efficiency %',kind:'ratio',fmt:'pct',num:'renewed',den:'due'},
+    {id:'eff',    label:'Renewal collection efficiency %',kind:'ratio',fmt:'pct',num:'renewed',den:'due', tgtDenActual:true},   // target = Renewed target ÷ actual renewals due
     {id:'rncol',  label:'Collections – Renewals',     kind:'base', fmt:'inr', src:'rnSum'},
     {id:'rnatv',  label:'ATV – Renewals',             kind:'ratio',fmt:'inr', num:'rncol', den:'renewed'},
     {group:'Renewal break-up'},
@@ -191,11 +197,11 @@ const SECTIONS=[
     {id:'renPrev',label:'Renewed – due in previous months',kind:'base', fmt:'n', src:'renPrev'},
     {id:'renAdv', label:'Renewed in advance',               kind:'base', fmt:'n', src:'renAdv'},
     {group:'First-time renewals'},
-    {id:'dueFT',  label:'Due',                        kind:'base', fmt:'n',   src:'dueFT', fixed:true},
+    {id:'dueFT',  label:'Due',                        kind:'base', fmt:'n',   src:'dueFT', fixed:true, noTarget:true},
     {id:'renFT',  label:'Renewed',                    kind:'base', fmt:'n',   src:'renFT'},
     {id:'pctFT',  label:'% Renewal',                  kind:'ratio',fmt:'pct', num:'renFT', den:'dueFT'},
     {group:'Repeated renewals'},
-    {id:'dueRP',  label:'Due',                        kind:'base', fmt:'n',   src:'dueRP', fixed:true},
+    {id:'dueRP',  label:'Due',                        kind:'base', fmt:'n',   src:'dueRP', fixed:true, noTarget:true},
     {id:'renRP',  label:'Renewed',                    kind:'base', fmt:'n',   src:'renRP'},
     {id:'pctRP',  label:'% Renewal',                  kind:'ratio',fmt:'pct', num:'renRP', den:'dueRP'}
   ]}
@@ -313,7 +319,7 @@ function ratio(a,b){return a==null||b==null||!b?null:a/b;}
 function cells(r,A,T,days){
   const base=r.kind==='base';
   const act=base?A[r.id]:ratio(A[r.num],A[r.den]);
-  const tgt=base?(T[r.id]??null):(T[r.id]??ratio(T[r.num],T[r.den]));
+  const tgt=r.noTarget?null:base?(T[r.id]??null):(T[r.id]??ratio(T[r.num],r.tgtDenActual?A[r.den]:T[r.den]));
   const has=v=>v!=null&&isFinite(v);
   const diff=has(act)&&has(tgt)?act-tgt:null;
   const ach=has(act)&&has(tgt)&&tgt?act/tgt:null;
@@ -335,7 +341,7 @@ function cells(r,A,T,days){
   else if(r.lower)gCell=`<td>${fmtVal(Math.max(gpd,0),r.fmt)}</td>`;                 // budget left per day
   else if(gpd<=0)gCell=`<td><span class="done"><i class="ti ti-check"></i> Achieved</span></td>`;
   else gCell=`<td>${fmtVal(gpd,r.fmt)}</td>`;
-  return td(fmtVal(tgt,r.fmt),'g')
+  return (r.noTarget?'<td class="na g">NA</td>':td(fmtVal(tgt,r.fmt),'g'))
     +td(fmtVal(act,r.fmt),'act')
     +td(fmtDiff(diff,r.fmt),diff==null||Math.abs(diff)<1e-9?'':good(diff)?'pos':'neg')
     +(ach==null?td(null):`<td><span class="pill ${cls}">${(ach*100).toFixed(0)}%</span></td>`)
