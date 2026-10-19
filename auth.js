@@ -102,6 +102,15 @@
     get user(){return session;},
     get pages(){return session&&session.pages||[];},
     fetchRows, signOut,
+    // Any other request to the data service, e.g. call('initiatives') or call('saveInitiative',{item})
+    async call(action,body){
+      if(!session||session.exp<Date.now()+30000){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
+      const j=await service(Object.assign({action},body||{}));
+      if(j.error==='expired'){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
+      if(j.error==='not-allowed') throw new Error("You don't have access to this");
+      if(j.error) throw new Error(j.error);
+      return j;
+    },
     // Teachers per centre and course (counts only), from the Basic Information sheet
     async teachers(){ const j=await service({action:'teachers'}); if(j.error) throw new Error(j.error==='expired'?'Your session has expired — sign in again':j.error); return j.teachers||{}; },
     onReady(fn){ session?fn(session):listeners.push(fn); }
