@@ -413,6 +413,7 @@
       .section-card:has(#scorecards-body) .section-title,.section-card:has(#breakdown-body) .section-title,.section-card:has(#rbreakdown-body) .section-title{font-size:19px}
     }
   </style>
+<script src="auth.js"></script>
 </head>
 <body>
 <div class="page">
@@ -759,11 +760,6 @@
 </div>
 
 <script>
-  const FS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=184947403&single=true&output=csv';
-  const RN_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=1190272933&single=true&output=csv';
-  const IS_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=32760902&single=true&output=csv';
-  const EF_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=579483228&single=true&output=csv';
-  const SC_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=413617851&single=true&output=csv';
 
   const COL={DATE:0,NAME:4,GENDER:5,AGE:6,COURSE:8,LEVEL:9,TYPE:10,REG_FEES:11,GROSS:13,DISCOUNT:15,NET:16,RENEWAL_STATUS:25,REASON:28,TEACHER:29};
   const ICOL={DATE:0,NAME:3,INST_ONLY:6,ACCESSORIES:8,TOTAL_COLL:9,COST_GST:12,GST_OUT:15,GST_IN:17,NET_COST:18};
@@ -945,16 +941,15 @@
   function unload(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('loading');});}
 
   /* ── Centre selector ──
-     Each centre reads its own receipts sheet (published Fresh Sales and Renewals tabs).
+     Each centre reads its own receipts sheet (Fresh Sales and Renewals tabs).
      A centre without links shows as "Coming soon". */
-  const OMR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vRphAw7sp-R5RE-q3VSo5jzoP3RBX7aaPe5YdG8GqeMGKawFnhdImZD50kc8Q7HyxiQu_c55FhuA1JT/pub?single=true&output=csv&gid=';
-  const BWR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vTjgfU58n7MbayzcGSVJ5q-NLEveOKIEphjRhHl_YtCzh-9x-w5cxPp2g1hvepJHqjmLa7L0GW59TS1/pub?single=true&output=csv&gid=';
+  // Each centre's receipts data comes from the data service (see auth.js)
   const CENTRES=[
-    {city:'Chennai',   name:'Alwarpet',      fs:FS_URL,                 rn:RN_URL},
-    {city:'Chennai',   name:'Thoraipakkam',  fs:OMR_PUB+'52323956',     rn:OMR_PUB+'1120927282'},
-    {city:'Bangalore', name:'Borewell Road', fs:BWR_PUB+'52323956',     rn:BWR_PUB+'279431779'}
+    {city:'Chennai',   name:'Alwarpet'},
+    {city:'Chennai',   name:'Thoraipakkam'},
+    {city:'Bangalore', name:'Borewell Road'}
   ];
-  CENTRES.forEach(c=>c.live=!!(c.fs&&c.rn));
+  CENTRES.forEach(c=>c.live=true);
   let activeCentre=(()=>{try{const s=localStorage.getItem('artium_centre');return CENTRES.some(c=>c.name===s&&c.live)?s:'Alwarpet';}catch(e){return'Alwarpet';}})();
   function centreInfo(){return CENTRES.find(c=>c.name===activeCentre);}
   function buildCentreMenu(){
@@ -1144,32 +1139,17 @@
     renderBreakdown(f);
   }
 
-  /* Google serves two copies of the published sheet at random: today's and an old one.
-     Fetch each tab in waves of 3 and keep the copy whose latest date is newest. If a whole wave
-     comes back identical (possibly all old), try another wave, up to 3 waves. */
-  function parseTab(t,skip,dateCol){
-    const rows=parseCSV(t).slice(skip).filter(r=>r[dateCol]&&r[dateCol].trim()!==''&&r[dateCol].toLowerCase()!=='date');
-    const latest=rows.reduce((m,r)=>{const d=parseDate(r[dateCol]);return d&&d>m?d:m;},new Date(0));
-    return{rows,latest};
-  }
-  async function fetchLatest(url,skip,dateCol){
-    let best=null;
-    for(let wave=0;wave<3;wave++){
-      const texts=await Promise.all([0,1,2].map(i=>
-        fetch(url+'&_='+Date.now()+'-'+wave+i,{cache:'no-store'}).then(r=>r.ok?r.text():null).catch(()=>null)));
-      const got=texts.filter(Boolean).map(t=>parseTab(t,skip,dateCol));
-      got.forEach(g=>{if(!best||g.latest>best.latest||(+g.latest===+best.latest&&g.rows.length>best.rows.length))best=g;});
-      if(best&&got.some(g=>+g.latest!==+got[0].latest))break;   // saw both copies, so we already hold the newer one
-    }
-    if(!best)throw new Error('Could not load data');
-    return best.rows;
+  /* Rows of a centre's tab, from the data service (see auth.js) */
+  async function fetchTab(centre,tab,skip,dateCol){
+    const rows=await ArtiumAuth.fetchRows(centre,tab);
+    return rows.slice(skip).filter(r=>r[dateCol]&&r[dateCol].trim()!==''&&r[dateCol].toLowerCase()!=='date');
   }
 
   async function loadData(){
     try{
       const c=centreInfo();
       document.getElementById('status-dot').className='status-dot loading';document.getElementById('last-updated-text').textContent='Loading '+c.name+'…';
-      const [f,r]=await Promise.all([fetchLatest(c.fs,2,COL.DATE),fetchLatest(c.rn,2,COL.DATE)]);
+      const [f,r]=await Promise.all([fetchTab(c.name,'Fresh Sales',2,COL.DATE),fetchTab(c.name,'Renewals',2,COL.DATE)]).catch(e=>{throw new Error(e.message.replace('one of the receipts sheets',c.name+"'s receipts sheet"));});
       if(c.name!==activeCentre)return;          // the user switched centre while this was loading
       // keep only this centre's rows (Academy, column C)
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);

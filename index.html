@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- site build: 2026-10-19 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -32,6 +31,7 @@
     .tab{padding:0 10px;font-size:12px}
   }
 </style>
+<script src="auth.js"></script>
 </head>
 <body>
   <header class="shell-bar">
@@ -50,7 +50,9 @@
 <script>
   const tabs = document.querySelectorAll(".tab");
   function show(name){
+    if(!ArtiumAuth.user) return;   // nothing loads before sign-in
     if(!document.getElementById("frame-" + name)) name = "centres";
+    if(!ArtiumAuth.pages.includes(name)) name = ArtiumAuth.pages[0];   // only pages this person may open
     tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
     document.querySelectorAll(".frames iframe").forEach(f => {
       const on = f.id === "frame-" + name;
@@ -61,7 +63,7 @@
   }
   tabs.forEach(t => t.addEventListener("click", () => show(t.dataset.tab)));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
-  show(location.hash.slice(1) || "centres");
+  ArtiumAuth.onReady(() => show(location.hash.slice(1) || "centres")); // pages load only after sign-in
 </script>
 </body>
 </html>

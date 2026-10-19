@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="auth.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -147,15 +148,11 @@
 </div>
 
 <script>
-/* ── Centres: each reads its own receipts sheet (Fresh Sales and Renewals tabs, published as CSV) ── */
-const ALW_FS='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=184947403&single=true&output=csv';
-const ALW_RN='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=1190272933&single=true&output=csv';
-const OMR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vRphAw7sp-R5RE-q3VSo5jzoP3RBX7aaPe5YdG8GqeMGKawFnhdImZD50kc8Q7HyxiQu_c55FhuA1JT/pub?single=true&output=csv&gid=';
-const BWR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vTjgfU58n7MbayzcGSVJ5q-NLEveOKIEphjRhHl_YtCzh-9x-w5cxPp2g1hvepJHqjmLa7L0GW59TS1/pub?single=true&output=csv&gid=';
+/* ── Centres: each centre's receipts data (Fresh Sales and Renewals tabs) comes from the data service (see auth.js) ── */
 const CENTRES=[
-  {city:'Chennai',   name:'Alwarpet',      fs:ALW_FS,             rn:ALW_RN},
-  {city:'Chennai',   name:'Thoraipakkam',  fs:OMR_PUB+'52323956', rn:OMR_PUB+'1120927282'},
-  {city:'Bangalore', name:'Borewell Road', fs:BWR_PUB+'52323956', rn:BWR_PUB+'279431779'}
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
 ];
 
 /* ── Monthly targets, by month and centre. Filled in once the targets sheet is connected.
@@ -250,18 +247,10 @@ function parseCSV(text){
     else cur+=ch;}
   row.push(cur.trim());if(row.some(v=>v!==''))rows.push(row);return rows;
 }
-/* Google sometimes serves an older copy of a published tab: fetch in waves of 3 and keep the newest. */
-function parseTab(t){const rows=parseCSV(t).slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
-  const latest=rows.reduce((m,r)=>{const d=parseDate(r[0]);return d&&d>m?d:m;},new Date(0));return{rows,latest};}
-async function fetchLatest(url){
-  let best=null;
-  for(let w=0;w<3;w++){
-    const texts=await Promise.all([0,1,2].map(i=>fetch(url+'&_='+Date.now()+'-'+w+i,{cache:'no-store'}).then(r=>r.ok?r.text():null).catch(()=>null)));
-    const got=texts.filter(Boolean).map(parseTab);
-    got.forEach(g=>{if(!best||g.latest>best.latest||(+g.latest===+best.latest&&g.rows.length>best.rows.length))best=g;});
-    if(best&&got.some(g=>+g.latest!==+got[0].latest))break;
-  }
-  if(!best)throw new Error('Could not load data');return best.rows;
+/* Rows of a centre's tab, from the data service (see auth.js) */
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
 }
 
 /* Indian number formats: ₹ under 1 lakh in full, above that in lakhs */
@@ -446,7 +435,7 @@ if(window.__SAMPLE){Object.assign(TARGETS,window.__SAMPLE.targets);
 async function load(){
   render();
   try{
-    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchLatest(c.fs),fetchLatest(c.rn)])));
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
     CENTRES.forEach((c,i)=>{
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
       DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};DATA[c.name].cls=classifyRenewals(DATA[c.name].fs,DATA[c.name].rn);
