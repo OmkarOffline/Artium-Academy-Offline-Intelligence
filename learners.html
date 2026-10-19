@@ -54,7 +54,7 @@
 
   /* Month-by-month table: newest month first, scroll right for history */
   .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
-  table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:100%}   /* few months: columns stretch to fill */
   th,td{padding:13px 16px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);min-width:92px}
   th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);vertical-align:bottom}
   thead tr.yr th{padding:14px 16px 4px;border-bottom:0;font:700 10px/1 var(--body);letter-spacing:.16em;color:var(--gold);text-align:left}
@@ -62,11 +62,16 @@
   th.cur{color:var(--accent)}
   th.cur small{display:block;font:500 10px/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--accent);opacity:.8}
   .yb{border-left:1px solid var(--border)}
-  .metric{position:sticky;left:0;z-index:1;text-align:left;background:#fff;min-width:340px;max-width:340px;white-space:normal;padding-left:22px;border-right:1px solid var(--border)}
+  .metric{position:sticky;left:0;z-index:1;text-align:left;background:#fff;min-width:380px;max-width:380px;white-space:normal;padding-left:22px;border-right:1px solid var(--border)}
   th.metric{background:#FAF9F7;z-index:2}
   td{font:500 14px var(--display);color:var(--ink2)}
   td.metric{font:500 14px var(--body);color:var(--ink)}
-  td.metric .k{display:inline-block;width:22px;font:700 11px var(--body);color:var(--gold)}
+  td.metric .k{display:inline-block;width:22px;font:700 11px var(--body);color:var(--gold);vertical-align:baseline}
+  td.metric .op{display:inline-block;width:46px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);vertical-align:baseline}   /* notional Add / Less column */
+  tr.add td.metric .op{color:var(--ok)}
+  tr.less td.metric .op{color:var(--bad)}
+  td.metric .lb{display:inline-block;width:calc(100% - 46px);vertical-align:top}
+  thead tr.yr th.metric{padding-left:68px}   /* 'Particulars' lines up with the row names */
   td.zero{color:var(--ghost);font-weight:400}
   tr.sum td{font-weight:600;color:var(--ink);background:#FCFBF9}
   tr.sum td.metric{font-weight:600}
@@ -81,8 +86,16 @@
   tr.mal td.metric{font:700 15px var(--display);color:var(--accent)}
   tr.spacer td{height:12px;padding:0;background:#FAF9F7;border-bottom:1px solid var(--line)}
   tbody tr:not(.mal):not(.spacer):hover td{background:#FCFBFE}
-  .note{padding:14px 4px 0;font-size:12.5px;color:var(--muted);line-height:1.6}
-  .note b{color:var(--ink2);font-weight:600}
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs ul{margin:12px 0 0;padding:14px 18px 14px 34px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .defs li{margin:4px 0}
+  .defs li b{color:var(--ink);font-weight:600}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
   .sample{display:inline-flex;align-items:center;gap:6px;background:#FFF6E5;border:1px solid #F0DDB5;color:#8A5A00;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:14px}
 
   @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
@@ -104,12 +117,17 @@
   <section class="tray">
     <div class="tray-head"><div class="tray-title">Active learners by month</div><span class="badge" id="months-badge">—</span></div>
     <div class="tbl-wrap"><table id="mal"></table></div>
-    <div class="note">
-      <b>Opening balance</b> = last month's Monthly Active Learners ·
-      <b>Due for renewal</b> = memberships whose end date (column X) falls in the month, up to today — first-time from the Fresh Sales tab, repeated from the Renewals tab ·
-      <b>Renewed</b> = every Renewals-tab entry dated in the month ·
-      <b>Net gain / loss</b> = this month's Monthly Active Learners − last month's ·
-      <b>Win-back / Churn</b> = Renewed − Total due: <span style="color:var(--ok);font-weight:600">+</span> more learners renewed than were due (win-back), <span style="color:var(--bad);font-weight:600">−</span> learners lost (churn)
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="defs-list" onclick="toggleDefs(this)"><span class="i">i</span>How these numbers are worked out</button>
+      <ul id="defs-list" hidden>
+        <li><b>Opening balance</b> — last month's Monthly Active Learners.</li>
+        <li><b>New admissions</b> — Fresh Sales entries dated in the month.</li>
+        <li><b>Due for renewal</b> — memberships whose end date (column X) falls in the month, up to today. First-time renewals come from the Fresh Sales tab, repeated renewals from the Renewals tab.</li>
+        <li><b>Actually renewed</b> — every Renewals-tab entry dated in the month.</li>
+        <li><b>Monthly Active Learners</b> — Total − Total due for renewals + Actually renewed.</li>
+        <li><b>Net gain / loss</b> — this month's Monthly Active Learners minus last month's.</li>
+        <li><b>Win-back / Churn</b> — Actually renewed − Total due for renewals. <span class="pos">+</span> means more learners renewed than were due (win-back); <span class="neg">−</span> means learners were lost (churn).</li>
+      </ul>
     </div>
   </section>
 </div>
@@ -139,7 +157,13 @@ async function fetchTab(centre,tab){
 }
 
 const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate()),FIRST=START.y*12+START.m,LAST=mi(now);
-const MONTHS=[];for(let k=LAST;k>=FIRST;k--)MONTHS.push(k);   // newest → oldest
+let MONTHS=[];   // newest → oldest, from the first transaction of the centre(s) shown
+/* Month of the first Fresh Sales or Renewals entry across these centres */
+function firstMonth(names){
+  let f=LAST;
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const t=parseDate(r[0]);if(t&&t.getFullYear()>=2020){const k=mi(t);if(k<f)f=k;}});});
+  return Math.max(f,FIRST);
+}
 let DATA={};
 
 /* Counts per month for one centre: new admissions, dues (first-time / repeated) and renewals */
@@ -166,14 +190,14 @@ function build(names){
 
 const ROWS=[
   {k:'A',label:'Opening balance'},
-  {k:'B',label:'Add: New admissions',cls:'add'},
+  {k:'B',op:'Add',label:'New admissions',cls:'add'},
   {k:'C',label:'Total',cls:'sum'},
   {spacer:true},
   {k:'D',label:'Due for renewal – First-time renewals'},
   {k:'E',label:'Due for renewal – Repeated renewals'},
-  {k:'F',label:'Less: Total due for renewals',cls:'sum less'},
+  {k:'F',op:'Less',label:'Total due for renewals',cls:'sum less'},
   {spacer:true},
-  {k:'G',label:'Add: Actually renewed in the month',cls:'add'},
+  {k:'G',op:'Add',label:'Actually renewed in the month',cls:'add'},
   {k:'H',label:'Monthly Active Learners',cls:'mal',note:'C − F + G'},
   {k:'I',label:'Net gain / loss',cls:'signed',note:'vs last month'},
   {k:'J',label:'Win-back / Churn',cls:'signed',note:'Renewed − Total due'}
@@ -184,9 +208,12 @@ function render(){
   document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
   document.getElementById('subtitle').textContent=sel?'Month-by-month learner movement — '+sel.name+', '+sel.city:'Month-by-month learner movement — all centres combined';
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
-  document.getElementById('months-badge').textContent=MONTHS.length+' months';
   const ready=CENTRES.every(c=>DATA[c.name]);
-  const v=ready?build(sel?[sel.name]:CENTRES.map(c=>c.name)):null;
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name);
+  const v=ready?build(names):null;
+  const from=ready?firstMonth(names):LAST;
+  MONTHS=[];for(let k=LAST;k>=from;k--)MONTHS.push(k);
+  document.getElementById('months-badge').textContent=ready?MONTHS.length+' month'+(MONTHS.length===1?'':'s')+' · since '+MON[from%12]+' '+Math.floor(from/12):'…';
 
   // Year band, then month names (newest first)
   const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
@@ -196,7 +223,7 @@ function render(){
     <tr class="mo">${MONTHS.map(k=>`<th class="${isYearStart(k)?'yb ':''}${k===LAST?'cur':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr>
   </thead>`;
   const body=ROWS.map(r=>r.spacer?`<tr class="spacer"><td class="metric"></td><td colspan="${MONTHS.length}"></td></tr>`:
-    `<tr class="${r.cls||''}"><td class="metric"><span class="k">${r.k}</span>${r.label}</td>${MONTHS.map(k=>{
+    `<tr class="${r.cls||''}"><td class="metric"><span class="op">${r.op||''}</span><span class="lb">${r.label}</span></td>${MONTHS.map(k=>{
       if(!v)return`<td class="zero${isYearStart(k)?' yb':''}">…</td>`;
       const x=v[k][r.k],sg=r.cls==='signed';const t=(sg&&x>0?'+':x<0?'−':'')+Math.abs(x).toLocaleString('en-IN');
       return`<td class="${x===0?'zero':sg?(x>0?'pos':'neg'):''}${isYearStart(k)?' yb':''}">${t}</td>`;}).join('')}</tr>`).join('');
@@ -225,6 +252,7 @@ async function load(){
     document.getElementById('dot').className='dot error';
   }
 }
+function toggleDefs(b){const l=document.getElementById('defs-list');l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 load();
 </script>
 </body>
