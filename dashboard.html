@@ -948,10 +948,11 @@
      Each centre reads its own receipts sheet (published Fresh Sales and Renewals tabs).
      A centre without links shows as "Coming soon". */
   const OMR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vRphAw7sp-R5RE-q3VSo5jzoP3RBX7aaPe5YdG8GqeMGKawFnhdImZD50kc8Q7HyxiQu_c55FhuA1JT/pub?single=true&output=csv&gid=';
+  const BWR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vTjgfU58n7MbayzcGSVJ5q-NLEveOKIEphjRhHl_YtCzh-9x-w5cxPp2g1hvepJHqjmLa7L0GW59TS1/pub?single=true&output=csv&gid=';
   const CENTRES=[
     {city:'Chennai',   name:'Alwarpet',      fs:FS_URL,                 rn:RN_URL},
     {city:'Chennai',   name:'Thoraipakkam',  fs:OMR_PUB+'52323956',     rn:OMR_PUB+'1120927282'},
-    {city:'Bangalore', name:'Borewell Road'}
+    {city:'Bangalore', name:'Borewell Road', fs:BWR_PUB+'52323956',     rn:BWR_PUB+'279431779'}
   ];
   CENTRES.forEach(c=>c.live=!!(c.fs&&c.rn));
   let activeCentre=(()=>{try{const s=localStorage.getItem('artium_centre');return CENTRES.some(c=>c.name===s&&c.live)?s:'Alwarpet';}catch(e){return'Alwarpet';}})();
