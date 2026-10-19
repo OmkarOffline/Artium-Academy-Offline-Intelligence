@@ -6,7 +6,7 @@
   <title>Alwarpet, Chennai — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -290,6 +290,106 @@
     .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
     .bd-note{padding:0 var(--card-padding) 22px;font-size:11.5px;color:var(--text-secondary)}
     @media (max-width:1100px){.bd-grid{grid-template-columns:1fr}}
+    /* ── Artium theme (matches the Class Audits site) ──
+       Poppins for headings and numbers, system UI for body text; warm canvas, white cards with a gold top edge,
+       Artium purple for actions and highlights. */
+    :root{
+      --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      --font-primary:var(--display);
+      --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+      --bg-primary:#FFFFFF;
+      --bg-secondary:#F6F5F2;
+      --bg-hover:#F2ECF8;
+      --border-primary:#E4E1EA;
+      --border-secondary:#D6D2DE;
+      --text-h1:#1D1B22;
+      --text-h2:#1D1B22;
+      --text-h3:#3B3742;
+      --text-body:#3B3742;
+      --text-secondary:#6B6774;
+      --text-disabled:#9A96A3;
+      --blue:#5B2A86;
+      --teal:#5B2A86;
+      --purple:#5B2A86;
+      --accent:#5B2A86;
+      --accent-soft:#F2ECF8;
+      --gold:#A8844F;
+      --ok:#1F7A4D;--ok-soft:#E5F4EC;
+      --bad:#B42318;--bad-soft:#FDECEB;
+      --card-radius:18px;
+      --card-shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+    }
+    body{background:var(--bg-secondary);font-family:var(--font-body);color:var(--text-body)}
+
+    /* Header */
+    .page-header{border-bottom:0;padding-bottom:0;margin-bottom:30px;align-items:flex-end}
+    .centre-eyebrow{font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+    .centre-trigger{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--text-h1)}
+    .centre-chev{width:30px;height:30px;border:1px solid var(--border-primary);border-radius:999px;background:#fff;color:var(--text-h3)}
+    .centre-trigger:hover .centre-chev{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+    .centre-opt[aria-checked="true"]{color:var(--accent);background:var(--accent-soft)}
+    .page-subtitle{font-size:15px;color:var(--text-secondary);margin-top:6px}
+    .page-header-right{gap:10px}
+    .last-updated{font-size:13px;color:var(--text-secondary)}
+    .status-dot{background:var(--ok)}
+    .header-date-controls{background:#fff;border:1px solid var(--border-primary);border-radius:16px;padding:8px;gap:8px;box-shadow:var(--card-shadow)}
+    .header-date-label{font:700 10px/1 var(--font-body);letter-spacing:.14em;color:var(--text-disabled);padding-left:4px}
+    input.header-date{background:var(--bg-secondary);border:1px solid transparent;border-radius:12px;height:42px;width:150px;font:500 14px var(--display);color:var(--text-h1)}
+    input.header-date:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+    .btn-reset-month{align-self:flex-end;margin-top:0;height:42px;padding:0 18px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:600 14px var(--display)}
+    .btn-reset-month:hover{background:#4C2272}
+
+    /* Section wrappers: Filters stays a card; Scorecards and Breakdowns sit on the canvas like "Centres this month" */
+    .section-card{border:1px solid var(--border-primary);border-radius:var(--card-radius);box-shadow:var(--card-shadow)}
+    .section-title{font:600 16px var(--display);color:var(--text-h1)}
+    .section-badge{background:var(--accent-soft);border:0;color:var(--accent);font-weight:600}
+    .section-card:has(#scorecards-body),.section-card:has(#breakdown-body),.section-card:has(#rbreakdown-body){background:transparent;border:0;box-shadow:none;overflow:visible}
+    .section-card:has(#scorecards-body) > .section-header,.section-card:has(#breakdown-body) > .section-header,.section-card:has(#rbreakdown-body) > .section-header{padding:6px 2px 2px}
+    .section-card:has(#scorecards-body) .section-header:hover,.section-card:has(#breakdown-body) .section-header:hover,.section-card:has(#rbreakdown-body) .section-header:hover{background:transparent}
+    .section-card:has(#scorecards-body) .section-title,.section-card:has(#breakdown-body) .section-title,.section-card:has(#rbreakdown-body) .section-title{font:600 24px/1.3 var(--display);letter-spacing:-.01em}
+    .section-card:has(#scorecards-body) .section-header-left > .ti,.section-card:has(#breakdown-body) .section-header-left > .ti,.section-card:has(#rbreakdown-body) .section-header-left > .ti{display:none}
+    #scorecards-body,#breakdown-body,#rbreakdown-body{border-top:0;padding:0}
+    .sc-compare{font-size:14px;color:var(--text-secondary);margin-left:8px}
+
+    /* Scorecards — same card language as the centre cards */
+    .kpi-section{padding:16px 2px 8px}
+    .kpi-section + .kpi-section{border-top:0;padding-top:20px}
+    .kpi-group-title{font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+    .kpi-grid{gap:14px}
+    .kpi{border:1px solid var(--border-primary);border-radius:18px;background:#fff;padding:20px 18px 16px;
+      box-shadow:inset 0 3px 0 var(--gold),0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);transition:transform .15s ease,box-shadow .15s ease}
+    .kpi:hover{transform:translateY(-2px);box-shadow:inset 0 3px 0 var(--gold),0 1px 2px rgba(31,26,36,.04),0 18px 34px -18px rgba(75,31,111,.36)}
+    .kpi::before,.kpi-icon{display:none}
+    .kpi-head{min-height:44px;margin-bottom:10px}
+    .kpi-label{font:700 10.5px/1.5 var(--font-body);letter-spacing:.11em;text-transform:uppercase;color:var(--text-secondary)}
+    .kpi-value{font:600 28px/1.15 var(--display);letter-spacing:-.01em;color:var(--text-h1)}
+    .kpi-cmp{flex-direction:row;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-primary);flex-wrap:wrap}
+    .kpi-pill{border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:600;line-height:1.6}
+    .kpi-pill .ti{display:none}
+    .kpi-pill.up{color:var(--ok);background:var(--ok-soft)}
+    .kpi-pill.down{color:var(--bad);background:var(--bad-soft)}
+    .kpi-pill.flat{color:var(--text-secondary);background:#EEEDF0}
+    .kpi-prev{font-size:13px;color:var(--text-secondary)}
+
+    /* Breakdown tables */
+    .bd-grid{padding:16px 2px 8px;gap:18px}
+    .bd-title{font:700 11px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+    .bd-scroll{border:1px solid var(--border-primary);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28)}
+    .bd-table th{background:#FAF9F7;color:var(--text-disabled);font-weight:700;letter-spacing:.1em}
+    .bd-table thead tr.grp th{padding-top:14px}
+    .bd-table thead th.grp-cur{color:var(--accent)}
+    .bd-table td{border-bottom-color:#EFEDF2}
+    .bd-table tbody td:first-child{font-weight:500;color:var(--text-h1)}
+    .bd-table td.cur{font:600 14px var(--display);color:var(--text-h1)}
+    .bd-table td.cmp{color:var(--text-h3)}
+    .bd-table td.cur.zero,.bd-table td.zero{font-family:var(--font-body);color:#B3AFBB;font-weight:400}
+    .bd-table tfoot td{background:#FAF9F7;font-weight:700}
+    .bd-table .sep{border-left-color:var(--border-primary)}
+    .bd-trend.up{color:var(--ok)}
+    .bd-trend.down{color:var(--bad)}
+    .bd-note{padding:2px 2px 8px;color:var(--text-secondary)}
+    @media (max-width:900px){.page-header{align-items:flex-start}}
+    @media (max-width:640px){.centre-trigger{font-size:28px}.section-card:has(#scorecards-body) .section-title{font-size:20px}}
   </style>
 </head>
 <body>
@@ -298,12 +398,12 @@
   <!-- PAGE HEADER -->
   <div class="page-header">
     <div>
-      <div class="centre-eyebrow" id="centre-eyebrow">Centre</div>
+      <div class="centre-eyebrow" id="centre-eyebrow">Chennai</div>
       <div class="centre-picker" id="centre-picker">
-        <button class="centre-trigger" id="centre-trigger" aria-haspopup="menu" aria-expanded="false" aria-labelledby="centre-eyebrow centre-trigger" onclick="toggleCentreMenu(event)"><span id="centre-name">Alwarpet, Chennai</span><span class="centre-chev" aria-hidden="true"><i class="ti ti-chevron-down"></i></span></button>
+        <button class="centre-trigger" id="centre-trigger" aria-haspopup="menu" aria-expanded="false" aria-labelledby="centre-eyebrow centre-trigger" onclick="toggleCentreMenu(event)"><span id="centre-name">Alwarpet</span><span class="centre-chev" aria-hidden="true"><i class="ti ti-chevron-down"></i></span></button>
         <div class="centre-menu" id="centre-menu" role="menu" hidden></div>
       </div>
-      <div class="page-subtitle">Centre performance dashboard</div>
+      <div class="page-subtitle">Lead to Purchase dashboard</div>
     </div>
     <div class="page-header-right">
       <div class="last-updated">
@@ -843,7 +943,7 @@
   function selectCentre(name){
     const c=CENTRES.find(x=>x.name===name);if(!c||!c.live)return;
     activeCentre=name;
-    document.getElementById('centre-name').textContent=c.name+', '+c.city;
+    document.getElementById('centre-name').textContent=c.name;document.getElementById('centre-eyebrow').textContent=c.city;
     document.title=c.name+', '+c.city+' — Dashboard';
     buildCentreMenu();closeCentreMenu();
   }
