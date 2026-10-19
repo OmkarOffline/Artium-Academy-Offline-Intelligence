@@ -83,9 +83,13 @@
   tbody tr:last-child td{border-bottom:0}
   tbody tr:hover td{background:#FCFBFE}
   tbody tr:hover td.metric{background:#FCFBFE}
+  tr.grp-row td{position:static;text-align:left;background:#FAF9F7;padding:30px 22px 10px;border-top:1px solid var(--border);border-bottom:1px solid var(--line)}
+  tr.grp-row span{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  tr.grp-row small{margin-left:10px;font-size:12px;color:var(--faint)}
+  tbody tr.grp-row:hover td{background:#FAF9F7}
   tr.sub td.metric{padding-left:36px;font-weight:400;color:var(--ink2)}
   tr.sub td.act{font-weight:500}
-  tr.ratio td.metric{padding-left:36px;font-weight:400;color:var(--ink2)}
+  tr.ratio td.metric{font-weight:500;color:var(--ink)}
   .pill{display:inline-block;min-width:58px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
   .pill.ok{color:var(--ok);background:var(--ok-soft)}
   .pill.warn{color:var(--warn);background:var(--warn-soft)}
@@ -160,33 +164,43 @@ const SECTIONS=[
   {id:'adm',title:'Admissions Overview',rows:[
     {id:'leads', label:'No. of leads registered',     kind:'base', fmt:'n',   src:null},
     {id:'appts', label:'No. of appointments booked',  kind:'base', fmt:'n',   src:null},
-    {id:'l2a',   label:'Lead to appointment %',       kind:'ratio',fmt:'pct', num:'appts', den:'leads',  f:'Appointments ÷ Leads'},
+    {id:'l2a',   label:'Lead to appointment %',       kind:'ratio',fmt:'pct', num:'appts', den:'leads'},
     {id:'visits',label:'No. of centre visits',        kind:'base', fmt:'n',   src:null},
-    {id:'a2v',   label:'Appointment to visit %',      kind:'ratio',fmt:'pct', num:'visits',den:'appts',  f:'Visits ÷ Appointments'},
-    {id:'l2v',   label:'Lead to visit %',             kind:'ratio',fmt:'pct', num:'visits',den:'leads',  f:'Visits ÷ Leads'},
+    {id:'a2v',   label:'Appointment to visit %',      kind:'ratio',fmt:'pct', num:'visits',den:'appts'},
+    {id:'l2v',   label:'Lead to visit %',             kind:'ratio',fmt:'pct', num:'visits',den:'leads'},
     {id:'conv',  label:'Conversions',                 kind:'base', fmt:'n',   src:'fsCount'},
-    {id:'v2c',   label:'Visit to conversion %',       kind:'ratio',fmt:'pct', num:'conv',  den:'visits', f:'Conversions ÷ Visits'},
+    {id:'v2c',   label:'Visit to conversion %',       kind:'ratio',fmt:'pct', num:'conv',  den:'visits'},
     {id:'fscol', label:'Collections – Fresh Sales',   kind:'base', fmt:'inr', src:'fsSum'},
-    {id:'fsatv', label:'ATV – Fresh Sales',           kind:'ratio',fmt:'inr', num:'fscol', den:'conv',   f:'Collections ÷ Conversions'}
+    {id:'fsatv', label:'ATV – Fresh Sales',           kind:'ratio',fmt:'inr', num:'fscol', den:'conv'}
   ]},
   {id:'mkt',title:'Marketing Overview',rows:[
     {id:'spend', label:'Marketing spends',            kind:'base', fmt:'inr', src:null, lower:true},
-    {id:'cpl',   label:'Blended CPL',                 kind:'ratio',fmt:'inr', num:'spend', den:'leads',  f:'Spends ÷ Leads', lower:true},
-    {id:'cac',   label:'CAC',                         kind:'ratio',fmt:'inr', num:'spend', den:'conv',   f:'Spends ÷ Conversions', lower:true},
-    {id:'cpcv',  label:'CPCV (cost per centre visit)',kind:'ratio',fmt:'inr', num:'spend', den:'visits', f:'Spends ÷ Centre visits', lower:true},
-    {id:'roas',  label:'ROAS',                        kind:'ratio',fmt:'x',   num:'fscol', den:'spend',  f:'Fresh Sales collections ÷ Spends'}
+    {id:'cpl',   label:'Blended CPL',                 kind:'ratio',fmt:'inr', num:'spend', den:'leads', lower:true},
+    {id:'cac',   label:'CAC',                         kind:'ratio',fmt:'inr', num:'spend', den:'conv', lower:true},
+    {id:'cpcv',  label:'CPCV (cost per centre visit)',kind:'ratio',fmt:'inr', num:'spend', den:'visits', lower:true},
+    {id:'roas',  label:'ROAS',                        kind:'ratio',fmt:'x',   num:'fscol', den:'spend'}
   ]},
   {id:'rn',title:'Renewals Overview',rows:[
-    {id:'due',   label:'No. of renewals due',         kind:'base', fmt:'n',   src:'dueAll', fixed:true},   // known at the start of the month, so no run-rate
-    {id:'dueFT', label:'First-time renewals',         kind:'base', fmt:'n',   src:'dueFT',  fixed:true, sub:true, f:'Membership ends this month · Fresh Sales tab'},
-    {id:'dueRP', label:'Repeated renewals',           kind:'base', fmt:'n',   src:'dueRP',  fixed:true, sub:true, f:'Membership ends this month · Renewals tab'},
+    {id:'due',    label:'No. of renewals due',        kind:'base', fmt:'n',   src:'dueAll', fixed:true},   // known at the start of the month, so no run-rate
     {id:'renewed',label:'Renewed',                    kind:'base', fmt:'n',   src:'rnCount'},
-    {id:'eff',   label:'Renewal collection efficiency %',kind:'ratio',fmt:'pct',num:'renewed',den:'due',f:'Renewed ÷ Renewals due'},
-    {id:'rncol', label:'Collections – Renewals',      kind:'base', fmt:'inr', src:'rnSum'},
-    {id:'rnatv', label:'ATV – Renewals',              kind:'ratio',fmt:'inr', num:'rncol', den:'renewed',f:'Collections ÷ Renewed'}
+    {id:'eff',    label:'Renewal collection efficiency %',kind:'ratio',fmt:'pct',num:'renewed',den:'due'},
+    {id:'rncol',  label:'Collections – Renewals',     kind:'base', fmt:'inr', src:'rnSum'},
+    {id:'rnatv',  label:'ATV – Renewals',             kind:'ratio',fmt:'inr', num:'rncol', den:'renewed'},
+    {group:'Renewal break-up'},
+    {id:'renCur', label:'Renewed – due in current month',  kind:'base', fmt:'n', src:'renCur'},
+    {id:'renPrev',label:'Renewed – due in previous months',kind:'base', fmt:'n', src:'renPrev'},
+    {id:'renAdv', label:'Renewed in advance',               kind:'base', fmt:'n', src:'renAdv'},
+    {group:'First-time renewals'},
+    {id:'dueFT',  label:'Due',                        kind:'base', fmt:'n',   src:'dueFT', fixed:true},
+    {id:'renFT',  label:'Renewed',                    kind:'base', fmt:'n',   src:'renFT'},
+    {id:'pctFT',  label:'% Renewal',                  kind:'ratio',fmt:'pct', num:'renFT', den:'dueFT'},
+    {group:'Repeated renewals'},
+    {id:'dueRP',  label:'Due',                        kind:'base', fmt:'n',   src:'dueRP', fixed:true},
+    {id:'renRP',  label:'Renewed',                    kind:'base', fmt:'n',   src:'renRP'},
+    {id:'pctRP',  label:'% Renewal',                  kind:'ratio',fmt:'pct', num:'renRP', den:'dueRP'}
   ]}
 ];
-const ROW={};SECTIONS.forEach(s=>s.rows.forEach(r=>ROW[r.id]=r));
+const ROW={};SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.id)ROW[r.id]=r;}));
 
 /* ── Utils ── */
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -263,12 +277,35 @@ function actualsFor(c,y,m){
   // End dates before 2020 are skipped: the sheet shows those when the membership start date (W) is blank.
   const endsInMonth=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020&&t.getFullYear()===y&&t.getMonth()===m;};
   const dueFT=d.fs.filter(endsInMonth).length,dueRP=d.rn.filter(endsInMonth).length;
-  const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP};
+  // Each renewal this month: which cohort it belongs to and when it was due (see classifyRenewals)
+  const B={renCur:0,renPrev:0,renAdv:0,renFT:0,renRP:0},cm=y*12+m;
+  rn.forEach(r=>{const c=d.cls.get(r);if(!c)return;
+    B[c.cohort==='ft'?'renFT':'renRP']++;
+    if(c.end){const em=c.end.getFullYear()*12+c.end.getMonth();B[em===cm?'renCur':em<cm?'renPrev':'renAdv']++;}});
+  const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP,...B};
   const A={};
   SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base')A[r.id]=r.src?SRC[r.src]:null;}));
   const S=window.__SAMPLE&&window.__SAMPLE.actuals[c.name];   // preview only: fills metrics whose sheet isn't connected yet
   if(S)for(const k in S)if(A[k]==null)A[k]=S[k];
   return A;
+}
+/* For every Renewals-tab entry, find the learner's previous entry by Learner ID (column D):
+   - an earlier entry in the Renewals tab → repeated renewal; its Membership End Date (X) is when this renewal was due
+   - otherwise their admission in the Fresh Sales tab → first-time renewal; the admission's end date is when it was due */
+function classifyRenewals(fs,rn){
+  const id=r=>(r[3]||'').trim().toUpperCase();
+  const end=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020?t:null;};
+  const order=rn.map((r,i)=>({r,i,d:parseDate(r[0])}));
+  const byId=new Map();order.forEach(o=>{const k=id(o.r);if(!k)return;(byId.get(k)||byId.set(k,[]).get(k)).push(o);});
+  const fsById=new Map();fs.forEach(r=>{const k=id(r);if(!k)return;(fsById.get(k)||fsById.set(k,[]).get(k)).push({r,d:parseDate(r[0])});});
+  const out=new Map();
+  order.forEach(o=>{const k=id(o.r);if(!k)return;
+    const prior=(byId.get(k)||[]).filter(p=>p.d<o.d||(+p.d===+o.d&&p.i<o.i));
+    if(prior.length){const p=prior.reduce((a,b)=>(b.d>a.d||(+b.d===+a.d&&b.i>a.i))?b:a);out.set(o.r,{cohort:'rp',end:end(p.r)});return;}
+    const adm=(fsById.get(k)||[]).filter(f=>!o.d||!f.d||f.d<=o.d);
+    if(adm.length)out.set(o.r,{cohort:'ft',end:end(adm[adm.length-1].r)});
+  });
+  return out;
 }
 function ratio(a,b){return a==null||b==null||!b?null:a/b;}
 
@@ -342,13 +379,13 @@ function render(){
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   const per=[sel?{A:actualsFor(sel,viewY,viewM),T:(TARGETS[key]||{})[sel.name]||{}}:combined(key)];
   document.getElementById('sections').innerHTML=SECTIONS.map(s=>{
-    const body=s.rows.map(r=>`<tr class="${r.kind}${r.sub?' sub':''}">
+    const body=s.rows.map(r=>r.group?`<tr class="grp-row"><td colspan="7"><span>${r.group}</span>${r.note?`<small>${r.note}</small>`:''}</td></tr>`:`<tr class="${r.kind}${r.sub?' sub':''}">
       <td class="metric">${r.label}${pendingRow(r)?'<span class="pending" title="Data source not connected yet"></span>':''}${r.f?`<span class="f">${r.f}</span>`:''}</td>
       ${per.map(p=>cells(r,p.A,p.T,days)).join('')}</tr>`).join('');
     return`<section class="tray${secClosed[s.id]?' closed':''}" id="sec-${s.id}">
       <div class="tray-head" onclick="toggleSec('${s.id}')">
         <div class="tray-title">${s.title}</div>
-        <div class="tray-meta"><span class="badge">${s.rows.length} metrics</span><span class="chev"><i class="ti ti-chevron-down"></i></span></div>
+        <div class="tray-meta"><span class="badge">${s.rows.filter(r=>r.id).length} metrics</span><span class="chev"><i class="ti ti-chevron-down"></i></span></div>
       </div>
       <div class="tray-body"><div class="tbl-wrap"><table>${head}<tbody>${body}</tbody></table></div></div>
     </section>`;
@@ -368,14 +405,14 @@ document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY-
 document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
 
 if(window.__SAMPLE){Object.assign(TARGETS,window.__SAMPLE.targets);
-  document.getElementById('sample-note').innerHTML='<span class="sample"><i class="ti ti-flask"></i> Preview — targets, leads, appointments, visits, spends and renewals due are sample numbers</span>';}
+  document.getElementById('sample-note').innerHTML='<span class="sample"><i class="ti ti-flask"></i> Preview — targets, leads, appointments, visits and spends are sample numbers</span>';}
 async function load(){
   render();
   try{
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchLatest(c.fs),fetchLatest(c.rn)])));
     CENTRES.forEach((c,i)=>{
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
-      DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};
+      DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};DATA[c.name].cls=classifyRenewals(DATA[c.name].fs,DATA[c.name].rn);
     });
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
