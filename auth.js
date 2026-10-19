@@ -102,6 +102,8 @@
     get user(){return session;},
     get pages(){return session&&session.pages||[];},
     fetchRows, signOut,
+    // Teachers per centre and course (counts only), from the Basic Information sheet
+    async teachers(){ const j=await service({action:'teachers'}); if(j.error) throw new Error(j.error==='expired'?'Your session has expired — sign in again':j.error); return j.teachers||{}; },
     onReady(fn){ session?fn(session):listeners.push(fn); }
   };
 

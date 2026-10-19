@@ -117,6 +117,20 @@
   .defs li b{color:var(--ink);font-weight:600}
   .defs .pos{color:var(--ok);font-weight:700}
   .defs .neg{color:var(--bad);font-weight:700}
+  table.ar{width:100%;table-layout:fixed}
+  table.ar th,table.ar td{min-width:0}
+  table.ar th{white-space:normal}
+  table.ar td.metric,table.ar th.metric{min-width:0;max-width:none;width:26%;padding-left:22px}
+  table.ar td.metric small{display:block;font:400 11.5px var(--body);color:var(--faint);margin-top:2px}
+  table.ar tr.pair td{border-bottom-color:transparent}
+  table.ar tr.total td{background:#FCFBF9;font-weight:700;color:var(--ink);border-top:1px solid var(--border)}
+  table.ar td.need,table.ar tr.total td.need{color:var(--bad);font-weight:700}
+  table.ar td.ok,table.ar tr.total td.ok{color:var(--ok);font-weight:700}
+  table.ar td.na{color:var(--ghost);font-weight:400}
+  .util{display:inline-block;min-width:58px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+  .util.hi{color:var(--ok);background:#E5F4EC}
+  .util.mid{color:#9A6200;background:#FBF1DC}
+  .util.lo{color:var(--bad);background:#FDECEB}
   .sample{display:inline-flex;align-items:center;gap:6px;background:#FFF6E5;border:1px solid #F0DDB5;color:#8A5A00;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:14px}
 
   @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
@@ -158,6 +172,22 @@
         <li><b>Monthly Active Learners</b> — Total − Total due for renewals + Actually renewed.</li>
         <li><b>Net gain / loss</b> — this month's Monthly Active Learners minus last month's.</li>
         <li><b>Win-back / Churn</b> — Actually renewed − Total due for renewals. <span class="pos">+</span> means more learners renewed than were due (win-back); <span class="neg">−</span> means learners were lost (churn).</li>
+      </ul>
+    </div>
+  </section>
+  <section class="tray">
+    <div class="tray-head"><div class="tray-title">Admission Requirement</div><span class="badge" id="ar-badge">—</span></div>
+    <div class="tbl-wrap"><table class="ar" id="ar"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="ar-defs" onclick="toggleDefs(this,'ar-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <ul id="ar-defs" hidden>
+        <li><b>No. of teachers</b> — teachers at the centre for that course, from the Offline Team tab of the Basic Information sheet. South Vocals teachers take PFM - Tamil and Carnatic Classical; North Vocals teachers take PFM - Hindi and Hindustani Classical.</li>
+        <li><b>Allocation %</b> — share of a teacher's time for the course: PFM - Tamil 80% / Carnatic Classical 20%, PFM - Hindi 80% / Hindustani Classical 20%, every other course 100%.</li>
+        <li><b>Capacity</b> — 90 learners × No. of teachers × Allocation %.</li>
+        <li><b>Target</b> — 70% of capacity.</li>
+        <li><b>Monthly Active Learners</b> — this month's active learners in the course, worked out as in the section above.</li>
+        <li><b>% Active utilisation</b> — Monthly Active Learners ÷ capacity.</li>
+        <li><b>Surplus / Deficit</b> — Target − Monthly Active Learners. A positive number is the admissions still needed; zero or below means no new admissions are needed.</li>
       </ul>
     </div>
   </section>
@@ -232,18 +262,18 @@ function clearFilters(){FILTERS.forEach(f=>fval[f.id]='');render();}
 function toggleFilters(){document.getElementById('filters').classList.toggle('closed');}
 
 /* Counts per month for one centre: new admissions, dues (first-time / repeated) and renewals */
-function countsFor(name){
+function countsFor(name,pred=passes){
   const d=DATA[name],c={};
   const bump=(k,key)=>{(c[k]=c[k]||{adm:0,dueFT:0,dueRP:0,ren:0})[key]++;};
   // Due only once the Membership End Date has arrived (up to and including today), so the current month is real-time
   const end=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020&&t<=TODAY?t:null;};
-  d.fs.filter(passes).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'adm');const e=end(r);if(e)bump(mi(e),'dueFT');});
-  d.rn.filter(passes).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'ren');const e=end(r);if(e)bump(mi(e),'dueRP');});
+  d.fs.filter(pred).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'adm');const e=end(r);if(e)bump(mi(e),'dueFT');});
+  d.rn.filter(pred).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'ren');const e=end(r);if(e)bump(mi(e),'dueRP');});
   return c;
 }
 /* Rows A–H for every month, oldest first so each month's opening balance is the previous month's closing */
-function build(names){
-  const per=names.map(countsFor),out={};let open=0;
+function build(names,pred=passes){
+  const per=names.map(n=>countsFor(n,pred)),out={};let open=0;
   for(let k=FIRST;k<=LAST;k++){
     const s={adm:0,dueFT:0,dueRP:0,ren:0};
     per.forEach(c=>{const x=c[k];if(x)for(const f in s)s[f]+=x[f];});
@@ -294,6 +324,44 @@ function render(){
       const x=v[k][r.k],sg=r.cls==='signed';const t=(sg&&x>0?'+':x<0?'−':'')+Math.abs(x).toLocaleString('en-IN');
       return`<td class="${x===0?'zero':sg?(x>0?'pos':'neg'):''}${isYearStart(k)?' yb':''}">${t}</td>`;}).join('')}</tr>`).join('');
   document.getElementById('mal').innerHTML=head+'<tbody>'+body+'</tbody>';
+  renderAR(names);
+}
+
+/* ── Admission Requirement ── */
+const AR_COURSES=[
+  {course:'PFM - Tamil',          group:'South Vocals',   alloc:.8, pair:true},
+  {course:'Carnatic Classical',   group:'South Vocals',   alloc:.2},
+  {course:'PFM - Hindi',          group:'North Vocals',   alloc:.8, pair:true},
+  {course:'Hindustani Classical', group:'North Vocals',   alloc:.2},
+  {course:'Western Vocals',       group:'Western Vocals', alloc:1},
+  {course:'Keyboard',             group:'Keyboard',       alloc:1},
+  {course:'Guitar',               group:'Guitar',         alloc:1}
+];
+const SEATS=90, TARGET_SHARE=.7;
+let TEACHERS=null;   // {centre:{'South Vocals':4,...}}
+function renderAR(names){
+  const el=document.getElementById('ar');
+  document.getElementById('ar-badge').textContent=MON[LAST%12]+' '+Math.floor(LAST/12)+' · till date';
+  const ready=names.every(n=>DATA[n])&&TEACHERS;
+  const fmt=x=>Math.round(x).toLocaleString('en-IN');
+  let tot={t:0,cap:0,tgt:0,mal:0};
+  const rows=AR_COURSES.map(c=>{
+    const t=names.reduce((s,n)=>s+((TEACHERS&&TEACHERS[n]&&TEACHERS[n][c.group])||0),0);
+    const cap=SEATS*t*c.alloc, tgt=cap*TARGET_SHARE;
+    const mal=ready?build(names,r=>cell(r,8).toLowerCase()===c.course.toLowerCase())[LAST].H:null;
+    if(ready){tot.cap+=cap;tot.tgt+=tgt;tot.mal+=mal;}
+    return{c,t,cap,tgt,mal};
+  });
+  const util=(mal,cap)=>{if(!cap)return'<td class="na">—</td>';const u=mal/cap;return`<td><span class="util ${u>=TARGET_SHARE?'hi':u>=TARGET_SHARE-.1?'mid':'lo'}">${(u*100).toFixed(0)}%</span></td>`;};
+  const sd=(tgt,mal)=>{const x=Math.round(tgt-mal);return x>0?`<td class="need">${fmt(x)}</td>`:`<td class="ok">${x===0?'0':'−'+fmt(-x)}</td>`;};
+  const head='<colgroup><col style="width:26%"><col><col><col><col><col><col></colgroup><thead><tr><th class="metric">Course name</th><th>No. of teachers</th><th>Allocation %</th><th>Target</th><th>Monthly Active Learners</th><th>% Active utilisation</th><th>Surplus / Deficit</th></tr></thead>';
+  const shown=rows.filter(x=>x.t>0||x.mal);   // hide courses this centre doesn't run
+  const body=shown.map((x,i)=>`<tr class="${x.c.pair&&shown[i+1]&&shown[i+1].c.group===x.c.group?'pair':''}"><td class="metric">${x.c.course}${x.c.group!==x.c.course?`<small>${x.c.group}</small>`:''}</td>
+    <td>${x.t}</td><td>${Math.round(x.c.alloc*100)}%</td><td>${fmt(x.tgt)}</td>
+    <td class="act">${x.mal==null?'…':fmt(x.mal)}</td>${x.mal==null?'<td class="na">…</td><td class="na">…</td>':util(x.mal,x.cap)+sd(x.tgt,x.mal)}</tr>`).join('');
+  const tt=names.reduce((s,n)=>s+Object.values((TEACHERS&&TEACHERS[n])||{}).reduce((a,b)=>a+b,0),0);
+  const foot=ready?`<tr class="total"><td class="metric">Total</td><td>${tt}</td><td></td><td>${fmt(tot.tgt)}</td><td>${fmt(tot.mal)}</td>${util(tot.mal,tot.cap)}${sd(tot.tgt,tot.mal)}</tr>`:'';
+  el.innerHTML=head+'<tbody>'+body+foot+'</tbody>';
 }
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_mal_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
@@ -304,7 +372,8 @@ document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.datas
 async function load(){
   render();
   try{
-    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    const [res,teachers]=await Promise.all([Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')]))),ArtiumAuth.teachers().catch(()=>({}))]);   // teacher counts are optional: the monthly table still loads without them
+    TEACHERS=teachers;
     CENTRES.forEach((c,i)=>{
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
       DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};
@@ -318,7 +387,7 @@ async function load(){
     document.getElementById('dot').className='dot error';
   }
 }
-function toggleDefs(b){const l=document.getElementById('defs-list');l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+function toggleDefs(b,id){const l=document.getElementById(id||'defs-list');l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 load();
 </script>
 </body>
