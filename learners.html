@@ -73,7 +73,11 @@
   tr.less td:not(.metric){color:var(--bad)}
   tr.less td.zero{color:var(--ghost)}
   tr.add td:not(.metric):not(.zero){color:var(--ok)}
-  tr.mal td{background:var(--accent-soft);font-weight:700;color:var(--accent);border-bottom:0}
+  tr.mal td{background:var(--accent-soft);font-weight:700;color:var(--accent)}
+  tr.signed td{font-weight:600}
+  tr.signed td.pos{color:var(--ok)}
+  tr.signed td.neg{color:var(--bad)}
+  tbody tr:last-child td{border-bottom:0}
   tr.mal td.metric{font:700 15px var(--display);color:var(--accent)}
   tr.spacer td{height:12px;padding:0;background:#FAF9F7;border-bottom:1px solid var(--line)}
   tbody tr:not(.mal):not(.spacer):hover td{background:#FCFBFE}
@@ -103,7 +107,9 @@
     <div class="note">
       <b>Opening balance</b> = last month's Monthly Active Learners ·
       <b>Due for renewal</b> = memberships whose end date (column X) falls in the month, up to today — first-time from the Fresh Sales tab, repeated from the Renewals tab ·
-      <b>Renewed</b> = every Renewals-tab entry dated in the month
+      <b>Renewed</b> = every Renewals-tab entry dated in the month ·
+      <b>Net gain / loss</b> = this month's Monthly Active Learners − last month's ·
+      <b>Win-back / Churn</b> = Renewed − Total due: <span style="color:var(--ok);font-weight:600">+</span> more learners renewed than were due (win-back), <span style="color:var(--bad);font-weight:600">−</span> learners lost (churn)
     </div>
   </section>
 </div>
@@ -153,7 +159,7 @@ function build(names){
     const s={adm:0,dueFT:0,dueRP:0,ren:0};
     per.forEach(c=>{const x=c[k];if(x)for(const f in s)s[f]+=x[f];});
     const A=open,B=s.adm,C=A+B,D=s.dueFT,E=s.dueRP,F=D+E,G=s.ren,H=C-F+G;
-    out[k]={A,B,C,D,E,F,G,H};open=H;
+    out[k]={A,B,C,D,E,F,G,H,I:H-A,J:G-F};open=H;   // I: net gain/loss vs last month · J: win-back (+) / churn (−)
   }
   return out;
 }
@@ -168,7 +174,9 @@ const ROWS=[
   {k:'F',label:'Less: Total due for renewals',cls:'sum less'},
   {spacer:true},
   {k:'G',label:'Add: Actually renewed in the month',cls:'add'},
-  {k:'H',label:'Monthly Active Learners',cls:'mal',note:'C − F + G'}
+  {k:'H',label:'Monthly Active Learners',cls:'mal',note:'C − F + G'},
+  {k:'I',label:'Net gain / loss',cls:'signed',note:'vs last month'},
+  {k:'J',label:'Win-back / Churn',cls:'signed',note:'Renewed − Total due'}
 ];
 
 function render(){
@@ -190,7 +198,8 @@ function render(){
   const body=ROWS.map(r=>r.spacer?`<tr class="spacer"><td class="metric"></td><td colspan="${MONTHS.length}"></td></tr>`:
     `<tr class="${r.cls||''}"><td class="metric"><span class="k">${r.k}</span>${r.label}</td>${MONTHS.map(k=>{
       if(!v)return`<td class="zero${isYearStart(k)?' yb':''}">…</td>`;
-      const x=v[k][r.k];return`<td class="${x===0?'zero':''}${isYearStart(k)?' yb':''}">${x.toLocaleString('en-IN')}</td>`;}).join('')}</tr>`).join('');
+      const x=v[k][r.k],sg=r.cls==='signed';const t=(sg&&x>0?'+':x<0?'−':'')+Math.abs(x).toLocaleString('en-IN');
+      return`<td class="${x===0?'zero':sg?(x>0?'pos':'neg'):''}${isYearStart(k)?' yb':''}">${t}</td>`;}).join('')}</tr>`).join('');
   document.getElementById('mal').innerHTML=head+'<tbody>'+body+'</tbody>';
 }
 
