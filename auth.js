@@ -12,12 +12,14 @@
   const SERVICE_URL='https://script.google.com/macros/s/AKfycbxl_MEjNx6vUGGM_Id9ALfdcUqcXJUjw8q4qmfUbiDJmuxO1xP6zlCytPd1fkD6qFI24A/exec';
   const SCOPES='openid email profile';
   const KEY='artium_oi_auth';
+  // Each page file and the name used for it in the access list
+  const PAGE_OF={'dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance','learners.html':'learners'};
 
   /* ── Inside the landing page: borrow its sign-in ── */
   if(window.parent!==window){
     try{ if(window.parent.ArtiumAuth){
       window.ArtiumAuth=window.parent.ArtiumAuth;
-      const pg={'dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance'}[location.pathname.split('/').pop()];
+      const pg=PAGE_OF[location.pathname.split('/').pop()];
       if(pg&&!window.ArtiumAuth.pages.includes(pg)){ document.documentElement.innerHTML='<body style="font:15px sans-serif;padding:48px;color:#6B6774">You don\'t have access to this page.</body>'; throw new Error('no access'); }
       return;
     } }catch(e){ if(e.message==='no access') throw e; }
@@ -25,7 +27,7 @@
   /* ── A page opened on its own: go to the landing page ── */
   const here=location.pathname.split('/').pop();
   if(here&&here!=='index.html'){
-    const tab=here.replace('.html','')==='performance'?'performance':here.replace('.html','')==='dfd'?'centres':'dashboard';
+    const tab=PAGE_OF[here]||'dashboard';
     location.replace('index.html#'+tab);
     return;
   }
