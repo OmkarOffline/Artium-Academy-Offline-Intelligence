@@ -92,6 +92,8 @@
   tr.grp-row span{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
   tr.grp-row small{margin-left:10px;font-size:12px;color:var(--faint)}
   tbody tr.grp-row:hover td{background:#FAF9F7}
+  tr.spacer td{height:14px;padding:0;background:#FAF9F7;border-bottom:1px solid var(--line)}
+  tbody tr.spacer:hover td{background:#FAF9F7}
   tr.sub td.metric{padding-left:36px;font-weight:400;color:var(--ink2)}
   tr.sub td.act{font-weight:500}
   tr.ratio td.metric{font-weight:500;color:var(--ink)}
@@ -172,6 +174,19 @@ const TARGETS={
    src          : where the actual comes from (null = sheet not connected yet)
    lower:true   : lower is better (costs) */
 const SECTIONS=[
+  {id:'col',title:'Collections Overview',rows:[
+    {id:'cAdm',  label:'No. of admissions',          kind:'base', fmt:'n',   src:'fsCount', tgtFrom:['conv']},
+    {id:'cFs',   label:'Collections – Fresh Sales',  kind:'base', fmt:'inr', src:'fsSum',   tgtFrom:['fscol']},
+    {id:'cFsAtv',label:'ATV – Fresh Sales',          kind:'ratio',fmt:'inr', num:'cFs',  den:'cAdm'},
+    {spacer:true},
+    {id:'cRn',   label:'No. of renewals',            kind:'base', fmt:'n',   src:'rnCount', tgtFrom:['renewed']},
+    {id:'cRncol',label:'Collections – Renewals',     kind:'base', fmt:'inr', src:'rnSum',   tgtFrom:['rncol']},
+    {id:'cRnAtv',label:'ATV – Renewals',             kind:'ratio',fmt:'inr', num:'cRncol',den:'cRn'},
+    {spacer:true},
+    {id:'cTx',   label:'Total transactions',         kind:'base', fmt:'n',   src:'txCount', tgtFrom:['conv','renewed']},
+    {id:'cTot',  label:'Collections – Total',        kind:'base', fmt:'inr', src:'totSum',  tgtFrom:['fscol','rncol']},
+    {id:'cBlend',label:'ATV – Blended',              kind:'ratio',fmt:'inr', num:'cTot', den:'cTx'}
+  ]},
   {id:'adm',title:'Admissions Overview',rows:[
     {id:'leads', label:'No. of leads registered',     kind:'base', fmt:'n',   src:null},
     {id:'appts', label:'No. of appointments booked',  kind:'base', fmt:'n',   src:null},
@@ -296,7 +311,7 @@ function actualsFor(c,y,m){
     B[em===cm?'renCur':em<cm?'renPrev':'renAdv']++;
     if(em===cm)B[c.cohort==='ft'?'renFT':'renRP']++;   // cohorts count only renewals that were due this month
   });
-  const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP,...B};
+  const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP,txCount:fs.length+rn.length,totSum:sum(fs,17)+sum(rn,16),...B};
   const A={};
   SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base')A[r.id]=r.src?SRC[r.src]:null;}));
   const S=window.__SAMPLE&&window.__SAMPLE.actuals[c.name];   // preview only: fills metrics whose sheet isn't connected yet
@@ -321,13 +336,20 @@ function classifyRenewals(fs,rn){
   });
   return out;
 }
+/* A target set directly, or built from other targets (e.g. Total transactions = Conversions + Renewed targets) */
+function tgtOf(id,T){
+  if(T[id]!=null)return T[id];
+  const r=ROW[id];if(!r||!r.tgtFrom)return null;
+  const parts=r.tgtFrom.map(k=>tgtOf(k,T));
+  return parts.every(v=>v!=null&&isFinite(v))?parts.reduce((x,y)=>x+y,0):null;
+}
 function ratio(a,b){return a==null||b==null||!b?null:a/b;}
 
 /* One centre's six cells for one metric */
 function cells(r,A,T,days){
   const base=r.kind==='base';
   const act=base?A[r.id]:ratio(A[r.num],A[r.den]);
-  const tgt=r.noTarget?null:base?(T[r.id]??null):(T[r.id]??ratio(T[r.num],r.tgtDenActual?A[r.den]:T[r.den]));
+  const tgt=r.noTarget?null:base?tgtOf(r.id,T):(T[r.id]??ratio(tgtOf(r.num,T),r.tgtDenActual?A[r.den]:tgtOf(r.den,T)));
   const has=v=>v!=null&&isFinite(v);
   const diff=has(act)&&has(tgt)?act-tgt:null;
   const ach=has(act)&&has(tgt)&&tgt?act/tgt:null;
@@ -394,7 +416,7 @@ function render(){
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   const per=[sel?{A:actualsFor(sel,viewY,viewM),T:(TARGETS[key]||{})[sel.name]||{}}:combined(key)];
   document.getElementById('sections').innerHTML=SECTIONS.map(s=>{
-    const body=s.rows.map(r=>r.group?`<tr class="grp-row"><td colspan="7"><span>${r.group}</span>${r.note?`<small>${r.note}</small>`:''}</td></tr>`:`<tr class="${r.kind}${r.sub?' sub':''}">
+    const body=s.rows.map(r=>r.spacer?'<tr class="spacer"><td colspan="7"></td></tr>':r.group?`<tr class="grp-row"><td colspan="7"><span>${r.group}</span>${r.note?`<small>${r.note}</small>`:''}</td></tr>`:`<tr class="${r.kind}${r.sub?' sub':''}">
       <td class="metric">${r.label}${pendingRow(r)?'<span class="pending" title="Data source not connected yet"></span>':''}${r.f?`<span class="f">${r.f}</span>`:''}</td>
       ${per.map(p=>cells(r,p.A,p.T,days)).join('')}</tr>`).join('');
     return`<section class="tray${secClosed[s.id]?' closed':''}" id="sec-${s.id}">
