@@ -134,7 +134,6 @@
   let gate;
   function showGate(reason){
     if(!gate){
-      document.head.appendChild(Object.assign(document.createElement('style'),{textContent:css}));
       if(!document.querySelector('link[href*="Poppins"]'))document.head.appendChild(el('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap">'));
       gate=el(`<div class="ag" role="dialog" aria-labelledby="ag-title">
         <div class="ag-card">
@@ -174,6 +173,19 @@
     chip.querySelector('button').onclick=signOut;
     bar.appendChild(chip);
   }
-  function start(){ session?hideGate():showGate(); }
+  async function start(){
+    // Styles for the sign-in screen and the name in the top bar (needed even when already signed in)
+    document.head.appendChild(Object.assign(document.createElement('style'),{textContent:css}));
+    if(!session) return showGate();
+    // Already signed in this session: re-check which pages this person may open, so changes in the
+    // Basic Information sheet (e.g. a newly added page) apply without signing out
+    try{
+      const me=await service({action:'me'});
+      if(me.error==='expired'){ save(null); return showGate('expired'); }
+      if(me.error||!me.pages||!me.pages.length){ save(null); return showGate(); }
+      save(Object.assign({},session,{pages:me.pages}));
+    }catch(e){ /* service unreachable: keep the pages from sign-in */ }
+    hideGate();
+  }
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',start):start();
 })();
