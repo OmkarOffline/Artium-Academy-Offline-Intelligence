@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monthly Performance Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--card:#fff;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;
+    --ok:#1F7A4D;--ok-soft:#E5F4EC;--warn:#9A6200;--warn-soft:#FBF1DC;--bad:#B42318;--bad-soft:#FDECEB;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .controls{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:8px;box-shadow:var(--shadow)}
+  .month-btn{width:36px;height:42px;border:0;border-radius:12px;background:var(--bg);color:var(--ink2);font-size:18px;cursor:pointer;display:grid;place-items:center}
+  .month-btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+  .month-btn:disabled{opacity:.35;cursor:default}
+  .month-label{min-width:128px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+  .day-chip{display:flex;flex-direction:column;justify-content:center;height:42px;padding:0 16px;border-radius:12px;background:var(--accent);color:#fff;min-width:150px}
+  .day-chip b{font:600 14px/1.2 var(--display)}
+  .day-chip span{font-size:11.5px;opacity:.8}
+  .day-bar{height:3px;border-radius:3px;background:rgba(255,255,255,.25);margin-top:4px;overflow:hidden}
+  .day-bar i{display:block;height:100%;background:#E9CF9E}
+
+  /* Section trays */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px;cursor:pointer;user-select:none}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .tray-meta{display:flex;align-items:center;gap:10px}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+  .chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s}
+  .tray.closed .chev{transform:rotate(-90deg)}
+  .tray.closed .tray-body{display:none}
+
+  /* Table */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;
+    box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:760px;table-layout:fixed}
+  th,td{padding:14px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+  td:last-child,th:last-child{padding-right:22px}
+  th{background:#FAF9F7;font:700 10.5px/1.3 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  th{vertical-align:bottom}
+  th{padding-top:16px;padding-bottom:14px}
+  thead tr.centres th{padding-top:16px;padding-bottom:8px;border-bottom:0}
+  thead tr.centres th.c{text-align:center;color:var(--ink);font:600 13.5px/1.2 var(--display);letter-spacing:0;text-transform:none}
+  thead tr.centres th.c small{display:block;font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+  .metric{position:sticky;left:0;z-index:1;text-align:left;background:#fff;width:30%;white-space:normal;padding-left:22px;border-right:1px solid var(--border)}
+  th.metric{background:#FAF9F7;padding-left:22px;vertical-align:bottom;z-index:2}
+  td.metric{font-size:14px;font-weight:500;color:var(--ink)}
+  td.metric .f{display:block;font-size:11px;font-weight:400;color:var(--faint);margin-top:2px}
+  td.metric .pending{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-left:7px;vertical-align:2px;cursor:help}
+  .legend .pending{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:1px}
+  .g{border-left:1px solid var(--border)}
+  td{font:500 14px var(--display);color:var(--ink2)}
+  td.act{font-weight:600;color:var(--ink)}
+  td.na{color:var(--ghost);font-family:var(--body);font-weight:400}
+  td.pos{color:var(--ok)}
+  td.neg{color:var(--bad)}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:#FCFBFE}
+  tbody tr:hover td.metric{background:#FCFBFE}
+  tr.sub td.metric{padding-left:36px;font-weight:400;color:var(--ink2)}
+  tr.sub td.act{font-weight:500}
+  tr.ratio td.metric{padding-left:36px;font-weight:400;color:var(--ink2)}
+  .pill{display:inline-block;min-width:58px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+  .pill.ok{color:var(--ok);background:var(--ok-soft)}
+  .pill.warn{color:var(--warn);background:var(--warn-soft)}
+  .pill.bad{color:var(--bad);background:var(--bad-soft)}
+  .done{color:var(--ok);font-weight:600;font-size:13px}
+  /* Centre toggle */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:8px 22px;padding:14px 4px 0;font-size:12.5px;color:var(--muted)}
+  .legend b{color:var(--ink2);font-weight:600}
+  .legend .pill{min-width:0;margin-right:4px}
+  .sample{display:inline-flex;align-items:center;gap:6px;background:#FFF6E5;border:1px solid #F0DDB5;color:#8A5A00;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:14px}
+
+  @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}.header-right{align-items:flex-start}h1{font-size:28px}
+    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.metric{width:180px;min-width:180px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Monthly Performance Analysis</h1>
+      <div class="subtitle" id="subtitle">Performance against monthly targets</div>
+    </div>
+    <div class="header-right">
+      <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <div class="controls">
+        <button class="month-btn" id="prev" aria-label="Previous month"><i class="ti ti-chevron-left"></i></button>
+        <div class="month-label" id="month-label">—</div>
+        <button class="month-btn" id="next" aria-label="Next month"><i class="ti ti-chevron-right"></i></button>
+        <div class="day-chip"><b id="day-main">—</b><span id="day-sub">—</span><div class="day-bar"><i id="day-bar"></i></div></div>
+      </div>
+    </div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <div id="sample-note"></div>
+  <div id="sections"></div>
+</div>
+
+<script>
+/* ── Centres: each reads its own receipts sheet (Fresh Sales and Renewals tabs, published as CSV) ── */
+const ALW_FS='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=184947403&single=true&output=csv';
+const ALW_RN='https://docs.google.com/spreadsheets/d/e/2PACX-1vRAVysitQgRpFNf94-ZH-I6KzBP4Zovlxj0NjgREoPLW1CY8lXNWAC-uXZs5P-o68hMqxwnzhXKljGr/pub?gid=1190272933&single=true&output=csv';
+const OMR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vRphAw7sp-R5RE-q3VSo5jzoP3RBX7aaPe5YdG8GqeMGKawFnhdImZD50kc8Q7HyxiQu_c55FhuA1JT/pub?single=true&output=csv&gid=';
+const BWR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vTjgfU58n7MbayzcGSVJ5q-NLEveOKIEphjRhHl_YtCzh-9x-w5cxPp2g1hvepJHqjmLa7L0GW59TS1/pub?single=true&output=csv&gid=';
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet',      fs:ALW_FS,             rn:ALW_RN},
+  {city:'Chennai',   name:'Thoraipakkam',  fs:OMR_PUB+'52323956', rn:OMR_PUB+'1120927282'},
+  {city:'Bangalore', name:'Borewell Road', fs:BWR_PUB+'52323956', rn:BWR_PUB+'279431779'}
+];
+
+/* ── Monthly targets, by month and centre. Filled in once the targets sheet is connected.
+   e.g. TARGETS['2026-10']['Alwarpet']={leads:600, appts:240, visits:150, conv:45, fscol:900000, spend:300000, due:120, renewed:100, rncol:700000} */
+const TARGETS={};
+
+/* ── Metrics ──
+   kind 'base'  : a number counted or summed for the month → gets Run-rate and Goal per day
+   kind 'ratio' : worked out from two base metrics (num ÷ den); its target is worked out the same way from the targets
+   src          : where the actual comes from (null = sheet not connected yet)
+   lower:true   : lower is better (costs) */
+const SECTIONS=[
+  {id:'adm',title:'Admissions Overview',rows:[
+    {id:'leads', label:'No. of leads registered',     kind:'base', fmt:'n',   src:null},
+    {id:'appts', label:'No. of appointments booked',  kind:'base', fmt:'n',   src:null},
+    {id:'l2a',   label:'Lead to appointment %',       kind:'ratio',fmt:'pct', num:'appts', den:'leads',  f:'Appointments ÷ Leads'},
+    {id:'visits',label:'No. of centre visits',        kind:'base', fmt:'n',   src:null},
+    {id:'a2v',   label:'Appointment to visit %',      kind:'ratio',fmt:'pct', num:'visits',den:'appts',  f:'Visits ÷ Appointments'},
+    {id:'l2v',   label:'Lead to visit %',             kind:'ratio',fmt:'pct', num:'visits',den:'leads',  f:'Visits ÷ Leads'},
+    {id:'conv',  label:'Conversions',                 kind:'base', fmt:'n',   src:'fsCount'},
+    {id:'v2c',   label:'Visit to conversion %',       kind:'ratio',fmt:'pct', num:'conv',  den:'visits', f:'Conversions ÷ Visits'},
+    {id:'fscol', label:'Collections – Fresh Sales',   kind:'base', fmt:'inr', src:'fsSum'},
+    {id:'fsatv', label:'ATV – Fresh Sales',           kind:'ratio',fmt:'inr', num:'fscol', den:'conv',   f:'Collections ÷ Conversions'}
+  ]},
+  {id:'mkt',title:'Marketing Overview',rows:[
+    {id:'spend', label:'Marketing spends',            kind:'base', fmt:'inr', src:null, lower:true},
+    {id:'cpl',   label:'Blended CPL',                 kind:'ratio',fmt:'inr', num:'spend', den:'leads',  f:'Spends ÷ Leads', lower:true},
+    {id:'cac',   label:'CAC',                         kind:'ratio',fmt:'inr', num:'spend', den:'conv',   f:'Spends ÷ Conversions', lower:true},
+    {id:'cpcv',  label:'CPCV (cost per centre visit)',kind:'ratio',fmt:'inr', num:'spend', den:'visits', f:'Spends ÷ Centre visits', lower:true},
+    {id:'roas',  label:'ROAS',                        kind:'ratio',fmt:'x',   num:'fscol', den:'spend',  f:'Fresh Sales collections ÷ Spends'}
+  ]},
+  {id:'rn',title:'Renewals Overview',rows:[
+    {id:'due',   label:'No. of renewals due',         kind:'base', fmt:'n',   src:'dueAll', fixed:true},   // known at the start of the month, so no run-rate
+    {id:'dueFT', label:'First-time renewals',         kind:'base', fmt:'n',   src:'dueFT',  fixed:true, sub:true, f:'Membership ends this month · Fresh Sales tab'},
+    {id:'dueRP', label:'Repeated renewals',           kind:'base', fmt:'n',   src:'dueRP',  fixed:true, sub:true, f:'Membership ends this month · Renewals tab'},
+    {id:'renewed',label:'Renewed',                    kind:'base', fmt:'n',   src:'rnCount'},
+    {id:'eff',   label:'Renewal collection efficiency %',kind:'ratio',fmt:'pct',num:'renewed',den:'due',f:'Renewed ÷ Renewals due'},
+    {id:'rncol', label:'Collections – Renewals',      kind:'base', fmt:'inr', src:'rnSum'},
+    {id:'rnatv', label:'ATV – Renewals',              kind:'ratio',fmt:'inr', num:'rncol', den:'renewed',f:'Collections ÷ Renewed'}
+  ]}
+];
+const ROW={};SECTIONS.forEach(s=>s.rows.forEach(r=>ROW[r.id]=r));
+
+/* ── Utils ── */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function parseDate(str){
+  if(!str)return null;const s=str.trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+function parseNum(s){if(!s)return 0;return parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0;}
+function parseCSV(text){
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){const ch=text[i];
+    if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+    else if(ch==='"')q=true;
+    else if(ch===','){row.push(cur.trim());cur='';}
+    else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cur.trim());if(row.some(v=>v!==''))rows.push(row);row=[];cur='';}
+    else cur+=ch;}
+  row.push(cur.trim());if(row.some(v=>v!==''))rows.push(row);return rows;
+}
+/* Google sometimes serves an older copy of a published tab: fetch in waves of 3 and keep the newest. */
+function parseTab(t){const rows=parseCSV(t).slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+  const latest=rows.reduce((m,r)=>{const d=parseDate(r[0]);return d&&d>m?d:m;},new Date(0));return{rows,latest};}
+async function fetchLatest(url){
+  let best=null;
+  for(let w=0;w<3;w++){
+    const texts=await Promise.all([0,1,2].map(i=>fetch(url+'&_='+Date.now()+'-'+w+i,{cache:'no-store'}).then(r=>r.ok?r.text():null).catch(()=>null)));
+    const got=texts.filter(Boolean).map(parseTab);
+    got.forEach(g=>{if(!best||g.latest>best.latest||(+g.latest===+best.latest&&g.rows.length>best.rows.length))best=g;});
+    if(best&&got.some(g=>+g.latest!==+got[0].latest))break;
+  }
+  if(!best)throw new Error('Could not load data');return best.rows;
+}
+
+/* Indian number formats: ₹ under 1 lakh in full, above that in lakhs */
+function fmtINR(v){const a=Math.abs(v),s=v<0?'−':'';
+  if(a>=1e7)return s+'₹'+(a/1e7).toFixed(2)+' Cr';
+  return s+'₹'+Math.round(a).toLocaleString('en-IN');}
+function fmtVal(v,fmt){if(v==null||!isFinite(v))return null;
+  if(fmt==='inr')return fmtINR(v);
+  if(fmt==='pct')return (v*100).toFixed(1)+'%';
+  if(fmt==='x')return v.toFixed(2)+'x';
+  const s=v<0?'−':'';return s+Math.round(Math.abs(v)).toLocaleString('en-IN');}
+function fmtDiff(v,fmt){if(v==null||!isFinite(v))return null;
+  const sign=v>0?'+':v<0?'−':'';
+  if(fmt==='pct')return sign+Math.abs(v*100).toFixed(1)+' pts';
+  if(fmt==='x')return sign+Math.abs(v).toFixed(2)+'x';
+  if(fmt==='inr')return sign+fmtINR(Math.abs(v));
+  return sign+Math.round(Math.abs(v)).toLocaleString('en-IN');}
+
+/* ── State ── */
+const now=new Date();
+let viewY=now.getFullYear(),viewM=now.getMonth();
+let DATA={};   // DATA[centre]={fs:[rows],rn:[rows]}
+const monthKey=(y,m)=>y+'-'+String(m+1).padStart(2,'0');
+
+function monthDays(y,m){
+  const total=new Date(y,m+1,0).getDate();
+  const cur=y===now.getFullYear()&&m===now.getMonth();
+  const past=y<now.getFullYear()||(y===now.getFullYear()&&m<now.getMonth());
+  const done=cur?now.getDate():past?total:0;          // days completed, today included
+  return{total,done,left:total-done,cur,past};
+}
+
+function actualsFor(c,y,m){
+  const d=DATA[c.name];if(!d)return{};
+  const inMonth=r=>{const t=parseDate(r[0]);return t&&t.getFullYear()===y&&t.getMonth()===m;};
+  const fs=d.fs.filter(inMonth),rn=d.rn.filter(inMonth);
+  const sum=(rows,col)=>rows.reduce((s,r)=>s+parseNum(r[col]),0);
+  // Renewals due: memberships whose end date (column X) falls in the month — Fresh Sales tab = first-time, Renewals tab = repeated.
+  // End dates before 2020 are skipped: the sheet shows those when the membership start date (W) is blank.
+  const endsInMonth=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020&&t.getFullYear()===y&&t.getMonth()===m;};
+  const dueFT=d.fs.filter(endsInMonth).length,dueRP=d.rn.filter(endsInMonth).length;
+  const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP};
+  const A={};
+  SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base')A[r.id]=r.src?SRC[r.src]:null;}));
+  const S=window.__SAMPLE&&window.__SAMPLE.actuals[c.name];   // preview only: fills metrics whose sheet isn't connected yet
+  if(S)for(const k in S)if(A[k]==null)A[k]=S[k];
+  return A;
+}
+function ratio(a,b){return a==null||b==null||!b?null:a/b;}
+
+/* One centre's six cells for one metric */
+function cells(r,A,T,days){
+  const base=r.kind==='base';
+  const act=base?A[r.id]:ratio(A[r.num],A[r.den]);
+  const tgt=base?(T[r.id]??null):(T[r.id]??ratio(T[r.num],T[r.den]));
+  const has=v=>v!=null&&isFinite(v);
+  const diff=has(act)&&has(tgt)?act-tgt:null;
+  const ach=has(act)&&has(tgt)&&tgt?act/tgt:null;
+  const rr=base&&!r.fixed&&has(act)&&days.done?act/days.done*days.total:null;
+  const gpd=base&&!r.fixed&&has(act)&&has(tgt)&&days.left?(tgt-act)/days.left:null;
+  const good=v=>r.lower?v<=0:v>=0;
+
+  // Achievement colour: base metrics by month-end projection (run-rate vs target); ratios by actual vs target
+  let cls='';
+  if(ach!=null){
+    const proj=rr!=null&&tgt?rr/tgt:ach;
+    const score=r.lower?(proj?1/proj:0):proj;
+    cls=score>=1?'ok':score>=.9?'warn':'bad';
+  }
+  const td=(v,extra='')=>v==null?`<td class="na ${extra}">—</td>`:`<td class="${extra}">${v}</td>`;
+  let gCell;
+  if(!base)gCell=td(null);
+  else if(gpd==null)gCell=td(null);
+  else if(r.lower)gCell=`<td>${fmtVal(Math.max(gpd,0),r.fmt)}</td>`;                 // budget left per day
+  else if(gpd<=0)gCell=`<td><span class="done"><i class="ti ti-check"></i> Achieved</span></td>`;
+  else gCell=`<td>${fmtVal(gpd,r.fmt)}</td>`;
+  return td(fmtVal(tgt,r.fmt),'g')
+    +td(fmtVal(act,r.fmt),'act')
+    +td(fmtDiff(diff,r.fmt),diff==null||Math.abs(diff)<1e-9?'':good(diff)?'pos':'neg')
+    +(ach==null?td(null):`<td><span class="pill ${cls}">${(ach*100).toFixed(0)}%</span></td>`)
+    +td(rr==null?null:fmtVal(rr,r.fmt))
+    +gCell;
+}
+
+function pendingRow(r){
+  if(r.kind==='base')return !r.src;
+  return pendingRow(ROW[r.num])||pendingRow(ROW[r.den]);
+}
+
+/* All centres: base metrics are added up across centres (targets too); ratios are then worked out from the totals.
+   A total is shown only when every centre has that number. */
+function combined(key){
+  const A={},T={};
+  const all=CENTRES.map(c=>({A:actualsFor(c,viewY,viewM),T:(TARGETS[key]||{})[c.name]||{}}));
+  const add=(list,k)=>list.every(x=>x[k]!=null&&isFinite(x[k]))?list.reduce((s,x)=>s+x[k],0):null;
+  SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base'){A[r.id]=add(all.map(p=>p.A),r.id);T[r.id]=add(all.map(p=>p.T),r.id);}}));
+  return{A,T};
+}
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_perf_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+function buildToggle(){
+  document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+    .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+  document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_perf_centre',selCentre);}catch(e){}render();});
+}
+buildToggle();
+function render(){
+  const days=monthDays(viewY,viewM),key=monthKey(viewY,viewM);
+  document.getElementById('month-label').textContent=MONTH_FULL[viewM]+' '+viewY;
+  document.getElementById('next').disabled=days.cur;
+  document.getElementById('day-main').textContent=days.cur?'Day '+days.done+' of '+days.total:days.past?'Month closed':'Not started';
+  document.getElementById('day-sub').textContent=days.cur?days.left+' day'+(days.left===1?'':'s')+' left':days.total+' days';
+  document.getElementById('day-bar').style.width=(days.done/days.total*100)+'%';
+
+  const head=`<thead><tr><th class="metric">Metric</th><th class="g">Target</th><th>Actuals</th><th>Surplus / Deficit</th><th>Achievement %</th><th>Run-rate</th><th>Goal / day</th></tr></thead>`;
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  document.getElementById('subtitle').textContent=sel?'Performance against monthly targets — '+sel.name+', '+sel.city:'Performance against monthly targets — all centres combined';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const per=[sel?{A:actualsFor(sel,viewY,viewM),T:(TARGETS[key]||{})[sel.name]||{}}:combined(key)];
+  document.getElementById('sections').innerHTML=SECTIONS.map(s=>{
+    const body=s.rows.map(r=>`<tr class="${r.kind}${r.sub?' sub':''}">
+      <td class="metric">${r.label}${pendingRow(r)?'<span class="pending" title="Data source not connected yet"></span>':''}${r.f?`<span class="f">${r.f}</span>`:''}</td>
+      ${per.map(p=>cells(r,p.A,p.T,days)).join('')}</tr>`).join('');
+    return`<section class="tray${secClosed[s.id]?' closed':''}" id="sec-${s.id}">
+      <div class="tray-head" onclick="toggleSec('${s.id}')">
+        <div class="tray-title">${s.title}</div>
+        <div class="tray-meta"><span class="badge">${s.rows.length} metrics</span><span class="chev"><i class="ti ti-chevron-down"></i></span></div>
+      </div>
+      <div class="tray-body"><div class="tbl-wrap"><table>${head}<tbody>${body}</tbody></table></div></div>
+    </section>`;
+  }).join('')+`<div class="legend">
+      <span><i class="pending"></i>Data source not connected yet</span>
+      <span><b>Surplus / Deficit</b> = Actuals − Target</span>
+      <span><b>Achievement %</b> = Actuals ÷ Target</span>
+      <span><b>Run-rate</b> = Actuals ÷ days completed × days in month</span>
+      <span><b>Goal / day</b> = (Target − Actuals) ÷ days left</span>
+      <span><span class="pill ok">On track</span><span class="pill warn">Within 10%</span><span class="pill bad">Behind</span> month-end projection vs target</span>
+    </div>`;
+}
+const secClosed={};
+function toggleSec(id){secClosed[id]=!secClosed[id];document.getElementById('sec-'+id).classList.toggle('closed',secClosed[id]);}
+
+document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
+document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
+
+if(window.__SAMPLE){Object.assign(TARGETS,window.__SAMPLE.targets);
+  document.getElementById('sample-note').innerHTML='<span class="sample"><i class="ti ti-flask"></i> Preview — targets, leads, appointments, visits, spends and renewals due are sample numbers</span>';}
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchLatest(c.fs),fetchLatest(c.rn)])));
+    CENTRES.forEach((c,i)=>{
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
+      DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};
+    });
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+}
+load();
+</script>
+</body>
+</html>
