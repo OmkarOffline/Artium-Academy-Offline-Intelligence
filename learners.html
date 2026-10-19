@@ -44,6 +44,27 @@
   .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
   .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+  /* Filters (collapsible, like Lead to Purchase) */
+  .filters{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);margin-bottom:26px}
+  .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;cursor:pointer;user-select:none}
+  .filters-head .t{display:flex;align-items:center;gap:10px;font:600 16px var(--display);color:var(--ink)}
+  .filters-head .t svg{color:var(--accent)}
+  .f-badge{background:var(--accent-soft);color:var(--accent);font:600 12px var(--body);border-radius:999px;padding:3px 10px}
+  .f-badge.on{background:var(--accent);color:#fff}
+  .f-chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s}
+  .filters.closed .f-chev{transform:rotate(-90deg)}
+  .filters.closed .filters-body{display:none}
+  .filters-body{border-top:1px solid var(--line);padding:18px 22px 20px}
+  .f-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+  .f-group{display:flex;flex-direction:column;gap:6px}
+  .f-group label{font:600 12px var(--body);color:var(--ink2)}
+  .f-group select{height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer}
+  .f-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .f-group select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .f-clear{margin-top:14px;border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;padding:0}
+  .f-clear:disabled{color:var(--ghost);cursor:default}
+  @media (max-width:900px){.f-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
   /* Section tray */
   .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
     box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
@@ -113,6 +134,16 @@
     <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
   </header>
   <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <section class="filters closed" id="filters">
+    <div class="filters-head" onclick="toggleFilters()">
+      <div class="t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="f-badge" id="f-badge">All optional</span></div>
+      <span class="f-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+    </div>
+    <div class="filters-body">
+      <div class="f-grid" id="f-grid"></div>
+      <button class="f-clear" id="f-clear" type="button" onclick="clearFilters()" disabled>Clear filters</button>
+    </div>
+  </section>
   <div id="sample-note"></div>
   <section class="tray">
     <div class="tray-head"><div class="tray-title">Active learners by month</div><span class="badge" id="months-badge">—</span></div>
@@ -166,14 +197,48 @@ function firstMonth(names){
 }
 let DATA={};
 
+/* ── Filters: apply to both tabs, using each row's own values ── */
+const FILTERS=[
+  {id:'course', label:'Course name', col:8,  all:'All courses'},
+  {id:'level',  label:'Course level',col:9,  all:'All levels'},
+  {id:'age',    label:'Age-group',   col:6,  all:'All ages'},
+  {id:'gender', label:'Gender',      col:5,  all:'All'},
+  {id:'teacher',label:'Teacher',     col:29, all:'All teachers'}   // column AD
+];
+const fval={};
+const cell=(r,c)=>String(r[c]||'').trim();
+const passes=r=>FILTERS.every(f=>!fval[f.id]||cell(r,f.col).toLowerCase()===fval[f.id].toLowerCase());
+const LEVEL_ORDER=['Preparatory','Intermediate','Proficient','Advanced'];
+const AGE_ORDER=['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'];
+function optionsFor(f,names){
+  const seen=new Map();
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const v=cell(r,f.col);if(v&&!seen.has(v.toLowerCase()))seen.set(v.toLowerCase(),v);});});
+  const vals=[...seen.values()];
+  const order=f.id==='level'?LEVEL_ORDER:f.id==='age'?AGE_ORDER:null;
+  return vals.sort((a,b)=>order?((order.indexOf(a)+1||99)-(order.indexOf(b)+1||99))||a.localeCompare(b):a.localeCompare(b));
+}
+function buildFilters(names){
+  document.getElementById('f-grid').innerHTML=FILTERS.map(f=>{
+    const opts=optionsFor(f,names);
+    if(fval[f.id]&&!opts.some(o=>o.toLowerCase()===fval[f.id].toLowerCase()))opts.unshift(fval[f.id]);
+    return`<div class="f-group"><label for="f-${f.id}">${f.label}</label><select id="f-${f.id}" class="${fval[f.id]?'set':''}" onchange="setFilter('${f.id}',this.value)">
+      <option value="">${f.all}</option>${opts.map(o=>`<option${fval[f.id]&&o.toLowerCase()===fval[f.id].toLowerCase()?' selected':''}>${o}</option>`).join('')}</select></div>`;}).join('');
+  const n=FILTERS.filter(f=>fval[f.id]).length;
+  const b=document.getElementById('f-badge');b.textContent=n?n+' active':'All optional';b.classList.toggle('on',!!n);
+  document.getElementById('f-clear').disabled=!n;
+}
+function setFilter(id,v){fval[id]=v;render();}
+function clearFilters(){FILTERS.forEach(f=>fval[f.id]='');render();}
+function toggleFilters(){document.getElementById('filters').classList.toggle('closed');}
+
 /* Counts per month for one centre: new admissions, dues (first-time / repeated) and renewals */
 function countsFor(name){
   const d=DATA[name],c={};
   const bump=(k,key)=>{(c[k]=c[k]||{adm:0,dueFT:0,dueRP:0,ren:0})[key]++;};
   // Due only once the Membership End Date has arrived (up to and including today), so the current month is real-time
   const end=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020&&t<=TODAY?t:null;};
-  d.fs.forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'adm');const e=end(r);if(e)bump(mi(e),'dueFT');});
-  d.rn.forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'ren');const e=end(r);if(e)bump(mi(e),'dueRP');});
+  d.fs.filter(passes).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'adm');const e=end(r);if(e)bump(mi(e),'dueFT');});
+  d.rn.filter(passes).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'ren');const e=end(r);if(e)bump(mi(e),'dueRP');});
   return c;
 }
 /* Rows A–H for every month, oldest first so each month's opening balance is the previous month's closing */
@@ -211,7 +276,8 @@ function render(){
   const ready=CENTRES.every(c=>DATA[c.name]);
   const names=sel?[sel.name]:CENTRES.map(c=>c.name);
   const v=ready?build(names):null;
-  const from=ready?firstMonth(names):LAST;
+  const from=ready?firstMonth(names):LAST;   // the period follows the centre(s), not the filters
+  buildFilters(names);
   MONTHS=[];for(let k=LAST;k>=from;k--)MONTHS.push(k);
   document.getElementById('months-badge').textContent=ready?MONTHS.length+' month'+(MONTHS.length===1?'':'s')+' · since '+MON[from%12]+' '+Math.floor(from/12):'…';
 
