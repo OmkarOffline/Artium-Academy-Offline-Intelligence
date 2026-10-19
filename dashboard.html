@@ -560,6 +560,80 @@
     </div>
   </div>
 
+  <!-- RENEWALS BREAKDOWN -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('rbreakdown')">
+      <div class="section-header-left">
+        <i class="ti ti-refresh" style="font-size:17px;color:var(--teal);" aria-hidden="true"></i>
+        <span class="section-title">Renewals Breakdown</span>
+      </div>
+      <button class="chevron-btn" aria-label="Toggle renewals breakdown" onclick="event.stopPropagation();toggleSection('rbreakdown')">
+        <i class="ti ti-chevron-down" id="rbreakdown-icon"></i>
+      </button>
+    </div>
+    <div id="rbreakdown-body" class="section-body">
+      <div class="bd-grid">
+        <div class="bd-block">
+          <div class="bd-title">Course-wise</div>
+          <div class="bd-scroll">
+          <table class="bd-table">
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">Course name</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
+            <tbody id="rbd-course-body"></tbody>
+            <tfoot><tr id="rbd-course-foot"></tr></tfoot>
+          </table>
+          </div>
+        </div>
+        <div class="bd-block">
+          <div class="bd-title">Course-level-wise</div>
+          <div class="bd-scroll">
+          <table class="bd-table">
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">Course level</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
+            <tbody id="rbd-level-body"></tbody>
+            <tfoot><tr id="rbd-level-foot"></tr></tfoot>
+          </table>
+          </div>
+        </div>
+        <div class="bd-block">
+          <div class="bd-title">Age-group-wise</div>
+          <div class="bd-scroll">
+          <table class="bd-table">
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">Age group</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
+            <tbody id="rbd-age-body"></tbody>
+            <tfoot><tr id="rbd-age-foot"></tr></tfoot>
+          </table>
+          </div>
+        </div>
+        <div class="bd-block">
+          <div class="bd-title">Subscription-period-wise</div>
+          <div class="bd-scroll">
+          <table class="bd-table">
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">No. of months</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
+            <tbody id="rbd-months-body"></tbody>
+            <tfoot><tr id="rbd-months-foot"></tr></tfoot>
+          </table>
+          </div>
+        </div>
+      </div>
+      <div class="bd-note" id="rbd-note"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -876,19 +950,19 @@
     if(a<b)return`<span class="bd-trend down" title="Down from ${b.toFixed(1)}% in the last 3 months"><i class="ti ti-arrow-down" aria-hidden="true"></i><span class="sr-only">down</span></span>`;
     return'<span class="bd-trend"></span>';
   }
-  function renderBreakdownTable(sets,cfg){
-    const values=[...new Set(fsRows.map(r=>(r[cfg.col]||'').trim()).filter(Boolean))];
+  function renderBreakdownTable(sets,cfg,allRows,pre){
+    const values=[...new Set(allRows.map(r=>(r[cfg.col]||'').trim()).filter(Boolean))];
     const cur=countBy(sets.cur,cfg.col), m3=countBy(sets.m3,cfg.col), m12=countBy(sets.m12,cfg.col), life=countBy(sets.life,cfg.col);
     const list=values.map(v=>[v,cur[v]||0]).sort(cfg.sort);
     const t=cur.__total;
-    document.getElementById('bd-'+cfg.key+'-body').innerHTML=list.map(([v,n])=>
+    document.getElementById(pre+'-'+cfg.key+'-body').innerHTML=list.map(([v,n])=>
       `<tr><td>${v}</td>
         <td class="num cur${n?'':' zero'}">${n.toLocaleString('en-IN')}</td>
         <td class="num cur${n?'':' zero'}"><div class="bd-share"><span>${fmtPct(n,t)}</span>${trendArrow(n,t,m3[v]||0,m3.__total)}</div></td>
         <td class="num cmp sep">${fmtPct(m3[v]||0,m3.__total)}</td>
         <td class="num cmp">${fmtPct(m12[v]||0,m12.__total)}</td>
         <td class="num cmp">${fmtPct(life[v]||0,life.__total)}</td></tr>`).join('');
-    document.getElementById('bd-'+cfg.key+'-foot').innerHTML=
+    document.getElementById(pre+'-'+cfg.key+'-foot').innerHTML=
       `<td>Total</td><td class="num">${t.toLocaleString('en-IN')}</td><td class="num"><div class="bd-share"><span>${t?'100%':'—'}</span><span class="bd-trend"></span></div></td>
        <td class="num sep">${m3.__total.toLocaleString('en-IN')}</td><td class="num">${m12.__total.toLocaleString('en-IN')}</td><td class="num">${life.__total.toLocaleString('en-IN')}</td>`;
   }
@@ -898,18 +972,25 @@
     {key:'age',    col:6,  sort:(a,b)=>leadNum(a[0])-leadNum(b[0])||a[0].localeCompare(b[0])},
     {key:'months', col:12, sort:(a,b)=>leadNum(a[0])-leadNum(b[0])}
   ];
-  function renderBreakdown(f){
+  // Same four tables for Fresh Sales (Admissions Breakdown, prefix bd) and Renewals (Renewals Breakdown, prefix rbd).
+  // Both tabs use the same columns: G age group, I course, J course level, M no. of months.
+  function renderBreakdownFor(allRows,pre,f,to){
     const g={...f,year:'',month:''};
-    const to=f.toVal||toISO(new Date());
     const sets={
-      cur:filterCourse(fsRows,g,f.fromVal,f.toVal),
-      m3:filterCourse(fsRows,g,monthsBefore(to,3),to),
-      m12:filterCourse(fsRows,g,monthsBefore(to,12),to),
-      life:filterCourse(fsRows,g,'','')
+      cur:filterCourse(allRows,g,f.fromVal,f.toVal),
+      m3:filterCourse(allRows,g,monthsBefore(to,3),to),
+      m12:filterCourse(allRows,g,monthsBefore(to,12),to),
+      life:filterCourse(allRows,g,'','')
     };
-    BREAKDOWNS.forEach(cfg=>renderBreakdownTable(sets,cfg));
+    BREAKDOWNS.forEach(cfg=>renderBreakdownTable(sets,cfg,allRows,pre));
+  }
+  function renderBreakdown(f){
+    const to=f.toVal||toISO(new Date());
+    renderBreakdownFor(fsRows,'bd',f,to);
+    renderBreakdownFor(rnRows,'rbd',f,to);
     const fd=iso=>{const d=localDate(iso);return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+String(d.getFullYear()).slice(2);};
-    set('bd-note','Last 3 months = '+fd(monthsBefore(to,3))+' – '+fd(to)+' · Last 12 months = '+fd(monthsBefore(to,12))+' – '+fd(to)+' · Lifetime = all entries');
+    const note='Last 3 months = '+fd(monthsBefore(to,3))+' – '+fd(to)+' · Last 12 months = '+fd(monthsBefore(to,12))+' – '+fd(to)+' · Lifetime = all entries';
+    set('bd-note',note);set('rbd-note',note);
   }
 
   function applyFilters(){
@@ -954,7 +1035,7 @@
   }
 
   /* ── Toggle helpers ── */
-  const secState={filters:false,scorecards:true,breakdown:true};
+  const secState={filters:false,scorecards:true,breakdown:true,rbreakdown:true};
   function toggleSection(id){
     secState[id]=!secState[id];const open=secState[id];
     document.getElementById(id+'-body').style.display=open?'':'none';
