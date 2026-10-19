@@ -256,24 +256,40 @@
     @media (max-width:640px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:340px){.kpi-grid{grid-template-columns:1fr}}
     /* ── Admissions Breakdown ── */
-    .bd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start;padding:20px var(--card-padding) 24px}
+    .bd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start;padding:20px var(--card-padding) 12px}
     .bd-block{min-width:0}
     .bd-title{font-family:var(--font-primary);font-size:15px;font-weight:700;color:var(--text-h1);margin-bottom:12px}
-    .bd-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;border:1px solid #E6E9F0;border-radius:12px;overflow:hidden}
-    .bd-table th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-disabled);text-align:left;padding:10px 16px;background:var(--bg-secondary);border-bottom:1px solid #E6E9F0}
-    .bd-table td{padding:10px 16px;border-bottom:1px solid #EEF1F5;color:var(--text-h3)}
+    .bd-scroll{overflow-x:auto;border:1px solid #E6E9F0;border-radius:12px}
+    .bd-table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;table-layout:fixed;min-width:520px}
+    .bd-table col.c-name{width:28%}
+    .bd-table col.c-n{width:11%}
+    .bd-table col.c-p{width:19%}
+    .bd-table col.c-cmp{width:14%}
+    .bd-table th{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-disabled);text-align:left;padding:8px 12px;background:var(--bg-secondary);white-space:nowrap}
+    .bd-table thead tr.grp th{padding-top:10px;padding-bottom:2px;font-size:10px;letter-spacing:.06em}
+    .bd-table thead tr:last-child th{border-bottom:1px solid #E6E9F0;padding-top:2px}
+    .bd-table thead th.grp-cur{color:var(--blue)}
+    .bd-table th.name{vertical-align:bottom;border-bottom:1px solid #E6E9F0;padding-bottom:8px}
+    .bd-table td{padding:10px 12px;border-bottom:1px solid #EEF1F5;color:var(--text-h3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .bd-table tbody td:first-child{font-size:13px}
+    .bd-table tbody td:first-child{white-space:normal;line-height:1.3}
     .bd-table tbody tr:last-child td{border-bottom:0}
     .bd-table tbody tr:hover td{background:#FAFBFC}
-    .bd-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .bd-table td.num{font-weight:600;color:var(--text-h1)}
-    .bd-table td.zero{color:var(--text-disabled);font-weight:500}
-    .bd-share{display:flex;align-items:center;justify-content:flex-end;gap:10px}
-    .bd-bar{flex:1;max-width:160px;height:6px;border-radius:999px;background:#EEF1F5;overflow:hidden}
-    .bd-bar span{display:block;height:100%;border-radius:999px;background:#4F46E5}
-    .bd-pct{min-width:48px;text-align:right}
-    .bd-table tfoot td{padding:11px 16px;background:var(--bg-secondary);border-top:1px solid #E6E9F0;font-weight:700;color:var(--text-h1)}
-    @media (max-width:900px){.bd-grid{grid-template-columns:1fr}}
-    @media (max-width:560px){.bd-bar{display:none}.bd-table th,.bd-table td,.bd-table tfoot td{padding:9px 12px}}
+    .bd-table .num{text-align:right;font-variant-numeric:tabular-nums}
+    .bd-table td.cur{font-weight:700;color:var(--text-h1)}
+    .bd-table td.cmp{font-weight:500;color:#334155}
+    .bd-table td.zero{color:#94A3B8;font-weight:500}
+    .bd-table .sep{border-left:1px solid #E6E9F0}
+    .bd-share{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+    .bd-table tfoot td{padding:10px 12px;background:var(--bg-secondary);border-top:1px solid #E6E9F0;font-weight:700;color:var(--text-h1)}
+    .bd-table tfoot td.sep{color:#64748B;font-weight:600}
+    .bd-table tfoot td.sep ~ td{color:#64748B;font-weight:600}
+    .bd-trend{display:inline-flex;align-items:center;justify-content:center;width:16px;flex-shrink:0;font-size:15px;font-weight:700}
+    .bd-trend.up{color:#059669}
+    .bd-trend.down{color:#DC2626}
+    .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+    .bd-note{padding:0 var(--card-padding) 22px;font-size:11.5px;color:var(--text-secondary)}
+    @media (max-width:1100px){.bd-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
@@ -485,37 +501,62 @@
       <div class="bd-grid">
         <div class="bd-block">
           <div class="bd-title">Course-wise</div>
+          <div class="bd-scroll">
           <table class="bd-table">
-            <thead><tr><th>Course name</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">Course name</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
             <tbody id="bd-course-body"></tbody>
-            <tfoot><tr><td>Total</td><td class="num" id="bd-course-total">—</td><td class="num" id="bd-course-total-pct">—</td></tr></tfoot>
+            <tfoot><tr id="bd-course-foot"></tr></tfoot>
           </table>
+          </div>
         </div>
         <div class="bd-block">
           <div class="bd-title">Course-level-wise</div>
+          <div class="bd-scroll">
           <table class="bd-table">
-            <thead><tr><th>Course level</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">Course level</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
             <tbody id="bd-level-body"></tbody>
-            <tfoot><tr><td>Total</td><td class="num" id="bd-level-total">—</td><td class="num" id="bd-level-total-pct">—</td></tr></tfoot>
+            <tfoot><tr id="bd-level-foot"></tr></tfoot>
           </table>
+          </div>
         </div>
         <div class="bd-block">
           <div class="bd-title">Age-group-wise</div>
+          <div class="bd-scroll">
           <table class="bd-table">
-            <thead><tr><th>Age group</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">Age group</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
             <tbody id="bd-age-body"></tbody>
-            <tfoot><tr><td>Total</td><td class="num" id="bd-age-total">—</td><td class="num" id="bd-age-total-pct">—</td></tr></tfoot>
+            <tfoot><tr id="bd-age-foot"></tr></tfoot>
           </table>
+          </div>
         </div>
         <div class="bd-block">
           <div class="bd-title">Subscription-period-wise</div>
+          <div class="bd-scroll">
           <table class="bd-table">
-            <thead><tr><th>No. of months</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <colgroup><col class="c-name"><col class="c-n"><col class="c-p"><col class="c-cmp"><col class="c-cmp"><col class="c-cmp"></colgroup>
+            <thead>
+              <tr class="grp"><th class="name" rowspan="2">No. of months</th><th class="num grp-cur" colspan="2">Selected period</th><th class="num sep" colspan="3">% share · comparison</th></tr>
+              <tr><th class="num">Count</th><th class="num">% share</th><th class="num sep">Last 3M</th><th class="num">Last 12M</th><th class="num">Lifetime</th></tr>
+            </thead>
             <tbody id="bd-months-body"></tbody>
-            <tfoot><tr><td>Total</td><td class="num" id="bd-months-total">—</td><td class="num" id="bd-months-total-pct">—</td></tr></tfoot>
+            <tfoot><tr id="bd-months-foot"></tr></tfoot>
           </table>
+          </div>
         </div>
       </div>
+      <div class="bd-note" id="bd-note"></div>
     </div>
   </div>
 
@@ -812,27 +853,44 @@
 
   /* ── Admissions Breakdown (Fresh Sales tab) ──
      Course-wise = Column I, Course-level-wise = Column J, Age-group-wise = Column G, Subscription-period-wise = Column M.
-     Values are taken from the whole column, so a value with 0 admissions in the period still shows. */
+     Values come from the whole column, so a value with 0 admissions in the period still shows.
+     Comparison columns: % share over the 3 and 12 months ending on the selected "To" date, and over all data. */
   const LEVEL_ORDER=['Preparatory','Intermediate','Proficient','Advanced'];
   const leadNum=v=>{const n=parseFloat(v);return isNaN(n)?Infinity:n;};
-  function renderBreakdownTable(rows,cfg){
-    // fixed list (months) or every value seen in the column
-    const values=cfg.fixed||[...new Set(fsRows.map(r=>(r[cfg.col]||'').trim()).filter(Boolean))];
-    const counts=Object.fromEntries(values.map(v=>[v,0]));
-    let other=0;
-    rows.forEach(r=>{
-      const v=(r[cfg.col]||'').trim(); if(!v)return;
-      if(v in counts)counts[v]++; else if(cfg.fixed)other++; else counts[v]=1;
-    });
-    const list=Object.entries(counts).sort(cfg.sort);
-    if(other)list.push(['Other',other]);           // e.g. an 8- or 10-month entry, so the total still matches admissions
-    const total=list.reduce((a,[,n])=>a+n,0);
-    const pct=n=>total?n/total*100:0;
+  function monthsBefore(iso,n){   // the day after the same date n months earlier, e.g. 19 Oct, 3 → 20 Jul
+    const d=localDate(iso),y=d.getFullYear(),m=d.getMonth()-n;
+    const last=new Date(y,m+1,0).getDate();
+    const s=new Date(y,m,Math.min(d.getDate(),last));s.setDate(s.getDate()+1);
+    return toISO(s);
+  }
+  function countBy(rows,col){
+    const c={};rows.forEach(r=>{const v=(r[col]||'').trim();if(v)c[v]=(c[v]||0)+1;});
+    c.__total=Object.values(c).reduce((a,b)=>a+b,0);return c;
+  }
+  const fmtPct=(n,t)=>t?(n/t*100).toFixed(1)+'%':'—';
+  // ▲ green if this period's share is above the last-3-months share, ▼ red if below (compared at 1 decimal place)
+  function trendArrow(n,t,n3,t3){
+    if(!t||!t3)return'<span class="bd-trend"></span>';
+    const a=+(n/t*100).toFixed(1), b=+(n3/t3*100).toFixed(1);
+    if(a>b)return`<span class="bd-trend up" title="Up from ${b.toFixed(1)}% in the last 3 months"><i class="ti ti-arrow-up" aria-hidden="true"></i><span class="sr-only">up</span></span>`;
+    if(a<b)return`<span class="bd-trend down" title="Down from ${b.toFixed(1)}% in the last 3 months"><i class="ti ti-arrow-down" aria-hidden="true"></i><span class="sr-only">down</span></span>`;
+    return'<span class="bd-trend"></span>';
+  }
+  function renderBreakdownTable(sets,cfg){
+    const values=[...new Set(fsRows.map(r=>(r[cfg.col]||'').trim()).filter(Boolean))];
+    const cur=countBy(sets.cur,cfg.col), m3=countBy(sets.m3,cfg.col), m12=countBy(sets.m12,cfg.col), life=countBy(sets.life,cfg.col);
+    const list=values.map(v=>[v,cur[v]||0]).sort(cfg.sort);
+    const t=cur.__total;
     document.getElementById('bd-'+cfg.key+'-body').innerHTML=list.map(([v,n])=>
-      `<tr><td>${v}</td><td class="num${n?'':' zero'}">${n.toLocaleString('en-IN')}</td>
-       <td class="num${n?'':' zero'}"><div class="bd-share"><div class="bd-bar" aria-hidden="true"><span style="width:${pct(n).toFixed(1)}%"></span></div><span class="bd-pct">${pct(n).toFixed(1)}%</span></div></td></tr>`).join('');
-    document.getElementById('bd-'+cfg.key+'-total').textContent=total.toLocaleString('en-IN');
-    document.getElementById('bd-'+cfg.key+'-total-pct').textContent=total?'100%':'—';
+      `<tr><td>${v}</td>
+        <td class="num cur${n?'':' zero'}">${n.toLocaleString('en-IN')}</td>
+        <td class="num cur${n?'':' zero'}"><div class="bd-share"><span>${fmtPct(n,t)}</span>${trendArrow(n,t,m3[v]||0,m3.__total)}</div></td>
+        <td class="num cmp sep">${fmtPct(m3[v]||0,m3.__total)}</td>
+        <td class="num cmp">${fmtPct(m12[v]||0,m12.__total)}</td>
+        <td class="num cmp">${fmtPct(life[v]||0,life.__total)}</td></tr>`).join('');
+    document.getElementById('bd-'+cfg.key+'-foot').innerHTML=
+      `<td>Total</td><td class="num">${t.toLocaleString('en-IN')}</td><td class="num"><div class="bd-share"><span>${t?'100%':'—'}</span><span class="bd-trend"></span></div></td>
+       <td class="num sep">${m3.__total.toLocaleString('en-IN')}</td><td class="num">${m12.__total.toLocaleString('en-IN')}</td><td class="num">${life.__total.toLocaleString('en-IN')}</td>`;
   }
   const BREAKDOWNS=[
     {key:'course', col:8,  sort:(a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])},
@@ -841,8 +899,17 @@
     {key:'months', col:12, sort:(a,b)=>leadNum(a[0])-leadNum(b[0])}
   ];
   function renderBreakdown(f){
-    const rows=filterCourse(fsRows,{...f,year:'',month:''},f.fromVal,f.toVal);
-    BREAKDOWNS.forEach(cfg=>renderBreakdownTable(rows,cfg));
+    const g={...f,year:'',month:''};
+    const to=f.toVal||toISO(new Date());
+    const sets={
+      cur:filterCourse(fsRows,g,f.fromVal,f.toVal),
+      m3:filterCourse(fsRows,g,monthsBefore(to,3),to),
+      m12:filterCourse(fsRows,g,monthsBefore(to,12),to),
+      life:filterCourse(fsRows,g,'','')
+    };
+    BREAKDOWNS.forEach(cfg=>renderBreakdownTable(sets,cfg));
+    const fd=iso=>{const d=localDate(iso);return d.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+String(d.getFullYear()).slice(2);};
+    set('bd-note','Last 3 months = '+fd(monthsBefore(to,3))+' – '+fd(to)+' · Last 12 months = '+fd(monthsBefore(to,12))+' – '+fd(to)+' · Lifetime = all entries');
   }
 
   function applyFilters(){
@@ -852,18 +919,23 @@
     renderBreakdown(f);
   }
 
-  /* Google sometimes serves an older copy of a published sheet. Fetch each tab a few times
-     and keep the copy whose latest date is newest (ties: most rows). */
+  /* Google serves two copies of the published sheet at random: today's and an old one.
+     Fetch each tab in waves of 3 and keep the copy whose latest date is newest. If a whole wave
+     comes back identical (possibly all old), try another wave, up to 3 waves. */
+  function parseTab(t,skip,dateCol){
+    const rows=parseCSV(t).slice(skip).filter(r=>r[dateCol]&&r[dateCol].trim()!==''&&r[dateCol].toLowerCase()!=='date');
+    const latest=rows.reduce((m,r)=>{const d=parseDate(r[dateCol]);return d&&d>m?d:m;},new Date(0));
+    return{rows,latest};
+  }
   async function fetchLatest(url,skip,dateCol){
-    const tries=await Promise.all([0,1,2].map(i=>
-      fetch(url+'&_='+Date.now()+'-'+i,{cache:'no-store'}).then(r=>r.ok?r.text():null).catch(()=>null)));
     let best=null;
-    tries.forEach(t=>{
-      if(!t)return;
-      const rows=parseCSV(t).slice(skip).filter(r=>r[dateCol]&&r[dateCol].trim()!==''&&r[dateCol].toLowerCase()!=='date');
-      const latest=rows.reduce((m,r)=>{const d=parseDate(r[dateCol]);return d&&d>m?d:m;},new Date(0));
-      if(!best||latest>best.latest||(+latest===+best.latest&&rows.length>best.rows.length))best={rows,latest};
-    });
+    for(let wave=0;wave<3;wave++){
+      const texts=await Promise.all([0,1,2].map(i=>
+        fetch(url+'&_='+Date.now()+'-'+wave+i,{cache:'no-store'}).then(r=>r.ok?r.text():null).catch(()=>null)));
+      const got=texts.filter(Boolean).map(t=>parseTab(t,skip,dateCol));
+      got.forEach(g=>{if(!best||g.latest>best.latest||(+g.latest===+best.latest&&g.rows.length>best.rows.length))best=g;});
+      if(best&&got.some(g=>+g.latest!==+got[0].latest))break;   // saw both copies, so we already hold the newer one
+    }
     if(!best)throw new Error('Could not load data');
     return best.rows;
   }
