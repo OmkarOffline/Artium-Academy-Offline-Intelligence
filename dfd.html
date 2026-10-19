@@ -40,6 +40,18 @@
   .dt-btn.empty span{color:var(--faint)}
   .dt-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+  /* Department summary strip */
+  .strip{display:flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);margin-bottom:26px;padding:16px 8px}
+  .strip>div{display:flex;align-items:center;gap:10px;padding:2px 24px;border-left:1px solid var(--line);white-space:nowrap}
+  .strip>div:first-child{border-left:0}
+  .strip .s-prog{flex:1;min-width:260px}
+  .strip .s-prog .bar{flex:1;height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-left:6px}
+  .strip .s-prog .bar i{display:block;height:100%;border-radius:6px;background:var(--accent)}
+  .strip b{font:600 22px/1 var(--display);color:var(--ink)}
+  .s-l{font:700 10.5px/1 var(--body);letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+  .s-dot{width:9px;height:9px;border-radius:50%}
+  .s-dot.done{background:var(--ok)}.s-dot.prog{background:#D9A23A}.s-dot.none{background:#C9C5CF}
+  @media (max-width:900px){.strip{flex-wrap:wrap;row-gap:12px}.strip .s-prog{flex-basis:100%;border-left:0}.strip>div:nth-child(2){border-left:0}}
   /* Department summary */
   .summary{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:14px;margin-bottom:26px}
   .stat{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px 20px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
@@ -287,11 +299,13 @@ function render(){
   document.getElementById('eyebrow').textContent=d.n;
   const all=allInits(d),done=all.filter(x=>x.pct>=100).length,none=all.filter(x=>!x.pct).length;
   if(!all.length&&!(d.s||[]).length){document.getElementById('content').innerHTML='<div class="empty-dept">No initiatives have been added for '+esc(d.n)+' yet.</div>';return;}
-  let h=`<div class="summary">
-    <div class="stat"><div class="l">Overall progress</div><div class="v">${avg(all)}%</div><div class="bar"><i style="width:${avg(all)}%"></i></div></div>
-    <div class="stat"><div class="l">Initiatives</div><div class="v">${all.length}</div></div>
-    <div class="stat"><div class="l">Complete</div><div class="v">${done}</div></div>
-    <div class="stat"><div class="l">In progress · Not started</div><div class="v">${all.length-done-none} · ${none}</div></div>
+  const prog=all.length-done-none;
+  let h=`<div class="strip">
+    <div class="s-prog"><span class="s-l">Overall progress</span><b>${avg(all)}%</b><div class="bar"><i style="width:${avg(all)}%"></i></div></div>
+    <div class="s-item"><b>${all.length}</b><span class="s-l">Initiatives</span></div>
+    <div class="s-item"><i class="s-dot done"></i><b>${done}</b><span class="s-l">Complete</span></div>
+    <div class="s-item"><i class="s-dot prog"></i><b>${prog}</b><span class="s-l">In progress</span></div>
+    <div class="s-item"><i class="s-dot none"></i><b>${none}</b><span class="s-l">Not started</span></div>
   </div>`;
   h+=(d.s||[]).map(f=>{const a=allInits(f);return`<section class="tray${open[f.path]===false?' closed':''}" data-path="${esc(f.path)}">
     <div class="tray-head" onclick="toggleFolder(this)"><div class="tray-title"><span class="emoji">${f.e||''}</span>${esc(f.n)}</div>
