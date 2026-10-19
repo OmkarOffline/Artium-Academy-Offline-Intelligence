@@ -62,8 +62,12 @@
   table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:760px;table-layout:fixed}
   th,td{padding:14px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
   td:last-child,th:last-child{padding-right:22px}
-  th{background:#FAF9F7;font:600 12px/1.3 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
   th:nth-child(5),td:nth-child(5){text-align:center}
+  /* Fixed column widths so header names never run into each other; long names wrap onto two lines on narrow screens */
+  col.c-metric{width:22%} col.c-tgt{width:12%} col.c-act{width:13%} col.c-sd{width:15%} col.c-ach{width:15%} col.c-rr{width:12%} col.c-gpd{width:11%}
+  thead th{white-space:normal;padding-left:12px;padding-right:12px}
+  thead th.metric{padding-left:22px}
   th{vertical-align:bottom}
   th{padding-top:16px;padding-bottom:14px}
   thead tr.centres th{padding-top:16px;padding-bottom:8px;border-bottom:0}
@@ -382,7 +386,8 @@ function render(){
   document.getElementById('day-sub').textContent=days.cur?days.left+' day'+(days.left===1?'':'s')+' left':days.total+' days';
   document.getElementById('day-bar').style.width=(days.done/days.total*100)+'%';
 
-  const head=`<thead><tr><th class="metric">Metric</th><th class="g">Target</th><th>Actuals</th><th>Surplus / Deficit</th><th>Achievement %</th><th>Run-rate</th><th>Goal / day</th></tr></thead>`;
+  const cols='<colgroup><col class="c-metric"><col class="c-tgt"><col class="c-act"><col class="c-sd"><col class="c-ach"><col class="c-rr"><col class="c-gpd"></colgroup>';
+  const head=cols+`<thead><tr><th class="metric">Metric</th><th class="g">Target</th><th>Actuals</th><th>Surplus / Deficit</th><th>Achievement %</th><th>Run-rate</th><th>Goal / day</th></tr></thead>`;
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
   document.getElementById('subtitle').textContent=sel?'Performance against monthly targets — '+sel.name+', '+sel.city:'Performance against monthly targets — all centres combined';
