@@ -62,7 +62,8 @@
   table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:760px;table-layout:fixed}
   th,td{padding:14px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
   td:last-child,th:last-child{padding-right:22px}
-  th{background:#FAF9F7;font:700 10.5px/1.3 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  th{background:#FAF9F7;font:600 12px/1.3 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  th:nth-child(5),td:nth-child(5){text-align:center}
   th{vertical-align:bottom}
   th{padding-top:16px;padding-bottom:14px}
   thead tr.centres th{padding-top:16px;padding-bottom:8px;border-bottom:0}
@@ -195,7 +196,7 @@ const SECTIONS=[
     {group:'Renewal break-up'},
     {id:'renCur', label:'Renewed – due in current month',  kind:'base', fmt:'n', src:'renCur'},
     {id:'renPrev',label:'Renewed – due in previous months',kind:'base', fmt:'n', src:'renPrev'},
-    {id:'renAdv', label:'Renewed in advance',               kind:'base', fmt:'n', src:'renAdv'},
+    {id:'renAdv', label:'Renewed in advance',               kind:'base', fmt:'n', src:'renAdv', noRunRate:true},   // can't be projected
     {group:'First-time renewals'},
     {id:'dueFT',  label:'Due',                        kind:'base', fmt:'n',   src:'dueFT', fixed:true, noTarget:true},
     {id:'renFT',  label:'Renewed',                    kind:'base', fmt:'n',   src:'renFT'},
@@ -286,8 +287,11 @@ function actualsFor(c,y,m){
   // Each renewal this month: which cohort it belongs to and when it was due (see classifyRenewals)
   const B={renCur:0,renPrev:0,renAdv:0,renFT:0,renRP:0},cm=y*12+m;
   rn.forEach(r=>{const c=d.cls.get(r);if(!c)return;
-    B[c.cohort==='ft'?'renFT':'renRP']++;
-    if(c.end){const em=c.end.getFullYear()*12+c.end.getMonth();B[em===cm?'renCur':em<cm?'renPrev':'renAdv']++;}});
+    if(!c.end)return;
+    const em=c.end.getFullYear()*12+c.end.getMonth();
+    B[em===cm?'renCur':em<cm?'renPrev':'renAdv']++;
+    if(em===cm)B[c.cohort==='ft'?'renFT':'renRP']++;   // cohorts count only renewals that were due this month
+  });
   const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP,...B};
   const A={};
   SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base')A[r.id]=r.src?SRC[r.src]:null;}));
@@ -345,7 +349,7 @@ function cells(r,A,T,days){
     +td(fmtVal(act,r.fmt),'act')
     +td(fmtDiff(diff,r.fmt),diff==null||Math.abs(diff)<1e-9?'':good(diff)?'pos':'neg')
     +(ach==null?td(null):`<td><span class="pill ${cls}">${(ach*100).toFixed(0)}%</span></td>`)
-    +td(rr==null?null:fmtVal(rr,r.fmt))
+    +(r.noRunRate?'<td class="na">NA</td>':td(rr==null?null:fmtVal(rr,r.fmt)))
     +gCell;
 }
 
