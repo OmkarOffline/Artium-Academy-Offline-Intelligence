@@ -72,8 +72,16 @@
 
   /* Initiative cards */
   .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding-top:4px}
+  .cards{align-items:start}
+  .card-body{display:none}
+  .card.open .card-body{display:block}
+  .card .prog{margin-bottom:2px}
+  .card.open .prog{margin-bottom:14px}
+  .card-chev{width:30px;height:30px;border-radius:999px;border:1px solid var(--border);background:#fff;color:var(--muted);display:grid;place-items:center;cursor:pointer;transition:transform .2s;flex:none}
+  .card-chev:hover{background:var(--accent-soft);color:var(--accent)}
+  .card.open .card-chev{transform:rotate(180deg)}
   .card{background:#fff;border:1px solid var(--border);border-radius:18px;padding:18px 20px 16px;box-shadow:var(--shadow)}
-  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .card h3{font:600 16px/1.35 var(--display);color:var(--ink)}
   .status{font:600 11.5px var(--body);border-radius:999px;padding:3px 10px;white-space:nowrap}
   .status.done{color:var(--ok);background:var(--ok-soft)}
@@ -104,8 +112,16 @@
   .btn-primary:hover{background:#4C2272}
   .btn-primary:disabled,.btn-claude:disabled{opacity:.55;cursor:default}
   .btn-ghost{height:42px;padding:0 16px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--ink2);font:600 14px var(--display);cursor:pointer}
-  .btn-claude{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;border:1px solid #F0D9C8;border-radius:12px;background:#FCF3EC;color:#B4532A;font:600 14px var(--display);cursor:pointer}
-  .btn-claude:hover{background:#F9E8DB}
+  .btn-link{border:0;background:none;color:var(--accent);font:600 13.5px var(--body);cursor:pointer;padding:0}
+  .rec-card{background:var(--accent-soft);border:1px solid #E0D4EE;border-radius:18px;padding:22px 24px}
+  .rec-l{font:700 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+  .rec-v{font:600 46px/1.1 var(--display);color:var(--accent);margin:10px 0 12px}
+  .rec-card .bar{height:8px;border-radius:8px;background:#fff;overflow:hidden}
+  .rec-card .bar i{display:block;height:100%;border-radius:8px;background:var(--accent);transition:width .4s}
+  .rec-why{margin-top:14px;font-size:14.5px;line-height:1.55;color:var(--ink2)}
+  .own{display:flex;align-items:flex-end;gap:14px}
+  .own[hidden]{display:none}
+  .own-note{font-size:13px;color:var(--muted);padding-bottom:12px}
   .edit-btn{border:1px solid var(--border);background:#fff;border-radius:999px;padding:3px 10px;font:600 11.5px var(--body);color:var(--accent);cursor:pointer;white-space:nowrap}
   .edit-btn:hover{background:var(--accent-soft)}
   .card-top .r{display:flex;align-items:center;gap:6px}
@@ -125,14 +141,13 @@
   .modal-body input,.modal-body select{height:42px;padding-top:0;padding-bottom:0}
   .modal-body textarea{resize:vertical}
   .modal-body :is(input,select,textarea):focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12);background:#fff}
-  .modal-body textarea.enhanced{background:#FFFBF6;border-color:#F0D9C8}
   .pct-in{display:flex;align-items:center;gap:6px}
   .pct-in b{font:600 14px var(--display);color:var(--muted)}
   .ed-msg{min-height:18px;font-size:13px;color:var(--muted)}
   .ed-msg.err{color:var(--bad)}
-  .ed-msg.ok{color:#B4532A}
   .modal-foot{display:flex;align-items:center;gap:10px;padding:14px 24px 20px;border-top:1px solid var(--line)}
   .modal-foot .sp{flex:1}
+  .modal-foot[hidden],.modal-body[hidden]{display:none}
   @media (max-width:1000px){.cards{grid-template-columns:1fr}.summary{grid-template-columns:1fr 1fr}}
   @media (max-width:640px){.page{padding:24px 16px 48px}h1{font-size:28px}.tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:18px}}
 </style>
@@ -167,20 +182,36 @@
         <label>New folder name<input id="ed-nf-name" placeholder="e.g. Referral programme"></label>
         <label class="narrow">Emoji<input id="ed-nf-emoji" placeholder="📁" maxlength="4"></label>
       </div>
-      <div class="row2">
-        <label>Initiative<input id="ed-name" placeholder="Short name, e.g. Lamp Posts"></label>
-        <label class="narrow">Progress<span class="pct-in"><input id="ed-pct" type="number" min="0" max="100" step="5" value="0"><b>%</b></span></label>
-      </div>
+      <label>Initiative<input id="ed-name" placeholder="Short name, e.g. Lamp Posts"></label>
       <label>Desired state<textarea id="ed-ds" rows="4" placeholder="Where we want to be. Rough notes are fine — one point per line."></textarea></label>
       <label>Current state<textarea id="ed-cs" rows="4" placeholder="Where things stand today."></textarea></label>
       <label>Plan ahead<textarea id="ed-pa" rows="4" placeholder="Next steps, one per line."></textarea></label>
       <div class="ed-msg" id="ed-msg"></div>
     </div>
-    <div class="modal-foot">
-      <button class="btn-claude" type="button" id="ed-enhance" onclick="enhanceDraft()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9z"/></svg>Enhance with Claude</button>
+    <!-- Step 2: recommended completion % -->
+    <div class="modal-body rec" id="ed-review" hidden>
+      <div class="rec-card">
+        <div class="rec-l">Recommended completion</div>
+        <div class="rec-v"><span id="rec-pct">0</span>%</div>
+        <div class="bar"><i id="rec-bar"></i></div>
+        <p class="rec-why" id="rec-why"></p>
+      </div>
+      <div class="own" id="own" hidden>
+        <label class="narrow">Your completion %<span class="pct-in"><input id="own-pct" type="number" min="0" max="100" step="5"><b>%</b></span></label>
+        <span class="own-note" id="own-note"></span>
+      </div>
+      <div class="ed-msg" id="rv-msg"></div>
+    </div>
+    <div class="modal-foot" id="foot-edit">
       <span class="sp"></span>
       <button class="btn-ghost" type="button" onclick="closeEditor()">Cancel</button>
-      <button class="btn-primary" type="button" id="ed-save" onclick="saveDraft()">Save</button>
+      <button class="btn-primary" type="button" id="ed-save" onclick="reviewDraft()">Save</button>
+    </div>
+    <div class="modal-foot" id="foot-review" hidden>
+      <button class="btn-link" type="button" onclick="backToEdit()">← Back to edit</button>
+      <span class="sp"></span>
+      <button class="btn-ghost" type="button" id="rv-reject" onclick="rejectRec()">Reject</button>
+      <button class="btn-primary" type="button" id="rv-approve" onclick="publish(true)">Approve &amp; publish</button>
     </div>
   </div>
 </div>
@@ -219,15 +250,21 @@ function card(x){
   const p=x.pct||0,[sc,st]=status(p);
   const links=(x.rb||[]).concat(x.do||[]).map(id=>`<span class="link">${esc(DEPS[id]||id)}</span>`).join('');
   const block=(k,label)=>x[k]&&x[k].length?`<div class="block ${k}"><h4>${label}</h4><ul>${x[k].map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:'';
-  return`<article class="card">
-    <div class="card-top"><h3>${esc(x.n)}</h3><div class="r"><span class="status ${sc}">${st}</span>${CAN_EDIT?`<button class="edit-btn" type="button" onclick="openEditor('${x.id}')">Edit</button>`:''}</div></div>
+  const isOpen=openCards.has(x.id);
+  return`<article class="card${isOpen?' open':''}" data-id="${x.id}">
+    <div class="card-top"><h3>${esc(x.n)}</h3><div class="r"><span class="status ${sc}">${st}</span>${CAN_EDIT?`<button class="edit-btn" type="button" onclick="openEditor('${x.id}')">Edit</button>`:''}
+      <button class="card-chev" type="button" aria-expanded="${isOpen}" aria-label="Show details" onclick="toggleCard(this)">${chevron}</button></div></div>
     <div class="prog"><div class="bar"><i style="width:${p}%;background:${colour(p)}"></i></div><b>${p}%</b></div>
-    ${links?`<div class="links">${links}</div>`:''}
-    ${block('ds','Desired state')}${block('cs','Current state')}${block('pa','Plan ahead')}
-    ${x.at?`<div class="by">Updated ${esc(x.at)}</div>`:''}
+    <div class="card-body">
+      ${links?`<div class="links">${links}</div>`:''}
+      ${block('ds','Desired state')}${block('cs','Current state')}${block('pa','Plan ahead')}
+      ${x.at?`<div class="by">Updated ${esc(x.at)}</div>`:''}
+    </div>
   </article>`;
 }
 let uid=0;
+const openCards=new Set();   // cards you've opened stay open while you work
+function toggleCard(btn){const c=btn.closest('.card'),o=!c.classList.contains('open');c.classList.toggle('open',o);btn.setAttribute('aria-expanded',o);o?openCards.add(c.dataset.id):openCards.delete(c.dataset.id);}
 const open={};   // remembers which sections are closed while you work
 function folderBody(f){
   const items=f.i||[],kids=f.kids||[];
@@ -299,41 +336,95 @@ function openEditor(id){
   $('ed-title').textContent=editing?'Edit initiative':'Add initiative';
   fillDepts(x.k);fillFolders(x.path);
   $('ed-nf-name').value='';$('ed-nf-emoji').value='';
-  $('ed-name').value=x.n;$('ed-pct').value=x.pct;
+  $('ed-name').value=x.n;
   $('ed-ds').value=x.ds.join('\n');$('ed-cs').value=x.cs.join('\n');$('ed-pa').value=x.pa.join('\n');
-  ['ed-ds','ed-cs','ed-pa'].forEach(i=>$(i).classList.remove('enhanced'));
-  msg('');$('editor').hidden=false;$('ed-name').focus();
+  backToEdit();msg('');$('editor').hidden=false;$('ed-name').focus();
 }
-function closeEditor(){$('editor').hidden=true;editing=null;}
+function closeEditor(){$('editor').hidden=true;editing=null;draft=null;}
 function msg(t,cls){$('ed-msg').textContent=t;$('ed-msg').className='ed-msg'+(cls?' '+cls:'');}
 function folderPath(){
   if($('ed-folder').value!=='__new')return $('ed-folder').value;
   const n=$('ed-nf-name').value.trim();return n;
 }
-async function enhanceDraft(){
-  const b=$('ed-enhance');b.disabled=true;msg('Claude is rewriting your notes…');
-  try{
-    const d=D.find(x=>x.k===$('ed-dept').value);
-    const r=await ArtiumAuth.call('enhance',{item:{dept:d&&d.n,path:folderPath(),n:$('ed-name').value,ds:$('ed-ds').value,cs:$('ed-cs').value,pa:$('ed-pa').value}});
-    const e=r.enhanced;
-    [['ds','ed-ds'],['cs','ed-cs'],['pa','ed-pa']].forEach(([k,i])=>{if(e[k]&&e[k].length){$(i).value=e[k].join('\n');$(i).classList.add('enhanced');}});
-    msg('Rewritten by Claude. Check each point, change anything you like, then Save.','ok');
-  }catch(err){msg(err.message,'err');}
-  b.disabled=false;
+/* Recommend a completion % by reading an initiative's text — no AI, just rules.
+   1. Each sentence of the Current state is placed on a stage (discussed → designed → built/piloted → live).
+      The furthest stage reached sets the starting range.
+   2. Sentences saying something is missing ("not yet", "does not", "paused"…) pull it down.
+   3. Each step still in Plan ahead pulls it down further; nothing left to do = complete. */
+const REC_STAGES=[
+  {k:4,label:'is live or implemented',lo:50,hi:100,n:5,re:/\b(is available|are available|is accessible|fully (built|implemented|optimised|designed)|is live|are live|now live|went live|gone live|running successfully|implemented|rolled out|launched|in place|delivered|captured and flow)/},
+  {k:3,label:'has been built, piloted or run',lo:35,hi:75,n:6,re:/\b(built|piloted|pilot|tested|trial|in development|being built|conducted|executed|calendarised|running|expanded|partnered|identified relevant)/},
+  {k:2,label:'has groundwork done (drafted, designed or planned)',lo:10,hi:40,n:6,re:/\b(exists|drafted|designed|finalised|prd|prepared|defined|agreed|shortlisted|requested|inquiry|enquiry|identified|informally)/},
+  {k:1,label:'has only been discussed or proposed',lo:5,hi:10,n:6,re:/\b(discussed|proposed|initiated|idea)/}
+];
+const REC_NEG=/\b(not yet|has not|have not|does not|did not|do not|is not|are not|no structured|no formal|not in a|lacks?|missing|paused|pending|incomplete|no further)\b/;
+const REC_NONE=/\b(not yet (been )?(proposed|discussed|set up|started|taken place|picked up)|yet to (start|begin))/;
+function recommendPct(x){
+  const sentences=(x.cs||[]).join(' ').split(/(?<=[.!?])\s+/).map(s=>s.trim().toLowerCase()).filter(Boolean)
+    .filter(s=>!/\bonline (world|employees|counterparts|learners)\b/.test(s)||/\boffline\b/.test(s)&&!/\bonline\b/.test(s));   // ignore what exists only in the online world
+  const steps=(x.pa||[]).filter(s=>String(s).trim()).length;
+  if(!sentences.length)return{pct:0,reason:'Nothing is written under Current state yet, so this is treated as not started.'};
+  let best=null,neg=0;
+  sentences.forEach(s=>{
+    const isNeg=REC_NEG.test(s);
+    if(isNeg){neg++;if(REC_NONE.test(s))return;}
+    let st=REC_STAGES.find(t=>t.re.test(s));
+    if(st&&/\b(initial|preliminary|first)\b/.test(s)&&st.k>2)st=REC_STAGES[2];   // e.g. "an initial inquiry has been completed"
+    if(st&&isNeg&&st.k>1)st=REC_STAGES.find(t=>t.k===st.k-1);                  // "built but not yet live" counts one stage lower
+    if(st&&(!best||st.k>best.k))best=st;
+  });
+  if(!best){
+    if(sentences.every(s=>REC_NEG.test(s)))return{pct:0,reason:'The current state says work has not started yet.'};
+    best=steps?{label:'has some work done',lo:10,hi:40,n:6}:REC_STAGES[0];
+  }
+  if(!steps&&!neg)return{pct:100,reason:`The current state says it ${best.label}, and nothing is left in Plan ahead.`};
+  let lo=best.lo;
+  if(/\b(final steps|few (final )?steps remain|nearly (done|complete)|almost (done|complete))/.test(sentences.join(' '))){lo=Math.max(lo,70);best={...best,hi:Math.max(best.hi,90)};}
+  let pct=best.hi-(best.hi-lo)*Math.min(steps,best.n)/best.n-neg*5;
+  pct=Math.max(lo,Math.min(steps?95:100,pct));
+  pct=Math.round(pct/5)*5;
+  const bits=[];
+  if(neg)bits.push(`${neg} point${neg===1?'':'s'} say${neg===1?'s':''} something is still missing`);
+  bits.push(steps?`${steps} step${steps===1?' is':'s are'} still in Plan ahead`:'nothing is left in Plan ahead');
+  return{pct,reason:`The current state says it ${best.label}; ${bits.join(', and ')}.`};
 }
-async function saveDraft(){
+
+/* Save → recommended % → Approve (publish with it) or Reject (enter your own) */
+let draft=null,rec=null;
+function show(step){
+  const review=step==='review';
+  document.querySelector('#editor .modal-body:not(.rec)').hidden=review;$('ed-review').hidden=!review;
+  $('foot-edit').hidden=review;$('foot-review').hidden=!review;
+  $('ed-title').textContent=review?'Review completion %':(editing?'Edit initiative':'Add initiative');
+}
+function backToEdit(){show('edit');}
+function reviewDraft(){
   const path=folderPath(),name=$('ed-name').value.trim();
   if(!name)return msg('Give the initiative a name.','err');
   if(!path)return msg('Choose a folder or type a new folder name.','err');
   const split=t=>t.split('\n').map(s=>s.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
-  const item={id:editing&&editing.id,k:$('ed-dept').value,path,emoji:$('ed-nf-emoji').value.trim(),n:name,pct:+$('ed-pct').value||0,ds:split($('ed-ds').value),cs:split($('ed-cs').value),pa:split($('ed-pa').value)};
-  const b=$('ed-save');b.disabled=true;msg('Saving…');
+  draft={id:editing&&editing.id,k:$('ed-dept').value,path,emoji:$('ed-nf-emoji').value.trim(),n:name,ds:split($('ed-ds').value),cs:split($('ed-cs').value),pa:split($('ed-pa').value)};
+  rec=recommendPct(draft);
+  $('rec-pct').textContent=rec.pct;$('rec-bar').style.width=rec.pct+'%';$('rec-why').textContent=rec.reason;
+  $('own').hidden=true;$('own-pct').value='';$('rv-msg').textContent='';
+  $('own-note').textContent=editing?'Currently '+editing.pct+'% on the page.':'';
+  $('rv-reject').hidden=false;$('rv-approve').textContent='Approve & publish';$('rv-approve').onclick=()=>publish(true);
+  show('review');
+}
+function rejectRec(){
+  $('own').hidden=false;$('own-pct').value=editing?editing.pct:rec.pct;$('own-pct').focus();
+  $('rv-reject').hidden=true;$('rv-approve').textContent='Publish with my %';$('rv-approve').onclick=()=>publish(false);
+}
+async function publish(useRec){
+  let pct=rec.pct;
+  if(!useRec){pct=Number($('own-pct').value);if($('own-pct').value===''||isNaN(pct)||pct<0||pct>100){$('rv-msg').textContent='Enter a percentage between 0 and 100.';$('rv-msg').className='ed-msg err';return;}}
+  const b=$('rv-approve');b.disabled=true;$('rv-msg').className='ed-msg';$('rv-msg').textContent='Publishing…';
   try{
-    await ArtiumAuth.call('saveInitiative',{item});
-    sel=item.k;closeEditor();
-    document.getElementById('dot').className='dot loading';document.getElementById('updated').textContent='Saved · refreshing…';
+    await ArtiumAuth.call('saveInitiative',{item:{...draft,pct:Math.round(pct)}});
+    sel=draft.k;closeEditor();
+    document.getElementById('dot').className='dot loading';document.getElementById('updated').textContent='Published · refreshing…';
     await load();
-  }catch(err){msg(err.message,'err');}
+  }catch(err){$('rv-msg').textContent=err.message;$('rv-msg').className='ed-msg err';}
   b.disabled=false;
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editor').hidden)closeEditor();});
