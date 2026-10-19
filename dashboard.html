@@ -230,18 +230,17 @@
     .kpi-section + .kpi-section{border-top:1px solid var(--border-primary)}
     .kpi-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
     .kpi-group-title{font-family:var(--font-primary);font-size:15px;font-weight:700;color:var(--text-h1);letter-spacing:-.1px}
-    .kpi-group-sub{font-size:12px;color:var(--text-secondary)}
+    .sc-compare{font-size:12px;font-weight:500;color:var(--text-secondary);margin-left:4px}
+    @media (max-width:560px){.sc-compare{display:none}}
     .kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
-    .kpi{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--bg-primary);border:1px solid #E6E9F0;border-radius:14px;padding:16px 14px 12px;overflow:hidden}
+    .kpi{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--bg-primary);border:1px solid #E6E9F0;border-radius:14px;padding:16px 14px 14px;overflow:hidden}
     .kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--kpi-accent)}
     .kpi-head{display:flex;align-items:flex-start;gap:8px;min-height:49px;margin-bottom:8px}
     .kpi-icon{flex-shrink:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:15px;color:var(--kpi-accent);background:var(--kpi-tint)}
     .kpi-label{font-size:12px;font-weight:600;line-height:1.35;color:#475569}
     .kpi-value{font-family:var(--font-primary);font-size:24px;font-weight:700;line-height:1.15;color:#0F172A;letter-spacing:-.4px;font-variant-numeric:tabular-nums;white-space:nowrap}
-    .kpi-cmp{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11.5px;color:#64748B;min-width:0}
+    .kpi-cmp{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px;font-size:11.5px;color:#64748B;min-width:0;max-width:100%}
     .kpi-prev{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .kpi-note{margin-top:auto;padding-top:10px;border-top:1px dashed #E6E9F0;font-size:11px;color:#94A3B8}
-    .kpi-cmp + .kpi-note{margin-top:12px}
     .kpi-pill{display:inline-flex;align-items:center;gap:2px;flex-shrink:0;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
     .kpi-pill.up{color:#047857;background:#ECFDF5}
     .kpi-pill.down{color:#B91C1C;background:#FEF2F2}
@@ -430,6 +429,7 @@
         <i class="ti ti-chart-bar" style="font-size:17px;color:var(--blue);" aria-hidden="true"></i>
         <span class="section-title">Scorecards</span>
         <span class="section-badge" id="scorecards-badge">—</span>
+        <span class="sc-compare" id="sc-compare"></span>
       </div>
       <button class="chevron-btn" aria-label="Toggle scorecards" onclick="event.stopPropagation();toggleSection('scorecards')">
         <i class="ti ti-chevron-down" id="scorecards-icon"></i>
@@ -437,15 +437,15 @@
     </div>
     <div id="scorecards-body" class="section-body">
       <div class="kpi-section" id="kpi-sec-fs">
-        <div class="kpi-group-head"><div class="kpi-group-title">Fresh Sales</div><div class="kpi-group-sub" id="kpi-sub-fs"></div></div>
+        <div class="kpi-group-head"><div class="kpi-group-title">Fresh Sales</div></div>
         <div class="kpi-grid" id="kpi-grid-fs"></div>
       </div>
       <div class="kpi-section" id="kpi-sec-rn">
-        <div class="kpi-group-head"><div class="kpi-group-title">Renewals</div><div class="kpi-group-sub" id="kpi-sub-rn"></div></div>
+        <div class="kpi-group-head"><div class="kpi-group-title">Renewals</div></div>
         <div class="kpi-grid" id="kpi-grid-rn"></div>
       </div>
       <div class="kpi-section" id="kpi-sec-tot">
-        <div class="kpi-group-head"><div class="kpi-group-title">Total – Coaching Fees</div><div class="kpi-group-sub" id="kpi-sub-tot"></div></div>
+        <div class="kpi-group-head"><div class="kpi-group-title">Total – Coaching Fees</div></div>
         <div class="kpi-grid" id="kpi-grid-tot"></div>
       </div>
     </div>
@@ -491,11 +491,9 @@
   /* ── Previous period calculation ── */
   function getPrevPeriod(fromVal, toVal){
     if(!fromVal||!toVal)return{from:null,to:null};
-    const f=localDate(fromVal), t=localDate(toVal);
-    const days=Math.round((t-f)/(1000*60*60*24));
-    const prevTo=new Date(f); prevTo.setDate(prevTo.getDate()-1);
-    const prevFrom=new Date(prevTo); prevFrom.setDate(prevFrom.getDate()-days);
-    return{from:toISO(prevFrom),to:toISO(prevTo)};
+    const shift=iso=>{const d=localDate(iso),y=d.getFullYear(),m=d.getMonth()-1;
+      const last=new Date(y,m+1,0).getDate();return toISO(new Date(y,m,Math.min(d.getDate(),last)));};
+    return{from:shift(fromVal),to:shift(toVal)};
   }
 
   function delta(curr, prev, higherIsBetter){
@@ -674,22 +672,22 @@
      Renewals tab:    A = Date (0), Q = Net Coaching Fees (16). */
   const KPI_SETS=[
     {id:'fs', cards:[
-      {id:'adm',   label:'No. of Admissions',                    note:'Count of Column A',           color:'indigo', icon:'user-plus',  fmt:'count'},
-      {id:'col',   label:'Collections – Fresh Sales',            note:'Sum of Column R',             color:'teal',   icon:'wallet',     fmt:'inr'},
-      {id:'atv',   label:'ATV – Fresh Sales',                    note:'Collections ÷ Admissions',    color:'amber',  icon:'receipt',    fmt:'inr'},
-      {id:'regn',  label:'No. of Registration Fee Transactions', note:'Column L entries above ₹0',   color:'sky',    icon:'ticket',     fmt:'count'},
-      {id:'regc',  label:'Collections – Registration Fees',      note:'Sum of Column L',             color:'violet', icon:'id-badge-2', fmt:'inr'},
-      {id:'coach', label:'Collections – Coaching Fees',          note:'Sum of Column Q',             color:'rose',   icon:'music',      fmt:'inr'}
+      {id:'adm',   label:'No. of Admissions',                    color:'indigo', icon:'user-plus',  fmt:'count'},
+      {id:'col',   label:'Collections – Fresh Sales',            color:'teal',   icon:'wallet',     fmt:'inr'},
+      {id:'atv',   label:'ATV – Fresh Sales',                    color:'amber',  icon:'receipt',    fmt:'inr'},
+      {id:'regn',  label:'No. of Registration Fee Transactions', color:'sky',    icon:'ticket',     fmt:'count'},
+      {id:'regc',  label:'Collections – Registration Fees',      color:'violet', icon:'id-badge-2', fmt:'inr'},
+      {id:'coach', label:'Collections – Coaching Fees',          color:'rose',   icon:'music',      fmt:'inr'}
     ]},
     {id:'rn', cards:[
-      {id:'n',   label:'No. of Renewals',        note:'Count of Column A',        color:'indigo', icon:'refresh', fmt:'count'},
-      {id:'col', label:'Collections – Renewals', note:'Sum of Column Q',          color:'teal',   icon:'wallet',  fmt:'inr'},
-      {id:'atv', label:'ATV – Renewals',         note:'Collections ÷ Renewals',   color:'amber',  icon:'receipt', fmt:'inr'}
+      {id:'n',   label:'No. of Renewals',        color:'indigo', icon:'refresh', fmt:'count'},
+      {id:'col', label:'Collections – Renewals', color:'teal',   icon:'wallet',  fmt:'inr'},
+      {id:'atv', label:'ATV – Renewals',         color:'amber',  icon:'receipt', fmt:'inr'}
     ]},
     {id:'tot', cards:[
-      {id:'n',   label:'No. of Transactions',         note:'Admissions + Renewals',                      color:'indigo', icon:'arrows-exchange', fmt:'count'},
-      {id:'col', label:'Collections – Coaching Fees', note:'Fresh Sales (Col R) + Renewals (Col Q)',     color:'teal',   icon:'wallet',          fmt:'inr'},
-      {id:'atv', label:'Blended ATV',                 note:'Collections ÷ Transactions',                 color:'amber',  icon:'scale',           fmt:'inr'}
+      {id:'n',   label:'No. of Transactions',         color:'indigo', icon:'arrows-exchange', fmt:'count'},
+      {id:'col', label:'Collections – Coaching Fees', color:'teal',   icon:'wallet',          fmt:'inr'},
+      {id:'atv', label:'Blended ATV',                 color:'amber',  icon:'scale',           fmt:'inr'}
     ]}
   ];
   function sumCol(rows,c){return rows.reduce((s,r)=>s+parseNum(r[c]),0);}
@@ -723,7 +721,6 @@
           <div class="kpi-head"><div class="kpi-icon"><i class="ti ti-${k.icon}" aria-hidden="true"></i></div><div class="kpi-label">${k.label}</div></div>
           <div class="kpi-value" id="${id}-val">—</div>
           <div class="kpi-cmp"><span id="${id}-delta"></span><span class="kpi-prev" id="${id}-prev">vs —</span></div>
-          <div class="kpi-note">${k.note}</div>
         </div>`;}).join('');
     });
     const total=KPI_SETS.reduce((n,s)=>n+s.cards.length,0);
@@ -733,9 +730,8 @@
     const curr=calcKpis(f.fromVal,f.toVal,f);
     const hasPrev=!!(prev.from&&prev.to);
     const before=hasPrev?calcKpis(prev.from,prev.to,f):null;
-    const sub=hasPrev?'Compared with '+fmtShortDate(prev.from)+' – '+fmtShortDate(prev.to):'';
+    set('sc-compare',hasPrev?'Compared with '+fmtShortDate(prev.from)+' – '+fmtShortDate(prev.to):'');
     KPI_SETS.forEach(s=>{
-      set('kpi-sub-'+s.id,sub);
       s.cards.forEach(k=>{
         const id='kpi-'+s.id+'-'+k.id, c=curr[s.id][k.id];
         set(id+'-val',fmtKpi(c,k.fmt));

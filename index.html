@@ -41,7 +41,7 @@
     </nav>
   </header>
   <main class="frames">
-    <iframe id="frame-centres" src="dfd.html" title="Offline Centres"></iframe>
+    <iframe id="frame-centres" data-src="dfd.html" title="Offline Centres"></iframe>
     <iframe id="frame-dashboard" data-src="dashboard.html" title="Lead to Purchase Dashboard" hidden></iframe>
   </main>
 <script>
@@ -51,7 +51,7 @@
     tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
     document.querySelectorAll(".frames iframe").forEach(f => {
       const on = f.id === "frame-" + name;
-      if(on && !f.getAttribute("src")) f.src = f.dataset.src; // load each page the first time it is opened
+      if(on && !f.getAttribute("src")) f.src = f.dataset.src + "?v=" + Date.now(); // load each page the first time it is opened, always the latest version
       f.hidden = !on;
     });
     if(location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
