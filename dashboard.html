@@ -390,6 +390,28 @@
     .bd-note{padding:2px 2px 8px;color:var(--text-secondary)}
     @media (max-width:900px){.page-header{align-items:flex-start}}
     @media (max-width:640px){.centre-trigger{font-size:28px}.section-card:has(#scorecards-body) .section-title{font-size:20px}}
+    /* ── Section trays, titles and dividers ── */
+    /* Each main section (Scorecards, Admissions Breakdown, Renewals Breakdown) sits in a soft tray that holds its white cards */
+    .section-card:has(#scorecards-body),.section-card:has(#breakdown-body),.section-card:has(#rbreakdown-body){
+      background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);
+      border:1px solid #E9E5EE;border-radius:28px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);
+      padding:8px 24px 18px;margin-bottom:28px}
+    .section-card:has(#scorecards-body) > .section-header,.section-card:has(#breakdown-body) > .section-header,.section-card:has(#rbreakdown-body) > .section-header{padding:18px 2px 6px}
+    /* Section title: a short gold marker and a quiet meta line — highlighted without being bigger */
+    .section-card:has(#scorecards-body) .section-title,.section-card:has(#breakdown-body) .section-title,.section-card:has(#rbreakdown-body) .section-title{
+      position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em}
+    .section-card:has(#scorecards-body) .section-title::before,.section-card:has(#breakdown-body) .section-title::before,.section-card:has(#rbreakdown-body) .section-title::before{
+      content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+    .section-card:has(#scorecards-body) .chevron-btn,.section-card:has(#breakdown-body) .chevron-btn,.section-card:has(#rbreakdown-body) .chevron-btn{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border-primary);color:var(--text-secondary)}
+    /* Group dividers: the gold label runs into a fading hairline */
+    .kpi-group-head,.bd-title{display:flex;align-items:center;gap:14px}
+    .kpi-group-head{margin-bottom:14px}
+    .kpi-group-title{white-space:nowrap}
+    .kpi-group-head::after,.bd-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(168,132,79,.45) 0%,rgba(168,132,79,.18) 45%,rgba(168,132,79,0) 100%)}
+    @media (max-width:640px){
+      .section-card:has(#scorecards-body),.section-card:has(#breakdown-body),.section-card:has(#rbreakdown-body){padding:4px 12px 12px;border-radius:22px}
+      .section-card:has(#scorecards-body) .section-title,.section-card:has(#breakdown-body) .section-title,.section-card:has(#rbreakdown-body) .section-title{font-size:19px}
+    }
   </style>
 </head>
 <body>
@@ -765,11 +787,21 @@
   function fINR(v){return '₹'+Math.round(v).toLocaleString('en-IN');}
   function fPct(v){return v.toFixed(2)+'%';}
   function fATV(v){return '₹'+v.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
+  // Reads CSV properly, including cells that contain commas, quotes or line breaks (e.g. remarks)
   function parseCSV(text){
-    const rows=[];
-    for(const line of text.split('\n')){if(!line.trim())continue;const cols=[];let cur='',inQ=false;for(const ch of line){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else{cur+=ch;}}cols.push(cur.trim());rows.push(cols);}
+    const rows=[];let row=[],cur='',q=false;
+    for(let i=0;i<text.length;i++){
+      const ch=text[i];
+      if(q){if(ch==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+      else if(ch==='"')q=true;
+      else if(ch===','){row.push(cur.trim());cur='';}
+      else if(ch==='\n'||ch==='\r'){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cur.trim());if(row.some(v=>v!==''))rows.push(row);row=[];cur='';}
+      else cur+=ch;
+    }
+    row.push(cur.trim());if(row.some(v=>v!==''))rows.push(row);
     return rows;
   }
+
 
   /* ── Previous period calculation ── */
   function getPrevPeriod(fromVal, toVal){
@@ -913,13 +945,17 @@
   function unload(ids){ids.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('loading');});}
 
   /* ── Centre selector ──
-     Centres from the Basic Information sheet (Offline Team tab). Only centres with live data are selectable. */
+     Each centre reads its own receipts sheet (published Fresh Sales and Renewals tabs).
+     A centre without links shows as "Coming soon". */
+  const OMR_PUB='https://docs.google.com/spreadsheets/d/e/2PACX-1vRphAw7sp-R5RE-q3VSo5jzoP3RBX7aaPe5YdG8GqeMGKawFnhdImZD50kc8Q7HyxiQu_c55FhuA1JT/pub?single=true&output=csv&gid=';
   const CENTRES=[
-    {city:'Chennai',   name:'Alwarpet',      live:true},
-    {city:'Chennai',   name:'Thoraipakkam',  live:false},
-    {city:'Bangalore', name:'Borewell Road', live:false}
+    {city:'Chennai',   name:'Alwarpet',      fs:FS_URL,                 rn:RN_URL},
+    {city:'Chennai',   name:'Thoraipakkam',  fs:OMR_PUB+'52323956',     rn:OMR_PUB+'1120927282'},
+    {city:'Bangalore', name:'Borewell Road'}
   ];
-  let activeCentre='Alwarpet';
+  CENTRES.forEach(c=>c.live=!!(c.fs&&c.rn));
+  let activeCentre=(()=>{try{const s=localStorage.getItem('artium_centre');return CENTRES.some(c=>c.name===s&&c.live)?s:'Alwarpet';}catch(e){return'Alwarpet';}})();
+  function centreInfo(){return CENTRES.find(c=>c.name===activeCentre);}
   function buildCentreMenu(){
     const menu=document.getElementById('centre-menu');
     let html='',city='';
@@ -940,12 +976,19 @@
     document.getElementById('centre-trigger').setAttribute('aria-expanded',open);
   }
   function closeCentreMenu(){if(!document.getElementById('centre-menu').hidden)toggleCentreMenu();}
-  function selectCentre(name){
-    const c=CENTRES.find(x=>x.name===name);if(!c||!c.live)return;
-    activeCentre=name;
+  function showCentre(){
+    const c=centreInfo();
     document.getElementById('centre-name').textContent=c.name;document.getElementById('centre-eyebrow').textContent=c.city;
     document.title=c.name+', '+c.city+' — Dashboard';
-    buildCentreMenu();closeCentreMenu();
+  }
+  function selectCentre(name){
+    const c=CENTRES.find(x=>x.name===name);if(!c||!c.live)return;
+    closeCentreMenu();
+    if(name===activeCentre)return;
+    activeCentre=name;try{localStorage.setItem('artium_centre',name);}catch(e){}
+    showCentre();buildCentreMenu();
+    document.querySelectorAll('.kpi').forEach(k=>k.classList.add('loading'));
+    loadData();
   }
   document.addEventListener('click',e=>{if(!e.target.closest('#centre-picker'))closeCentreMenu();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCentreMenu();});
@@ -1123,7 +1166,13 @@
 
   async function loadData(){
     try{
-      [fsRows,rnRows]=await Promise.all([fetchLatest(FS_URL,2,COL.DATE),fetchLatest(RN_URL,2,COL.DATE)]);
+      const c=centreInfo();
+      document.getElementById('status-dot').className='status-dot loading';document.getElementById('last-updated-text').textContent='Loading '+c.name+'…';
+      const [f,r]=await Promise.all([fetchLatest(c.fs,2,COL.DATE),fetchLatest(c.rn,2,COL.DATE)]);
+      if(c.name!==activeCentre)return;          // the user switched centre while this was loading
+      // keep only this centre's rows (Academy, column C)
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);
+      fsRows=mine(f);rnRows=mine(r);
       const now=new Date();
       document.getElementById('last-updated-text').textContent='Updated '+now.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+now.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
       document.getElementById('status-dot').className='status-dot';
