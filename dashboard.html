@@ -499,6 +499,22 @@
             <tfoot><tr><td>Total</td><td class="num" id="bd-level-total">—</td><td class="num" id="bd-level-total-pct">—</td></tr></tfoot>
           </table>
         </div>
+        <div class="bd-block">
+          <div class="bd-title">Age-group-wise</div>
+          <table class="bd-table">
+            <thead><tr><th>Age group</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <tbody id="bd-age-body"></tbody>
+            <tfoot><tr><td>Total</td><td class="num" id="bd-age-total">—</td><td class="num" id="bd-age-total-pct">—</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="bd-block">
+          <div class="bd-title">Subscription-period-wise</div>
+          <table class="bd-table">
+            <thead><tr><th>No. of months</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <tbody id="bd-months-body"></tbody>
+            <tfoot><tr><td>Total</td><td class="num" id="bd-months-total">—</td><td class="num" id="bd-months-total-pct">—</td></tr></tfoot>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -795,26 +811,38 @@
   }
 
   /* ── Admissions Breakdown (Fresh Sales tab) ──
-     Course-wise uses Column I, Course-level-wise uses Column J.
-     Every value that appears anywhere in the column is listed, even with 0 admissions in the period. */
+     Course-wise = Column I, Course-level-wise = Column J, Age-group-wise = Column G, Subscription-period-wise = Column M.
+     Values are taken from the whole column, so a value with 0 admissions in the period still shows. */
   const LEVEL_ORDER=['Preparatory','Intermediate','Proficient','Advanced'];
-  function renderBreakdownTable(rows,col,key,sortFn){
-    const values=[...new Set(fsRows.map(r=>(r[col]||'').trim()).filter(Boolean))];
+  const leadNum=v=>{const n=parseFloat(v);return isNaN(n)?Infinity:n;};
+  function renderBreakdownTable(rows,cfg){
+    // fixed list (months) or every value seen in the column
+    const values=cfg.fixed||[...new Set(fsRows.map(r=>(r[cfg.col]||'').trim()).filter(Boolean))];
     const counts=Object.fromEntries(values.map(v=>[v,0]));
-    rows.forEach(r=>{const v=(r[col]||'').trim();if(v)counts[v]=(counts[v]||0)+1;});
-    const total=Object.values(counts).reduce((a,b)=>a+b,0);
+    let other=0;
+    rows.forEach(r=>{
+      const v=(r[cfg.col]||'').trim(); if(!v)return;
+      if(v in counts)counts[v]++; else if(cfg.fixed)other++; else counts[v]=1;
+    });
+    const list=Object.entries(counts).sort(cfg.sort);
+    if(other)list.push(['Other',other]);           // e.g. an 8- or 10-month entry, so the total still matches admissions
+    const total=list.reduce((a,[,n])=>a+n,0);
     const pct=n=>total?n/total*100:0;
-    document.getElementById('bd-'+key+'-body').innerHTML=Object.entries(counts).sort(sortFn).map(([v,n])=>
+    document.getElementById('bd-'+cfg.key+'-body').innerHTML=list.map(([v,n])=>
       `<tr><td>${v}</td><td class="num${n?'':' zero'}">${n.toLocaleString('en-IN')}</td>
        <td class="num${n?'':' zero'}"><div class="bd-share"><div class="bd-bar" aria-hidden="true"><span style="width:${pct(n).toFixed(1)}%"></span></div><span class="bd-pct">${pct(n).toFixed(1)}%</span></div></td></tr>`).join('');
-    document.getElementById('bd-'+key+'-total').textContent=total.toLocaleString('en-IN');
-    document.getElementById('bd-'+key+'-total-pct').textContent=total?'100%':'—';
+    document.getElementById('bd-'+cfg.key+'-total').textContent=total.toLocaleString('en-IN');
+    document.getElementById('bd-'+cfg.key+'-total-pct').textContent=total?'100%':'—';
   }
+  const BREAKDOWNS=[
+    {key:'course', col:8,  sort:(a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])},
+    {key:'level',  col:9,  sort:(a,b)=>{const r=v=>{const i=LEVEL_ORDER.indexOf(v);return i<0?99:i;};return r(a[0])-r(b[0])||a[0].localeCompare(b[0]);}},
+    {key:'age',    col:6,  sort:(a,b)=>leadNum(a[0])-leadNum(b[0])||a[0].localeCompare(b[0])},
+    {key:'months', col:12, sort:(a,b)=>leadNum(a[0])-leadNum(b[0])}
+  ];
   function renderBreakdown(f){
     const rows=filterCourse(fsRows,{...f,year:'',month:''},f.fromVal,f.toVal);
-    renderBreakdownTable(rows,COL.COURSE,'course',(a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
-    const rank=v=>{const i=LEVEL_ORDER.indexOf(v);return i<0?LEVEL_ORDER.length:i;};
-    renderBreakdownTable(rows,COL.LEVEL,'level',(a,b)=>rank(a[0])-rank(b[0])||a[0].localeCompare(b[0]));
+    BREAKDOWNS.forEach(cfg=>renderBreakdownTable(rows,cfg));
   }
 
   function applyFilters(){
