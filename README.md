@@ -1,0 +1,2 @@
+# Artium-Academy-Offline-Intelligence
+
