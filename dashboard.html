@@ -255,6 +255,25 @@
     @media (max-width:1180px){.kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
     @media (max-width:640px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:340px){.kpi-grid{grid-template-columns:1fr}}
+    /* ── Admissions Breakdown ── */
+    .bd-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start;padding:20px var(--card-padding) 24px}
+    .bd-block{min-width:0}
+    .bd-title{font-family:var(--font-primary);font-size:15px;font-weight:700;color:var(--text-h1);margin-bottom:12px}
+    .bd-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;border:1px solid #E6E9F0;border-radius:12px;overflow:hidden}
+    .bd-table th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-disabled);text-align:left;padding:10px 16px;background:var(--bg-secondary);border-bottom:1px solid #E6E9F0}
+    .bd-table td{padding:10px 16px;border-bottom:1px solid #EEF1F5;color:var(--text-h3)}
+    .bd-table tbody tr:last-child td{border-bottom:0}
+    .bd-table tbody tr:hover td{background:#FAFBFC}
+    .bd-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .bd-table td.num{font-weight:600;color:var(--text-h1)}
+    .bd-table td.zero{color:var(--text-disabled);font-weight:500}
+    .bd-share{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+    .bd-bar{flex:1;max-width:160px;height:6px;border-radius:999px;background:#EEF1F5;overflow:hidden}
+    .bd-bar span{display:block;height:100%;border-radius:999px;background:#4F46E5}
+    .bd-pct{min-width:48px;text-align:right}
+    .bd-table tfoot td{padding:11px 16px;background:var(--bg-secondary);border-top:1px solid #E6E9F0;font-weight:700;color:var(--text-h1)}
+    @media (max-width:900px){.bd-grid{grid-template-columns:1fr}}
+    @media (max-width:560px){.bd-bar{display:none}.bd-table th,.bd-table td,.bd-table tfoot td{padding:9px 12px}}
   </style>
 </head>
 <body>
@@ -447,6 +466,39 @@
       <div class="kpi-section" id="kpi-sec-tot">
         <div class="kpi-group-head"><div class="kpi-group-title">Total – Coaching Fees</div></div>
         <div class="kpi-grid" id="kpi-grid-tot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMISSIONS BREAKDOWN -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('breakdown')">
+      <div class="section-header-left">
+        <i class="ti ti-chart-pie" style="font-size:17px;color:var(--purple);" aria-hidden="true"></i>
+        <span class="section-title">Admissions Breakdown</span>
+      </div>
+      <button class="chevron-btn" aria-label="Toggle admissions breakdown" onclick="event.stopPropagation();toggleSection('breakdown')">
+        <i class="ti ti-chevron-down" id="breakdown-icon"></i>
+      </button>
+    </div>
+    <div id="breakdown-body" class="section-body">
+      <div class="bd-grid">
+        <div class="bd-block">
+          <div class="bd-title">Course-wise</div>
+          <table class="bd-table">
+            <thead><tr><th>Course name</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <tbody id="bd-course-body"></tbody>
+            <tfoot><tr><td>Total</td><td class="num" id="bd-course-total">—</td><td class="num" id="bd-course-total-pct">—</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="bd-block">
+          <div class="bd-title">Course-level-wise</div>
+          <table class="bd-table">
+            <thead><tr><th>Course level</th><th class="num">Count</th><th class="num">% share</th></tr></thead>
+            <tbody id="bd-level-body"></tbody>
+            <tfoot><tr><td>Total</td><td class="num" id="bd-level-total">—</td><td class="num" id="bd-level-total-pct">—</td></tr></tfoot>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -742,10 +794,34 @@
     });
   }
 
+  /* ── Admissions Breakdown (Fresh Sales tab) ──
+     Course-wise uses Column I, Course-level-wise uses Column J.
+     Every value that appears anywhere in the column is listed, even with 0 admissions in the period. */
+  const LEVEL_ORDER=['Preparatory','Intermediate','Proficient','Advanced'];
+  function renderBreakdownTable(rows,col,key,sortFn){
+    const values=[...new Set(fsRows.map(r=>(r[col]||'').trim()).filter(Boolean))];
+    const counts=Object.fromEntries(values.map(v=>[v,0]));
+    rows.forEach(r=>{const v=(r[col]||'').trim();if(v)counts[v]=(counts[v]||0)+1;});
+    const total=Object.values(counts).reduce((a,b)=>a+b,0);
+    const pct=n=>total?n/total*100:0;
+    document.getElementById('bd-'+key+'-body').innerHTML=Object.entries(counts).sort(sortFn).map(([v,n])=>
+      `<tr><td>${v}</td><td class="num${n?'':' zero'}">${n.toLocaleString('en-IN')}</td>
+       <td class="num${n?'':' zero'}"><div class="bd-share"><div class="bd-bar" aria-hidden="true"><span style="width:${pct(n).toFixed(1)}%"></span></div><span class="bd-pct">${pct(n).toFixed(1)}%</span></div></td></tr>`).join('');
+    document.getElementById('bd-'+key+'-total').textContent=total.toLocaleString('en-IN');
+    document.getElementById('bd-'+key+'-total-pct').textContent=total?'100%':'—';
+  }
+  function renderBreakdown(f){
+    const rows=filterCourse(fsRows,{...f,year:'',month:''},f.fromVal,f.toVal);
+    renderBreakdownTable(rows,COL.COURSE,'course',(a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    const rank=v=>{const i=LEVEL_ORDER.indexOf(v);return i<0?LEVEL_ORDER.length:i;};
+    renderBreakdownTable(rows,COL.LEVEL,'level',(a,b)=>rank(a[0])-rank(b[0])||a[0].localeCompare(b[0]));
+  }
+
   function applyFilters(){
     const f=getF();
     const prev=getPrevPeriod(f.fromVal,f.toVal);
     renderKpis(f,prev);
+    renderBreakdown(f);
   }
 
   /* Google sometimes serves an older copy of a published sheet. Fetch each tab a few times
@@ -778,7 +854,7 @@
   }
 
   /* ── Toggle helpers ── */
-  const secState={filters:false,scorecards:true};
+  const secState={filters:false,scorecards:true,breakdown:true};
   function toggleSection(id){
     secState[id]=!secState[id];const open=secState[id];
     document.getElementById(id+'-body').style.display=open?'':'none';
