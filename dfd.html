@@ -44,13 +44,15 @@
   .strip{display:flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);margin-bottom:26px;padding:16px 8px}
   .strip>div{display:flex;align-items:center;gap:10px;padding:2px 24px;border-left:1px solid var(--line);white-space:nowrap}
   .strip>div:first-child{border-left:0}
-  .strip .s-prog{flex:1;min-width:260px}
+  .strip .s-prog{flex:1;min-width:300px}
   .strip .s-prog .bar{flex:1;height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-left:6px}
   .strip .s-prog .bar i{display:block;height:100%;border-radius:6px;background:var(--accent)}
   .strip b{font:600 22px/1 var(--display);color:var(--ink)}
   .s-l{font:700 10.5px/1 var(--body);letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
-  .s-dot{width:9px;height:9px;border-radius:50%}
-  .s-dot.done{background:var(--ok)}.s-dot.prog{background:#D9A23A}.s-dot.none{background:#C9C5CF}
+  .strip .s-stages{flex:2;display:flex;flex-wrap:wrap;gap:6px;white-space:normal}
+  .s-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px 4px 5px;font:600 12px var(--body)}
+  .s-chip b{display:grid;place-items:center;min-width:22px;height:22px;border-radius:999px;background:#fff;font:600 12.5px var(--display);color:inherit}
+  .s-chip.zero{opacity:.45}
   @media (max-width:900px){.strip{flex-wrap:wrap;row-gap:12px}.strip .s-prog{flex-basis:100%;border-left:0}.strip>div:nth-child(2){border-left:0}}
   /* Department summary */
   .summary{display:grid;grid-template-columns:1.4fr repeat(3,1fr);gap:14px;margin-bottom:26px}
@@ -237,8 +239,19 @@ const chevron='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" strok
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function allInits(node){return (node.i||[]).concat(...(node.kids||node.s||[]).map(allInits));}
 const avg=arr=>arr.length?Math.round(arr.reduce((s,x)=>s+(x.pct||0),0)/arr.length):0;
-const colour=p=>p>=100?'#1F7A4D':p>=60?'#5B2A86':p>=30?'#A8844F':'#B42318';
-const status=p=>p>=100?['done','Complete']:p>0?['prog','In progress']:['none','Not started'];
+/* Progress labels */
+const STAGES=[
+  {max:20, k:'s1',label:'Getting Started',      c:'#8A8594',bg:'#EEEDF0'},
+  {max:40, k:'s2',label:'Gaining Ground',      c:'#B42318',bg:'#FDECEB'},
+  {max:60, k:'s3',label:'Building Momentum',      c:'#B4532A',bg:'#FCEFE6'},
+  {max:80, k:'s4',label:'Well Underway',   c:'#9A6200',bg:'#FBF1DC'},
+  {max:94, k:'s5',label:'Closing In',c:'#5B2A86',bg:'#F2ECF8'},
+  {max:99, k:'s6',label:'Final Stretch',      c:'#2E7D6B',bg:'#E3F3EF'},
+  {max:100,k:'s7',label:'Achieved',         c:'#1F7A4D',bg:'#E5F4EC'}
+];
+const stageOf=p=>STAGES.find(s=>p<=s.max)||STAGES[STAGES.length-1];
+const colour=p=>stageOf(p).c;
+const status=p=>{const s=stageOf(p);return[s.k,s.label];};
 
 /* Turn the sheet's flat lists into departments → folder tree */
 function buildTree(){
@@ -264,7 +277,7 @@ function card(x){
   const block=(k,label)=>x[k]&&x[k].length?`<div class="block ${k}"><h4>${label}</h4><ul>${x[k].map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:'';
   const isOpen=openCards.has(x.id);
   return`<article class="card${isOpen?' open':''}" data-id="${x.id}">
-    <div class="card-top"><h3>${esc(x.n)}</h3><div class="r"><span class="status ${sc}">${st}</span>${CAN_EDIT?`<button class="edit-btn" type="button" onclick="openEditor('${x.id}')">Edit</button>`:''}
+    <div class="card-top"><h3>${esc(x.n)}</h3><div class="r"><span class="status" style="color:${stageOf(p).c};background:${stageOf(p).bg}">${st}</span>${CAN_EDIT?`<button class="edit-btn" type="button" onclick="openEditor('${x.id}')">Edit</button>`:''}
       <button class="card-chev" type="button" aria-expanded="${isOpen}" aria-label="Show details" onclick="toggleCard(this)">${chevron}</button></div></div>
     <div class="prog"><div class="bar"><i style="width:${p}%;background:${colour(p)}"></i></div><b>${p}%</b></div>
     <div class="card-body">
@@ -299,13 +312,11 @@ function render(){
   document.getElementById('eyebrow').textContent=d.n;
   const all=allInits(d),done=all.filter(x=>x.pct>=100).length,none=all.filter(x=>!x.pct).length;
   if(!all.length&&!(d.s||[]).length){document.getElementById('content').innerHTML='<div class="empty-dept">No initiatives have been added for '+esc(d.n)+' yet.</div>';return;}
-  const prog=all.length-done-none;
+  const counts=STAGES.map(st=>({st,n:all.filter(x=>stageOf(x.pct||0)===st).length}));
   let h=`<div class="strip">
     <div class="s-prog"><span class="s-l">Overall progress</span><b>${avg(all)}%</b><div class="bar"><i style="width:${avg(all)}%"></i></div></div>
     <div class="s-item"><b>${all.length}</b><span class="s-l">Initiatives</span></div>
-    <div class="s-item"><i class="s-dot done"></i><b>${done}</b><span class="s-l">Complete</span></div>
-    <div class="s-item"><i class="s-dot prog"></i><b>${prog}</b><span class="s-l">In progress</span></div>
-    <div class="s-item"><i class="s-dot none"></i><b>${none}</b><span class="s-l">Not started</span></div>
+    <div class="s-stages">${counts.map(c=>`<span class="s-chip${c.n?'':' zero'}" style="color:${c.st.c};background:${c.st.bg}"><b>${c.n}</b>${c.st.label}</span>`).join('')}</div>
   </div>`;
   h+=(d.s||[]).map(f=>{const a=allInits(f);return`<section class="tray${open[f.path]===false?' closed':''}" data-path="${esc(f.path)}">
     <div class="tray-head" onclick="toggleFolder(this)"><div class="tray-title"><span class="emoji">${f.e||''}</span>${esc(f.n)}</div>
