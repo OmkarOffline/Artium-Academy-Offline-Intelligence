@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Statistics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Section tray */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs ul{margin:12px 0 0;padding:14px 18px 14px 34px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .defs li{margin:4px 0}
+  .defs li b{color:var(--ink);font-weight:600}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+
+  /* Record cards */
+  .records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .rec{position:relative;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);padding:20px 22px 18px;display:flex;flex-direction:column;gap:14px}
+  .rec-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .rec-label{font:600 13px/1.35 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+  .rec-ic{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+  .rec-val{font:600 34px/1.1 var(--display);letter-spacing:-.01em;color:var(--accent);font-variant-numeric:tabular-nums}
+  .rec-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .month{display:inline-flex;align-items:center;gap:6px;background:#FBF4E8;border:1px solid #EEDDC0;color:#7A5A2A;border-radius:999px;padding:4px 12px;font:700 13px/1 var(--display);letter-spacing:.02em}
+  .lead{font-size:12.5px;color:var(--ok);font-weight:600}
+  .new{background:var(--ok);color:#fff;border-radius:999px;padding:3px 10px;font:700 11px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase}
+  .facts{display:flex;flex-direction:column;gap:7px}
+  .fact{display:flex;justify-content:space-between;align-items:baseline;font:600 13.5px var(--body);color:var(--ink2)}
+  .fact span:last-child{font:500 13.5px var(--display);color:var(--ink2);font-variant-numeric:tabular-nums}
+  .runners{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:7px}
+  .runners .h{font:700 10px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:2px}
+  .runner{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--muted)}
+  .runner b{font:600 13px var(--display);color:var(--ink2);margin-right:8px}
+  .runner .r{font:500 13.5px var(--display);color:var(--ink2);font-variant-numeric:tabular-nums}
+  .rec.loading .rec-val,.rec.loading .month{opacity:.35}
+  @media (max-width:1100px){.records{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
+    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.records{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Statistics</h1>
+      <div class="subtitle" id="subtitle">Best performances on record</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <section class="tray">
+    <div class="tray-head"><div class="tray-title">Collection Records</div><span class="badge" id="since-badge">—</span></div>
+    <div class="records" id="records"></div>
+  </section>
+</div>
+
+<script>
+/* ── Centres: each centre's receipts data (Fresh Sales and Renewals tabs) comes from the data service (see auth.js) ── */
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const mi=d=>d.getFullYear()*12+d.getMonth();                    // month index
+const mmmyy=k=>MON[k%12]+'-'+String(Math.floor(k/12)).slice(2);  // e.g. Jun-26
+const inr=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const LAST=mi(new Date());
+const di=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();   // day key, e.g. 20260614
+const ddmmmyy=k=>String(k%100).padStart(2,'0')+'-'+MON[Math.floor(k/100)%100-1]+'-'+String(Math.floor(k/10000)).slice(2);   // e.g. 14-Jun-26
+const TODAYK=di(new Date());
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+}
+let DATA={};
+
+/* Collections – Total by month for the centre(s) shown */
+function monthly(names){
+  const m={};
+  const add=(rows,col)=>rows.forEach(r=>{const t=parseDate(r[0]);if(!t||t.getFullYear()<2020)return;const k=mi(t);m[k]=(m[k]||0)+parseNum(r[col]);});
+  names.forEach(n=>{const d=DATA[n];if(!d)return;add(d.fs,17);add(d.rn,16);});   // Fresh Sales R · Renewals Q
+  return m;
+}
+
+/* Collections – Total by day */
+function daily(names){
+  const m={};
+  const add=(rows,col)=>rows.forEach(r=>{const t=parseDate(r[0]);if(!t||t.getFullYear()<2020)return;const k=di(t);m[k]=(m[k]||0)+parseNum(r[col]);});
+  names.forEach(n=>{const d=DATA[n];if(!d)return;add(d.fs,17);add(d.rn,16);});
+  return m;
+}
+/* Admissions and renewals on one day */
+function dayFacts(names,k){
+  const f={adm:0,ren:0};
+  const onK=r=>{const t=parseDate(r[0]);return t&&di(t)===k;};
+  names.forEach(n=>{const d=DATA[n];if(!d)return;f.adm+=d.fs.filter(onK).length;f.ren+=d.rn.filter(onK).length;});
+  return f;
+}
+
+/* Admissions, renewals and renewals due for one month — same definitions as Monthly Performance Analysis */
+function monthFacts(names,k){
+  const f={adm:0,ren:0,due:0};
+  const inK=c=>r=>{const t=parseDate(r[c]);return t&&t.getFullYear()>=2020&&mi(t)===k;};
+  names.forEach(n=>{const d=DATA[n];if(!d)return;
+    f.adm+=d.fs.filter(inK(0)).length;f.ren+=d.rn.filter(inK(0)).length;
+    f.due+=d.fs.filter(inK(23)).length+d.rn.filter(inK(23)).length;});   // Membership End Date (X) in the month
+  return f;
+}
+
+/* ── Records: each entry ranks months by one measure. Add more entries here. ── */
+const RECORDS=[
+  {id:'top-month',label:'Highest monthly collection',icon:'<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
+   series:monthly,fmt:inr,key:mmmyy,isNow:k=>k===LAST,now:'This month',facts:(names,k)=>{const f=monthFacts(names,k);
+     return[['No. of admissions',f.adm.toLocaleString('en-IN')],['No. of renewals',f.ren.toLocaleString('en-IN')],['Renewal collection efficiency',f.due?Math.round(f.ren/f.due*100)+'%':'NA']];}},
+  {id:'top-day',label:'Highest single day collection',icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v3"/>',
+   series:daily,fmt:inr,key:ddmmmyy,isNow:k=>k===TODAYK,now:'Today',facts:(names,k)=>{const f=dayFacts(names,k);
+     return[['No. of admissions',f.adm.toLocaleString('en-IN')],['No. of renewals',f.ren.toLocaleString('en-IN')]];}}
+];
+
+function card(r,names,ready){
+  const icon=`<span class="rec-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>`;
+  if(!ready)return`<article class="rec loading"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div><div class="rec-val">…</div><div class="rec-meta"><span class="month">…</span></div></article>`;
+  const ranked=Object.entries(r.series(names)).map(([k,v])=>({k:+k,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  if(!ranked.length)return`<article class="rec"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div><div class="rec-val" style="color:var(--ghost)">—</div><div class="rec-meta" style="font-size:13px;color:var(--muted)">No entries yet</div></article>`;
+  const [best,...rest]=ranked,next=rest.slice(0,2);
+  const lead=!next[0]?'':Math.round(best.v)===Math.round(next[0].v)?`<span class="lead" style="color:var(--muted)">Tied with ${r.key(next[0].k)}</span>`:`<span class="lead">+${((best.v/next[0].v-1)*100).toFixed(1)}% over next best</span>`;
+  return`<article class="rec"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div>
+    <div class="rec-val">${r.fmt(best.v)}</div>
+    <div class="rec-meta"><span class="month">${r.key(best.k)}</span>${r.isNow(best.k)?`<span class="new">${r.now}</span>`:''}${lead}</div>
+    ${r.facts?`<div class="facts">${r.facts(names,best.k).map(([l,v])=>`<div class="fact"><span>${l}</span><span>${v}</span></div>`).join('')}</div>`:''}
+    ${next.length?`<div class="runners"><div class="h">Next best</div>${next.map(x=>`<div class="runner"><span><b>${r.key(x.k)}</b></span><span class="r">${r.fmt(x.v)}</span></div>`).join('')}</div>`:''}
+  </article>`;
+}
+
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  document.getElementById('subtitle').textContent=sel?'Best performances on record — '+sel.name+', '+sel.city:'Best performances on record — all centres combined';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name);
+  const ready=names.every(n=>DATA[n]);
+  if(ready){
+    const ks=Object.keys(monthly(names)).map(Number);
+    document.getElementById('since-badge').textContent=ks.length?'Since '+mmmyy(Math.min(...ks)):'—';
+  }else document.getElementById('since-badge').textContent='…';
+  document.getElementById('records').innerHTML=RECORDS.map(r=>card(r,names,ready)).join('');
+}
+
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_stats_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_stats_centre',selCentre);}catch(e){}render();});
+
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
+      DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};
+    });
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+}
+load();
+</script>
+</body>
+</html>
