@@ -85,6 +85,18 @@
   .xt .win{font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:#C9A66B;text-decoration-thickness:2px;text-underline-offset:5px}
   .xt td.top{text-align:left;font:500 13px var(--body);color:var(--muted);border-left:1px solid var(--border)}
   .xt td.top b{font:600 13.5px var(--display);color:var(--accent);margin-right:6px}
+  .xt td.lo,.xt tr.tr td.lo{color:var(--faint);font-weight:500}
+  .rr-filter{display:flex;align-items:center;gap:10px;margin:0 2px 14px}
+  .rr-filter label{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+  .rr-filter select{height:38px;min-width:280px;border:1px solid var(--border);border-radius:12px;background:#fff;padding:0 12px;font:500 13.5px var(--body);color:var(--ink);cursor:pointer}
+  .rr-sp{flex:1}
+  .rr-filter{flex-wrap:wrap}
+  .pd button{min-width:44px;font-family:var(--display)}
+  #rr-month{min-width:150px}
+  .rr-filter select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .rr-filter select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .dl{display:block;margin-top:2px;font:600 11px/1.2 var(--body);letter-spacing:.01em}
+  .dl.up{color:var(--ok)}.dl.dn{color:var(--bad)}.dl.mu,.dl.eq{color:var(--ghost);font-weight:500}
   .xt td.z{color:var(--ghost);font-weight:400}
   .xt .tc{border-left:1px solid var(--border);background:#FCFBF9;font-weight:700;color:var(--ink)}
   .xt tr.tr td{background:#FCFBF9;font-weight:700;color:var(--ink);border-top:1px solid var(--border);border-bottom:0}
@@ -231,6 +243,29 @@
         <div class="def"><div class="dt">%C (share of the column):</div><p>Each course's share of an age group's admissions, so every column adds up to 100%. The Total column shows each course's share of all admissions.</p></div>
         <div class="def"><div class="dt">%R (share of the row):</div><p>Each age group's share of a course's admissions, so every row adds up to 100%. The Total row shows each age group's share of all admissions.</p></div>
         <div class="def"><div class="dt">Gold underline:</div><p>Marks the highest number. In # and %R it compares the age groups within each course; in %C it compares the courses within each age group. If two numbers are equal, both are underlined.</p></div>
+      </div>
+    </div>
+    </div>
+  </section>
+  <section class="tray" id="sec-rr">
+    <div class="tray-head"><div class="tray-title">Renewal Rate by Age Group</div>
+      <div class="nav"><div class="wb rk" role="group" aria-label="Renewals"><button type="button" data-rk="ft" aria-pressed="true">First-time</button><button type="button" data-rk="rp" aria-pressed="false">Repeated</button><button type="button" data-rk="all" aria-pressed="false">Total</button></div><span class="badge" id="rr-badge">—</span><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body">
+    <div class="tray-sub">Out of the memberships that fell due in the chosen period (up to yesterday), the share that renewed — for every course and age group.</div>
+    <div class="rr-filter"><label for="rr-teacher">Teacher</label><select id="rr-teacher" onchange="rrTeacher=this.value;render()"></select><span class="rr-sp"></span>
+      <div class="wb pd" role="group" aria-label="Period"><button type="button" data-pd="cm" aria-pressed="true" title="Current month">CM</button><button type="button" data-pd="3" aria-pressed="false" title="This month and the 2 before">3M</button><button type="button" data-pd="6" aria-pressed="false" title="This month and the 5 before">6M</button><button type="button" data-pd="9" aria-pressed="false" title="This month and the 8 before">9M</button><button type="button" data-pd="12" aria-pressed="false" title="This month and the 11 before">12M</button><button type="button" data-pd="life" aria-pressed="false" title="Since the centre opened">Lifetime</button></div>
+      <select id="rr-month" aria-label="Pick a month"></select></div>
+    <div class="tbl-wrap"><table class="xt" id="rrt"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="rr-defs" onclick="toggleDefs(this,'rr-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="rr-defs" hidden>
+        <div class="def"><div class="dt">Renewal rate:</div><p>Memberships that renewed ÷ memberships that were due. A membership is due once it has ended — yesterday or earlier. Hover over a percentage to see the actual numbers.</p></div>
+        <div class="def"><div class="dt">Period:</div><p>Picks memberships by the month they ended. CM is the current month so far; 3M is this month and the two before it; 6M, 9M and 12M work the same way; Lifetime is everything. Pick a month to see just that month. A membership counts as renewed whenever the learner renewed, even if that was after the period, so the most recent months can look lower while renewals are still coming in.</p></div>
+        <div class="def"><div class="dt">First-time:</div><p>A learner's first membership, bought when they joined. It counts as renewed if the learner renewed at any point after joining.</p></div>
+        <div class="def"><div class="dt">Repeated:</div><p>A membership the learner had already renewed into. It counts as renewed if the learner renewed again after it.</p></div>
+        <div class="def"><div class="dt">Total:</div><p>First-time and repeated memberships together.</p></div>
+        <div class="def"><div class="dt">Teacher filter:</div><p>Shows only the memberships taught by that teacher, and only the courses they teach. Under each percentage, <span class="pos">▲</span> or <span class="neg">▼</span> shows how far the teacher is above or below everyone teaching the same course and age group, in percentage points. Hover over a cell to see both sets of numbers.</p></div>
+        <div class="def"><div class="dt">Gold underline:</div><p>The age group with the highest renewal rate for each course. Any figure based on fewer than 5 memberships is greyed out (and never underlined), since a handful of learners can swing the percentage.</p></div>
       </div>
     </div>
     </div>
@@ -416,6 +451,7 @@ function render(){
   requestAnimationFrame(navState);
   renderTTR(names,ready);
   renderXT(names,ready);
+  renderRR(names,ready);
 }
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_stats_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
@@ -472,7 +508,7 @@ function renderTTR(names,ready){
   document.getElementById('ttr-badge').textContent=withWinback?num(tot.wb)+' win-backs included':num(tot.wb)+' win-backs left out';
   el.innerHTML=head+'<tbody>'+(G.length?G.map(g=>row(g.m+' month'+(g.m===1?'':'s'),g)).join('')+row('All packages',tot,'total'):'<tr><td colspan="9" class="na" style="text-align:center">No admissions yet</td></tr>')+'</tbody>';
 }
-document.querySelectorAll('.wb:not(.vm) button').forEach(b=>b.onclick=()=>{withWinback=b.dataset.wb==='1';document.querySelectorAll('.wb:not(.vm) button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
+document.querySelectorAll('.wb:not(.vm):not(.rk):not(.pd) button').forEach(b=>b.onclick=()=>{withWinback=b.dataset.wb==='1';document.querySelectorAll('.wb:not(.vm):not(.rk):not(.pd) button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
 function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 
 /* Sideways scrolling: arrows move one screenful; dots show where you are */
@@ -523,6 +559,82 @@ function renderXT(names,ready){
 }
 const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 document.querySelectorAll('.vm button').forEach(b=>b.onclick=()=>{xtMode=b.dataset.vm;document.querySelectorAll('.vm button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
+
+/* ── Renewal Rate by Age Group: renewed ÷ due, for memberships that ended by yesterday ── */
+let rrKind='ft';
+let rrTeacher='';
+let rrPeriod='cm',rrMonth=null;   // cm · 3 · 6 · 9 · 12 · life · or a specific month (rrMonth = month index)
+/* Months the period covers, by the month the membership ended (was due). CM = this month; 3M = this month and the 2 before; and so on */
+function rrRange(){
+  if(rrMonth!=null)return[rrMonth,rrMonth];
+  if(rrPeriod==='life')return[-Infinity,Infinity];
+  const n=rrPeriod==='cm'?1:+rrPeriod;return[LAST-n+1,LAST];
+}
+const TEACHER_MIN_SHARE=0.10;   // a course shows for a teacher only if it is at least 10% of their memberships (skips stray entries)
+function rrCounts(names,teacher){
+  const id=r=>String(r[3]||'').trim().toUpperCase(),tch=r=>String(r[29]||'').trim();   // teacher
+  const ren=new Map();   // Learner ID → renewal dates
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.rn.forEach(r=>{const k=id(r),t=parseDate(r[0]);if(k&&t)(ren.get(k)||ren.set(k,[]).get(k)).push(+t);});});
+  const C={},add=(c,a,ok)=>{const x=((C[c]=C[c]||{})[a]=C[c][a]||{due:0,ok:0});x.due++;if(ok)x.ok++;};
+  const take=(rows,first)=>rows.forEach(r=>{
+    const k=id(r),t=parseDate(r[0]),e=parseDate(r[23]),c=String(r[8]||'').trim(),a=String(r[6]||'').trim();
+    if(!k||!t||!c||!a||!e||e.getFullYear()<2020||e>YESTERDAY)return;   // only memberships that have ended
+    const em=mi(e),[lo,hi]=rrRange();if(em<lo||em>hi)return;              // and that fell due in the chosen period
+    if(teacher&&tch(r).toLowerCase()!==teacher.toLowerCase())return;
+    add(c,a,(ren.get(k)||[]).some(x=>first?x>=+t:x>+t));});
+  names.forEach(n=>{const d=DATA[n];if(!d)return;if(rrKind!=='rp')take(d.fs,true);if(rrKind!=='ft')take(d.rn,false);});
+  return C;
+}
+function teacherList(names){
+  const m=new Map();
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const t=String(r[29]||'').trim(),c=String(r[8]||'').trim();if(!t||!c)return;
+    const k=t.toLowerCase();if(!m.has(k))m.set(k,{name:t,courses:{},n:0});const x=m.get(k);x.courses[c]=(x.courses[c]||0)+1;x.n++;});});
+  return[...m.values()].map(x=>Object.assign(x,{main:Object.keys(x.courses).filter(c=>x.courses[c]>=x.n*TEACHER_MIN_SHARE).sort((a,b)=>x.courses[b]-x.courses[a])})).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function renderRR(names,ready){
+  const el=document.getElementById('rrt'),sel=document.getElementById('rr-teacher');
+  if(!ready){el.innerHTML='<tbody><tr><td class="z" style="text-align:center">Loading…</td></tr></tbody>';return;}
+  const TL=teacherList(names);
+  if(rrTeacher&&!TL.some(t=>t.name.toLowerCase()===rrTeacher.toLowerCase()))rrTeacher='';
+  sel.innerHTML='<option value="">All teachers</option>'+TL.map(t=>`<option value="${esc(t.name)}"${t.name.toLowerCase()===rrTeacher.toLowerCase()?' selected':''}>${esc(t.name)} — ${esc(t.main.join(', '))}</option>`).join('');
+  sel.classList.toggle('set',!!rrTeacher);
+  // Month picker: every month in which memberships fell due, newest first
+  const ms=new Set();names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const e=parseDate(r[23]);if(e&&e.getFullYear()>=2020&&e<=YESTERDAY)ms.add(mi(e));});});
+  const mlist=[...ms].sort((a,b)=>b-a);
+  const mm=document.getElementById('rr-month');
+  mm.innerHTML='<option value="">Pick a month</option>'+mlist.map(k=>`<option value="${k}"${k===rrMonth?' selected':''}>${MON[k%12]} ${Math.floor(k/12)}</option>`).join('');
+  mm.classList.toggle('set',rrMonth!=null);
+  document.querySelectorAll('.pd button').forEach(b=>b.setAttribute('aria-pressed',rrMonth==null&&b.dataset.pd===rrPeriod));
+  const base=rrCounts(names,''),C=rrTeacher?rrCounts(names,rrTeacher):base;
+  const T=rrTeacher?TL.find(t=>t.name.toLowerCase()===rrTeacher.toLowerCase()):null;
+  const ci=c=>{const j=COURSE_ORDER.findIndex(z=>z.toLowerCase()===c.toLowerCase());return j<0?99:j;};
+  const courses=Object.keys(C).filter(c=>!T||T.main.some(m=>m.toLowerCase()===c.toLowerCase())).sort((x,y)=>ci(x)-ci(y)||x.localeCompare(y));
+  const ageSet=new Set();courses.forEach(c=>Object.keys(C[c]).forEach(a=>ageSet.add(a)));
+  const ages=[...ageSet].sort((x,y)=>((AGE_ORDER.indexOf(x)+1)||99)-((AGE_ORDER.indexOf(y)+1)||99)||x.localeCompare(y));
+  const sum=list=>list.reduce((t,x)=>({due:t.due+(x?x.due:0),ok:t.ok+(x?x.ok:0)}),{due:0,ok:0});
+  const pct=x=>x&&x.due?Math.round(x.ok/x.due*100):null;
+  const MIN=5;
+  // Teacher view: how far this teacher is from everyone teaching the same course and age group (percentage points)
+  const delta=(x,b,muted)=>{if(!T||!x||!x.due||!b||!b.due)return'';const d=pct(x)-pct(b);if(!d)return'';   // same as everyone (e.g. the only teacher for that course): nothing to show
+    return`<span class="dl ${muted?'mu':d>0?'up':'dn'}">${d>0?'▲':'▼'} ${Math.abs(d)}%</span>`;};
+  const tip=(x,b)=>`${num(x.ok)} of ${num(x.due)} renewed`+(T&&b&&b.due?` · all teachers: ${pct(b)}% (${num(b.ok)} of ${num(b.due)})`:'');
+  const all=sum(courses.flatMap(c=>ages.map(a=>C[c][a]))),allB=sum(courses.flatMap(c=>ages.map(a=>(base[c]||{})[a])));
+  const [lo,hi]=rrRange(),pl=rrMonth!=null?MON[rrMonth%12]+' '+Math.floor(rrMonth/12):rrPeriod==='life'?'lifetime':rrPeriod==='cm'?MON[LAST%12]+' '+Math.floor(LAST/12)+' so far':MON[lo%12]+' '+String(Math.floor(lo/12)).slice(2)+' – '+MON[hi%12]+' '+String(Math.floor(hi/12)).slice(2);
+  document.getElementById('rr-badge').textContent=num(all.due)+' memberships due · '+pl;
+  const head=`<thead><tr><th>Course</th>${ages.map(a=>`<th>${esc(a)}</th>`).join('')}<th class="tc">Total</th></tr></thead>`;
+  const body=courses.map(c=>{
+    const best=Math.max(...ages.map(a=>{const x=C[c][a];return x&&x.due>=MIN?pct(x):-1;}));
+    const cells=ages.map(a=>{const x=C[c][a],b=(base[c]||{})[a];if(!x)return'<td class="z">—</td>';const p=pct(x);
+      if(x.due<MIN)return`<td class="lo" title="${tip(x,b)}">${p}%${delta(x,b,true)}</td>`;
+      return`<td title="${tip(x,b)}">${p===best&&best>0?`<span class="win">${p}%</span>`:p+'%'}${delta(x,b)}</td>`;}).join('');
+    const t=sum(ages.map(a=>C[c][a])),tb=sum(ages.map(a=>(base[c]||{})[a]));
+    return`<tr><td>${esc(c)}</td>${cells}<td class="tc${t.due<MIN?' lo':''}" title="${tip(t,tb)}">${pct(t)}%${delta(t,tb,t.due<MIN)}</td></tr>`;}).join('');
+  const foot=`<tr class="tr"><td>Total</td>${ages.map(a=>{const t=sum(courses.map(c=>C[c][a])),tb=sum(courses.map(c=>(base[c]||{})[a]));return t.due?`<td class="${t.due<MIN?'lo':''}" title="${tip(t,tb)}">${pct(t)}%${delta(t,tb,t.due<MIN)}</td>`:'<td class="z">—</td>';}).join('')}<td class="tc${all.due<MIN?' lo':''}" title="${tip(all,allB)}">${pct(all)}%${delta(all,allB,all.due<MIN)}</td></tr>`;
+  el.innerHTML=courses.length?head+'<tbody>'+body+foot+'</tbody>':'<tbody><tr><td class="z" style="text-align:center">No memberships fell due in this period</td></tr></tbody>';
+}
+document.querySelectorAll('.pd button').forEach(b=>b.onclick=()=>{rrPeriod=b.dataset.pd;rrMonth=null;render();});
+document.getElementById('rr-month').onchange=e=>{rrMonth=e.target.value===''?null:+e.target.value;render();};
+document.querySelectorAll('.rk button').forEach(b=>b.onclick=()=>{rrKind=b.dataset.rk;document.querySelectorAll('.rk button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
 
 /* Open / close each section by clicking its heading; the page remembers what you closed */
 const CLOSED=(()=>{try{return JSON.parse(localStorage.getItem('artium_stats_closed')||'{}');}catch(e){return{};}})();
