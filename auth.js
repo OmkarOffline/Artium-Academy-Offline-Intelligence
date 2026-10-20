@@ -135,11 +135,25 @@
   .ag-msg{min-height:20px;margin-top:16px;font-size:13.5px;line-height:1.45;color:#B42318}
   .ag-foot{margin-top:18px;padding-top:18px;border-top:1px solid #EFEDF2;font-size:12.5px;color:#9A96A3}
   .ag-foot b{color:#6B6774;font-weight:600}
-  .user-chip{margin-left:auto;display:flex;align-items:center;gap:10px;color:#CBD5E1;font:500 12.5px "Inter",sans-serif;white-space:nowrap}
-  .user-chip img{width:26px;height:26px;border-radius:50%}
-  .user-chip button{border:1px solid rgba(255,255,255,.25);background:none;color:#fff;border-radius:999px;padding:4px 12px;font:600 12px "Inter",sans-serif;cursor:pointer}
-  .user-chip button:hover{background:rgba(255,255,255,.1)}
-  @media (max-width:640px){.user-chip .em{display:none}}`;
+  .user-menu{margin-left:auto;position:relative;flex-shrink:0}
+  .um-av{display:grid;place-items:center;width:34px;height:34px;padding:0;border:0;border-radius:50%;background:#E8762E;color:#fff;font:600 14px 'Poppins',sans-serif;cursor:pointer;overflow:hidden;
+    box-shadow:0 0 0 2px rgba(255,255,255,.14);transition:box-shadow .2s}
+  .um-av img{width:100%;height:100%;object-fit:cover}
+  .um-av:hover{box-shadow:0 0 0 2px rgba(226,196,138,.6)}
+  .um-av[aria-expanded="true"]{box-shadow:0 0 0 2px #E2C48A}
+  .um-av:focus-visible{outline:2px solid #E2C48A;outline-offset:2px}
+  .um-pop{position:absolute;right:-6px;top:calc(100% + 14px);z-index:60;width:290px;background:#fff;border:1px solid #E4E1EA;border-radius:16px;padding:18px;
+    box-shadow:0 24px 50px -20px rgba(40,20,60,.45);opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .18s}
+  .um-pop.open{opacity:1;transform:none;pointer-events:auto}
+  .um-pop::before{content:"";position:absolute;top:-7px;right:17px;width:12px;height:12px;background:#fff;border-left:1px solid #E4E1EA;border-top:1px solid #E4E1EA;transform:rotate(45deg)}
+  .um-who{display:flex;gap:12px;align-items:center;min-width:0}
+  .um-who .um-av{width:44px;height:44px;font-size:18px;flex:none;cursor:default;box-shadow:none}
+  .um-n{font:600 15px 'Poppins',sans-serif;color:#1D1B22;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .um-e{font:400 12.5px 'Poppins',sans-serif;color:#6B6774;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .um-pop hr{border:0;border-top:1px solid #EFEDF2;margin:14px 0}
+  .um-out{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;border-radius:11px;border:1px solid #E4E1EA;background:#FAF9F7;
+    font:600 13px 'Poppins',sans-serif;color:#B42318;cursor:pointer;transition:background .15s,border-color .15s}
+  .um-out:hover{background:#FDECEB;border-color:#F5C6C2}`;
   function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
 
   let gate;
@@ -179,10 +193,24 @@
     listeners.splice(0).forEach(fn=>fn(session));
   }
   function showUser(){
-    const bar=document.querySelector('.shell-bar');if(!bar||!session||bar.querySelector('.user-chip'))return;
-    const chip=el(`<div class="user-chip">${session.picture?`<img src="${session.picture}" alt="" referrerpolicy="no-referrer">`:''}<span class="em">${session.email}</span><button type="button">Sign out</button></div>`);
-    chip.querySelector('button').onclick=signOut;
-    bar.appendChild(chip);
+    const bar=document.querySelector('.shell-bar');if(!bar||!session||bar.querySelector('.user-menu'))return;
+    const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const initial=esc((session.name||session.email||'?').trim().charAt(0).toUpperCase());
+    const face=session.picture?`<img src="${esc(session.picture)}" alt="" referrerpolicy="no-referrer">`:initial;
+    const menu=el(`<div class="user-menu">
+      <button class="um-av" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Account">${face}</button>
+      <div class="um-pop" role="dialog" aria-label="Account">
+        <div class="um-who"><span class="um-av">${face}</span><div style="min-width:0">${session.name?`<div class="um-n">${esc(session.name)}</div>`:''}<div class="um-e">${esc(session.email)}</div></div></div>
+        <hr><button class="um-out" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>Sign out</button>
+      </div></div>`);
+    const btn=menu.querySelector('.um-av'),pop=menu.querySelector('.um-pop');
+    const set=open=>{pop.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);};
+    btn.onclick=e=>{e.stopPropagation();set(!pop.classList.contains('open'));};
+    menu.querySelector('.um-out').onclick=signOut;
+    document.addEventListener('click',e=>{if(!menu.contains(e.target))set(false);});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')set(false);});
+    window.addEventListener('blur',()=>set(false));   // a click inside a page (iframe) also closes it
+    bar.appendChild(menu);
   }
   async function start(){
     // Styles for the sign-in screen and the name in the top bar (needed even when already signed in)

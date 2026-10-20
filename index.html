@@ -6,25 +6,35 @@
 <title>Artium Academy — Offline Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--navy:#17213C;--blue:#2563EB;--border:#E2E8F0;--sec:#64748B;--bg:#F0F4F8}
+  :root{--plum:#2B1840;--plum2:#22122F;--gold:#E2C48A;--bg:#F6F5F2}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{display:flex;flex-direction:column;background:var(--bg);font-family:"Inter",sans-serif;overflow:hidden}
-  .shell-bar{flex-shrink:0;display:flex;align-items:center;gap:24px;height:52px;padding:0 20px;background:var(--navy);color:#fff}
-  .brand{font-family:"Manrope",sans-serif;font-weight:800;font-size:15px;letter-spacing:-.01em;white-space:nowrap}
-  .brand span{color:#60A5FA}
-  .tabs{display:flex;gap:4px;height:100%;overflow-x:auto;scrollbar-width:none}
+  body{display:flex;flex-direction:column;background:var(--bg);font-family:"Poppins",sans-serif;overflow:hidden}
+  .shell-bar{position:relative;z-index:10;flex-shrink:0;display:flex;align-items:center;gap:26px;height:60px;padding:0 22px;color:#fff;
+    background:linear-gradient(180deg,var(--plum) 0%,var(--plum2) 100%);box-shadow:0 10px 24px -18px rgba(34,18,47,.8)}
+  .brand{display:flex;align-items:center;gap:8px;font:700 15px "Poppins",sans-serif;letter-spacing:-.01em;white-space:nowrap}
+  .brand i{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
+  .tabs{position:relative;display:flex;align-items:center;gap:2px;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{position:relative;display:flex;align-items:center;padding:0 14px;height:100%;border:0;background:none;color:#CBD5E1;font:600 13px "Inter",sans-serif;cursor:pointer;white-space:nowrap}
-  .tab:hover{color:#fff}
-  .tab[aria-selected="true"]{color:#fff}
-  .tab[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:#60A5FA}
-  .tab:focus-visible{outline:2px solid #60A5FA;outline-offset:-4px;border-radius:6px}
+  .tab{position:relative;display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border:0;border-radius:10px;background:transparent;
+    color:rgba(255,255,255,.62);font:500 13.5px "Poppins",sans-serif;cursor:pointer;white-space:nowrap;transition:color .2s,background-color .2s}
+  .tab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8;transition:transform .2s,opacity .2s,color .2s}
+  .tab::before{content:"";position:absolute;left:50%;right:50%;bottom:4px;height:1.5px;border-radius:2px;background:rgba(255,255,255,.45);opacity:0;transition:left .2s,right .2s,opacity .2s}
+  .tab:hover{color:#fff;background:rgba(255,255,255,.05)}
+  .tab:hover svg{transform:translateY(-1px);opacity:1}
+  .tab:hover::before{left:30%;right:30%;opacity:1}
+  .tab[aria-selected="true"]{color:#fff;background:rgba(255,255,255,.08)}
+  .tab[aria-selected="true"]::before{display:none}
+  .tab[aria-selected="true"] svg{color:var(--gold);opacity:1}
+  .tab:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+  .tab-ink{position:absolute;left:0;bottom:0;width:0;height:2px;border-radius:2px;pointer-events:none;opacity:0;
+    background:linear-gradient(90deg,rgba(226,196,138,0),var(--gold),rgba(226,196,138,0));transition:transform .35s cubic-bezier(.3,.7,.2,1),width .35s cubic-bezier(.3,.7,.2,1),opacity .2s}
   .frames{flex:1;position:relative}
   .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
   .frames iframe[hidden]{display:none}
+  @media (prefers-reduced-motion:reduce){.tab,.tab svg,.tab::before,.tab-ink{transition:none}}
   @media (max-width:640px){
     .shell-bar{gap:12px;padding:0 12px}
     .brand .full{display:none}
@@ -35,13 +45,14 @@
 </head>
 <body>
   <header class="shell-bar">
-    <div class="brand">Artium <span>●</span> <span class="full" style="color:inherit">Offline </span>Intelligence</div>
+    <div class="brand"><i></i><span>Artium <span class="full">Offline </span>Intelligence</span></div>
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="centres" aria-selected="true">Offline Centres</button>
-      <button class="tab" role="tab" data-tab="dashboard" aria-selected="false">Lead to Purchase</button>
-      <button class="tab" role="tab" data-tab="performance" aria-selected="false">Monthly Performance</button>
-      <button class="tab" role="tab" data-tab="learners" aria-selected="false">Monthly Active Learners</button>
-      <button class="tab" role="tab" data-tab="stats" aria-selected="false">Statistics</button>
+      <button class="tab" role="tab" data-tab="centres" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
+      <button class="tab" role="tab" data-tab="dashboard" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>Lead to Purchase</button>
+      <button class="tab" role="tab" data-tab="performance" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Monthly Performance</button>
+      <button class="tab" role="tab" data-tab="learners" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 15c1.8.6 2.8 2.3 3 5"/></svg>Monthly Active Learners</button>
+      <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>Statistics</button>
+      <span class="tab-ink" aria-hidden="true"></span>
     </nav>
   </header>
   <main class="frames">
@@ -64,7 +75,18 @@
       f.hidden = !on;
     });
     if(location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
+    moveInk();
   }
+  // Gold line under the open page; glides to the new tab when you switch
+  function moveInk(){
+    const t = document.querySelector('.tab[aria-selected="true"]:not([hidden])'), ink = document.querySelector(".tab-ink");
+    if(!t){ ink.style.opacity = 0; return; }
+    ink.style.width = (t.offsetWidth - 28) + "px";
+    ink.style.transform = "translateX(" + (t.offsetLeft + 14) + "px)";
+    ink.style.opacity = 1;
+  }
+  window.addEventListener("resize", moveInk);
+  if(document.fonts) document.fonts.ready.then(moveInk);
   tabs.forEach(t => t.addEventListener("click", () => show(t.dataset.tab)));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
   ArtiumAuth.onReady(() => show(location.hash.slice(1) || "centres")); // pages load only after sign-in
