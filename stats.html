@@ -64,7 +64,17 @@
   .defs .neg{color:var(--bad);font-weight:700}
 
   /* Record cards */
-  .records{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+  .rec-scroll{overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;margin:0 -4px;padding:4px 4px 6px}
+  .rec-scroll::-webkit-scrollbar{display:none}
+  .records{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:calc((100% - 36px)/3);gap:18px}
+  .rec{scroll-snap-align:start}
+  .nav{display:flex;align-items:center;gap:8px}
+  .nav button{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:var(--shadow);transition:background .15s,color .15s,opacity .15s}
+  .nav button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#fff}
+  .nav button:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .dots{display:flex;justify-content:center;gap:6px;padding-top:14px}
+  .dots i{width:6px;height:6px;border-radius:999px;background:#DCD6E4;transition:width .2s,background .2s}
+  .dots i.on{width:18px;background:var(--gold)}
   .rec{position:relative;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);padding:20px 22px 18px;display:flex;flex-direction:column;gap:14px}
   .rec-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
   .rec-label{font:600 13px/1.35 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
@@ -72,6 +82,8 @@
   .rec-val{font:600 34px/1.1 var(--display);letter-spacing:-.01em;color:var(--accent);font-variant-numeric:tabular-nums}
   .rec-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .month{display:inline-flex;align-items:center;gap:6px;background:#FBF4E8;border:1px solid #EEDDC0;color:#7A5A2A;border-radius:999px;padding:4px 12px;font:700 13px/1 var(--display);letter-spacing:.02em}
+  .centre{display:inline-flex;align-items:center;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 11px;font:600 12px/1 var(--body)}
+  .runner .rc{margin-left:2px;font:400 12.5px var(--body);color:var(--faint)}
   .lead{font-size:12.5px;color:var(--ok);font-weight:600}
   .new{background:var(--ok);color:#fff;border-radius:999px;padding:3px 10px;font:700 11px/1.4 var(--body);letter-spacing:.06em;text-transform:uppercase}
   .facts{display:flex;flex-direction:column;gap:7px}
@@ -83,9 +95,9 @@
   .runner b{font:600 13px var(--display);color:var(--ink2);margin-right:8px}
   .runner .r{font:500 13.5px var(--display);color:var(--ink2);font-variant-numeric:tabular-nums}
   .rec.loading .rec-val,.rec.loading .month{opacity:.35}
-  @media (max-width:1100px){.records{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:1100px){.records{grid-auto-columns:calc((100% - 18px)/2)}}
   @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
-    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.records{grid-template-columns:1fr}}
+    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.records{grid-auto-columns:88%}}
 </style>
 </head>
 <body>
@@ -100,8 +112,11 @@
   </header>
   <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
   <section class="tray">
-    <div class="tray-head"><div class="tray-title">Collection Records</div><span class="badge" id="since-badge">—</span></div>
-    <div class="records" id="records"></div>
+    <div class="tray-head"><div class="tray-title">All-Time Records</div><div class="nav"><span class="badge" id="since-badge">—</span>
+      <button type="button" id="prev" aria-label="Previous records"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button type="button" id="next" aria-label="More records"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+    <div class="rec-scroll" id="rec-scroll"><div class="records" id="records"></div></div>
+    <div class="dots" id="dots"></div>
   </section>
 </div>
 
@@ -143,6 +158,17 @@ function monthly(names){
   return m;
 }
 
+/* Fresh Sales and Renewals per month: count and collections */
+function monthAgg(names){
+  const m={},get=k=>m[k]=m[k]||{fsN:0,fsSum:0,rnN:0,rnSum:0};
+  names.forEach(n=>{const d=DATA[n];if(!d)return;
+    d.fs.forEach(r=>{const t=parseDate(r[0]);if(!t||t.getFullYear()<2020)return;const x=get(mi(t));x.fsN++;x.fsSum+=parseNum(r[17]);});
+    d.rn.forEach(r=>{const t=parseDate(r[0]);if(!t||t.getFullYear()<2020)return;const x=get(mi(t));x.rnN++;x.rnSum+=parseNum(r[16]);});});
+  return m;
+}
+const pick=f=>names=>{const a=monthAgg(names),o={};for(const k in a){const v=f(a[k]);if(v!=null)o[k]=v;}return o;};
+const num=x=>Math.round(x).toLocaleString('en-IN');
+
 /* Collections – Total by day */
 function daily(names){
   const m={};
@@ -169,27 +195,63 @@ function monthFacts(names,k){
 }
 
 /* ── Records: each entry ranks months by one measure. Add more entries here. ── */
+const IC={
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
+  day:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v3"/>',
+  adm:'<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.7-3.6 3.3-5.5 6.5-5.5 1.6 0 3 .5 4.1 1.3"/><path d="M18 14v6M15 17h6"/>',
+  ren:'<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/>',
+  atv:'<path d="M7 5h10M7 9h10M13 19L7 13h2a4 4 0 0 0 0-8"/>',
+  life:'<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>'
+};
+const MONTH={key:mmmyy,isNow:k=>k===LAST,now:'This month'};
 const RECORDS=[
-  {id:'top-month',label:'Highest monthly collection',icon:'<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
-   series:monthly,fmt:inr,key:mmmyy,isNow:k=>k===LAST,now:'This month',facts:(names,k)=>{const f=monthFacts(names,k);
-     return[['No. of admissions',f.adm.toLocaleString('en-IN')],['No. of renewals',f.ren.toLocaleString('en-IN')],['Renewal collection efficiency',f.due?Math.round(f.ren/f.due*100)+'%':'NA']];}},
-  {id:'top-day',label:'Highest single day collection',icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M12 14v3"/>',
-   series:daily,fmt:inr,key:ddmmmyy,isNow:k=>k===TODAYK,now:'Today',facts:(names,k)=>{const f=dayFacts(names,k);
-     return[['No. of admissions',f.adm.toLocaleString('en-IN')],['No. of renewals',f.ren.toLocaleString('en-IN')]];}}
+  {label:'Highest monthly collection',icon:IC.trend,series:monthly,fmt:inr,...MONTH,facts:(names,k)=>{const f=monthFacts(names,k);
+     return[['No. of admissions',num(f.adm)],['No. of renewals',num(f.ren)],['Renewal collection efficiency',f.due?Math.round(f.ren/f.due*100)+'%':'NA']];}},
+  {label:'Highest single day collection',icon:IC.day,series:daily,fmt:inr,key:ddmmmyy,isNow:k=>k===TODAYK,now:'Today',facts:(names,k)=>{const f=dayFacts(names,k);
+     return[['No. of admissions',num(f.adm)],['No. of renewals',num(f.ren)]];}},
+  {label:'Highest admissions in a month',icon:IC.adm,series:pick(x=>x.fsN),fmt:num,...MONTH,facts:(names,k)=>{const x=monthAgg(names)[k];
+     return[['Collections – Fresh Sales',inr(x.fsSum)],['ATV – Fresh Sales',inr(x.fsSum/x.fsN)]];}},
+  {label:'Highest renewals in a month',icon:IC.ren,series:pick(x=>x.rnN),fmt:num,...MONTH,facts:(names,k)=>{const x=monthAgg(names)[k],f=monthFacts(names,k);
+     return[['Collections – Renewals',inr(x.rnSum)],['Renewal collection efficiency',f.due?Math.round(f.ren/f.due*100)+'%':'NA']];}},
+  {label:'Highest ATV – Fresh Sales in a month',icon:IC.atv,perCentre:true,series:pick(x=>x.fsN?x.fsSum/x.fsN:null),fmt:inr,...MONTH,facts:(names,k)=>{const x=monthAgg(names)[k];
+     return[['No. of admissions',num(x.fsN)],['Collections – Fresh Sales',inr(x.fsSum)]];}},
+  {label:'Highest ATV – Renewals in a month',icon:IC.atv,perCentre:true,series:pick(x=>x.rnN?x.rnSum/x.rnN:null),fmt:inr,...MONTH,facts:(names,k)=>{const x=monthAgg(names)[k];
+     return[['No. of renewals',num(x.rnN)],['Collections – Renewals',inr(x.rnSum)]];}},
+  {label:'Lifetime admissions',icon:IC.life,lifetime:'fsN'},
+  {label:'Lifetime renewals',icon:IC.life,lifetime:'rnN'}
 ];
+
+/* Lifetime totals: all entries since the first month, with this year and a monthly average */
+function lifetimeCard(r,names,icon){
+  const a=monthAgg(names),ks=Object.keys(a).map(Number).filter(k=>a[k][r.lifetime]>0);
+  const head=`<div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div>`;
+  if(!ks.length)return`<article class="rec">${head}<div class="rec-val" style="color:var(--ghost)">—</div><div class="rec-meta" style="font-size:13px;color:var(--muted)">No entries yet</div></article>`;
+  const first=Math.min(...ks),tot=ks.reduce((s,k)=>s+a[k][r.lifetime],0),yr=Math.floor(LAST/12);
+  const thisYr=ks.filter(k=>Math.floor(k/12)===yr).reduce((s,k)=>s+a[k][r.lifetime],0),months=LAST-first+1;
+  const split=names.length>1?names.map(n=>[n,Object.values(monthAgg([n])).reduce((s,x)=>s+x[r.lifetime],0)]):null;
+  return`<article class="rec">${head}<div class="rec-val">${num(tot)}</div>
+    <div class="rec-meta"><span class="month">Since ${mmmyy(first)}</span></div>
+    <div class="facts"><div class="fact"><span>This year (${yr})</span><span>${num(thisYr)}</span></div><div class="fact"><span>Monthly average</span><span>${num(tot/months)}</span></div></div>
+    ${split?`<div class="runners"><div class="h">By centre</div>${split.map(([n,v])=>`<div class="runner"><span><b>${n}</b></span><span class="r">${num(v)}</span></div>`).join('')}</div>`:''}
+  </article>`;
+}
 
 function card(r,names,ready){
   const icon=`<span class="rec-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>`;
+  if(ready&&r.lifetime)return lifetimeCard(r,names,icon);
   if(!ready)return`<article class="rec loading"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div><div class="rec-val">…</div><div class="rec-meta"><span class="month">…</span></div></article>`;
-  const ranked=Object.entries(r.series(names)).map(([k,v])=>({k:+k,v})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  // perCentre: with several centres shown, rank each centre's months on their own (best centre-month) instead of pooling them
+  const byCentre=r.perCentre&&names.length>1;
+  const ranked=(byCentre?names.flatMap(n=>Object.entries(r.series([n])).map(([k,v])=>({k:+k,v,n}))):Object.entries(r.series(names)).map(([k,v])=>({k:+k,v})))
+    .filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
   if(!ranked.length)return`<article class="rec"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div><div class="rec-val" style="color:var(--ghost)">—</div><div class="rec-meta" style="font-size:13px;color:var(--muted)">No entries yet</div></article>`;
   const [best,...rest]=ranked,next=rest.slice(0,2);
-  const lead=!next[0]?'':Math.round(best.v)===Math.round(next[0].v)?`<span class="lead" style="color:var(--muted)">Tied with ${r.key(next[0].k)}</span>`:`<span class="lead">+${((best.v/next[0].v-1)*100).toFixed(1)}% over next best</span>`;
+  const lead=!next[0]?'':Math.round(best.v)===Math.round(next[0].v)?`<span class="lead" style="color:var(--muted)">Tied with ${r.key(next[0].k)}${next[0].n?' · '+next[0].n:''}</span>`:`<span class="lead">+${((best.v/next[0].v-1)*100).toFixed(1)}% over next best</span>`;
   return`<article class="rec"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div>
     <div class="rec-val">${r.fmt(best.v)}</div>
-    <div class="rec-meta"><span class="month">${r.key(best.k)}</span>${r.isNow(best.k)?`<span class="new">${r.now}</span>`:''}${lead}</div>
-    ${r.facts?`<div class="facts">${r.facts(names,best.k).map(([l,v])=>`<div class="fact"><span>${l}</span><span>${v}</span></div>`).join('')}</div>`:''}
-    ${next.length?`<div class="runners"><div class="h">Next best</div>${next.map(x=>`<div class="runner"><span><b>${r.key(x.k)}</b></span><span class="r">${r.fmt(x.v)}</span></div>`).join('')}</div>`:''}
+    <div class="rec-meta"><span class="month">${r.key(best.k)}</span>${best.n?`<span class="centre">${best.n}</span>`:''}${r.isNow(best.k)?`<span class="new">${r.now}</span>`:''}${lead}</div>
+    ${r.facts?`<div class="facts">${r.facts(best.n?[best.n]:names,best.k).map(([l,v])=>`<div class="fact"><span>${l}</span><span>${v}</span></div>`).join('')}</div>`:''}
+    ${next.length?`<div class="runners"><div class="h">Next best</div>${next.map(x=>`<div class="runner"><span><b>${r.key(x.k)}</b>${x.n?`<span class="rc">${x.n}</span>`:''}</span><span class="r">${r.fmt(x.v)}</span></div>`).join('')}</div>`:''}
   </article>`;
 }
 
@@ -205,12 +267,26 @@ function render(){
     document.getElementById('since-badge').textContent=ks.length?'Since '+mmmyy(Math.min(...ks)):'—';
   }else document.getElementById('since-badge').textContent='…';
   document.getElementById('records').innerHTML=RECORDS.map(r=>card(r,names,ready)).join('');
+  requestAnimationFrame(navState);
 }
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_stats_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
   .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
 document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_stats_centre',selCentre);}catch(e){}render();});
+
+/* Sideways scrolling: arrows move one screenful; dots show where you are */
+const sc=document.getElementById('rec-scroll');
+function navState(){
+  const max=sc.scrollWidth-sc.clientWidth,pages=Math.max(1,Math.ceil(sc.scrollWidth/sc.clientWidth-0.05)),at=max>0?Math.round(sc.scrollLeft/max*(pages-1)):0;
+  document.getElementById('prev').disabled=sc.scrollLeft<=2;
+  document.getElementById('next').disabled=sc.scrollLeft>=max-2;
+  document.getElementById('dots').innerHTML=pages>1?Array.from({length:pages},(_,i)=>`<i class="${i===at?'on':''}"></i>`).join(''):'';
+}
+document.getElementById('prev').onclick=()=>sc.scrollBy({left:-sc.clientWidth});
+document.getElementById('next').onclick=()=>sc.scrollBy({left:sc.clientWidth});
+sc.addEventListener('scroll',()=>requestAnimationFrame(navState));
+window.addEventListener('resize',navState);
 
 async function load(){
   render();
