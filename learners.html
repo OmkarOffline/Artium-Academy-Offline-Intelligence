@@ -133,6 +133,21 @@
   .util.mid{color:#9A6200;background:#FBF1DC}
   .util.lo{color:var(--bad);background:#FDECEB}
   .util.top{color:#1D4ED8;background:#E6EEFB}
+  /* Monthly Active Learners split by course & teacher, and by age group */
+  tr.grp td{font-weight:600;color:var(--ink);background:#FCFBF9;cursor:pointer}
+  tr.grp td.metric{font:600 14px var(--display);color:var(--ink)}
+  tr.grp td.metric .ar{display:inline-block;width:16px;color:var(--muted);transition:transform .15s}
+  tr.grp.shut td.metric .ar{transform:rotate(-90deg)}
+  tr.sub td.metric{padding-left:46px;color:var(--ink2);font-weight:400}
+  tr.sub td{font-weight:400}
+  tr.nm td.metric{color:var(--faint);font-style:italic}
+  tr.tot td{background:var(--accent-soft);font-weight:700;color:var(--accent);border-bottom:0}
+  tr.tot td.metric{font:700 15px var(--display);color:var(--accent)}
+  td.neg{color:var(--bad)}
+  tr.sep td{background:#FAF9F7;font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding-top:14px;padding-bottom:10px}
+  tr.past td{color:var(--faint)}
+  tr.past td.metric{color:var(--muted)}
+  tr.past td.metric small{color:var(--faint);font-size:11.5px}
   /* Capacity utilisation: second most important row, a lighter version of the Monthly Active Learners row */
   tr.cu td{background:#FBF8FD;border-top:1px solid #EFE7F6}
   tr.cu td.metric{font:600 14.5px var(--display);color:var(--accent)}
@@ -195,6 +210,42 @@
         <div class="def"><div class="dt">Monthly Active Learners:</div><p>This month's active learners in the course, worked out as in the section above.</p></div>
         <div class="def"><div class="dt">% Active utilisation:</div><p>Monthly Active Learners ÷ capacity.</p></div>
         <div class="def"><div class="dt">Surplus / Deficit:</div><p>Target − Monthly Active Learners. A positive number is the admissions still needed; zero or below means no new admissions are needed.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="tray">
+    <div class="tray-head"><div class="tray-title">Monthly Active Learners by Course</div><span class="badge" id="c-badge">—</span></div>
+    <div class="tbl-wrap"><table id="mal-c"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="c-defs" onclick="toggleDefs(this,'c-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="c-defs" hidden>
+        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as in the first table, but only for that course. The Total row matches Monthly Active Learners in the first table.</p></div>
+        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no course filled in. They still count in the totals.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="tray">
+    <div class="tray-head"><div class="tray-title">Monthly Active Learners by Age Group</div><span class="badge" id="ag-badge">—</span></div>
+    <div class="tbl-wrap"><table id="mal-ag"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="ag-defs" onclick="toggleDefs(this,'ag-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="ag-defs" hidden>
+        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as in the first table, but only for that age group. The Total row matches Monthly Active Learners in the first table.</p></div>
+        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no age group filled in. They still count in the totals.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="tray">
+    <div class="tray-head"><div class="tray-title">Monthly Active Learners by Teacher</div><span class="badge" id="t-badge">—</span></div>
+    <div class="tbl-wrap"><table id="mal-t"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="t-defs" onclick="toggleDefs(this,'t-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="t-defs" hidden>
+        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as in the first table, but only for that teacher. The Total row matches Monthly Active Learners in the first table.</p></div>
+        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no teacher filled in. They still count in the totals.</p></div>
+        <div class="def"><div class="dt">Current and past teachers:</div><p>Current teachers have active learners this month and an admission or renewal in the last 3 months; they're listed first, biggest first. Past teachers are listed below, with the month of their last admission or renewal. A past teacher can still show a learner or two while a long membership runs out.</p></div>
+        <div class="def"><div class="dt">Active months:</div><p>A teacher's numbers start in the month of their first admission or renewal and stop after the month their last membership ends — the last month a learner of theirs can still be active. Every other month shows 0.</p></div>
+        <div class="def"><div class="dt">Outside a teacher's active months:</div><p>Learners still counted against a teacher outside those months — usually a membership with no end date. They're kept here so the Total still matches the first table.</p></div>
       </div>
     </div>
   </section>
@@ -339,7 +390,54 @@ function render(){
       return`<td class="${x===0?'zero':sg?(x>0?'pos':'neg'):''}${isYearStart(k)?' yb':''}">${t}</td>`;}).join('')}</tr>`).join('');
   document.getElementById('mal').innerHTML=head+'<tbody>'+body+'</tbody>';
   renderAR(names);
+  renderSplits(names,head,v);
 }
+
+
+/* ── Monthly Active Learners split by course & teacher, and by age group ──
+   Same calculation as the first table (build), run on just the rows of each course, teacher or age group.
+   Every split covers all rows, blanks included ("Not mentioned"), so the rows always add up to the first table. */
+const COURSE_ORDER=['PFM - Tamil','Carnatic Classical','PFM - Hindi','Hindustani Classical','Western Vocals','Guitar','Keyboard','Karaoke'];
+function splitRow(names,pred){const v=build(names,r=>passes(r)&&pred(r));return MONTHS.map(k=>v[k].H);}
+function malCells(vals){return vals.map((x,i)=>{const k=MONTHS[i],yb=(k===MONTHS[0]||Math.floor(k/12)!==Math.floor((k+1)/12))?' yb':'';
+  return`<td class="${x===0?'zero':x<0?'neg':''}${yb}">${x<0?'−':''}${Math.abs(x).toLocaleString('en-IN')}</td>`;}).join('');}
+function renderSplits(names,head,v){
+  const T=[['mal-c',8,'Course','c-badge'],['mal-ag',6,'Age group','ag-badge'],['mal-t',29,'Teacher','t-badge']];
+  if(!v){T.forEach(([id])=>document.getElementById(id).innerHTML=head+'<tbody><tr><td class="metric">Loading…</td></tr></tbody>');return;}
+  const rows=names.flatMap(n=>DATA[n]?DATA[n].fs.concat(DATA[n].rn):[]).filter(passes);
+  const totals=MONTHS.map(k=>v[k].H);
+  const totRow=`<tr class="tot"><td class="metric">Total</td>${malCells(totals)}</tr>`;
+  const AGE_ORDER=['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'];
+  const order={8:c=>{const j=COURSE_ORDER.findIndex(z=>z.toLowerCase()===c.toLowerCase());return j<0?99:j;},6:a=>(AGE_ORDER.indexOf(a)+1)||99};
+  const badge=MON[LAST%12]+' '+Math.floor(LAST/12)+': '+totals[0].toLocaleString('en-IN')+' active';
+  const sortKeys=(col)=>[...new Set(rows.map(r=>cell(r,col)))].sort((a,b)=>(a===''?1:0)-(b===''?1:0)||order[col](a)-order[col](b)||a.localeCompare(b));
+  // Course and age group
+  T.slice(0,2).forEach(([id,col,label,bid])=>{
+    const body=sortKeys(col).map(k=>{const kv=splitRow(names,r=>cell(r,col)===k);if(kv.every(x=>x===0))return'';
+      return`<tr class="${k===''?'nm':''}"><td class="metric">${k?esc(k):label+' not mentioned'}</td>${malCells(kv)}</tr>`;}).join('');
+    document.getElementById(id).innerHTML=head.replace('Particulars',label)+'<tbody>'+body+totRow+'</tbody>';
+    document.getElementById(bid).textContent=badge;
+  });
+  // Teacher: a teacher's numbers run from the month of their first admission or renewal to the month their last membership ends.
+  // Current teachers (an admission or renewal in the last 3 months) come first, past teachers below.
+  const span={};
+  rows.forEach(r=>{const t=cell(r,29);if(!t)return;const d=parseDate(r[0]),e=parseDate(r[23]);const x=span[t]=span[t]||{first:Infinity,last:-Infinity,end:-Infinity};
+    if(d){x.first=Math.min(x.first,mi(d));x.last=Math.max(x.last,mi(d));}if(e&&e.getFullYear()>=2020)x.end=Math.max(x.end,mi(e));});
+  const adj=MONTHS.map(()=>0);
+  const tRows=Object.keys(span).map(t=>{const x=span[t],stop=Math.max(x.end,x.last),raw=splitRow(names,r=>cell(r,29)===t);
+    const vals=raw.map((val,i)=>{const k=MONTHS[i];if(k<x.first||k>stop){adj[i]+=val;return 0;}return val;});
+    return{t,vals,active:x.last>=LAST-2&&vals[0]>0};}).filter(x=>x.vals.some(y=>y!==0));
+  const act=tRows.filter(x=>x.active).sort((a,b)=>b.vals[0]-a.vals[0]||a.t.localeCompare(b.t));
+  const past=tRows.filter(x=>!x.active).sort((a,b)=>span[b.t].last-span[a.t].last||a.t.localeCompare(b.t));
+  const nm=splitRow(names,r=>cell(r,29)==='');
+  let body=act.map(x=>`<tr><td class="metric">${esc(x.t)}</td>${malCells(x.vals)}</tr>`).join('');
+  if(nm.some(y=>y!==0))body+=`<tr class="nm"><td class="metric">Teacher not mentioned</td>${malCells(nm)}</tr>`;
+  if(adj.some(y=>y!==0))body+=`<tr class="nm"><td class="metric">Outside a teacher's active months</td>${malCells(adj)}</tr>`;
+  if(past.length)body+=`<tr class="sep"><td class="metric">Past teachers</td><td colspan="${MONTHS.length}"></td></tr>`+past.map(x=>`<tr class="past"><td class="metric">${esc(x.t)}<small> · last entry ${MON[span[x.t].last%12]} ${String(Math.floor(span[x.t].last/12)).slice(2)}</small></td>${malCells(x.vals)}</tr>`).join('');
+  document.getElementById('mal-t').innerHTML=head.replace('Particulars','Teacher')+'<tbody>'+body+totRow+'</tbody>';
+  document.getElementById('t-badge').textContent=badge+' · '+act.length+' current teacher'+(act.length===1?'':'s');
+}
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ── Admission Requirement ── */
 const AR_COURSES=[
