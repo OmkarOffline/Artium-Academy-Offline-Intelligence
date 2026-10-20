@@ -63,6 +63,32 @@
   .defs .pos{color:var(--ok);font-weight:700}
   .defs .neg{color:var(--bad);font-weight:700}
 
+  /* Collapsible sections */
+  .tray-head{cursor:pointer;user-select:none}
+  .chev{display:grid;place-items:center;width:32px;height:32px;padding:0;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:transform .2s,background .15s,color .15s}
+  .tray-head:hover .chev{background:var(--accent-soft);color:var(--accent)}
+  .tray.closed .chev{transform:rotate(-90deg)}
+  .tray.closed .tray-body{display:none}
+  .tray.closed{padding-bottom:8px}
+  .tray.closed #prev,.tray.closed #next,.tray.closed .wb{display:none}
+  /* Course × age group table */
+  .vm button{min-width:42px;font-family:var(--display)}
+  table.xt{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  .xt th,.xt td{padding:12px 14px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+  .xt th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+  .xt th:first-child,.xt td:first-child{text-align:left;padding-left:22px}
+  .xt td{font:500 14px var(--display);color:var(--ink2)}
+  .xt td:first-child{font:600 14px var(--body);color:var(--ink)}
+  .md{display:inline-grid;place-items:center;width:18px;height:18px;margin-right:7px;border-radius:50%;font:700 10px/1 var(--display);font-style:normal;color:#fff;vertical-align:1px;cursor:help;box-shadow:inset 0 -1px 0 rgba(0,0,0,.12)}
+  .md.m1{background:linear-gradient(180deg,#E9CF9E,#C9A66B)}
+  .md.m2{background:linear-gradient(180deg,#DCD9E2,#A9A3B4)}
+  .xt .win{font-weight:700;color:var(--ink);text-decoration:underline;text-decoration-color:#C9A66B;text-decoration-thickness:2px;text-underline-offset:5px}
+  .xt td.top{text-align:left;font:500 13px var(--body);color:var(--muted);border-left:1px solid var(--border)}
+  .xt td.top b{font:600 13.5px var(--display);color:var(--accent);margin-right:6px}
+  .xt td.z{color:var(--ghost);font-weight:400}
+  .xt .tc{border-left:1px solid var(--border);background:#FCFBF9;font-weight:700;color:var(--ink)}
+  .xt tr.tr td{background:#FCFBF9;font-weight:700;color:var(--ink);border-top:1px solid var(--border);border-bottom:0}
+  .xt tr.tr td.tc{background:#F5F2F8;color:var(--accent)}
   /* Time to First Renewal table */
   .tray-sub{font-size:13px;color:var(--muted);margin:-6px 2px 14px}
   .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
@@ -162,16 +188,20 @@
     <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
   </header>
   <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
-  <section class="tray">
+  <section class="tray" id="sec-rec">
     <div class="tray-head"><div class="tray-title">All-Time Records</div><div class="nav"><span class="badge" id="since-badge">—</span>
       <button type="button" id="prev" aria-label="Previous records"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
-      <button type="button" id="next" aria-label="More records"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+      <button type="button" id="next" aria-label="More records"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      <button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body">
     <div class="rec-scroll" id="rec-scroll"><div class="records" id="records"></div></div>
     <div class="dots" id="dots"></div>
+    </div>
   </section>
-  <section class="tray">
+  <section class="tray" id="sec-ttr">
     <div class="tray-head"><div class="tray-title">Renewal Turnaround</div>
-      <div class="nav"><div class="wb" role="group" aria-label="Win-back"><span class="wb-l" tabindex="0" aria-describedby="wb-tip">Win-back<span class="tip" id="wb-tip" role="tooltip"><b>Win-back</b>A renewal that came more than 45 days after the previous membership ended.<br><br><b>Including</b> counts every renewal.<br><b>Excluding</b> leaves win-backs out of every column, so the table shows how learners renew when they come back on their own.</span></span><button type="button" data-wb="1" aria-pressed="true">Including</button><button type="button" data-wb="0" aria-pressed="false">Excluding</button></div><span class="badge" id="ttr-badge">—</span></div></div>
+      <div class="nav"><div class="wb" role="group" aria-label="Win-back"><span class="wb-l" tabindex="0" aria-describedby="wb-tip">Win-back<span class="tip" id="wb-tip" role="tooltip"><b>Win-back</b>A renewal that came more than 45 days after the previous membership ended.<br><br><b>Including</b> counts every renewal.<br><b>Excluding</b> leaves win-backs out of every column, so the table shows how learners renew when they come back on their own.</span></span><button type="button" data-wb="1" aria-pressed="true">Including</button><button type="button" data-wb="0" aria-pressed="false">Excluding</button></div><span class="badge" id="ttr-badge">—</span><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body">
     <div class="tray-sub">For every package, how long learners take to complete their classes and renew their membership.</div>
     <div class="tbl-wrap"><table class="ttr" id="ttr"></table></div>
     <div class="legend"><span><i class="mk good">★</i>Renewing faster than at the first renewal</span><span><i class="mk warn">!</i>Slower than the first renewal — needs attention</span></div>
@@ -185,6 +215,24 @@
         <div class="def"><div class="dt">Renewal → next renewal:</div><p>For learners who have renewed two or more times, the days between each renewal and the next. Every gap counts, so someone with 20 renewals adds 19 gaps. Each gap sits in the row of the package bought at the earlier renewal.</p></div>
         <div class="def"><div class="dt">Average and median:</div><p>The average adds everyone's days and divides by the number of learners, so a few very late renewals pull it up. The median is the middle learner when everyone is lined up from quickest to slowest: half renewed sooner, half later.</p></div>
       </div>
+    </div>
+    </div>
+  </section>
+  <section class="tray" id="sec-age">
+    <div class="tray-head"><div class="tray-title">Course Subscription by Age Group</div>
+      <div class="nav"><div class="wb vm" role="group" aria-label="Show as"><button type="button" data-vm="n" aria-pressed="true" title="Number of admissions">#</button><button type="button" data-vm="c" aria-pressed="false" title="Share of each age group's admissions">%C</button><button type="button" data-vm="r" aria-pressed="false" title="Share of each course's admissions">%R</button></div><span class="badge" id="age-badge">—</span><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body">
+    <div class="tray-sub">Admissions for every course, split by the learner's age group.</div>
+    <div class="tbl-wrap"><table class="xt" id="xt"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="xt-defs" onclick="toggleDefs(this,'xt-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="xt-defs" hidden>
+        <div class="def"><div class="dt">#:</div><p>The number of learners who joined each course in each age group.</p></div>
+        <div class="def"><div class="dt">%C (share of the column):</div><p>Each course's share of an age group's admissions, so every column adds up to 100%. The Total column shows each course's share of all admissions.</p></div>
+        <div class="def"><div class="dt">%R (share of the row):</div><p>Each age group's share of a course's admissions, so every row adds up to 100%. The Total row shows each age group's share of all admissions.</p></div>
+        <div class="def"><div class="dt">Gold underline:</div><p>Marks the highest number. In # and %R it compares the age groups within each course; in %C it compares the courses within each age group. If two numbers are equal, both are underlined.</p></div>
+      </div>
+    </div>
     </div>
   </section>
 </div>
@@ -367,6 +415,7 @@ function render(){
   document.getElementById('records').innerHTML=RECORDS.map(r=>card(r,names,ready)).join('');
   requestAnimationFrame(navState);
   renderTTR(names,ready);
+  renderXT(names,ready);
 }
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_stats_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
@@ -423,7 +472,7 @@ function renderTTR(names,ready){
   document.getElementById('ttr-badge').textContent=withWinback?num(tot.wb)+' win-backs included':num(tot.wb)+' win-backs left out';
   el.innerHTML=head+'<tbody>'+(G.length?G.map(g=>row(g.m+' month'+(g.m===1?'':'s'),g)).join('')+row('All packages',tot,'total'):'<tr><td colspan="9" class="na" style="text-align:center">No admissions yet</td></tr>')+'</tbody>';
 }
-document.querySelectorAll('.wb button').forEach(b=>b.onclick=()=>{withWinback=b.dataset.wb==='1';document.querySelectorAll('.wb button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
+document.querySelectorAll('.wb:not(.vm) button').forEach(b=>b.onclick=()=>{withWinback=b.dataset.wb==='1';document.querySelectorAll('.wb:not(.vm) button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
 function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 
 /* Sideways scrolling: arrows move one screenful; dots show where you are */
@@ -438,6 +487,56 @@ document.getElementById('prev').onclick=()=>sc.scrollBy({left:-sc.clientWidth});
 document.getElementById('next').onclick=()=>sc.scrollBy({left:sc.clientWidth});
 sc.addEventListener('scroll',()=>requestAnimationFrame(navState));
 window.addEventListener('resize',navState);
+
+/* ── Course Subscription by Age Group: admissions per course (rows) and age group (columns) ── */
+const AGE_ORDER=['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'];
+const COURSE_ORDER=['PFM - Tamil','Carnatic Classical','PFM - Hindi','Hindustani Classical','Western Vocals','Guitar','Keyboard','Karaoke'];   // any other course goes after these
+let xtMode='n';
+function renderXT(names,ready){
+  const el=document.getElementById('xt');
+  if(!ready){el.innerHTML='<tbody><tr><td class="z" style="text-align:center">Loading…</td></tr></tbody>';return;}
+  const M={},rowT={},colT={};let N=0;
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.forEach(r=>{
+    const c=String(r[8]||'').trim(),a=String(r[6]||'').trim();if(!c||!a)return;   // course, age group
+    (M[c]=M[c]||{})[a]=(M[c][a]||0)+1;rowT[c]=(rowT[c]||0)+1;colT[a]=(colT[a]||0)+1;N++;});});
+  const ages=Object.keys(colT).sort((x,y)=>((AGE_ORDER.indexOf(x)+1)||99)-((AGE_ORDER.indexOf(y)+1)||99)||x.localeCompare(y));
+  const ci=c=>{const i=COURSE_ORDER.findIndex(x=>x.toLowerCase()===c.toLowerCase());return i<0?99:i;};
+  const courses=Object.keys(rowT).sort((x,y)=>ci(x)-ci(y)||x.localeCompare(y));
+  document.getElementById('age-badge').textContent=num(N)+' admissions';
+  const val=(v,c,a)=>xtMode==='n'?v:xtMode==='c'?(colT[a]?v/colT[a]*100:0):(rowT[c]?v/rowT[c]*100:0);
+  const show=v=>xtMode==='n'?num(v):(v<0.5&&v>0?'<1':Math.round(v))+'%';
+  // Medals: gold 1 and silver 2 for the two highest values — within the column for %C, within the row for # and %R. Ties share a medal.
+  const rankOf=(c,a)=>{const v=val((M[c]||{})[a]||0,c,a);if(!v)return 0;
+    const peers=(xtMode==='c'?courses.map(x=>val((M[x]||{})[a]||0,x,a)):ages.map(y=>val((M[c]||{})[y]||0,c,y))).filter(x=>x>0).map(Math.round);   // compare what's shown: whole numbers, so two cells showing 12% tie
+    const top=[...new Set(peers)].sort((x,y)=>y-x);const r=top.indexOf(Math.round(v))+1;return r<=2?r:0;};
+  // The winner (highest value in its row for # and %R, in its column for %C) gets a gold underline under the number itself
+  const cell=(v,c,a)=>{if(!v)return'<td class="z">—</td>';const t=show(val(v,c,a));
+    return rankOf(c,a)===1?`<td><span class="win" title="Highest">${t}</span></td>`:`<td>${t}</td>`;};
+  const topAge=c=>{const b=ages.filter(a=>(M[c]||{})[a]).sort((x,y)=>(M[c][y]||0)-(M[c][x]||0))[0];return b?`<b>${esc(b)}</b>${Math.round(M[c][b]/rowT[c]*100)}%`:'—';};
+  const topCourse=a=>{const b=courses.filter(c=>(M[c]||{})[a]).sort((x,y)=>(M[y][a]||0)-(M[x][a]||0))[0];return b?`<b>${esc(b)}</b>${Math.round(M[b][a]/colT[a]*100)}%`:'—';};
+  const SUM=false;
+  const head=`<thead><tr><th>Course</th>${ages.map(a=>`<th>${esc(a)}</th>`).join('')}<th class="tc">Total</th>${SUM&&xtMode!=='c'?'<th style="text-align:left;border-left:1px solid var(--border)">Most popular age group</th>':''}</tr></thead>`;
+  const body=courses.map(c=>`<tr><td>${esc(c)}</td>${ages.map(a=>cell((M[c]||{})[a]||0,c,a)).join('')}<td class="tc">${xtMode==='n'?num(rowT[c]):xtMode==='r'?'100%':show(rowT[c]/N*100)}</td>${SUM&&xtMode!=='c'?`<td class="top">${topAge(c)}</td>`:''}</tr>`).join('');
+  const foot=`<tr class="tr"><td>Total</td>${ages.map(a=>`<td>${xtMode==='n'?num(colT[a]):xtMode==='c'?'100%':show(colT[a]/N*100)}</td>`).join('')}<td class="tc">${xtMode==='n'?num(N):'100%'}</td>${SUM&&xtMode!=='c'?'<td class="top"></td>':''}</tr>`;
+  const topRow=SUM&&xtMode==='c'?`<tr class="tp"><td>Most popular course</td>${ages.map(a=>`<td class="top" style="border-left:0;text-align:right;white-space:normal">${topCourse(a)}</td>`).join('')}<td class="tc"></td></tr>`:'';
+  el.innerHTML=head+'<tbody>'+body+foot+topRow+'</tbody>';
+}
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.querySelectorAll('.vm button').forEach(b=>b.onclick=()=>{xtMode=b.dataset.vm;document.querySelectorAll('.vm button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
+
+/* Open / close each section by clicking its heading; the page remembers what you closed */
+const CLOSED=(()=>{try{return JSON.parse(localStorage.getItem('artium_stats_closed')||'{}');}catch(e){return{};}})();
+document.querySelectorAll('section.tray[id]').forEach(sec=>{
+  const head=sec.querySelector('.tray-head'),chev=sec.querySelector('.chev');
+  const set=closed=>{sec.classList.toggle('closed',closed);chev.setAttribute('aria-expanded',!closed);};
+  set(!!CLOSED[sec.id]);
+  head.addEventListener('click',e=>{
+    if(e.target.closest('button:not(.chev),.wb'))return;   // arrows and the win-back toggle keep their own job
+    const c=!sec.classList.contains('closed');set(c);CLOSED[sec.id]=c;
+    try{localStorage.setItem('artium_stats_closed',JSON.stringify(CLOSED));}catch(err){}
+    if(!c)requestAnimationFrame(navState);
+  });
+});
 
 async function load(){
   render();
