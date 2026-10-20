@@ -63,15 +63,65 @@
   .defs .pos{color:var(--ok);font-weight:700}
   .defs .neg{color:var(--bad);font-weight:700}
 
+  /* Time to First Renewal table */
+  .tray-sub{font-size:13px;color:var(--muted);margin:-6px 2px 14px}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table.ttr{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  .ttr th,.ttr td{padding:12px 16px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+  .ttr th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);vertical-align:bottom}
+  .ttr thead tr.grp th{padding:12px 16px 4px;border-bottom:0;font:700 10px/1 var(--body);letter-spacing:.14em;color:var(--gold);text-align:center}
+  .ttr thead tr.grp th.g{border-left:1px solid var(--border)}
+  .ttr .g{border-left:1px solid var(--border)}
+  .ttr th:first-child,.ttr td:first-child{text-align:left;padding-left:22px}
+  .ttr td{font:500 14px var(--display);color:var(--ink2)}
+  .ttr td:first-child{font:600 14px var(--body);color:var(--ink)}
+  .ttr td.na{color:var(--ghost);font-weight:400}
+  .mk{display:inline-grid;place-items:center;width:16px;height:16px;margin-right:6px;border-radius:50%;font:700 9.5px/1 var(--body);font-style:normal;vertical-align:1px;cursor:help}
+  .mk.good{color:#A8844F;background:#FBF4E8}
+  .mk.warn{color:#B42318;background:#FDE2E0}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;padding:12px 4px 0;font-size:12.5px;color:var(--muted)}
+  .legend .mk{margin-right:5px}
+  .ttr th.sh{white-space:normal;width:84px;line-height:1.25}
+  .ttr .late{color:var(--bad);font-weight:600}
+  .ttr .early{color:var(--ok);font-weight:600}
+  .ttr td.hl{color:var(--accent);font-weight:600}
+  .ttr tr.total td{background:#FCFBF9;font-weight:700;color:var(--ink);border-top:1px solid var(--border)}
+  .ttr tbody tr:last-child td{border-bottom:0}
+  .ttr tbody tr:hover td{background:#FCFBFE}
+  .wb{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px;box-shadow:var(--shadow)}
+  .wb-l{position:relative;font:700 10px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:4px 8px 4px 10px;cursor:help;text-decoration:underline dotted;text-underline-offset:3px}
+  .wb-l .tip{position:absolute;right:-6px;top:calc(100% + 12px);z-index:20;width:300px;padding:14px 16px;background:#2B1840;color:#E9E2F1;border-radius:12px;box-shadow:0 18px 36px -16px rgba(34,18,47,.55);
+    font:400 12.5px/1.55 var(--body);letter-spacing:0;text-transform:none;text-decoration:none;opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .15s,transform .15s}
+  .wb-l .tip::before{content:"";position:absolute;top:-6px;right:28px;width:12px;height:12px;background:#2B1840;transform:rotate(45deg)}
+  .wb-l .tip b{display:block;color:#E2C48A;font-weight:600;margin-bottom:2px}
+  .wb-l .tip br+b,.wb-l .tip br+br+b{display:inline;color:#fff}
+  .wb-l:hover .tip,.wb-l:focus .tip{opacity:1;transform:none}
+  .wb button{border:0;background:none;border-radius:999px;padding:6px 13px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;transition:background .15s,color .15s}
+  .wb button:hover{background:var(--accent-soft)}
+  .wb button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .pace{display:inline-block;min-width:52px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+  .pace.hi{color:var(--ok);background:#E5F4EC}.pace.mid{color:#9A6200;background:#FBF1DC}.pace.lo{color:var(--bad);background:#FDECEB}
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs ul{margin:12px 0 0;padding:14px 18px 14px 34px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .defs li{margin:4px 0}.defs li b{color:var(--ink);font-weight:600}
+  .defs .pos{color:var(--ok);font-weight:700}.defs .neg{color:var(--bad);font-weight:700}
+  .defs-list{margin:12px 0 0;padding:18px 22px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:16px}
+  .defs-list[hidden]{display:none}
+  .def .dt{font:600 13.5px/1.3 var(--display);color:var(--ink);margin-bottom:3px}
+  .def p{font-size:13.5px;line-height:1.6;color:var(--muted);max-width:980px}
   /* Record cards */
   .rec-scroll{overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;margin:0 -4px;padding:4px 4px 6px}
   .rec-scroll::-webkit-scrollbar{display:none}
   .records{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);grid-auto-columns:calc((100% - 36px)/3);gap:18px}
   .rec{scroll-snap-align:start}
   .nav{display:flex;align-items:center;gap:8px}
-  .nav button{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:var(--shadow);transition:background .15s,color .15s,opacity .15s}
-  .nav button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#fff}
-  .nav button:disabled{opacity:.35;cursor:default;box-shadow:none}
+  .nav > button{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:var(--shadow);transition:background .15s,color .15s,opacity .15s}
+  .nav > button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:#fff}
+  .nav > button:disabled{opacity:.35;cursor:default;box-shadow:none}
   .dots{display:flex;justify-content:center;gap:6px;padding-top:14px}
   .dots i{width:6px;height:6px;border-radius:999px;background:#DCD6E4;transition:width .2s,background .2s}
   .dots i.on{width:18px;background:var(--gold)}
@@ -118,6 +168,24 @@
       <button type="button" id="next" aria-label="More records"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
     <div class="rec-scroll" id="rec-scroll"><div class="records" id="records"></div></div>
     <div class="dots" id="dots"></div>
+  </section>
+  <section class="tray">
+    <div class="tray-head"><div class="tray-title">Renewal Turnaround</div>
+      <div class="nav"><div class="wb" role="group" aria-label="Win-back"><span class="wb-l" tabindex="0" aria-describedby="wb-tip">Win-back<span class="tip" id="wb-tip" role="tooltip"><b>Win-back</b>A renewal that came more than 45 days after the previous membership ended.<br><br><b>Including</b> counts every renewal.<br><b>Excluding</b> leaves win-backs out of every column, so the table shows how learners renew when they come back on their own.</span></span><button type="button" data-wb="1" aria-pressed="true">Including</button><button type="button" data-wb="0" aria-pressed="false">Excluding</button></div><span class="badge" id="ttr-badge">—</span></div></div>
+    <div class="tray-sub">For every package, how long learners take to complete their classes and renew their membership.</div>
+    <div class="tbl-wrap"><table class="ttr" id="ttr"></table></div>
+    <div class="legend"><span><i class="mk good">★</i>Renewing faster than at the first renewal</span><span><i class="mk warn">!</i>Slower than the first renewal — needs attention</span></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="ttr-defs" onclick="toggleDefs(this,'ttr-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="ttr-defs" hidden>
+        <div class="def"><div class="dt">Memberships ended:</div><p>Admissions whose membership ended yesterday or earlier. Memberships still running aren't due for renewal yet, so they're left out.</p></div>
+        <div class="def"><div class="dt">First renewal:</div><p>A learner's first renewal after joining. Learners who haven't renewed are left out of the day counts.</p></div>
+        <div class="def"><div class="dt">To 1st class:</div><p>Average days from the day a learner joined to the day their membership started, for the learners who renewed.</p></div>
+        <div class="def"><div class="dt">Admission → first renewal:</div><p>Days from the day a learner joined to their first renewal. It is made up of To 1st class, the package itself, and the days taken to renew after the membership ends.</p></div>
+        <div class="def"><div class="dt">Renewal → next renewal:</div><p>For learners who have renewed two or more times, the days between each renewal and the next. Every gap counts, so someone with 20 renewals adds 19 gaps. Each gap sits in the row of the package bought at the earlier renewal.</p></div>
+        <div class="def"><div class="dt">Average and median:</div><p>The average adds everyone's days and divides by the number of learners, so a few very late renewals pull it up. The median is the middle learner when everyone is lined up from quickest to slowest: half renewed sooner, half later.</p></div>
+      </div>
+    </div>
   </section>
 </div>
 
@@ -298,12 +366,65 @@ function render(){
   }else document.getElementById('since-badge').textContent='…';
   document.getElementById('records').innerHTML=RECORDS.map(r=>card(r,names,ready)).join('');
   requestAnimationFrame(navState);
+  renderTTR(names,ready);
 }
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_stats_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
   .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
 document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_stats_centre',selCentre);}catch(e){}render();});
+
+/* ── Time to First Renewal, by package bought at admission ── */
+const WINBACK_DAYS=45;   // renewed more than 45 days after the membership ended = win-back
+let withWinback=true;
+const YESTERDAY=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()-1);
+function firstRenewals(names){
+  const ren=new Map();   // Learner ID → renewal dates
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.rn.forEach(r=>{const k=String(r[3]||'').trim().toUpperCase(),t=parseDate(r[0]);if(k&&t)(ren.get(k)||ren.set(k,[]).get(k)).push(t);});});
+  const by={};
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.forEach(r=>{
+    const k=String(r[3]||'').trim().toUpperCase(),t=parseDate(r[0]),m=parseNum(r[12]),e=parseDate(r[23]);   // Membership End Date (X)
+    // Only memberships that ended by yesterday — the rest aren't due for renewal yet
+    if(!k||!t||!m||t.getFullYear()<2020||!e||e.getFullYear()<2020||e>YESTERDAY)return;
+    const g=by[m]=by[m]||{m,adm:0,days:[],late:[],start:[],wb:0};g.adm++;
+    const later=(ren.get(k)||[]).filter(x=>x>=t);if(!later.length)return;
+    const first=new Date(Math.min(...later)),e2p=Math.round((first-e)/864e5);
+    if(e2p>WINBACK_DAYS){g.wb++;if(!withWinback){g.adm--;return;}}   // Excluding: a win-back leaves both the ended and the renewed counts
+    g.days.push(Math.round((first-t)/864e5));
+    g.late.push(e2p);
+    const w=parseDate(r[22]);if(w&&w.getFullYear()>=2020)g.start.push(Math.round((w-t)/864e5));   // Membership Start Date (W): first class
+  });});
+  // Renewal → next renewal: learners with two or more renewals (same Learner ID), every gap between consecutive renewals,
+  // grouped by the package bought at the earlier renewal (column M)
+  const rr=new Map();
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.rn.forEach(r=>{const k=String(r[3]||'').trim().toUpperCase(),t=parseDate(r[0]);if(k&&t&&t.getFullYear()>=2020)(rr.get(k)||rr.set(k,[]).get(k)).push({t,m:parseNum(r[12]),e:parseDate(r[23])});});});
+  rr.forEach(list=>{if(list.length<2)return;list.sort((a,b)=>a.t-b.t);
+    for(let i=0;i<list.length-1;i++){const a=list[i],b=list[i+1];if(!a.m)continue;
+      const g=by[a.m]=by[a.m]||{m:a.m,adm:0,days:[],late:[],start:[],wb:0};g.rr=g.rr||[];
+      if(a.e&&a.e.getFullYear()>=2020&&(b.t-a.e)/864e5>WINBACK_DAYS){g.wb++;if(!withWinback)continue;}   // came back more than 45 days after that renewal ended
+      g.rr.push(Math.round((b.t-a.t)/864e5));}});
+  return Object.values(by).sort((a,b)=>a.m-b.m);
+}
+function renderTTR(names,ready){
+  const el=document.getElementById('ttr');
+  const avg=a=>a.reduce((s,x)=>s+x,0)/a.length,med=a=>{const b=[...a].sort((x,y)=>x-y),i=b.length>>1;return b.length%2?b[i]:(b[i-1]+b[i])/2;};
+  const head=`<thead><tr class="grp"><th></th><th colspan="3"></th><th class="g"></th><th class="g" colspan="2">Admission → first renewal</th><th class="g" colspan="2">Renewal → next renewal</th></tr>
+    <tr><th>Package</th><th>Memberships ended</th><th>Renewed</th><th>Renewal rate</th><th class="g sh">To 1st class</th><th class="g">Average</th><th>Median</th><th class="g">Average</th><th>Median</th></tr></thead>`;
+  if(!ready){el.innerHTML=head+'<tbody><tr><td colspan="9" class="na" style="text-align:center">Loading…</td></tr></tbody>';return;}
+  const G=firstRenewals(names),days=x=>{x=Math.round(x);return x+(Math.abs(x)===1?' day':' days');};
+  const signed=v=>{v=Math.round(v);return v>0?`<span class="late">+${days(v)}</span>`:v<0?`<span class="early">−${days(-v)}</span>`:'On time';};
+  // Renewal → next renewal vs admission → first renewal: faster gets a small star, slower a small attention mark
+  const mark=(v,ref)=>ref==null||Math.round(v)===Math.round(ref)?'':Math.round(v)<Math.round(ref)?'<i class="mk good" title="Faster than the first renewal">★</i>':'<i class="mk warn" title="Slower than the first renewal — needs attention">!</i>';
+  const late=(a,ref)=>a&&a.length?`<td class="g hl">${mark(avg(a),ref&&ref.length?avg(ref):null)}${days(avg(a))}</td><td>${mark(med(a),ref&&ref.length?med(ref):null)}${days(med(a))}</td>`:'<td class="g na">—</td><td class="na">—</td>';
+  const row=(label,g,cls)=>{const n=g.days.length;
+    if(cls==='total')return`<tr class="total"><td>${label}</td><td>${num(g.adm)}</td><td>${num(n)}</td><td>${g.adm?Math.round(n/g.adm*100)+'%':'—'}</td><td class="g"></td><td class="g"></td><td></td><td class="g"></td><td></td></tr>`;return`<tr class="${cls||''}"><td>${label}</td><td>${num(g.adm)}</td><td>${num(n)}</td><td>${g.adm?Math.round(n/g.adm*100)+'%':'—'}</td>
+    ${g.start.length?`<td class="g">${days(avg(g.start))}</td>`:'<td class="g na">—</td>'}${n?`<td class="g hl">${days(avg(g.days))}</td><td>${days(med(g.days))}</td>`:'<td class="g na">—</td><td class="na">—</td>'}${late(g.rr,g.days)}</tr>`;};
+  const tot={m:0,adm:G.reduce((s,g)=>s+g.adm,0),days:G.flatMap(g=>g.days),late:G.flatMap(g=>g.late),start:G.flatMap(g=>g.start),rr:G.flatMap(g=>g.rr||[]),wb:G.reduce((s,g)=>s+g.wb,0)};
+  document.getElementById('ttr-badge').textContent=withWinback?num(tot.wb)+' win-backs included':num(tot.wb)+' win-backs left out';
+  el.innerHTML=head+'<tbody>'+(G.length?G.map(g=>row(g.m+' month'+(g.m===1?'':'s'),g)).join('')+row('All packages',tot,'total'):'<tr><td colspan="9" class="na" style="text-align:center">No admissions yet</td></tr>')+'</tbody>';
+}
+document.querySelectorAll('.wb button').forEach(b=>b.onclick=()=>{withWinback=b.dataset.wb==='1';document.querySelectorAll('.wb button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
+function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 
 /* Sideways scrolling: arrows move one screenful; dots show where you are */
 const sc=document.getElementById('rec-scroll');

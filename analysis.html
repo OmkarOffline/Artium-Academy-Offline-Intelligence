@@ -174,15 +174,15 @@ const crs=x=>x.courses.length===1?`<div class="crs">${esc(x.courses[0][1].course
 const ctr=x=>[...x.centres].map(n=>`<span class="ctr">${esc(n)}</span>`).join(' ');
 
 const SECTIONS=[
-  {id:'adm',title:'Top 10 Highest-Paying Admissions',sub:'Learners who paid the most at the time of admission (Fresh Sales, Total receipts). A learner who joined more than one course is counted once, with all their admissions added together.',
+  {id:'adm',title:'Top 10 Highest-Paying Admissions',sub:'Learners who paid the most when they joined. A learner who joined more than one course is counted once, with all their admissions added together.',
    head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Admission date',{t:'Months',n:1},{t:'Paid at admission',n:1}],
    rows:(names,all)=>people(names).filter(x=>x.fsPaid>0).sort((a,b)=>b.fsPaid-a.fsPaid).slice(0,10)
      .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),fmtD(x.first),{v:num(x.admMonths),n:1},{v:inr(x.fsPaid),n:1,tot:1}])},
-  {id:'ren',title:'Top 10 Most Renewed Learners',sub:'Learners who appear the most times in the Renewals tab, across all their courses. Ties go to the higher total paid.',
+  {id:'ren',title:'Top 10 Most Renewed Learners',sub:'Learners who have renewed the most times, across all their courses. Ties go to the higher total paid.',
    head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined',{t:'Months purchased',n:1},{t:'Total paid',n:1},{t:'No. of renewals',n:1}],
    rows:(names,all)=>people(names).filter(x=>x.renewals).sort((a,b)=>b.renewals-a.renewals||b.total-a.total).slice(0,10)
      .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),fmtD(x.first),{v:num(x.months),n:1},{v:inr(x.total),n:1},{v:num(x.renewals),n:1,tot:1}])},
-  {id:'ltv',title:'Top 10 Highest Lifetime Spenders',sub:'Total paid by each learner across all their courses: admissions (Fresh Sales, Total receipts) plus every renewal (Renewals, Net coaching fees).',
+  {id:'ltv',title:'Top 10 Highest Lifetime Spenders',sub:'Total paid by each learner across all their courses: what they paid when they joined plus every renewal.',
    head:all=>['#','Learner',...(all?['Centre']:[]),'Course',{t:'No. of renewals',n:1},{t:'Paid at admission',n:1},{t:'Paid in renewals',n:1},{t:'Total paid',n:1}],
    rows:(names,all)=>people(names).sort((a,b)=>b.total-a.total).slice(0,10)
      .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),{v:num(x.renewals),n:1},{v:inr(x.fsPaid),n:1},{v:inr(x.rnPaid),n:1},{v:inr(x.total),n:1,tot:1}])}
