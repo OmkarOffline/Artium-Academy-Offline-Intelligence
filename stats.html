@@ -80,6 +80,7 @@
   .rec-label{font:600 13px/1.35 var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
   .rec-ic{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
   .rec-val{font:600 34px/1.1 var(--display);letter-spacing:-.01em;color:var(--accent);font-variant-numeric:tabular-nums}
+  .rec-val.sm{font-size:28px;line-height:1.3}
   .rec-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .month{display:inline-flex;align-items:center;gap:6px;background:#FBF4E8;border:1px solid #EEDDC0;color:#7A5A2A;border-radius:999px;padding:4px 12px;font:700 13px/1 var(--display);letter-spacing:.02em}
   .centre{display:inline-flex;align-items:center;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 11px;font:600 12px/1 var(--body)}
@@ -169,6 +170,22 @@ function monthAgg(names){
 const pick=f=>names=>{const a=monthAgg(names),o={};for(const k in a){const v=f(a[k]);if(v!=null)o[k]=v;}return o;};
 const num=x=>Math.round(x).toLocaleString('en-IN');
 
+/* Lifetime totals for the Lifetime Value and Average Customer Lifespan cards */
+const FIRST=2024*12+4;   // May 2024 — same start as the Monthly Active Learners page
+const now0=new Date(),TODAY=new Date(now0.getFullYear(),now0.getMonth(),now0.getDate());
+function totals(names){
+  const t={adm:0,ren:0,due:0,months:0,fsSum:0,rnSum:0};
+  const inRange=r=>{const d=parseDate(r[0]);return d&&mi(d)>=FIRST&&mi(d)<=LAST;};
+  const due=r=>{const d=parseDate(r[23]);return d&&d.getFullYear()>=2020&&d<=TODAY&&mi(d)>=FIRST;};   // Membership End Date (X) reached
+  names.forEach(n=>{const d=DATA[n];if(!d)return;
+    d.fs.forEach(r=>{t.fsSum+=parseNum(r[17]);t.months+=parseNum(r[12]);if(inRange(r))t.adm++;if(due(r))t.due++;});
+    d.rn.forEach(r=>{t.rnSum+=parseNum(r[16]);t.months+=parseNum(r[12]);if(inRange(r))t.ren++;if(due(r))t.due++;});});
+  t.mal=t.adm-t.due+t.ren;          // current Monthly Active Learners, as on that page
+  t.churned=t.adm-t.mal;
+  return t;
+}
+const ym=m=>{m=Math.round(m);const y=Math.floor(m/12),r=m%12;return y+' Year'+(y===1?'':'s')+' '+r+' Month'+(r===1?'':'s');};
+
 /* Collections – Total by day */
 function daily(names){
   const m={};
@@ -218,7 +235,14 @@ const RECORDS=[
   {label:'Highest ATV – Renewals in a month',icon:IC.atv,perCentre:true,series:pick(x=>x.rnN?x.rnSum/x.rnN:null),fmt:inr,...MONTH,facts:(names,k)=>{const x=monthAgg(names)[k];
      return[['No. of renewals',num(x.rnN)],['Collections – Renewals',inr(x.rnSum)]];}},
   {label:'Lifetime admissions',icon:IC.life,lifetime:'fsN'},
-  {label:'Lifetime renewals',icon:IC.life,lifetime:'rnN'}
+  {label:'Lifetime renewals',icon:IC.life,lifetime:'rnN'},
+  {label:'Lifetime value',icon:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>',custom:names=>{const t=totals(names);
+     return{val:t.adm?inr((t.fsSum+t.rnSum)/t.adm):'NA',chip:'Per learner',facts:[['Collections – Fresh Sales',inr(t.fsSum)],['Collections – Renewals',inr(t.rnSum)],['Lifetime admissions',num(t.adm)]],
+       split:n=>{const x=totals([n]);return x.adm?inr((x.fsSum+x.rnSum)/x.adm):'NA';}};}},
+  {label:'Average customer lifespan',icon:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',custom:names=>{const t=totals(names);
+     return{val:t.churned>0?ym(t.months/t.churned):'NA',small:true,chip:t.churned>0?'Per churned learner':'No learner has left yet',
+       facts:[['Total customer lifespan',num(t.months)+' months'],['Lifetime admissions',num(t.adm)],['Current active learners',num(t.mal)],['Churned learners',num(t.churned)]],
+       split:n=>{const x=totals([n]);return x.churned>0?ym(x.months/x.churned):'NA';}};}}
 ];
 
 /* Lifetime totals: all entries since the first month, with this year and a monthly average */
@@ -239,6 +263,12 @@ function lifetimeCard(r,names,icon){
 function card(r,names,ready){
   const icon=`<span class="rec-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${r.icon}</svg></span>`;
   if(ready&&r.lifetime)return lifetimeCard(r,names,icon);
+  if(ready&&r.custom){const c=r.custom(names);
+    return`<article class="rec"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div>
+      <div class="rec-val${c.small?' sm':''}">${c.val}</div><div class="rec-meta"><span class="month">${c.chip}</span></div>
+      <div class="facts">${c.facts.map(([l,v])=>`<div class="fact"><span>${l}</span><span>${v}</span></div>`).join('')}</div>
+      ${names.length>1?`<div class="runners"><div class="h">By centre</div>${names.map(n=>`<div class="runner"><span><b>${n}</b></span><span class="r">${c.split(n)}</span></div>`).join('')}</div>`:''}
+    </article>`;}
   if(!ready)return`<article class="rec loading"><div class="rec-top"><div class="rec-label">${r.label}</div>${icon}</div><div class="rec-val">…</div><div class="rec-meta"><span class="month">…</span></div></article>`;
   // perCentre: with several centres shown, rank each centre's months on their own (best centre-month) instead of pooling them
   const byCentre=r.perCentre&&names.length>1;
