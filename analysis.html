@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learner Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Section tray */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs ul{margin:12px 0 0;padding:14px 18px 14px 34px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .defs li{margin:4px 0}
+  .defs li b{color:var(--ink);font-weight:600}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+
+
+  /* Collapsible sections */
+  .tray-head{cursor:pointer;user-select:none}
+  .tray-head .right{display:flex;align-items:center;gap:10px}
+  .chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s,background .15s}
+  .tray-head:hover .chev{background:var(--accent-soft);color:var(--accent)}
+  .tray.closed .chev{transform:rotate(-90deg)}
+  .tray.closed .tray-body{display:none}
+  .tray.closed{padding-bottom:8px}
+  .tray-sub{font-size:13px;color:var(--muted);margin:-6px 2px 14px}
+
+  /* Top-10 tables */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  th,td{padding:13px 16px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line)}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+  th.n,td.n{text-align:right}
+  td{font:400 14px var(--body);color:var(--ink2)}
+  td.n{font:500 14px var(--display)}
+  td.tot{font:600 14.5px var(--display);color:var(--accent)}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:#FCFBFE}
+  .rk{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#F3F1F6;color:var(--muted);font:600 13px var(--display)}
+  tr.r1 .rk{background:linear-gradient(180deg,#E9CF9E,#C9A66B);color:#fff}
+  tr.r2 .rk{background:linear-gradient(180deg,#DCD9E2,#B8B3C2);color:#fff}
+  tr.r3 .rk{background:linear-gradient(180deg,#E6C3A5,#BF8E66);color:#fff}
+  .who b{display:block;font:600 14px var(--body);color:var(--ink)}
+  .who small{font:500 11.5px var(--body);color:var(--faint);letter-spacing:.02em}
+  .crs small{display:block;font-size:12px;color:var(--faint)}
+  .crs.multi{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.35}
+  .who sup{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:3px;padding:0 4px;border-radius:999px;background:var(--gold);color:#fff;font:700 10.5px/1 var(--display);vertical-align:super;cursor:help}
+  .ctr{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font:600 12px var(--body)}
+  .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
+  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Learner Analysis</h1>
+      <div class="subtitle" id="subtitle">Our most valuable learners</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <div id="sections"></div>
+</div>
+
+<script>
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const inr=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const num=x=>Math.round(x).toLocaleString('en-IN');
+const fmtD=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'—';
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+}
+let DATA={};
+
+/* Columns used: A Date · D Learner ID · E Learner's name · H Mobile number · I Course · J Level · M No. of months · Q Net coaching fees (Renewals) · R Total receipts (Fresh Sales) */
+const ID=r=>String(r[3]||'').trim().toUpperCase();
+/* Each course gets its own Learner ID, so one person can have several IDs.
+   The same person = same mobile number (last 10 digits) and same name (letters only, any case).
+   Without a mobile number, the Learner ID stands alone. */
+const personOf=r=>{const m=String(r[7]||'').replace(/\D/g,'').slice(-10),n=String(r[4]||'').toLowerCase().replace(/[^a-z]/g,'');return m&&n?m+'|'+n:'id:'+ID(r);};
+let PERSON={};   // Learner ID → person
+function linkPeople(){PERSON={};CENTRES.forEach(c=>{const d=DATA[c.name];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const k=ID(r);if(k&&!PERSON[k])PERSON[k]=personOf(r);});});}
+
+/* One record per person across both tabs, for the centre(s) shown */
+function people(names){
+  const P=new Map();
+  const add=(r,centre,tab)=>{const id=ID(r);if(!id)return;const key=PERSON[id]||personOf(r),date=parseDate(r[0]);
+    if(!P.has(key))P.set(key,{name:'',centres:new Set(),ids:new Map(),first:null,last:null,fsPaid:0,rnPaid:0,renewals:0,months:0,admMonths:0});
+    const x=P.get(key);x.centres.add(centre);x.months+=parseNum(r[12]);
+    const c=x.ids.get(id)||{course:'',level:'',last:null};   // course of each ID = its latest entry
+    if(!c.last||(date&&date>=c.last)){c.last=date;c.course=r[8]||c.course;c.level=r[9]||c.level;}
+    x.ids.set(id,c);
+    if(!x.last||(date&&date>=x.last)){x.last=date;if(r[4])x.name=r[4];}
+    if(!x.name)x.name=r[4]||'';
+    if(tab==='fs'){x.fsPaid+=parseNum(r[17]);x.admMonths+=parseNum(r[12]);if(!x.first||(date&&date<x.first))x.first=date;}
+    else{x.rnPaid+=parseNum(r[16]);x.renewals++;}
+  };
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.forEach(r=>add(r,n,'fs'));d.rn.forEach(r=>add(r,n,'rn'));});
+  return[...P.values()].map(x=>Object.assign(x,{total:x.fsPaid+x.rnPaid,courses:[...x.ids.entries()]}));
+}
+
+/* Name with the number of courses raised beside it when there is more than one */
+const who=x=>{const n=x.courses.length,tip=x.courses.map(([id,c])=>`${c.course||'—'} (${id})`).join('\n');
+  return`<div class="who"><b>${esc(x.name)||'—'}${n>1?`<sup title="${esc(n+' courses:\n'+tip)}">${n}</sup>`:''}</b><small>${x.courses.map(([id])=>esc(id)).join(' · ')}</small></div>`;};
+const crs=x=>x.courses.length===1?`<div class="crs">${esc(x.courses[0][1].course)||'—'}${x.courses[0][1].level?`<small>${esc(x.courses[0][1].level)}</small>`:''}</div>`
+  :`<div class="crs multi">${x.courses.map(([,c])=>`<span>${esc(c.course)||'—'}</span>`).join('')}</div>`;
+const ctr=x=>[...x.centres].map(n=>`<span class="ctr">${esc(n)}</span>`).join(' ');
+
+const SECTIONS=[
+  {id:'adm',title:'Top 10 Highest-Paying Admissions',sub:'Learners who paid the most at the time of admission (Fresh Sales, Total receipts). A learner who joined more than one course is counted once, with all their admissions added together.',
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Admission date',{t:'Months',n:1},{t:'Paid at admission',n:1}],
+   rows:(names,all)=>people(names).filter(x=>x.fsPaid>0).sort((a,b)=>b.fsPaid-a.fsPaid).slice(0,10)
+     .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),fmtD(x.first),{v:num(x.admMonths),n:1},{v:inr(x.fsPaid),n:1,tot:1}])},
+  {id:'ren',title:'Top 10 Most Renewed Learners',sub:'Learners who appear the most times in the Renewals tab, across all their courses. Ties go to the higher total paid.',
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined',{t:'Months purchased',n:1},{t:'Total paid',n:1},{t:'No. of renewals',n:1}],
+   rows:(names,all)=>people(names).filter(x=>x.renewals).sort((a,b)=>b.renewals-a.renewals||b.total-a.total).slice(0,10)
+     .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),fmtD(x.first),{v:num(x.months),n:1},{v:inr(x.total),n:1},{v:num(x.renewals),n:1,tot:1}])},
+  {id:'ltv',title:'Top 10 Highest Lifetime Spenders',sub:'Total paid by each learner across all their courses: admissions (Fresh Sales, Total receipts) plus every renewal (Renewals, Net coaching fees).',
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course',{t:'No. of renewals',n:1},{t:'Paid at admission',n:1},{t:'Paid in renewals',n:1},{t:'Total paid',n:1}],
+   rows:(names,all)=>people(names).sort((a,b)=>b.total-a.total).slice(0,10)
+     .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),{v:num(x.renewals),n:1},{v:inr(x.fsPaid),n:1},{v:inr(x.rnPaid),n:1},{v:inr(x.total),n:1,tot:1}])}
+];
+
+const closed=(()=>{try{return JSON.parse(localStorage.getItem('artium_la_closed')||'{}');}catch(e){return{};}})();
+function toggleSec(id){closed[id]=!closed[id];try{localStorage.setItem('artium_la_closed',JSON.stringify(closed));}catch(e){}document.getElementById('sec-'+id).classList.toggle('closed',!!closed[id]);}
+
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  document.getElementById('subtitle').textContent=sel?'Our most valuable learners — '+sel.name+', '+sel.city:'Our most valuable learners — all centres combined';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name),all=!sel,ready=names.every(n=>DATA[n]);
+  document.getElementById('sections').innerHTML=SECTIONS.map(s=>{
+    const head=s.head(all).map(h=>typeof h==='string'?`<th>${h}</th>`:`<th class="n">${h.t}</th>`).join('');
+    const rows=ready?s.rows(names,all):null;
+    const body=!ready?`<tr><td colspan="9" class="empty">Loading…</td></tr>`:!rows.length?`<tr><td colspan="9" class="empty">No entries yet</td></tr>`:
+      rows.map((cells,i)=>`<tr class="r${i+1}"><td><span class="rk">${i+1}</span></td>${cells.map(c=>typeof c==='string'?`<td>${c}</td>`:`<td class="${c.n?'n':''}${c.tot?' tot':''}">${c.v}</td>`).join('')}</tr>`).join('');
+    return`<section class="tray${closed[s.id]?' closed':''}" id="sec-${s.id}">
+      <div class="tray-head" onclick="toggleSec('${s.id}')" role="button" aria-expanded="${!closed[s.id]}"><div class="tray-title">${s.title}</div>
+        <div class="right"><span class="badge">Top 10</span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></div></div>
+      <div class="tray-body"><div class="tray-sub">${s.sub}</div><div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></div>
+    </section>`;}).join('');
+}
+
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_la_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_la_centre',selCentre);}catch(e){}render();});
+
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
+      DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};
+    });
+    linkPeople();
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+}
+load();
+</script>
+</body>
+</html>
