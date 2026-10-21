@@ -155,6 +155,9 @@
   .ev.ph.can{cursor:pointer}
   .ev.ph.can:hover{box-shadow:0 0 0 1px rgba(155,44,31,.35)}
   .ev .mvd{font-weight:700;margin-right:4px}
+  .ev.sp{font-weight:600}
+  .ev.sp::before{display:none}
+  .ev .star{color:var(--gold,#A8844F);margin-right:4px;font-size:.85em}
   .ev .from{font-weight:400;opacity:.75}
   .ev.gone{font:500 11px/1.35 var(--body);color:var(--faint);text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);padding:0 2px}
   .ev.gone .cb{text-decoration:none}
@@ -207,7 +210,7 @@
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="cal-defs" onclick="toggleDefs(this,'cal-defs')"><span class="i">i</span>How this calendar works</button>
       <div class="defs-list" id="cal-defs" hidden>
         <div class="def"><div class="dt">Public holidays:</div><p>The state government holidays for each city — Chennai (Tamil Nadu), Bangalore (Karnataka) and Mumbai (Maharashtra) — kept in the State Holidays sheet. Small letters show where each one applies: C Chennai, B Bangalore, M Mumbai. The same festival can fall on different dates in different cities. For a year that isn't in the sheet yet, Google's national public holidays are shown for every city. Hover over a holiday to see each city's name for it.</p></div>
-        <div class="def"><div class="dt">Festivals &amp; special days:</div><p>Festivals and observances from the same Google Calendar — useful for planning communication, even when they aren't days off.</p></div>
+        <div class="def"><div class="dt">Festivals &amp; special days:</div><p>Festivals and observances from the same Google Calendar — useful for planning communication, even when they aren't days off. Days marked ✦ are our own special days for social media planning; the social media team gets an email about each one 20 days before.</p></div>
         <div class="def"><div class="dt">Long weekend:</div><p>Three or more days off in a row, counting Saturdays, Sundays and that city's public holidays — for example a holiday on a Friday or a Monday. A holiday on a Saturday or Sunday doesn't make one. The city letters show where the long weekend applies; pick a city to see only its long weekends.</p></div>
         <div class="def"><div class="dt">Long weekend with 1 day's leave:</div><p>A holiday on a Tuesday or Thursday leaves one working day between it and the weekend. Many people take that day off, turning it into a four-day break. The day to take off is marked with a dashed box.</p></div>
         <div class="def"><div class="dt">Moved holidays:</div><p>If an academy observes a holiday on a different day, the Head of Offline Operations or a Centre Manager can click the holiday and move it — or mark it not observed — for their city. Only that city changes; the other cities keep the original date. A moved holiday shows ↪ on its new date, and the original date shows it crossed out. Long weekends update to match.</p></div>
@@ -262,7 +265,7 @@ const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate
 let view={y:TODAY.getFullYear(),m:TODAY.getMonth()};
 const show={ph:true,lw:true,ob:true,our:true};
 let OURS=[],CAN_EDIT=false,ME='';
-let EVENTS=[],BYDAY=new Map(),LONG=[];
+let EVENTS=[],BYDAY=new Map(),LONG=[],SPECIAL=[];
 
 /* ── Public holidays by city ──
    Each city's holidays come from the State Holidays sheet (Chennai = Tamil Nadu, Bangalore = Karnataka, Mumbai = Maharashtra).
@@ -287,6 +290,10 @@ function buildHolidays(){
   BYDAY=new Map();
   EVENTS.forEach(e=>{const ph=e.type==='Public holiday'&&PH.has(e.date)&&PH.get(e.date).name===e.name;if(ph)return;
     (BYDAY.get(e.date)||BYDAY.set(e.date,[]).get(e.date)).push(e.type==='Public holiday'?Object.assign({},e,{type:'Observance',elsewhere:true}):e);});
+  // Our special days (for social media planning) — a Google festival with the same name that day is replaced by ours
+  SPECIAL.filter(sp=>!sp.city||cityF==='all'||sp.city===cityF).forEach(sp=>{const l=BYDAY.get(sp.date)||BYDAY.set(sp.date,[]).get(sp.date);
+    const same=l.findIndex(e=>e.name.toLowerCase()===sp.name.toLowerCase());if(same>=0)l.splice(same,1);
+    l.unshift({date:sp.date,name:sp.name,type:'Observance',special:true,notes:sp.notes});});
 }
 /* One day's holidays split into groups: cities that moved a holiday here get their own group ("↪ … from 8 Nov"), the rest share one */
 function phSplit(k,ph,phc){const mv=ph.moved||{},stay=phc.filter(c=>!mv[c]),moved=phc.filter(c=>mv[c]),out=[];
@@ -348,7 +355,7 @@ function render(){
       (isBridge?`<span class="bridgetag">Take 1 day off${badges(l.cities)}</span>`:'')+
       (ph?phPills(k,ph,phc):'')+
       (show.ph&&PH.get(k)&&PH.get(k).out?PH.get(k).out.filter(o=>citiesShown().includes(o.city)).map(o=>`<span class="ev gone">${esc(o.name)} — ${o.to?'moved to '+fmtD(o.to):'not observed'}${badges([o.city])}</span>`).join(''):'')+
-      evs.map(e=>`<span class="ev ob">${esc(e.name)}</span>`).join('')+
+      evs.map(e=>`<span class="ev ob${e.special?' sp':''}"${e.notes?` title="${esc(e.notes)}"`:''}>${e.special?'<b class="star">✦</b>':''}${esc(e.name)}</span>`).join('')+
       ours.map(o=>`<span class="ev our" data-id="${esc(o.id)}" title="${esc(o.type+(o.notes?' — '+o.notes:'')+' · added by '+o.by)}">${esc(o.title)}<small>${esc(o.type)}${o.centre&&o.centre!=='All centres'?' · '+esc(o.centre):''}</small></span>`).join('')+'</div>';
   }
   document.getElementById('grid').innerHTML=html;
@@ -363,7 +370,7 @@ function render(){
   const mev=(show.ph?[...PH.keys()].filter(k=>inMonth(k)&&phOn(k).length).flatMap(k=>phSplit(k,PH.get(k),phOn(k)).map(p=>({date:k,name:p.name,type:'Public holiday',cs:p.cs,national:p.plain,from:p.from}))):[])
     .concat(show.ob?[...BYDAY.keys()].filter(inMonth).flatMap(k=>BYDAY.get(k)):[])
     .concat(show.our?OURS.filter(o=>Math.floor(o.from/100)<=mk&&mk<=Math.floor((o.to||o.from)/100)).map(o=>({date:Math.max(o.from,mk*100+1),name:o.title,type:'our',o})):[]).sort((a,b)=>a.date-b.date);
-  document.getElementById('m-list').innerHTML=mev.length?mev.map(e=>{const d=fromKey(e.date);return`<div class="li">${fmt(d)}<div><div class="t">${esc(e.name)}${e.type==='Public holiday'&&!e.national?badges(e.cs):''}<span class="tag ${e.type==='Public holiday'?'ph':e.type==='our'?'our':'ob'}">${e.type==='Public holiday'?'Public holiday':e.type==='our'?esc(e.o.type):e.elsewhere?'Holiday in other states':'Festival / special day'}</span></div><div class="s">${e.type==='our'?ourWhen(e.o):['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+(d.getDay()===1?' · academy closed anyway':'')+(e.from?' · moved here from '+fmtD(e.from):'')}</div></div></div>`;}).join(''):'<div class="empty">Nothing this month.</div>';
+  document.getElementById('m-list').innerHTML=mev.length?mev.map(e=>{const d=fromKey(e.date);return`<div class="li">${fmt(d)}<div><div class="t">${esc(e.name)}${e.type==='Public holiday'&&!e.national?badges(e.cs):''}<span class="tag ${e.type==='Public holiday'?'ph':e.type==='our'?'our':'ob'}">${e.type==='Public holiday'?'Public holiday':e.type==='our'?esc(e.o.type):e.elsewhere?'Holiday in other states':e.special?'Special day':'Festival / special day'}</span></div><div class="s">${e.type==='our'?ourWhen(e.o):['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+(d.getDay()===1?' · academy closed anyway':'')+(e.from?' · moved here from '+fmtD(e.from):'')}</div></div></div>`;}).join(''):'<div class="empty">Nothing this month.</div>';
 }
 
 async function load(refresh){
@@ -372,6 +379,7 @@ async function load(refresh){
   try{
     const j=await ArtiumAuth.call('holidays',{refresh:!!refresh});
     EVENTS=(j.events||[]).map(e=>({date:+e.date,name:e.name,type:e.type}));
+    SPECIAL=(j.special||[]).map(s=>({date:+s.date,name:s.name,city:s.city||'',notes:s.notes||''}));
     OURS=(j.entries||[]).map(o=>Object.assign({},o,{from:+o.from,to:+(o.to||o.from)}));
     CAN_EDIT=!!j.canEdit;document.getElementById('add').hidden=!CAN_EDIT;
     STATE=(j.state||[]).map(h=>({date:+h.date,name:h.name,city:h.city})).filter(h=>CITIES.includes(h.city));
@@ -477,7 +485,7 @@ document.getElementById('prev').onclick=()=>{view.m--;if(view.m<0){view.m=11;vie
 document.getElementById('next').onclick=()=>{view.m++;if(view.m>11){view.m=0;view.y++;}render();};
 document.getElementById('today').onclick=()=>{view={y:TODAY.getFullYear(),m:TODAY.getMonth()};render();};
 document.getElementById('refresh').onclick=()=>load(true);
-document.querySelectorAll('.cityf button').forEach(b=>b.onclick=()=>{cityF=b.dataset.c;document.querySelectorAll('.cityf button').forEach(x=>x.setAttribute('aria-pressed',x===b));LONG=findLongWeekends();render();});
+document.querySelectorAll('.cityf button').forEach(b=>b.onclick=()=>{cityF=b.dataset.c;document.querySelectorAll('.cityf button').forEach(x=>x.setAttribute('aria-pressed',x===b));buildHolidays();LONG=findLongWeekends();render();});
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{show[c.dataset.k]=!show[c.dataset.k];c.setAttribute('aria-pressed',show[c.dataset.k]);render();});
 function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 render();load(false);
