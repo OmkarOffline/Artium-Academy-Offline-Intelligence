@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Section tray */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs ul{margin:12px 0 0;padding:14px 18px 14px 34px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .defs li{margin:4px 0}
+  .defs li b{color:var(--ink);font-weight:600}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+
+
+  .defs{padding:14px 2px 0}
+  .defs{padding:14px 2px 0}
+  .defs-list{margin:12px 0 0;padding:18px 22px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:16px}
+  .defs-list[hidden]{display:none}
+  .def .dt{font:600 13.5px/1.3 var(--display);color:var(--ink);margin-bottom:3px}
+  .def p{font-size:13.5px;line-height:1.6;color:var(--muted);max-width:980px}
+  /* Calendar */
+  .refresh{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;box-shadow:var(--shadow);transition:background .15s,color .15s}
+  .refresh:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .refresh svg{transition:transform .6s}
+  .refresh.spin svg{animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .head-right{display:flex;align-items:center;gap:14px}
+  .cal-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 2px 16px}
+  .mnav{display:flex;align-items:center;gap:10px}
+  .mnav h2{font:600 24px/1.2 var(--display);color:var(--ink);min-width:200px;text-align:center}
+  .mnav button{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--ink2);cursor:pointer;box-shadow:var(--shadow)}
+  .mnav button:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+  .mnav .today{width:auto;border-radius:999px;padding:0 14px;font:600 12.5px var(--body)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 12px 6px 10px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .chip i{width:10px;height:10px;border-radius:3px}
+  .chip[aria-pressed="false"]{opacity:.45}
+  .k-ph{background:#C0392B}.k-lw{background:linear-gradient(90deg,#E9CF9E,#C9A66B)}.k-ob{background:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--border);border-radius:18px;overflow:hidden;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  .dow{padding:12px 12px 10px;background:#FAF9F7;border-bottom:1px solid var(--border);font:600 11.5px/1.2 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+  .dow small{display:block;font:500 10px/1.3 var(--body);letter-spacing:.02em;text-transform:none;color:var(--faint);margin-top:2px}
+  .day{position:relative;min-height:128px;padding:10px 10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:5px}
+  .day:nth-child(7n){border-right:0}
+  .day.out{background:#FCFBFA}.day.out .dn{color:var(--ghost)}
+  .day.mon{background:repeating-linear-gradient(135deg,#FBFAF8 0 8px,#F7F5F2 8px 16px)}
+  .day.wkend .dn{color:var(--muted)}
+  .dn{font:600 15px/1 var(--display);color:var(--ink)}
+  .day.today .dn{display:inline-grid;place-items:center;width:28px;height:28px;margin:-5px 0 0 -5px;border-radius:50%;background:var(--accent);color:#fff}
+  .ev{font:500 12px/1.35 var(--body);border-radius:7px;padding:3px 7px}
+  .ev.ph{background:#FDECEB;color:#9B2C1F;font-weight:600}
+  .ev.ob{color:var(--accent);padding-left:0;padding-right:0}
+  .ev.ob::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:1px}
+  .day.lw{box-shadow:inset 0 4px 0 #C9A66B}
+  .day.lw.bridge{box-shadow:inset 0 4px 0 #E9CF9E}
+  .lwtag{font:700 10px/1.2 var(--body);letter-spacing:.08em;text-transform:uppercase;color:#8A6A35}
+  .bridgetag{font:600 11px/1.3 var(--body);color:#8A6A35;border:1px dashed #D9BE8C;border-radius:7px;padding:3px 7px;background:#FFFBF3}
+  .side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:22px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:18px 20px}
+  .card h3{font:600 16px var(--display);color:var(--ink);margin-bottom:12px}
+  .li{display:flex;gap:14px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+  .li:first-of-type{border-top:0}
+  .li .d{flex:none;width:58px;text-align:center;border-radius:12px;background:#FAF9F7;padding:6px 0}
+  .li .d b{display:block;font:700 18px/1.1 var(--display);color:var(--ink)}
+  .li .d small{font:600 10.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .li .t{font:600 14px var(--body);color:var(--ink)}
+  .li .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .li .t .tag{margin-left:6px;font:600 11px var(--body);border-radius:999px;padding:2px 8px;vertical-align:1px}
+  .tag.ph{background:#FDECEB;color:#9B2C1F}.tag.ob{background:var(--accent-soft);color:var(--accent)}.tag.lw{background:#FBF4E8;color:#7A5A2A}
+  .k-our{background:#1F7A6B}
+  .add{display:inline-flex;align-items:center;gap:7px;border:0;background:var(--accent);color:#fff;border-radius:999px;padding:8px 16px 8px 13px;font:600 13px var(--body);cursor:pointer;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .add:hover{background:#4A2270}
+  .ev.our{background:#E6F4F1;color:#1F6B5E;font-weight:600;cursor:pointer}
+  .ev.our small{display:block;font-weight:500;color:#4F8F84;font-size:10.5px}
+  .tag.our{background:#E6F4F1;color:#1F6B5E}
+  .modal{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:rgba(34,18,47,.35)}
+  .modal[hidden]{display:none}
+  .sheet{width:100%;max-width:460px;background:#fff;border-radius:20px;box-shadow:0 30px 60px -20px rgba(34,18,47,.5);padding:24px 24px 20px}
+  .sheet h3{font:600 20px var(--display);color:var(--ink);margin-bottom:4px}
+  .sheet .sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+  .fld{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+  .fld label{font:600 12px var(--body);color:var(--ink2)}
+  .fld input,.fld select,.fld textarea{height:40px;border:1px solid var(--border);border-radius:11px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink)}
+  .fld textarea{height:70px;padding:10px 12px;resize:vertical}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .types{display:flex;flex-wrap:wrap;gap:6px}
+  .types button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 12px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .types button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .acts{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:11px;padding:10px 18px;font:600 13.5px var(--body);color:var(--ink2);cursor:pointer}
+  .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.del{margin-right:auto;color:var(--bad)}
+  .fmsg{min-height:18px;font-size:12.5px;color:var(--bad)}
+  .wb{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px;box-shadow:var(--shadow)}
+  .wb button{border:0;background:none;border-radius:999px;padding:6px 13px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer}
+  .wb button:hover{background:var(--accent-soft)}
+  .wb button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .cal-bar{row-gap:12px}
+  .cb{display:inline-flex;gap:2px;margin-left:6px;vertical-align:1px}
+  .cb i{display:inline-grid;place-items:center;width:15px;height:15px;border-radius:4px;background:rgba(155,44,31,.1);color:#9B2C1F;font:700 9.5px/1 var(--body);font-style:normal;letter-spacing:0}
+  .li .cb i,.tag+.cb i,.lwtag .cb i,.bridgetag .cb i{background:#F4EFE6;color:#8A6A35}
+  .li .t .cb{margin-left:6px}
+  .ev.ph.can{cursor:pointer}
+  .ev.ph.can:hover{box-shadow:0 0 0 1px rgba(155,44,31,.35)}
+  .ev .mvd{font-weight:700;margin-right:4px}
+  .ev .from{font-weight:400;opacity:.75}
+  .ev.gone{font:500 11px/1.35 var(--body);color:var(--faint);text-decoration:line-through;text-decoration-color:rgba(0,0,0,.25);padding:0 2px}
+  .ev.gone .cb{text-decoration:none}
+  .cities{display:flex;gap:8px;flex-wrap:wrap}
+  .cities label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:999px;padding:6px 12px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .cities input{accent-color:var(--accent)}
+  .orig{background:#FDECEB;color:#9B2C1F;border-radius:10px;padding:10px 12px;font:600 14px var(--body);margin-bottom:14px}
+  .orig small{display:block;font:500 12px var(--body);color:#B4554A;margin-top:2px}
+  .empty{color:var(--muted);font-size:13.5px;padding:6px 0}
+  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.day{min-height:92px;padding:6px}.ev{font-size:11px}.side{grid-template-columns:1fr}.dow small{display:none}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow">Holidays &amp; special days</div>
+      <h1>Calendar</h1>
+      <div class="subtitle">Public holidays by city, long weekends and festivals, plus our own entries</div>
+    </div>
+    <div class="head-right">
+      <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <button class="refresh" id="refresh" type="button" title="Check Google Calendar for the latest holidays"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/></svg>Refresh</button>
+    </div>
+  </header>
+
+  <section class="tray">
+    <div class="cal-bar">
+      <div class="mnav">
+        <button type="button" id="prev" aria-label="Previous month"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <h2 id="mtitle">—</h2>
+        <button type="button" id="next" aria-label="Next month"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+        <button type="button" class="today" id="today">Today</button>
+      </div>
+      <div class="wb cityf" role="group" aria-label="City"><button type="button" data-c="all" aria-pressed="true">All cities</button><button type="button" data-c="Chennai" aria-pressed="false">Chennai</button><button type="button" data-c="Bangalore" aria-pressed="false">Bangalore</button><button type="button" data-c="Mumbai" aria-pressed="false">Mumbai</button></div>
+      <div class="chips">
+        <button type="button" class="chip" data-k="ph" aria-pressed="true"><i class="k-ph"></i>Public holidays</button>
+        <button type="button" class="chip" data-k="lw" aria-pressed="true"><i class="k-lw"></i>Long weekends</button>
+        <button type="button" class="chip" data-k="ob" aria-pressed="true"><i class="k-ob"></i>Festivals &amp; special days</button>
+        <button type="button" class="chip" data-k="our" aria-pressed="true"><i class="k-our"></i>Our entries</button>
+        <button type="button" class="add" id="add" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add entry</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="side">
+      <div class="card"><h3>Long weekends coming up</h3><div id="lw-list"></div></div>
+      <div class="card"><h3 id="m-list-title">This month</h3><div id="m-list"></div></div>
+    </div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="cal-defs" onclick="toggleDefs(this,'cal-defs')"><span class="i">i</span>How this calendar works</button>
+      <div class="defs-list" id="cal-defs" hidden>
+        <div class="def"><div class="dt">Public holidays:</div><p>The state government holidays for each city — Chennai (Tamil Nadu), Bangalore (Karnataka) and Mumbai (Maharashtra) — kept in the State Holidays sheet. Small letters show where each one applies: C Chennai, B Bangalore, M Mumbai. The same festival can fall on different dates in different cities. For a year that isn't in the sheet yet, Google's national public holidays are shown for every city. Hover over a holiday to see each city's name for it.</p></div>
+        <div class="def"><div class="dt">Festivals &amp; special days:</div><p>Festivals and observances from the same Google Calendar — useful for planning communication, even when they aren't days off.</p></div>
+        <div class="def"><div class="dt">Long weekend:</div><p>Three or more days off in a row, counting Saturdays, Sundays and that city's public holidays — for example a holiday on a Friday or a Monday. A holiday on a Saturday or Sunday doesn't make one. The city letters show where the long weekend applies; pick a city to see only its long weekends.</p></div>
+        <div class="def"><div class="dt">Long weekend with 1 day's leave:</div><p>A holiday on a Tuesday or Thursday leaves one working day between it and the weekend. Many people take that day off, turning it into a four-day break. The day to take off is marked with a dashed box.</p></div>
+        <div class="def"><div class="dt">Moved holidays:</div><p>If an academy observes a holiday on a different day, the Head of Offline Operations or a Centre Manager can click the holiday and move it — or mark it not observed — for their city. Only that city changes; the other cities keep the original date. A moved holiday shows ↪ on its new date, and the original date shows it crossed out. Long weekends update to match.</p></div>
+        <div class="def"><div class="dt">Our entries:</div><p>Birthdays, school holidays, school exams and other events added by the offline staff. Everyone who can open the calendar sees them; only staff (not teachers) can add, edit or delete them. Click an entry to edit it.</p></div>
+        <div class="def"><div class="dt">Mondays:</div><p>Shaded, since the academy is closed on Mondays.</p></div>
+        <div class="def"><div class="dt">Refresh:</div><p>The calendar checks Google every few hours by itself. Refresh checks again straight away, in case a holiday has been added or moved.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="hmodal" hidden role="dialog" aria-labelledby="h-title">
+  <form class="sheet" id="hform">
+    <h3 id="h-title">Change holiday</h3>
+    <div class="sub">For when an academy observes this holiday on a different day. Other cities keep the original date.</div>
+    <div class="orig" id="h-orig"></div>
+    <div class="fld"><label>For</label><div class="cities" id="h-cities"></div></div>
+    <div class="fld"><label>Change</label><div class="types" id="h-kind"><button type="button" data-k="Moved" aria-pressed="true">Move to another date</button><button type="button" data-k="Not observed" aria-pressed="false">Not observed</button></div></div>
+    <div class="fld" id="h-tofld"><label for="h-to">New date</label><input id="h-to" type="date"></div>
+    <div class="fld"><label for="h-note">Note <span style="font-weight:400;color:var(--faint)">(optional)</span></label><input id="h-note" maxlength="200" placeholder="e.g. Centre open on 8 Nov for the Diwali showcase"></div>
+    <div class="fmsg" id="h-msg"></div>
+    <div class="acts"><button type="button" class="btn del" id="h-undo" hidden>Back to original date</button><button type="button" class="btn" id="h-cancel">Cancel</button><button type="submit" class="btn pri" id="h-save">Save</button></div>
+  </form>
+</div>
+
+<div class="modal" id="modal" hidden role="dialog" aria-labelledby="m-title">
+  <form class="sheet" id="form">
+    <h3 id="m-title">Add entry</h3>
+    <div class="sub">Visible to everyone who can open this calendar.</div>
+    <div class="fld"><label>Type</label><div class="types" id="types"></div></div>
+    <div class="fld"><label for="f-title">Title</label><input id="f-title" required maxlength="80" placeholder="e.g. DAV School half-yearly exams"></div>
+    <div class="row2">
+      <div class="fld"><label for="f-from">From</label><input id="f-from" type="date" required></div>
+      <div class="fld"><label for="f-to">To <span style="font-weight:400;color:var(--faint)">(optional)</span></label><input id="f-to" type="date"></div>
+    </div>
+    <div class="fld"><label for="f-centre">Centre</label><select id="f-centre"><option>All centres</option><option>Alwarpet</option><option>Thoraipakkam</option><option>Borewell Road</option></select></div>
+    <div class="fld"><label for="f-notes">Notes <span style="font-weight:400;color:var(--faint)">(optional)</span></label><textarea id="f-notes" maxlength="300" placeholder="Anything the team should know"></textarea></div>
+    <div class="fmsg" id="f-msg"></div>
+    <div class="acts"><button type="button" class="btn del" id="f-del" hidden>Delete</button><button type="button" class="btn" id="f-cancel">Cancel</button><button type="submit" class="btn pri" id="f-save">Save</button></div>
+  </form>
+</div>
+
+<script>
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const key=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+const fromKey=k=>new Date(Math.floor(k/10000),Math.floor(k/100)%100-1,k%100);
+const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+let view={y:TODAY.getFullYear(),m:TODAY.getMonth()};
+const show={ph:true,lw:true,ob:true,our:true};
+let OURS=[],CAN_EDIT=false,ME='';
+let EVENTS=[],BYDAY=new Map(),LONG=[];
+
+/* ── Public holidays by city ──
+   Each city's holidays come from the State Holidays sheet (Chennai = Tamil Nadu, Bangalore = Karnataka, Mumbai = Maharashtra).
+   For a year not in that sheet yet, Google's national public holidays are used for every city. */
+const CITIES=['Chennai','Bangalore','Mumbai'],LETTER={Chennai:'C',Bangalore:'B',Mumbai:'M'};
+let STATE=[],PH=new Map(),cityF='all',CHANGES=[],MOVE=[];
+function buildHolidays(){
+  const covered=new Set(STATE.map(h=>Math.floor(h.date/10000)));
+  PH=new Map();
+  const g=k=>(PH.get(k)||PH.set(k,{name:'',cities:{},national:false}).get(k));
+  STATE.forEach(h=>{const x=g(h.date);x.cities[h.city]=h.name;});
+  EVENTS.filter(e=>e.type==='Public holiday').forEach(e=>{
+    if(covered.has(Math.floor(e.date/10000))){if(PH.has(e.date))PH.get(e.date).name=e.name;}   // Google's name where a city also has a holiday that day
+    else{const x=g(e.date);x.name=e.name;x.national=true;CITIES.forEach(c=>x.cities[c]=e.name);}
+  });
+  // Changes made by centre heads: a holiday moved to another date (or not observed) for one city leaves the other cities as they were
+  CHANGES.forEach(ch=>{const x=PH.get(ch.from);if(!x||!x.cities[ch.city])return;const nm=x.cities[ch.city],orig=x.name||nm;
+    delete x.cities[ch.city];(x.out=x.out||[]).push({city:ch.city,to:ch.to,name:nm});
+    if(ch.to){const y=g(ch.to);y.cities[ch.city]=nm;(y.moved=y.moved||{})[ch.city]={from:ch.from,name:nm,by:ch.by,note:ch.note};if(!y.name)y.name=orig;}});
+  PH.forEach(x=>{if(!x.name&&Object.keys(x.cities).length)x.name=x.cities[CITIES.find(c=>x.cities[c])];});   // no Google name: use the first city's name (hover shows each city's)
+  // Google public holidays that none of our cities observe are shown as special days instead
+  BYDAY=new Map();
+  EVENTS.forEach(e=>{const ph=e.type==='Public holiday'&&PH.has(e.date)&&PH.get(e.date).name===e.name;if(ph)return;
+    (BYDAY.get(e.date)||BYDAY.set(e.date,[]).get(e.date)).push(e.type==='Public holiday'?Object.assign({},e,{type:'Observance',elsewhere:true}):e);});
+}
+/* One day's holidays split into groups: cities that moved a holiday here get their own group ("↪ … from 8 Nov"), the rest share one */
+function phSplit(k,ph,phc){const mv=ph.moved||{},stay=phc.filter(c=>!mv[c]),moved=phc.filter(c=>mv[c]),out=[];
+  if(stay.length)out.push({name:moved.some(c=>mv[c].name===ph.name)&&!stay.some(c=>ph.cities[c]===ph.name)?ph.cities[stay[0]]:ph.name,cs:stay,
+    tip:stay.map(c=>c+': '+ph.cities[c]).join('\n'),plain:ph.national&&stay.length===CITIES.length});
+  const grp={};moved.forEach(c=>{const g=mv[c].name+'|'+mv[c].from;(grp[g]=grp[g]||[]).push(c);});
+  Object.values(grp).forEach(cs=>{const m=mv[cs[0]];out.push({name:m.name,cs,from:m.from,
+    tip:cs.map(c=>c+': '+m.name+' — moved here from '+fmtD(m.from)+(mv[c].by?' by '+mv[c].by:'')+(mv[c].note?' ('+mv[c].note+')':'')).join('\n')});});
+  return out;}
+function phPills(k,ph,phc){const can=MOVE.length?' can':'';
+  return phSplit(k,ph,phc).map(p=>`<span class="ev ph${can}" data-k="${k}" title="${esc(p.tip)}">${p.from?'<b class="mvd">↪</b>':''}${esc(p.name)}${p.from?`<span class="from"> · from ${fmtD(p.from)}</span>`:''}${p.plain?'':badges(p.cs)}</span>`).join('');}
+const citiesShown=()=>cityF==='all'?CITIES:[cityF];
+const phOn=(k)=>{const x=PH.get(k);return x?citiesShown().filter(c=>x.cities[c]):[];};
+
+/* Long weekends, worked out city by city: runs of 3+ days off (Saturday, Sunday or a public holiday) that include a holiday,
+   plus breaks where one working day sits between a holiday and the weekend. The same break in several cities is shown once. */
+function longWeekendsFor(city){
+  const hol=new Set([...PH.keys()].filter(k=>PH.get(k).cities[city]));
+  const off=d=>d.getDay()===0||d.getDay()===6||hol.has(key(d));
+  const out=[],seen=new Set();
+  [...hol].sort().forEach(k=>{
+    const h=fromKey(k);if(seen.has(k))return;
+    let a=h,b=h;while(off(addDays(a,-1)))a=addDays(a,-1);while(off(addDays(b,1)))b=addDays(b,1);
+    const len=Math.round((b-a)/864e5)+1;
+    for(let d=a;d<=b;d=addDays(d,1))seen.add(key(d));
+    if(len>=3){out.push({from:a,to:b,days:len,bridge:null});return;}
+    for(const dir of[-1,1]){const w=dir<0?addDays(a,-1):addDays(b,1);const beyond=addDays(w,dir);
+      if(!off(w)&&off(beyond)){let x=beyond;while(off(addDays(x,dir)))x=addDays(x,dir);
+        const from=dir<0?x:a,to=dir<0?b:x,days=Math.round((to-from)/864e5)+1;
+        if(days>=4){out.push({from,to,days,bridge:w});for(let d=from;d<=to;d=addDays(d,1))seen.add(key(d));break;}}}
+  });
+  out.forEach(l=>{l.names=[];for(let d=l.from;d<=l.to;d=addDays(d,1)){const x=PH.get(key(d));if(x&&x.cities[city])l.names.push(x.cities[city]);}});
+  return out;
+}
+function findLongWeekends(){
+  const m=new Map();
+  citiesShown().forEach(c=>longWeekendsFor(c).forEach(l=>{const id=key(l.from)+'-'+key(l.to)+'-'+(l.bridge?key(l.bridge):'');
+    if(!m.has(id))m.set(id,Object.assign(l,{cities:[]}));m.get(id).cities.push(c);}));
+  return[...m.values()].sort((x,y)=>x.from-y.from||y.days-x.days);
+}
+const fmtD=k=>{const d=fromKey(k);return d.getDate()+' '+MON[d.getMonth()];};
+const badges=cs=>cs.length&&!(cs.length===1&&cityF!=='all')?`<span class="cb">${CITIES.filter(c=>cs.includes(c)).map(c=>`<i title="${c}">${LETTER[c]}</i>`).join('')}</span>`:'';
+
+function render(){
+  const first=new Date(view.y,view.m,1),start=addDays(first,-((first.getDay()+6)%7));   // weeks start on Monday
+  document.getElementById('mtitle').textContent=MONTHS[view.m]+' '+view.y;
+  const lwDay=new Map();LONG.forEach(l=>{for(let d=l.from;d<=l.to;d=addDays(d,1))lwDay.set(key(d),l);});
+  let html=DOW.map((d,i)=>`<div class="dow">${d}${i===0?'<small>Academy closed</small>':''}</div>`).join('');
+  for(let i=0;i<42;i++){
+    const d=addDays(start,i),k=key(d),inM=d.getMonth()===view.m;
+    if(i===35&&!inM)break;   // drop a sixth row that is entirely next month
+    const evs=show.ob?(BYDAY.get(k)||[]):[];
+    const phc=show.ph?phOn(k):[],ph=phc.length?PH.get(k):null;
+    const ours=show.our?OURS.filter(o=>o.from<=k&&k<=(o.to||o.from)):[];
+    const l=show.lw?lwDay.get(k):null,isBridge=l&&l.bridge&&key(l.bridge)===k;
+    const cls=['day',inM?'':'out',d.getDay()===1?'mon':'',d.getDay()%6===0?'wkend':'',+d===+TODAY?'today':'',l?'lw':'',isBridge?'bridge':''].join(' ');
+    html+=`<div class="${cls}"><span class="dn">${d.getDate()}</span>`+
+      (show.lw?LONG.filter(x=>+x.from===+d).map(x=>`<span class="lwtag">${x.bridge?x.days+'-day break · 1 day leave':'Long weekend · '+x.days+' days'}${badges(x.cities)}</span>`).join(''):'')+
+      (isBridge?`<span class="bridgetag">Take 1 day off${badges(l.cities)}</span>`:'')+
+      (ph?phPills(k,ph,phc):'')+
+      (show.ph&&PH.get(k)&&PH.get(k).out?PH.get(k).out.filter(o=>citiesShown().includes(o.city)).map(o=>`<span class="ev gone">${esc(o.name)} — ${o.to?'moved to '+fmtD(o.to):'not observed'}${badges([o.city])}</span>`).join(''):'')+
+      evs.map(e=>`<span class="ev ob">${esc(e.name)}</span>`).join('')+
+      ours.map(o=>`<span class="ev our" data-id="${esc(o.id)}" title="${esc(o.type+(o.notes?' — '+o.notes:'')+' · added by '+o.by)}">${esc(o.title)}<small>${esc(o.type)}${o.centre&&o.centre!=='All centres'?' · '+esc(o.centre):''}</small></span>`).join('')+'</div>';
+  }
+  document.getElementById('grid').innerHTML=html;
+  // Lists
+  const fmt=d=>`<div class="d"><b>${d.getDate()}</b><small>${MON[d.getMonth()]}</small></div>`;
+  const wd=d=>['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+  const up=LONG.filter(l=>l.to>=TODAY).slice(0,6);
+  document.getElementById('lw-list').innerHTML=up.length?up.map(l=>`<div class="li">${fmt(l.from)}<div><div class="t">${esc([...new Set(l.names)].join(' & '))}<span class="tag lw">${l.days} days</span>${badges(l.cities)}</div>
+    <div class="s">${wd(l.from)} ${l.from.getDate()} ${MON[l.from.getMonth()]} – ${wd(l.to)} ${l.to.getDate()} ${MON[l.to.getMonth()]}${l.bridge?` · take ${wd(l.bridge)} ${l.bridge.getDate()} ${MON[l.bridge.getMonth()]} off`:''}</div></div></div>`).join(''):'<div class="empty">No long weekends coming up.</div>';
+  document.getElementById('m-list-title').textContent=MONTHS[view.m]+' '+view.y;
+  const mk=view.y*100+view.m+1,inMonth=k=>Math.floor(k/100)===mk;
+  const mev=(show.ph?[...PH.keys()].filter(k=>inMonth(k)&&phOn(k).length).flatMap(k=>phSplit(k,PH.get(k),phOn(k)).map(p=>({date:k,name:p.name,type:'Public holiday',cs:p.cs,national:p.plain,from:p.from}))):[])
+    .concat(show.ob?[...BYDAY.keys()].filter(inMonth).flatMap(k=>BYDAY.get(k)):[])
+    .concat(show.our?OURS.filter(o=>Math.floor(o.from/100)<=mk&&mk<=Math.floor((o.to||o.from)/100)).map(o=>({date:Math.max(o.from,mk*100+1),name:o.title,type:'our',o})):[]).sort((a,b)=>a.date-b.date);
+  document.getElementById('m-list').innerHTML=mev.length?mev.map(e=>{const d=fromKey(e.date);return`<div class="li">${fmt(d)}<div><div class="t">${esc(e.name)}${e.type==='Public holiday'&&!e.national?badges(e.cs):''}<span class="tag ${e.type==='Public holiday'?'ph':e.type==='our'?'our':'ob'}">${e.type==='Public holiday'?'Public holiday':e.type==='our'?esc(e.o.type):e.elsewhere?'Holiday in other states':'Festival / special day'}</span></div><div class="s">${e.type==='our'?ourWhen(e.o):['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+(d.getDay()===1?' · academy closed anyway':'')+(e.from?' · moved here from '+fmtD(e.from):'')}</div></div></div>`;}).join(''):'<div class="empty">Nothing this month.</div>';
+}
+
+async function load(refresh){
+  const btn=document.getElementById('refresh');btn.classList.add('spin');btn.disabled=true;
+  document.getElementById('dot').className='dot loading';
+  try{
+    const j=await ArtiumAuth.call('holidays',{refresh:!!refresh});
+    EVENTS=(j.events||[]).map(e=>({date:+e.date,name:e.name,type:e.type}));
+    OURS=(j.entries||[]).map(o=>Object.assign({},o,{from:+o.from,to:+(o.to||o.from)}));
+    CAN_EDIT=!!j.canEdit;document.getElementById('add').hidden=!CAN_EDIT;
+    STATE=(j.state||[]).map(h=>({date:+h.date,name:h.name,city:h.city})).filter(h=>CITIES.includes(h.city));
+    CHANGES=(j.changes||[]).map(c=>Object.assign({},c,{from:+c.from,to:+c.to||0}));
+    MOVE=j.moveCities||[];
+    buildHolidays();LONG=findLongWeekends();
+    const t=j.checked?new Date(j.checked):new Date();
+    document.getElementById('updated').textContent='Checked with Google '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+  btn.classList.remove('spin');btn.disabled=false;
+  render();
+}
+
+/* ── Our entries: added by the offline staff (not teachers); stored in the Calendar Entries sheet via the data service ── */
+const TYPES=['Birthday','School holiday','School exams','Event','Other'];
+let editing=null,ftype='Birthday';
+const ourWhen=o=>{const a=fromKey(o.from),b=o.to&&o.to!==o.from?fromKey(o.to):null;const f=d=>d.getDate()+' '+MON[d.getMonth()];
+  return(b?f(a)+' – '+f(b):['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][a.getDay()])+(o.centre&&o.centre!=='All centres'?' · '+o.centre:'')+' · added by '+(o.byName||o.by);};
+const iso=k=>k?`${Math.floor(k/10000)}-${String(Math.floor(k/100)%100).padStart(2,'0')}-${String(k%100).padStart(2,'0')}`:'';
+const unIso=v=>v?+v.replace(/-/g,''):null;
+function openForm(o){
+  editing=o||null;ftype=o?o.type:'Birthday';
+  document.getElementById('m-title').textContent=o?'Edit entry':'Add entry';
+  document.getElementById('types').innerHTML=TYPES.map(t=>`<button type="button" aria-pressed="${t===ftype}">${t}</button>`).join('');
+  document.querySelectorAll('#types button').forEach(b=>b.onclick=()=>{ftype=b.textContent;document.querySelectorAll('#types button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+  document.getElementById('f-title').value=o?o.title:'';
+  document.getElementById('f-from').value=iso(o?o.from:key(TODAY));
+  document.getElementById('f-to').value=o&&o.to&&o.to!==o.from?iso(o.to):'';
+  document.getElementById('f-centre').value=o?o.centre||'All centres':'All centres';
+  document.getElementById('f-notes').value=o?o.notes||'':'';
+  document.getElementById('f-msg').textContent='';
+  document.getElementById('f-del').hidden=!o;
+  document.getElementById('modal').hidden=false;document.getElementById('f-title').focus();
+}
+const closeForm=()=>{document.getElementById('modal').hidden=true;};
+document.getElementById('add').onclick=()=>openForm();
+document.getElementById('f-cancel').onclick=closeForm;
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeForm();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm();});
+document.getElementById('grid').onclick=e=>{const hp=e.target.closest('.ev.ph.can');if(hp){openHoliday(+hp.dataset.k);return;}const el=e.target.closest('.ev.our');if(!el||!CAN_EDIT)return;const o=OURS.find(x=>x.id===el.dataset.id);if(o)openForm(o);};
+document.getElementById('form').onsubmit=async e=>{e.preventDefault();
+  const from=unIso(document.getElementById('f-from').value),to=unIso(document.getElementById('f-to').value)||from;
+  const msg=document.getElementById('f-msg');
+  if(to<from){msg.textContent='"To" can’t be before "From".';return;}
+  const entry={id:editing?editing.id:'',type:ftype,title:document.getElementById('f-title').value.trim(),from,to,centre:document.getElementById('f-centre').value,notes:document.getElementById('f-notes').value.trim()};
+  if(!entry.title){msg.textContent='Please add a title.';return;}
+  const btn=document.getElementById('f-save');btn.disabled=true;btn.textContent='Saving…';
+  try{const j=await ArtiumAuth.call('saveCalEntry',{entry});OURS=j.entries||OURS;closeForm();render();}
+  catch(err){msg.textContent=err.message;}
+  btn.disabled=false;btn.textContent='Save';
+};
+document.getElementById('f-del').onclick=async()=>{if(!editing)return;const msg=document.getElementById('f-msg');
+  try{const j=await ArtiumAuth.call('deleteCalEntry',{id:editing.id});OURS=j.entries||OURS.filter(x=>x.id!==editing.id);closeForm();render();}
+  catch(err){msg.textContent=err.message;}};
+
+/* ── Changing a holiday (centre heads and you): move it to another date, or mark it not observed, for chosen cities ── */
+let hk=null,hkind='Moved';
+function openHoliday(k){
+  const x=PH.get(k);if(!x)return;hk=k;hkind='Moved';
+  // cities that already moved this holiday away from here are listed too (unticked), so they can be moved again or put back
+  const gone=(x.out||[]).filter(o=>MOVE.includes(o.city)&&citiesShown().includes(o.city));
+  const cs=phOn(k).filter(c=>MOVE.includes(c)).concat(gone.map(o=>o.city).filter(c=>!x.cities[c]));
+  if(!cs.length)return;
+  const d=fromKey(k);
+  document.getElementById('h-orig').innerHTML=`${esc(x.name)}<small>${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}</small>`;
+  document.getElementById('h-cities').innerHTML=cs.map(c=>{const o=gone.find(g=>g.city===c);return`<label><input type="checkbox" value="${c}"${o?'':' checked'}>${c}${x.moved&&x.moved[c]?' <span style="color:var(--faint)">(moved here)</span>':o?` <span style="color:var(--faint)">(${o.to?'moved to '+fmtD(o.to):'not observed'})</span>`:''}</label>`;}).join('');
+  document.querySelectorAll('#h-kind button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===hkind));
+  document.getElementById('h-tofld').hidden=false;document.getElementById('h-to').value='';document.getElementById('h-note').value='';document.getElementById('h-msg').textContent='';
+  document.getElementById('h-undo').hidden=!((x.moved&&cs.some(c=>x.moved[c]))||gone.length);
+  document.getElementById('hmodal').hidden=false;
+}
+const closeH=()=>{document.getElementById('hmodal').hidden=true;};
+document.querySelectorAll('#h-kind button').forEach(b=>b.onclick=()=>{hkind=b.dataset.k;document.querySelectorAll('#h-kind button').forEach(x=>x.setAttribute('aria-pressed',x===b));document.getElementById('h-tofld').hidden=hkind!=='Moved';});
+document.getElementById('h-cancel').onclick=closeH;
+document.getElementById('hmodal').onclick=e=>{if(e.target.id==='hmodal')closeH();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeH();});
+const chosen=()=>[...document.querySelectorAll('#h-cities input:checked')].map(i=>i.value);
+async function sendChanges(list,action){
+  let j=null;for(const change of list)j=await ArtiumAuth.call(action,{change});
+  if(j&&j.changes)CHANGES=j.changes.map(c=>Object.assign({},c,{from:+c.from,to:+c.to||0}));
+  buildHolidays();LONG=findLongWeekends();render();
+}
+document.getElementById('hform').onsubmit=async e=>{e.preventDefault();
+  const x=PH.get(hk),cs=chosen(),msg=document.getElementById('h-msg'),to=unIso(document.getElementById('h-to').value);
+  if(!cs.length){msg.textContent='Pick at least one city.';return;}
+  if(hkind==='Moved'&&(!to||to===hk)){msg.textContent='Pick the new date.';return;}
+  const note=document.getElementById('h-note').value.trim();
+  // a holiday already moved here is moved again from its original date, so the sheet keeps one change per city
+  const list=cs.map(c=>{const m=x.moved&&x.moved[c],o=(x.out||[]).find(g=>g.city===c);return{cities:[c],name:m?m.name:o?o.name:x.cities[c],from:m?m.from:hk,to:hkind==='Moved'?to:null,kind:hkind,note};});
+  const btn=document.getElementById('h-save');btn.disabled=true;btn.textContent='Saving…';
+  try{await sendChanges(list,'saveHolidayChange');closeH();}catch(err){msg.textContent=err.message;}
+  btn.disabled=false;btn.textContent='Save';
+};
+document.getElementById('h-undo').onclick=async()=>{const x=PH.get(hk);
+  const ch=chosen().map(c=>{const m=x.moved&&x.moved[c],o=(x.out||[]).find(g=>g.city===c);return m?{cities:[c],name:m.name,from:m.from}:o?{cities:[c],name:o.name,from:hk}:null;}).filter(Boolean);
+  if(!ch.length){document.getElementById('h-msg').textContent='Tick a city that was changed.';return;}
+  try{await sendChanges(ch,'undoHolidayChange');closeH();}catch(err){document.getElementById('h-msg').textContent=err.message;}};
+document.getElementById('prev').onclick=()=>{view.m--;if(view.m<0){view.m=11;view.y--;}render();};
+document.getElementById('next').onclick=()=>{view.m++;if(view.m>11){view.m=0;view.y++;}render();};
+document.getElementById('today').onclick=()=>{view={y:TODAY.getFullYear(),m:TODAY.getMonth()};render();};
+document.getElementById('refresh').onclick=()=>load(true);
+document.querySelectorAll('.cityf button').forEach(b=>b.onclick=()=>{cityF=b.dataset.c;document.querySelectorAll('.cityf button').forEach(x=>x.setAttribute('aria-pressed',x===b));LONG=findLongWeekends();render();});
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{show[c.dataset.k]=!show[c.dataset.k];c.setAttribute('aria-pressed',show[c.dataset.k]);render();});
+function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+render();load(false);
+</script>
+</body>
+</html>
