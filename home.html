@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Pulse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Section tray */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs ul{margin:12px 0 0;padding:14px 18px 14px 34px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:13.5px;line-height:1.55;color:var(--muted)}
+  .defs li{margin:4px 0}
+  .defs li b{color:var(--ink);font-weight:600}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+
+  /* Collapsible sections */
+  .tray-head{cursor:pointer;user-select:none}
+  .chev{display:grid;place-items:center;width:32px;height:32px;padding:0;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:transform .2s,background .15s,color .15s}
+  .tray-head:hover .chev{background:var(--accent-soft);color:var(--accent)}
+  .tray.closed .chev{transform:rotate(-90deg)}
+  .tray.closed .tray-body{display:none}
+  .tray.closed{padding-bottom:8px}
+  .tray.closed #prev,.tray.closed #next,.tray.closed .wb{display:none}
+  .wb{display:inline-flex;align-items:center;gap:2px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px;box-shadow:var(--shadow)}
+  .wb button{border:0;background:none;border-radius:999px;padding:6px 13px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;transition:background .15s,color .15s}
+  .wb button:hover{background:var(--accent-soft)}
+  .wb button[aria-pressed="true"]{background:var(--accent);color:#fff}
+
+  .defs-list{margin:12px 0 0;padding:18px 22px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:16px}
+  .defs-list[hidden]{display:none}
+  .def .dt{font:600 13.5px/1.3 var(--display);color:var(--ink);margin-bottom:3px}
+  .def p{font-size:13.5px;line-height:1.6;color:var(--muted);max-width:980px}
+  /* Controls */
+  .controls{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px}
+  .controls .centre-toggle{margin-bottom:0}
+  .period{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .period .wb button{min-width:44px;font-family:var(--display)}
+  .period-note{font-size:12.5px;color:var(--muted)}
+  .period-note b{color:var(--ink2);font-weight:600}
+
+  /* Metric cards */
+  .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+  .card{position:relative;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);padding:18px 20px 16px;display:flex;flex-direction:column;gap:10px;min-height:156px}
+  .card .lbl{font:600 12px/1.35 var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .card .val{font:600 30px/1.1 var(--display);letter-spacing:-.01em;color:var(--accent);font-variant-numeric:tabular-nums}
+  .card .val small{font:500 13px var(--body);color:var(--faint);letter-spacing:0;margin-left:4px}
+  .run{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+  .run b{font:600 13.5px var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
+  .chip{flex:none;border-radius:999px;padding:3px 9px;font:600 11.5px/1.2 var(--body);white-space:nowrap}
+  .chip.up{color:var(--ok);background:#E5F4EC}.chip.dn{color:var(--bad);background:#FDECEB}.chip.eq{color:var(--muted);background:#F1EFF4}
+  /* Not connected yet */
+  .card.wait{background:repeating-linear-gradient(135deg,#fff 0 10px,#FCFBF9 10px 20px);box-shadow:inset 0 3px 0 #E4DDD0,var(--shadow)}
+  .card.wait .val{color:var(--ghost)}
+  .card.wait .run{border-top-style:dashed}
+  .card.wait{min-height:0}
+  .soon{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font:600 11.5px var(--body);color:#8A6A3A;background:#FBF4E8;border:1px solid #EEDDC0;border-radius:999px;padding:3px 10px}
+  .formula{font-size:12px;color:var(--faint)}
+
+  /* Renewals table */
+  .rn-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table.rn{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  .rn th,.rn td{padding:14px 18px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:top}
+  .rn th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+  .rn th:first-child,.rn td:first-child{text-align:left;padding-left:22px}
+  .rn td:first-child{font:600 14px var(--body);color:var(--ink)}
+  .rn td:first-child small{display:block;font:400 12px var(--body);color:var(--faint);margin-top:3px}
+  .rn .v{font:600 18px var(--display);color:var(--accent)}
+  .rn .r{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:5px;font-size:12px;color:var(--muted)}
+  .rn .r b{font:600 12.5px var(--display);color:var(--ink2)}
+  .rn .r .chip{padding:2px 7px;font-size:11px}
+  .rn tr.ov td{background:#FCFBF9}
+  .rn td.lo .v{color:var(--ghost)}
+  .rn tbody tr:last-child td{border-bottom:0}
+  .defs{padding:14px 2px 0}
+
+  @media (max-width:1180px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:640px){.page{padding:24px 16px 48px}.cards{grid-template-columns:1fr}.period{align-items:flex-start}h1{font-size:30px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Business Pulse</h1>
+      <div class="subtitle">The numbers to know at all times: monthly averages, and how this month is running against them</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <div class="controls">
+    <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+    <div class="period">
+      <div class="wb pd" role="group" aria-label="Average over">
+        <button type="button" data-p="3" aria-pressed="false">3M</button><button type="button" data-p="6" aria-pressed="false">6M</button><button type="button" data-p="12" aria-pressed="false">12M</button><button type="button" data-p="0" aria-pressed="false">Lifetime</button>
+      </div>
+      <div class="period-note" id="period-note">—</div>
+    </div>
+  </div>
+
+  <section class="tray" id="sec-mkt">
+    <div class="tray-head"><div class="tray-title">Marketing</div><div class="nav"><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body"><div class="cards" id="c-mkt"></div></div>
+  </section>
+
+  <section class="tray" id="sec-apv">
+    <div class="tray-head"><div class="tray-title">Appointments &amp; Centre Visits</div><div class="nav"><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body"><div class="cards" id="c-apv"></div></div>
+  </section>
+
+  <section class="tray" id="sec-conv">
+    <div class="tray-head"><div class="tray-title">Conversions</div><div class="nav"><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body"><div class="cards" id="c-conv"></div></div>
+  </section>
+
+  <section class="tray" id="sec-rn">
+    <div class="tray-head"><div class="tray-title">Renewals</div><div class="nav"><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
+    <div class="tray-body">
+      <div class="rn-wrap"><table class="rn" id="rn"></table></div>
+    </div>
+  </section>
+
+  <div class="defs">
+    <button class="info-btn" type="button" aria-expanded="false" aria-controls="home-defs" onclick="toggleDefs(this,'home-defs')"><span class="i">i</span>How these numbers are worked out</button>
+    <div class="defs-list" id="home-defs" hidden>
+      <div class="def"><div class="dt">Average:</div><p>The monthly figure averaged over the completed months picked above (3, 6 or 12 months, or every month since the centre opened). The running month is never part of the average. Percentages and ATVs are worked out over the whole period, not averaged month by month.</p></div>
+      <div class="def"><div class="dt">CM (current month):</div><p>The figure for the running month so far.</p></div>
+      <div class="def"><div class="dt">RR (run-rate):</div><p>Where the current month will end if it carries on at the same daily rate: the figure so far ÷ days gone × days in the month. The green or red tag compares the run-rate with the average. Renewals due are known for the whole month in advance, so they have no run-rate.</p></div>
+      <div class="def"><div class="dt">CPL (cost per lead):</div><p>Marketing spend on a channel ÷ leads from that channel. Blended CPL uses the spend and leads of all channels together.</p></div>
+      <div class="def"><div class="dt">CAC (customer acquisition cost):</div><p>Total marketing spend ÷ conversions (admissions).</p></div>
+      <div class="def"><div class="dt">Cost per appointment / cost per centre visit:</div><p>Total marketing spend ÷ appointments booked, or ÷ centre visits.</p></div>
+      <div class="def"><div class="dt">Appointments to visits %:</div><p>Centre visits ÷ appointments booked.</p></div>
+      <div class="def"><div class="dt">Conversions:</div><p>New admissions (Fresh Sales) in the month.</p></div>
+      <div class="def"><div class="dt">Visits to conversions %:</div><p>Conversions ÷ centre visits.</p></div>
+      <div class="def"><div class="dt">Time to conversion:</div><p>Days from a learner's centre visit to their admission, averaged.</p></div>
+      <div class="def"><div class="dt">ATV (average transaction value):</div><p>Money collected ÷ number of transactions: admissions for Fresh Sales, renewals for Renewals.</p></div>
+      <div class="def"><div class="dt">Renewals due:</div><p>Memberships whose end date falls in the month. First-time renewals are due from an admission; repeated renewals are due from an earlier renewal.</p></div>
+      <div class="def"><div class="dt">Successful renewals:</div><p>Renewals paid in the month, whenever they were due. Each is first-time or repeated depending on whether the learner had renewed before. First-time and repeated add up to the overall figure.</p></div>
+      <div class="def"><div class="dt">Renewal collection efficiency:</div><p>Successful renewals ÷ renewals due, the same way as on Monthly Performance Analysis.</p></div>
+      <div class="def"><div class="dt">Not connected yet:</div><p>Cards with a striped background need leads, appointments, visits and marketing spends, which aren't connected to the site yet. They will fill in once those sheets are linked.</p></div>
+    </div>
+  </div>
+</div>
+<script>
+/* ── Centres: each centre's receipts data (Fresh Sales and Renewals tabs) comes from the data service (see auth.js) ── */
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const mi=d=>d.getFullYear()*12+d.getMonth();                    // month index
+const mmmyy=k=>MON[k%12]+'-'+String(Math.floor(k/12)).slice(2);  // e.g. Jun-26
+const TODAY=new Date();
+const CUR=mi(TODAY);                                             // the running month
+const DAYS_TOTAL=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate(),DAYS_DONE=TODAY.getDate();
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+}
+let DATA={};
+
+/* For every Renewals-tab entry: first-time (the learner's first renewal after admission) or repeated (they had renewed before).
+   Same matching as on Monthly Performance Analysis, by Learner ID. A renewal with no earlier record counts as repeated. */
+function classifyRenewals(fs,rn){
+  const id=r=>(r[3]||'').trim().toUpperCase();
+  const order=rn.map((r,i)=>({r,i,d:parseDate(r[0])}));
+  const byId=new Map();order.forEach(o=>{const k=id(o.r);if(!k)return;(byId.get(k)||byId.set(k,[]).get(k)).push(o);});
+  const fsById=new Map();fs.forEach(r=>{const k=id(r);if(!k)return;(fsById.get(k)||fsById.set(k,[]).get(k)).push({r,d:parseDate(r[0])});});
+  const out=new Map();
+  order.forEach(o=>{const k=id(o.r);
+    const prior=k?(byId.get(k)||[]).filter(p=>p.d<o.d||(+p.d===+o.d&&p.i<o.i)):[];
+    if(prior.length){out.set(o.r,'rp');return;}
+    const adm=k?(fsById.get(k)||[]).filter(f=>!o.d||!f.d||f.d<=o.d):[];
+    out.set(o.r,adm.length?'ft':'rp');
+  });
+  return out;
+}
+
+/* Month-by-month totals for the centre(s) shown */
+function monthly(names){
+  const M={},g=k=>M[k]||(M[k]={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0});
+  names.forEach(n=>{const d=DATA[n];if(!d)return;
+    d.fs.forEach(r=>{const t=parseDate(r[0]);if(t){const x=g(mi(t));x.conv++;x.fsAmt+=parseNum(r[17]);}
+      const e=parseDate(r[23]);if(e&&e.getFullYear()>=2020)g(mi(e)).dueFT++;});   // end dates before 2020 appear when the start date is blank
+    d.rn.forEach(r=>{const t=parseDate(r[0]);if(t){const x=g(mi(t)),a=parseNum(r[16]),c=d.cls.get(r);x.ren++;x.rnAmt+=a;x[c]++;x[c+'Amt']+=a;}
+      const e=parseDate(r[23]);if(e&&e.getFullYear()>=2020)g(mi(e)).dueRP++;});
+  });
+  return M;
+}
+function firstMonth(names){
+  let f=Infinity;names.forEach(n=>{const d=DATA[n];if(d)d.fs.forEach(r=>{const t=parseDate(r[0]);if(t)f=Math.min(f,mi(t));});});
+  return f;
+}
+
+/* ── Formats ── */
+function inr(v){const a=Math.abs(v);if(a>=1e7)return '₹'+(a/1e7).toFixed(2)+' Cr';return '₹'+Math.round(a).toLocaleString('en-IN');}
+const num=v=>Math.round(v).toLocaleString('en-IN');
+const pct=v=>(v*100).toFixed(1)+'%';
+const FMT={n:num,inr,pct};
+function chip(now,avg,fmt,neutral){
+  if(now==null||avg==null||!isFinite(now)||!isFinite(avg)||!avg)return '';
+  let d,txt;
+  if(fmt==='pct'){d=now-avg;txt=(d>=0?'+':'−')+Math.abs(d*100).toFixed(1)+' pts';}
+  else{d=(now-avg)/avg;txt=(d>=0?'+':'−')+Math.abs(d*100).toFixed(0)+'%';}
+  const flat=fmt==='pct'?Math.abs(d)<.005:Math.abs(d)<.02;
+  const cls=neutral||flat?'eq':d>0?'up':'dn';
+  return `<span class="chip ${cls}" title="CM run-rate compared with the average">${flat?'on average':txt+' vs avg'}</span>`;
+}
+
+/* ── Metrics ── */
+const WAIT=(label,formula)=>({label,formula,wait:true});
+const MKT=[
+  WAIT('CPL – Meta','Meta spend ÷ Meta leads'),
+  WAIT('CPL – Google','Google spend ÷ Google leads'),
+  WAIT('CPL – JustDial','JustDial spend ÷ JustDial leads'),
+  WAIT('Blended CPL','Total spend ÷ total leads'),
+  WAIT('Leads per month – Meta','Average leads from Meta each month'),
+  WAIT('Leads per month – Google','Average leads from Google each month'),
+  WAIT('Leads per month – JustDial','Average leads from JustDial each month'),
+  WAIT('CAC','Total spend ÷ conversions')
+];
+const APV=[
+  WAIT('Appointments per month','Average appointments booked each month'),
+  WAIT('Cost per appointment','Total spend ÷ appointments'),
+  WAIT('Centre visits per month','Average centre visits each month'),
+  WAIT('Cost per centre visit','Total spend ÷ centre visits'),
+  WAIT('Appointments to visits','Centre visits ÷ appointments')
+];
+const CONV=[
+  {label:'Conversions per month',fmt:'n',unit:'/ month',avg:P=>P.conv/P.n,so:C=>C.conv,pace:true},
+  WAIT('Visits to conversions','Conversions ÷ centre visits'),
+  WAIT('Time to conversion','Days from centre visit to admission'),
+  {label:'ATV – Fresh Sales',fmt:'inr',avg:P=>P.conv?P.fsAmt/P.conv:null,so:C=>C.conv?C.fsAmt/C.conv:null}
+];
+const RN=[
+  {key:'all',label:'Overall',sub:'All renewals',due:x=>x.dueFT+x.dueRP,ren:x=>x.ren,amt:x=>x.rnAmt},
+  {key:'ft',label:'First-time renewals',sub:'First renewal after admission',due:x=>x.dueFT,ren:x=>x.ft,amt:x=>x.ftAmt},
+  {key:'rp',label:'Repeated renewals',sub:'Second renewal onwards',due:x=>x.dueRP,ren:x=>x.rp,amt:x=>x.rpAmt}
+];
+
+function card(m,P,C,ready){
+  if(m.wait)return `<div class="card wait"><div class="lbl">${m.label}</div><div class="val">—</div>
+    <div class="run"><span class="formula">${m.formula}</span><span class="soon">Not connected yet</span></div></div>`;
+  if(!ready)return `<div class="card"><div class="lbl">${m.label}</div><div class="val">…</div><div class="run">&nbsp;</div></div>`;
+  const f=FMT[m.fmt],a=P.n?m.avg(P):null,so=m.so(C),pace=m.pace?so/DAYS_DONE*DAYS_TOTAL:so;
+  const val=a==null?'—':f(a)+(m.unit?`<small>${m.unit}</small>`:'');
+  const run=so==null?`<span>CM: nothing yet</span>`
+    :m.pace?`<span>CM <b>${f(so)}</b> · RR <b>${f(pace)}</b></span>`
+    :`<span>CM <b>${f(so)}</b></span>`;
+  return `<div class="card"><div class="lbl">${m.label}</div><div class="val">${val}</div><div class="run">${run}${chip(pace,a,m.fmt)}</div></div>`;
+}
+
+function rnTable(P,C,ready){
+  const th='<thead><tr><th></th><th>Renewals due<br>per month</th><th>Successful renewals<br>per month</th><th>Renewal collection<br>efficiency</th><th>ATV – Renewals</th></tr></thead>';
+  if(!ready)return th+'<tbody><tr><td>Loading…</td><td></td><td></td><td></td><td></td></tr></tbody>';
+  return th+'<tbody>'+RN.map(r=>{
+    const due=r.due(P),ren=r.ren(P),amt=r.amt(P),n=P.n||NaN;
+    const cDue=r.due(C),cRen=r.ren(C),cAmt=r.amt(C),pRen=cRen/DAYS_DONE*DAYS_TOTAL;
+    const lo=due<5,cLo=cDue<5;   // fewer than 5 due: too few to compare, shown in grey
+    const cell=(v,run,c)=>`<td class="${lo?'lo':''}"><div class="v">${v}</div><div class="r">${run}${lo||cLo?'':c}</div></td>`;
+    return `<tr class="${r.key==='all'?'ov':''}"><td>${r.label}<small>${r.sub}</small></td>`+
+      cell(num(due/n),`CM <b>${num(cDue)}</b>`,chip(cDue,due/n,'n',true))+
+      cell(num(ren/n),`CM <b>${num(cRen)}</b> · RR <b>${num(pRen)}</b>`,chip(pRen,ren/n,'n'))+
+      cell(due?pct(ren/due):'—',cDue?`RR <b>${pct(pRen/cDue)}</b>`:'',cDue&&due?chip(pRen/cDue,ren/due,'pct'):'')+
+      cell(ren?inr(amt/ren):'—',cRen?`CM <b>${inr(cAmt/cRen)}</b>`:'',cRen&&ren?chip(cAmt/cRen,amt/ren,'inr'):'')+
+      '</tr>';}).join('')+'</tbody>';
+}
+
+/* ── Render ── */
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_home_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+let period=(()=>{try{const v=+localStorage.getItem('artium_home_period');return [0,3,6,12].includes(v)&&localStorage.getItem('artium_home_period')!==null?v:12;}catch(e){return 12;}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_home_centre',selCentre);}catch(e){}render();});
+document.querySelectorAll('.pd button').forEach(b=>b.onclick=()=>{period=+b.dataset.p;try{localStorage.setItem('artium_home_period',period);}catch(e){}render();});
+
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  document.querySelectorAll('.pd button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===period));
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name);
+  const ready=names.every(n=>DATA[n]);
+  let P={n:0},C={};
+  if(ready){
+    const M=monthly(names),first=firstMonth(names);
+    const from=Math.max(first,period?CUR-period:first),to=CUR-1;
+    const zero={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0};
+    P=Object.assign({},zero,{n:Math.max(0,to-from+1)});
+    for(let k=from;k<=to;k++){const x=M[k];if(x)for(const f in zero)P[f]+=x[f];}
+    C=Object.assign({},zero,M[CUR]||{});
+    const short=period&&first>CUR-period?' (all the months there are)':'';
+    document.getElementById('period-note').innerHTML=P.n?`Average of <b>${P.n} month${P.n>1?'s':''}</b>, ${mmmyy(from)} to ${mmmyy(to)}${short} · CM (${MONTH_FULL[CUR%12]}): day ${DAYS_DONE} of ${DAYS_TOTAL}`:'No completed months yet';
+  }else document.getElementById('period-note').textContent='Loading…';
+  document.getElementById('c-mkt').innerHTML=MKT.map(m=>card(m,P,C,ready)).join('');
+  document.getElementById('c-apv').innerHTML=APV.map(m=>card(m,P,C,ready)).join('');
+  document.getElementById('c-conv').innerHTML=CONV.map(m=>card(m,P,C,ready)).join('');
+  document.getElementById('rn').innerHTML=rnTable(P,C,ready);
+}
+function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+
+/* Open / close each section by clicking its heading; the page remembers what you closed */
+const CLOSED=(()=>{try{return JSON.parse(localStorage.getItem('artium_home_closed')||'{}');}catch(e){return{};}})();
+document.querySelectorAll('section.tray[id]').forEach(sec=>{
+  const head=sec.querySelector('.tray-head'),chev=sec.querySelector('.chev');
+  const set=closed=>{sec.classList.toggle('closed',closed);chev.setAttribute('aria-expanded',!closed);};
+  set(!!CLOSED[sec.id]);
+  head.addEventListener('click',()=>{const c=!sec.classList.contains('closed');set(c);CLOSED[sec.id]=c;
+    try{localStorage.setItem('artium_home_closed',JSON.stringify(CLOSED));}catch(err){}});
+});
+
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
+      const d={fs:mine(res[i][0]),rn:mine(res[i][1])};d.cls=classifyRenewals(d.fs,d.rn);DATA[c.name]=d;
+    });
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+}
+load();
+</script>
+</body>
+</html>

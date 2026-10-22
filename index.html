@@ -47,7 +47,8 @@
   <header class="shell-bar">
     <div class="brand"><i></i><span>Artium <span class="full">Offline </span>Intelligence</span></div>
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="centres" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
+      <button class="tab" role="tab" data-tab="home" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2.5-6 4.5 12 2.5-6H22"/></svg>Business Pulse</button>
+      <button class="tab" role="tab" data-tab="centres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
       <button class="tab" role="tab" data-tab="dashboard" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>Lead to Purchase</button>
       <button class="tab" role="tab" data-tab="performance" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Monthly Performance</button>
       <button class="tab" role="tab" data-tab="learners" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 15c1.8.6 2.8 2.3 3 5"/></svg>Monthly Active Learners</button>
@@ -58,7 +59,8 @@
     </nav>
   </header>
   <main class="frames">
-    <iframe id="frame-centres" data-src="dfd.html" title="Offline Centres"></iframe>
+    <iframe id="frame-home" data-src="home.html" title="Business Pulse"></iframe>
+    <iframe id="frame-centres" data-src="dfd.html" title="Offline Centres" hidden></iframe>
     <iframe id="frame-dashboard" data-src="dashboard.html" title="Lead to Purchase Dashboard" hidden></iframe>
     <iframe id="frame-performance" data-src="performance.html" title="Monthly Performance Analysis" hidden></iframe>
     <iframe id="frame-learners" data-src="learners.html" title="Monthly Active Learners" hidden></iframe>
@@ -70,7 +72,7 @@
   const tabs = document.querySelectorAll(".tab");
   function show(name){
     if(!ArtiumAuth.user) return;   // nothing loads before sign-in
-    if(!document.getElementById("frame-" + name)) name = "centres";
+    if(!document.getElementById("frame-" + name)) name = "home";
     if(!ArtiumAuth.pages.includes(name)) name = ArtiumAuth.pages[0];   // only pages this person may open
     tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
     document.querySelectorAll(".frames iframe").forEach(f => {
@@ -93,7 +95,7 @@
   if(document.fonts) document.fonts.ready.then(moveInk);
   tabs.forEach(t => t.addEventListener("click", () => show(t.dataset.tab)));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
-  ArtiumAuth.onReady(() => show(location.hash.slice(1) || "centres")); // pages load only after sign-in
+  ArtiumAuth.onReady(() => show(location.hash.slice(1) || "home")); // pages load only after sign-in
 </script>
 </body>
 </html>
