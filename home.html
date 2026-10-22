@@ -181,8 +181,9 @@
       <div class="def"><div class="dt">Average:</div><p>The monthly figure averaged over the completed months picked above (3, 6 or 12 months, or every month since the centre opened). The running month is never part of the average. For all centres together, it is the average per centre per month: each centre's own monthly average, worked out only over the months that centre has been open, and then averaged across the centres. So a newly opened centre is never spread over months before it existed. For renewals, a centre counts from the month its first memberships came up for renewal, and on All centres it is added only once it has 6 months of renewals behind it. CM and RR are then also shown per centre, so they compare like for like. Percentages and ATVs are worked out over the whole period, not averaged month by month.</p></div>
       <div class="def"><div class="dt">CM (current month):</div><p>The figure for the running month so far.</p></div>
       <div class="def"><div class="dt">RR (run-rate):</div><p>Where the current month will end if it carries on at the same daily rate: the figure so far ÷ days gone × days in the month. The green or red tag compares the run-rate with the average. Renewals due are known for the whole month in advance, so they have no run-rate.</p></div>
+      <div class="def"><div class="dt">Marketing spends and leads:</div><p>Daily Meta and Google spends and leads from the offline marketing tracker. A campaign that names a centre counts for that centre; Chennai campaigns that don't name one are split equally between Alwarpet and Thoraipakkam. Google leads count only the lead-search campaigns; the Local Store campaigns' spend is included, but their store actions (calls, directions, visits) aren't counted as leads.</p></div>
       <div class="def"><div class="dt">CPL (cost per lead):</div><p>Marketing spend on a channel ÷ leads from that channel. Blended CPL uses the spend and leads of all channels together.</p></div>
-      <div class="def"><div class="dt">CAC (customer acquisition cost):</div><p>Total marketing spend ÷ conversions (admissions).</p></div>
+      <div class="def"><div class="dt">CAC (customer acquisition cost):</div><p>Total marketing spend ÷ conversions (admissions), over the months spends are recorded for.</p></div>
       <div class="def"><div class="dt">Cost per appointment / cost per centre visit:</div><p>Total marketing spend ÷ appointments booked, or ÷ centre visits.</p></div>
       <div class="def"><div class="dt">Appointments:</div><p>Appointments placed in the month they were expected to visit. In the current month, only appointments up to today are counted.</p></div>
       <div class="def"><div class="dt">Centre visits:</div><p>Every visit logged at the centre, scheduled or walk-in.</p></div>
@@ -194,7 +195,8 @@
       <div class="def"><div class="dt">Renewals due:</div><p>Memberships whose end date falls in the month. First-time renewals are due from an admission; repeated renewals are due from an earlier renewal.</p></div>
       <div class="def"><div class="dt">Successful renewals:</div><p>Renewals actually paid in the month, whether they were due that month, earlier or later. Each is first-time or repeated depending on whether the learner had renewed before. First-time and repeated add up to the overall figure.</p></div>
       <div class="def"><div class="dt">Renewal collection efficiency:</div><p>Successful renewals ÷ renewals due, the same way as on Monthly Performance Analysis.</p></div>
-      <div class="def"><div class="dt">Not connected yet:</div><p>Striped cards need leads or marketing spends, which aren't connected to the site yet. They will fill in once those sheets are linked.</p></div>
+      <div class="def"><div class="dt">Not connected yet:</div><p>Striped cards (JustDial for now) need a sheet that isn't connected to the site yet.</p></div>
+      <div class="def"><div class="dt">Costs and CPLs:</div><p>Lower is better, so a cheaper CM shows green.</p></div>
     </div>
   </div>
 </div>
@@ -249,13 +251,14 @@ function classifyRenewals(fs,rn){
 
 /* Month-by-month totals for the centre(s) shown */
 function monthly(names){
-  const M={},g=k=>M[k]||(M[k]={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0,appts:0,visits:0,tcDays:0,tcN:0});
+  const M={},g=k=>M[k]||(M[k]={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0,appts:0,visits:0,tcDays:0,tcN:0,mSp:0,mLd:0,gSp:0,gLd:0});
   names.forEach(n=>{const d=DATA[n];if(!d)return;
     d.fs.forEach(r=>{const t=parseDate(r[0]);if(t){const x=g(mi(t));x.conv++;x.fsAmt+=parseNum(r[17]);}
       const e=parseDate(r[23]);if(e&&e.getFullYear()>=2020)g(mi(e)).dueFT++;});   // end dates before 2020 appear when the start date is blank
     d.rn.forEach(r=>{const t=parseDate(r[0]);if(t){const x=g(mi(t)),a=parseNum(r[16]),c=d.cls.get(r);x.ren++;x.rnAmt+=a;x[c]++;x[c+'Amt']+=a;}
       const e=parseDate(r[23]);if(e&&e.getFullYear()>=2020)g(mi(e)).dueRP++;});
     const F=FUN&&FUN[n];if(!F)return;
+    (F.mkt||[]).forEach(([k,ms,ml,gs,gl])=>{if(k>TODAYK)return;const x=g(ymi(k));x.mSp+=ms;x.mLd+=ml;x.gSp+=gs;x.gLd+=gl;});
     (F.appts||[]).forEach(k=>{if(k<=TODAYK)g(ymi(k)).appts++;});              // by expected visit date; later this month isn't counted yet
     (F.visits||[]).forEach(([v,a])=>{if(v>TODAYK)return;g(ymi(v)).visits++;
       if(a&&a>=v&&a<=TODAYK){const x=g(ymi(a));x.tcDays+=(ymdDate(a)-ymdDate(v))/864e5;x.tcN++;}});   // time to conversion, in the month of admission
@@ -289,21 +292,22 @@ function chip(now,avg,fmt,neutral,lower){
 
 /* ── Metrics ── */
 const WAIT=(label,formula)=>({label,formula,wait:true});
+const ratio=(a,b)=>b?a/b:null;
 const MKT=[
-  WAIT('CPL – Meta','Meta spend ÷ Meta leads'),
-  WAIT('CPL – Google','Google spend ÷ Google leads'),
+  {src:'K',label:'CPL – Meta',fmt:'inr',lower:true,avg:P=>ratio(P.mSp,P.mLd),so:C=>ratio(C.mSp,C.mLd)},
+  {src:'K',label:'CPL – Google',fmt:'inr',lower:true,avg:P=>ratio(P.gSp,P.gLd),so:C=>ratio(C.gSp,C.gLd)},
   WAIT('CPL – JustDial','JustDial spend ÷ JustDial leads'),
-  WAIT('Blended CPL','Total spend ÷ total leads'),
-  WAIT('Leads per month – Meta','Average leads from Meta each month'),
-  WAIT('Leads per month – Google','Average leads from Google each month'),
+  {src:'K',label:'Blended CPL',fmt:'inr',lower:true,avg:P=>ratio(P.mSp+P.gSp,P.mLd+P.gLd),so:C=>ratio(C.mSp+C.gSp,C.mLd+C.gLd)},
+  {src:'K',label:'Leads per month – Meta',fmt:'n',unit:'/ month',avg:P=>P.avg.mLd,so:C=>C.mLd,pace:true},
+  {src:'K',label:'Leads per month – Google',fmt:'n',unit:'/ month',avg:P=>P.avg.gLd,so:C=>C.gLd,pace:true},
   WAIT('Leads per month – JustDial','Average leads from JustDial each month'),
-  WAIT('CAC','Total spend ÷ conversions')
+  {src:'K',label:'CAC',fmt:'inr',lower:true,avg:P=>ratio(P.mSp+P.gSp,P.conv),so:C=>ratio(C.mSp+C.gSp,C.conv)}
 ];
 const APV=[
   {src:'A',label:'Appointments per month',fmt:'n',unit:'/ month',avg:P=>P.avg.appts,so:C=>C.appts,pace:true},
-  WAIT('Cost per appointment','Total spend ÷ appointments'),
+  {src:'KA',label:'Cost per appointment',fmt:'inr',lower:true,avg:P=>ratio(P.mSp+P.gSp,P.appts),so:C=>ratio(C.mSp+C.gSp,C.appts)},
   {src:'V',label:'Centre visits per month',fmt:'n',unit:'/ month',avg:P=>P.avg.visits,so:C=>C.visits,pace:true},
-  WAIT('Cost per centre visit','Total spend ÷ centre visits'),
+  {src:'KV',label:'Cost per centre visit',fmt:'inr',lower:true,avg:P=>ratio(P.mSp+P.gSp,P.visits),so:C=>ratio(C.mSp+C.gSp,C.visits)},
   {src:'A',label:'Appointments to visits',fmt:'pct',avg:P=>P.appts?P.visits/P.appts:null,so:C=>C.appts?C.visits/C.appts:null}
 ];
 const CONV=[
@@ -363,7 +367,7 @@ function render(){
   document.querySelectorAll('.pd button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===period));
   const names=sel?[sel.name]:CENTRES.map(c=>c.name);
   const ready=names.every(n=>DATA[n]);
-  let P={n:0},C={};R={n:0};CR={};const X={A:{P:{n:0},C:{},none:true},V:{P:{n:0},C:{},none:true}};
+  let P={n:0},C={};R={n:0};CR={};const E={P:{n:0},C:{},none:true},X={A:E,V:E,K:E,KA:E,KV:E};
   document.getElementById('apv-note').innerHTML='';
   document.getElementById('rn-note').innerHTML='';
   if(ready){
@@ -371,7 +375,7 @@ function render(){
     // then the mean of those centres. A new centre adds its own (short) history without being stretched over months
     // it didn't exist. CM and RR are per centre too (same centres), so the comparison is like for like.
     // Renewal figures count a centre from the month its first memberships came up for renewal.
-    const zero={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0,appts:0,visits:0,tcDays:0,tcN:0};
+    const zero={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0,appts:0,visits:0,tcDays:0,tcN:0,mSp:0,mLd:0,gSp:0,gLd:0};
     const agg=(startOf)=>{const T=Object.assign({},zero,{n:0,k:0,avg:Object.assign({},zero)}),Cm=Object.assign({},zero);let lo=Infinity;
       names.forEach(nm=>{const st=startOf(nm);if(!isFinite(st))return;const M=monthly([nm]);
         const from=Math.max(st,period?CUR-period:st);if(from>to)return;lo=Math.min(lo,from);
@@ -390,8 +394,10 @@ function render(){
     // Appointments and visits: only centres whose sheets are connected, from their first month of entries
     const firstOf=(nm,key)=>{const F=FUN&&FUN[nm];if(!F||!F[key]||!F[key].length)return Infinity;
       return Math.min(...F[key].map(x=>ymi(Array.isArray(x)?x[0]:x)));};
-    const fa=agg(nm=>firstOf(nm,'appts')),fv=agg(nm=>firstOf(nm,'visits'));
-    X.A={P:fa.T,C:fa.Cm,PER:fa.T.k||1,none:!fa.T.k};X.V={P:fv.T,C:fv.Cm,PER:fv.T.k||1,none:!fv.T.k};
+    const both=(nm,a,b)=>{const x=firstOf(nm,a),y=firstOf(nm,b);return isFinite(x)&&isFinite(y)?Math.max(x,y):Infinity;};
+    const ctx=startOf=>{const r=agg(startOf);return{P:r.T,C:r.Cm,PER:r.T.k||1,none:!r.T.k};};
+    X.A=ctx(nm=>firstOf(nm,'appts'));X.V=ctx(nm=>firstOf(nm,'visits'));X.K=ctx(nm=>firstOf(nm,'mkt'));
+    X.KA=ctx(nm=>both(nm,'mkt','appts'));X.KV=ctx(nm=>both(nm,'mkt','visits'));
     const miss=k=>names.filter(nm=>!isFinite(firstOf(nm,k)));
     const ma=miss('appts'),mv=miss('visits');
     document.getElementById('apv-note').innerHTML=names.length>1&&FUN?[ma.length?`<b>${ma.join(', ')}</b>: no appointments sheet connected, so ${ma.length>1?'they are':'it is'} left out of appointment figures.`:'',mv.length?`<b>${mv.join(', ')}</b>: no centre visits sheet connected.`:''].filter(Boolean).join('<br>'):'';
@@ -401,7 +407,7 @@ function render(){
   }else document.getElementById('period-note').textContent='Loading…';
   X.M=X.M||{P,C,PER};
   const funReady=ready&&FUN!==null;
-  document.getElementById('c-mkt').innerHTML=MKT.map(m=>card(m,X[m.src||'M'],ready)).join('');
+  document.getElementById('c-mkt').innerHTML=MKT.map(m=>card(m,X[m.src||'M'],m.src?funReady:ready)).join('');
   document.getElementById('c-apv').innerHTML=APV.map(m=>card(m,X[m.src||'M'],m.src?funReady:ready)).join('');
   document.getElementById('c-conv').innerHTML=CONV.map(m=>card(m,X[m.src||'M'],m.src?funReady:ready)).join('');
   document.getElementById('rn').innerHTML=rnTable(R,CR,ready);

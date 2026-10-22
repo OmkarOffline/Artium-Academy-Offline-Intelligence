@@ -185,10 +185,10 @@ const SECTIONS=[
     {id:'cBlend',label:'ATV – Blended',              kind:'ratio',fmt:'inr', num:'cTot', den:'cTx'}
   ]},
   {id:'adm',title:'Admissions Overview',rows:[
-    {id:'leads', label:'No. of leads registered',     kind:'base', fmt:'n',   src:null},
-    {id:'appts', label:'No. of appointments booked',  kind:'base', fmt:'n',   src:null},
+    {id:'leads', label:'No. of leads registered',     kind:'base', fmt:'n',   src:'leads'},
+    {id:'appts', label:'No. of appointments booked',  kind:'base', fmt:'n',   src:'appts'},
     {id:'l2a',   label:'Lead to appointment %',       kind:'ratio',fmt:'pct', num:'appts', den:'leads'},
-    {id:'visits',label:'No. of centre visits',        kind:'base', fmt:'n',   src:null},
+    {id:'visits',label:'No. of centre visits',        kind:'base', fmt:'n',   src:'visits'},
     {id:'a2v',   label:'Appointment to visit %',      kind:'ratio',fmt:'pct', num:'visits',den:'appts'},
     {id:'l2v',   label:'Lead to visit %',             kind:'ratio',fmt:'pct', num:'visits',den:'leads'},
     {id:'conv',  label:'Conversions',                 kind:'base', fmt:'n',   src:'fsCount'},
@@ -197,7 +197,7 @@ const SECTIONS=[
     {id:'fsatv', label:'ATV – Fresh Sales',           kind:'ratio',fmt:'inr', num:'fscol', den:'conv'}
   ]},
   {id:'mkt',title:'Marketing Overview',rows:[
-    {id:'spend', label:'Marketing spends',            kind:'base', fmt:'inr', src:null, lower:true},
+    {id:'spend', label:'Marketing spends',            kind:'base', fmt:'inr', src:'spend', lower:true},
     {id:'cpl',   label:'Blended CPL',                 kind:'ratio',fmt:'inr', num:'spend', den:'leads', lower:true},
     {id:'cac',   label:'CAC',                         kind:'ratio',fmt:'inr', num:'spend', den:'conv', lower:true},
     {id:'cpcv',  label:'CPCV (cost per centre visit)',kind:'ratio',fmt:'inr', num:'spend', den:'visits', lower:true},
@@ -300,13 +300,28 @@ function actualsFor(c,y,m){
     B[em===cm?'renCur':em<cm?'renPrev':'renAdv']++;
     if(em===cm)B[c.cohort==='ft'?'renFT':'renRP']++;   // cohorts count only renewals that were due this month
   });
-  const SRC={fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP,txCount:fs.length+rn.length,totSum:sum(fs,17)+sum(rn,16),...B};
+  const SRC={...funnelFor(c.name,y,m),fsCount:fs.length,fsSum:sum(fs,17),rnCount:rn.length,rnSum:sum(rn,16),dueFT,dueRP,dueAll:dueFT+dueRP,txCount:fs.length+rn.length,totSum:sum(fs,17)+sum(rn,16),...B};
   const A={};
   SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base')A[r.id]=r.src?SRC[r.src]:null;}));
   const S=window.__SAMPLE&&window.__SAMPLE.actuals[c.name];   // preview only: fills metrics whose sheet isn't connected yet
   if(S)for(const k in S)if(A[k]==null)A[k]=S[k];
   return A;
 }
+/* Leads, appointments, centre visits and marketing spends for one centre and month, from the data service (dates only).
+   null when that centre's sheet isn't connected or the month is before its records start. Leads = Meta + Google (lead-search campaigns). */
+let FUN=null;
+function funnelFor(name,y,m){
+  const F=FUN&&FUN[name],out={leads:null,appts:null,visits:null,spend:null};if(!F)return out;
+  const lo=(y*100+m+1)*100,hi=lo+99,ym=y*12+m,mon=k=>Math.floor(k/10000)*12+Math.floor(k/100)%100-1;
+  const startOk=list=>list&&list.length&&Math.min(...list)<=hi&&mon(Math.min(...list))<=ym;
+  if(F.mkt&&startOk(F.mkt.map(r=>r[0]))){let sp=0,ld=0;F.mkt.forEach(r=>{if(r[0]>=lo&&r[0]<=hi){sp+=r[1]+r[3];ld+=r[2]+r[4];}});out.spend=Math.round(sp);out.leads=Math.round(ld);}
+  if(F.appts&&startOk(F.appts)){const t=todayKey();out.appts=F.appts.filter(k=>k>=lo&&k<=hi&&k<=t).length;}   // by expected visit date, up to today
+  if(F.visits&&startOk(F.visits.map(v=>v[0])))out.visits=F.visits.filter(v=>v[0]>=lo&&v[0]<=hi).length;
+  return out;
+}
+const todayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();};
+const FUNNEL_IDS=['leads','appts','visits','spend'];
+
 /* For every Renewals-tab entry, find the learner's previous entry by Learner ID (column D):
    - an earlier entry in the Renewals tab → repeated renewal; its Membership End Date (X) is when this renewal was due
    - otherwise their admission in the Fresh Sales tab → first-time renewal; the admission's end date is when it was due */
@@ -337,7 +352,7 @@ function ratio(a,b){return a==null||b==null||!b?null:a/b;}
 /* One centre's six cells for one metric */
 function cells(r,A,T,days){
   const base=r.kind==='base';
-  const act=base?A[r.id]:ratio(A[r.num],A[r.den]);
+  const act=base?A[r.id]:A['@'+r.id]!==undefined?A['@'+r.id]:ratio(A[r.num],A[r.den]);
   const tgt=r.noTarget?null:base?tgtOf(r.id,T):(T[r.id]??ratio(tgtOf(r.num,T),r.tgtDenActual?A[r.den]:tgtOf(r.den,T)));
   const has=v=>v!=null&&isFinite(v);
   const diff=has(act)&&has(tgt)?act-tgt:null;
@@ -379,7 +394,14 @@ function combined(key){
   const A={},T={};
   const all=CENTRES.map(c=>({A:actualsFor(c,viewY,viewM),T:(TARGETS[key]||{})[c.name]||{}}));
   const add=(list,k)=>list.every(x=>x[k]!=null&&isFinite(x[k]))?list.reduce((s,x)=>s+x[k],0):null;
-  SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base'){A[r.id]=add(all.map(p=>p.A),r.id);T[r.id]=add(all.map(p=>p.T),r.id);}}));
+  // leads, appointments, visits and spends: added up over the centres whose sheets are connected
+  const addSome=(list,k)=>{const ok=list.filter(x=>x[k]!=null&&isFinite(x[k]));return ok.length?ok.reduce((s,x)=>s+x[k],0):null;};
+  SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='base'){A[r.id]=(FUNNEL_IDS.includes(r.id)?addSome:add)(all.map(p=>p.A),r.id);T[r.id]=add(all.map(p=>p.T),r.id);}}));
+  // a ratio that uses leads, appointments, visits or spends counts only centres that have both numbers
+  // (e.g. appointment to visit % leaves out a centre with no appointments sheet)
+  SECTIONS.forEach(s=>s.rows.forEach(r=>{if(r.kind==='ratio'&&(FUNNEL_IDS.includes(r.num)||FUNNEL_IDS.includes(r.den))){
+    const both=all.filter(p=>p.A[r.num]!=null&&p.A[r.den]!=null),n=both.reduce((x,p)=>x+p.A[r.num],0),d=both.reduce((x,p)=>x+p.A[r.den],0);
+    A['@'+r.id]=both.length&&d?n/d:null;}}));
   return{A,T};
 }
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_perf_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
@@ -435,6 +457,7 @@ if(window.__SAMPLE){Object.assign(TARGETS,window.__SAMPLE.targets);
 async function load(){
   render();
   try{
+    ArtiumAuth.call('funnel',{}).then(j=>{FUN=j&&j.funnel||null;render();}).catch(()=>{});   // leads, appointments, visits, spends
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
     CENTRES.forEach((c,i)=>{
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
