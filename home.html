@@ -90,12 +90,12 @@
   .period-note b{color:var(--ink2);font-weight:600}
 
   /* Metric cards */
-  .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-  .card{position:relative;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);padding:18px 20px 16px;display:flex;flex-direction:column;gap:10px;min-height:156px}
-  .card .lbl{font:600 12px/1.35 var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
-  .card .val{font:600 30px/1.1 var(--display);letter-spacing:-.01em;color:var(--accent);font-variant-numeric:tabular-nums}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
+  .card{position:relative;background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);padding:14px 16px 12px;display:flex;flex-direction:column;gap:8px}
+  .card .lbl{font:600 11.5px/1.35 var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .card .val{font:600 25px/1.1 var(--display);letter-spacing:-.01em;color:var(--accent);font-variant-numeric:tabular-nums}
   .card .val small{font:500 13px var(--body);color:var(--faint);letter-spacing:0;margin-left:4px}
-  .run{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+  .run{margin-top:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
   .run b{font:600 13.5px var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
   .chip{flex:none;border-radius:999px;padding:3px 9px;font:600 11.5px/1.2 var(--body);white-space:nowrap}
   .chip.up{color:var(--ok);background:#E5F4EC}.chip.dn{color:var(--bad);background:#FDECEB}.chip.eq{color:var(--muted);background:#F1EFF4}
@@ -103,7 +103,9 @@
   .card.wait{background:repeating-linear-gradient(135deg,#fff 0 10px,#FCFBF9 10px 20px);box-shadow:inset 0 3px 0 #E4DDD0,var(--shadow)}
   .card.wait .val{color:var(--ghost)}
   .card.wait .run{border-top-style:dashed}
-  .card.wait{min-height:0}
+  .card.wait{min-height:0;gap:10px;padding:13px 16px 14px}
+  .card.wait .soon{align-self:flex-start}
+  .card.wait .lbl{color:var(--muted)}
   .soon{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;font:600 11.5px var(--body);color:#8A6A3A;background:#FBF4E8;border:1px solid #EEDDC0;border-radius:999px;padding:3px 10px}
   .formula{font-size:12px;color:var(--faint)}
 
@@ -123,8 +125,10 @@
   .rn td.lo .v{color:var(--ghost)}
   .rn tbody tr:last-child td{border-bottom:0}
   .defs{padding:14px 2px 0}
+  .rn-note{font-size:12.5px;color:var(--muted);padding:10px 4px 0}
+  .rn-note:empty{display:none}
+  .rn-note b{color:var(--ink2);font-weight:600}
 
-  @media (max-width:1180px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media (max-width:640px){.page{padding:24px 16px 48px}.cards{grid-template-columns:1fr}.period{align-items:flex-start}h1{font-size:30px}}
 </style>
 </head>
@@ -167,13 +171,14 @@
     <div class="tray-head"><div class="tray-title">Renewals</div><div class="nav"><button type="button" class="chev" aria-label="Show or hide this section" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button></div></div>
     <div class="tray-body">
       <div class="rn-wrap"><table class="rn" id="rn"></table></div>
+      <div class="rn-note" id="rn-note"></div>
     </div>
   </section>
 
   <div class="defs">
     <button class="info-btn" type="button" aria-expanded="false" aria-controls="home-defs" onclick="toggleDefs(this,'home-defs')"><span class="i">i</span>How these numbers are worked out</button>
     <div class="defs-list" id="home-defs" hidden>
-      <div class="def"><div class="dt">Average:</div><p>The monthly figure averaged over the completed months picked above (3, 6 or 12 months, or every month since the centre opened). The running month is never part of the average. Percentages and ATVs are worked out over the whole period, not averaged month by month.</p></div>
+      <div class="def"><div class="dt">Average:</div><p>The monthly figure averaged over the completed months picked above (3, 6 or 12 months, or every month since the centre opened). The running month is never part of the average. For all centres together, it is the average per centre per month: each centre's own monthly average, worked out only over the months that centre has been open, and then averaged across the centres. So a newly opened centre is never spread over months before it existed. For renewals, a centre counts from the month its first memberships came up for renewal, and on All centres it is added only once it has 6 months of renewals behind it. CM and RR are then also shown per centre, so they compare like for like. Percentages and ATVs are worked out over the whole period, not averaged month by month.</p></div>
       <div class="def"><div class="dt">CM (current month):</div><p>The figure for the running month so far.</p></div>
       <div class="def"><div class="dt">RR (run-rate):</div><p>Where the current month will end if it carries on at the same daily rate: the figure so far ÷ days gone × days in the month. The green or red tag compares the run-rate with the average. Renewals due are known for the whole month in advance, so they have no run-rate.</p></div>
       <div class="def"><div class="dt">CPL (cost per lead):</div><p>Marketing spend on a channel ÷ leads from that channel. Blended CPL uses the spend and leads of all channels together.</p></div>
@@ -185,9 +190,9 @@
       <div class="def"><div class="dt">Time to conversion:</div><p>Days from a learner's centre visit to their admission, averaged.</p></div>
       <div class="def"><div class="dt">ATV (average transaction value):</div><p>Money collected ÷ number of transactions: admissions for Fresh Sales, renewals for Renewals.</p></div>
       <div class="def"><div class="dt">Renewals due:</div><p>Memberships whose end date falls in the month. First-time renewals are due from an admission; repeated renewals are due from an earlier renewal.</p></div>
-      <div class="def"><div class="dt">Successful renewals:</div><p>Renewals paid in the month, whenever they were due. Each is first-time or repeated depending on whether the learner had renewed before. First-time and repeated add up to the overall figure.</p></div>
+      <div class="def"><div class="dt">Successful renewals:</div><p>Renewals actually paid in the month, whether they were due that month, earlier or later. Each is first-time or repeated depending on whether the learner had renewed before. First-time and repeated add up to the overall figure.</p></div>
       <div class="def"><div class="dt">Renewal collection efficiency:</div><p>Successful renewals ÷ renewals due, the same way as on Monthly Performance Analysis.</p></div>
-      <div class="def"><div class="dt">Not connected yet:</div><p>Cards with a striped background need leads, appointments, visits and marketing spends, which aren't connected to the site yet. They will fill in once those sheets are linked.</p></div>
+      <div class="def"><div class="dt">Not connected yet:</div><p>Striped cards need leads, appointments, visits and marketing spends, which aren't connected to the site yet. They will fill in once those sheets are linked.</p></div>
     </div>
   </div>
 </div>
@@ -248,6 +253,10 @@ function monthly(names){
   });
   return M;
 }
+function firstDue(name){   // month the centre's first memberships ended
+  let f=Infinity;const d=DATA[name];if(d)d.fs.forEach(r=>{const e=parseDate(r[23]);if(e&&e.getFullYear()>=2020)f=Math.min(f,mi(e));});
+  return f;
+}
 function firstMonth(names){
   let f=Infinity;names.forEach(n=>{const d=DATA[n];if(d)d.fs.forEach(r=>{const t=parseDate(r[0]);if(t)f=Math.min(f,mi(t));});});
   return f;
@@ -288,7 +297,7 @@ const APV=[
   WAIT('Appointments to visits','Centre visits ÷ appointments')
 ];
 const CONV=[
-  {label:'Conversions per month',fmt:'n',unit:'/ month',avg:P=>P.conv/P.n,so:C=>C.conv,pace:true},
+  {label:'Conversions per month',fmt:'n',unit:'/ month',avg:P=>P.avg.conv,so:C=>C.conv,pace:true},
   WAIT('Visits to conversions','Conversions ÷ centre visits'),
   WAIT('Time to conversion','Days from centre visit to admission'),
   {label:'ATV – Fresh Sales',fmt:'inr',avg:P=>P.conv?P.fsAmt/P.conv:null,so:C=>C.conv?C.fsAmt/C.conv:null}
@@ -300,11 +309,11 @@ const RN=[
 ];
 
 function card(m,P,C,ready){
-  if(m.wait)return `<div class="card wait"><div class="lbl">${m.label}</div><div class="val">—</div>
-    <div class="run"><span class="formula">${m.formula}</span><span class="soon">Not connected yet</span></div></div>`;
+  if(m.wait)return `<div class="card wait"><div class="lbl">${m.label}</div>
+    <span class="soon">Not connected yet</span></div>`;
   if(!ready)return `<div class="card"><div class="lbl">${m.label}</div><div class="val">…</div><div class="run">&nbsp;</div></div>`;
-  const f=FMT[m.fmt],a=P.n?m.avg(P):null,so=m.so(C),pace=m.pace?so/DAYS_DONE*DAYS_TOTAL:so;
-  const val=a==null?'—':f(a)+(m.unit?`<small>${m.unit}</small>`:'');
+  const f=FMT[m.fmt],a=P.n?m.avg(P):null,so=m.pace?m.so(C)/PER:m.so(C),pace=m.pace?so/DAYS_DONE*DAYS_TOTAL:so;
+  const val=a==null?'—':f(a)+(m.unit?`<small>${PER>1||selCentre==='All'?'/ centre / month':m.unit}</small>`:'');
   const run=so==null?`<span>CM: nothing yet</span>`
     :m.pace?`<span>CM <b>${f(so)}</b> · RR <b>${f(pace)}</b></span>`
     :`<span>CM <b>${f(so)}</b></span>`;
@@ -315,19 +324,20 @@ function rnTable(P,C,ready){
   const th='<thead><tr><th></th><th>Renewals due<br>per month</th><th>Successful renewals<br>per month</th><th>Renewal collection<br>efficiency</th><th>ATV – Renewals</th></tr></thead>';
   if(!ready)return th+'<tbody><tr><td>Loading…</td><td></td><td></td><td></td><td></td></tr></tbody>';
   return th+'<tbody>'+RN.map(r=>{
-    const due=r.due(P),ren=r.ren(P),amt=r.amt(P),n=P.n||NaN;
-    const cDue=r.due(C),cRen=r.ren(C),cAmt=r.amt(C),pRen=cRen/DAYS_DONE*DAYS_TOTAL;
-    const lo=due<5,cLo=cDue<5;   // fewer than 5 due: too few to compare, shown in grey
+    const due=r.due(P),ren=r.ren(P),amt=r.amt(P),aDue=P.k?r.due(P.avg):NaN,aRen=P.k?r.ren(P.avg):NaN;
+    const cDue=r.due(C)/PERR,cRen=r.ren(C)/PERR,cAmt=r.amt(C)/PERR,pRen=cRen/DAYS_DONE*DAYS_TOTAL;
+    const lo=due<5,cLo=cDue*PERR<5;   // fewer than 5 due: too few to compare, shown in grey
     const cell=(v,run,c)=>`<td class="${lo?'lo':''}"><div class="v">${v}</div><div class="r">${run}${lo||cLo?'':c}</div></td>`;
     return `<tr class="${r.key==='all'?'ov':''}"><td>${r.label}<small>${r.sub}</small></td>`+
-      cell(num(due/n),`CM <b>${num(cDue)}</b>`,chip(cDue,due/n,'n',true))+
-      cell(num(ren/n),`CM <b>${num(cRen)}</b> · RR <b>${num(pRen)}</b>`,chip(pRen,ren/n,'n'))+
+      cell(num(aDue),`CM <b>${num(cDue)}</b>`,chip(cDue,aDue,'n',true))+
+      cell(num(aRen),`CM <b>${num(cRen)}</b> · RR <b>${num(pRen)}</b>`,chip(pRen,aRen,'n'))+
       cell(due?pct(ren/due):'—',cDue?`RR <b>${pct(pRen/cDue)}</b>`:'',cDue&&due?chip(pRen/cDue,ren/due,'pct'):'')+
       cell(ren?inr(amt/ren):'—',cRen?`CM <b>${inr(cAmt/cRen)}</b>`:'',cRen&&ren?chip(cAmt/cRen,amt/ren,'inr'):'')+
       '</tr>';}).join('')+'</tbody>';
 }
 
 /* ── Render ── */
+let PER=1,PERR=1,R={n:0},CR={};   // centres open in the current month (CM and RR counts are divided by this)
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_home_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
 let period=(()=>{try{const v=+localStorage.getItem('artium_home_period');return [0,3,6,12].includes(v)&&localStorage.getItem('artium_home_period')!==null?v:12;}catch(e){return 12;}})();
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
@@ -342,21 +352,37 @@ function render(){
   document.querySelectorAll('.pd button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.p===period));
   const names=sel?[sel.name]:CENTRES.map(c=>c.name);
   const ready=names.every(n=>DATA[n]);
-  let P={n:0},C={};
+  let P={n:0},C={};R={n:0};CR={};
+  document.getElementById('rn-note').innerHTML='';
   if(ready){
-    const M=monthly(names),first=firstMonth(names);
-    const from=Math.max(first,period?CUR-period:first),to=CUR-1;
+    // Averages are per centre per month: each centre's own monthly average, over only the months it has been open,
+    // then the mean of those centres. A new centre adds its own (short) history without being stretched over months
+    // it didn't exist. CM and RR are per centre too (same centres), so the comparison is like for like.
+    // Renewal figures count a centre from the month its first memberships came up for renewal.
     const zero={conv:0,fsAmt:0,ren:0,rnAmt:0,ft:0,ftAmt:0,rp:0,rpAmt:0,dueFT:0,dueRP:0};
-    P=Object.assign({},zero,{n:Math.max(0,to-from+1)});
-    for(let k=from;k<=to;k++){const x=M[k];if(x)for(const f in zero)P[f]+=x[f];}
-    C=Object.assign({},zero,M[CUR]||{});
-    const short=period&&first>CUR-period?' (all the months there are)':'';
-    document.getElementById('period-note').innerHTML=P.n?`Average of <b>${P.n} month${P.n>1?'s':''}</b>, ${mmmyy(from)} to ${mmmyy(to)}${short} · CM (${MONTH_FULL[CUR%12]}): day ${DAYS_DONE} of ${DAYS_TOTAL}`:'No completed months yet';
+    const agg=(startOf)=>{const T=Object.assign({},zero,{n:0,k:0,avg:Object.assign({},zero)}),Cm=Object.assign({},zero);let lo=Infinity;
+      names.forEach(nm=>{const st=startOf(nm);if(!isFinite(st))return;const M=monthly([nm]);
+        const from=Math.max(st,period?CUR-period:st);if(from>to)return;lo=Math.min(lo,from);
+        const S=Object.assign({},zero);for(let k=from;k<=to;k++){const x=M[k];if(x)for(const f in zero)S[f]+=x[f];}
+        const n=to-from+1;T.n+=n;T.k++;for(const f in zero){T[f]+=S[f];T.avg[f]+=S[f]/n;}
+        const x=M[CUR];if(x)for(const f in zero)Cm[f]+=x[f];});
+      if(T.k)for(const f in zero)T.avg[f]/=T.k;
+      return {T,Cm,lo};};
+    // On All centres, a centre joins the renewal figures only after 6 completed months of renewals,
+    // so a new centre's first trickle of renewals doesn't pull the per-centre figures down
+    const RN_MIN=6,left=[];
+    const rnStart=nm=>{const f=firstDue(nm);if(names.length>1&&isFinite(f)&&CUR-f<RN_MIN){left.push({nm,from:f+RN_MIN});return Infinity;}return f;};
+    const to=CUR-1,a=agg(nm=>firstMonth([nm])),b=agg(rnStart);
+    document.getElementById('rn-note').innerHTML=left.map(l=>`<b>${l.nm}</b> is left out of these renewal figures until it has 6 months of renewals (from ${mmmyy(l.from)}). Select it above to see its own numbers.`).join('<br>');
+    P=a.T;C=a.Cm;R=b.T;CR=b.Cm;const lo=a.lo;
+    PER=P.k||1;PERR=R.k||1;
+    const months=isFinite(lo)?to-lo+1:0;
+    document.getElementById('period-note').innerHTML=P.n?(P.k>1?`Per centre per month · <b>${P.k} centres</b>`:`Average of <b>${P.n} month${P.n>1?'s':''}</b>`)+`, ${mmmyy(lo)} to ${mmmyy(to)} · CM (${MONTH_FULL[CUR%12]}): day ${DAYS_DONE} of ${DAYS_TOTAL}`:'No completed months yet';
   }else document.getElementById('period-note').textContent='Loading…';
   document.getElementById('c-mkt').innerHTML=MKT.map(m=>card(m,P,C,ready)).join('');
   document.getElementById('c-apv').innerHTML=APV.map(m=>card(m,P,C,ready)).join('');
   document.getElementById('c-conv').innerHTML=CONV.map(m=>card(m,P,C,ready)).join('');
-  document.getElementById('rn').innerHTML=rnTable(P,C,ready);
+  document.getElementById('rn').innerHTML=rnTable(R,CR,ready);
 }
 function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
 
