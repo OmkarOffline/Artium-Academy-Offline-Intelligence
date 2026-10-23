@@ -8,57 +8,63 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{--plum:#2B1840;--plum2:#22122F;--gold:#E2C48A;--bg:#F6F5F2}
+  :root{--plum:#2B1840;--plum2:#1F1029;--gold:#E2C48A;--bg:#F6F5F2}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
-  body{display:flex;flex-direction:column;background:var(--bg);font-family:"Poppins",sans-serif;overflow:hidden}
-  .shell-bar{position:relative;z-index:10;flex-shrink:0;display:flex;align-items:center;gap:26px;height:60px;padding:0 22px;color:#fff;
-    background:linear-gradient(180deg,var(--plum) 0%,var(--plum2) 100%);box-shadow:0 10px 24px -18px rgba(34,18,47,.8)}
-  .brand{display:flex;align-items:center;gap:8px;font:700 15px "Poppins",sans-serif;letter-spacing:-.01em;white-space:nowrap}
-  .brand i{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold)}
-  .tabs{position:relative;display:flex;align-items:center;gap:2px;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
-  .tabs::-webkit-scrollbar{display:none}
-  .tab{position:relative;display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border:0;border-radius:10px;background:transparent;
-    color:rgba(255,255,255,.62);font:500 13.5px "Poppins",sans-serif;cursor:pointer;white-space:nowrap;transition:color .2s,background-color .2s}
-  .tab svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8;transition:transform .2s,opacity .2s,color .2s}
-  .tab::before{content:"";position:absolute;left:50%;right:50%;bottom:4px;height:1.5px;border-radius:2px;background:rgba(255,255,255,.45);opacity:0;transition:left .2s,right .2s,opacity .2s}
-  .tab:hover{color:#fff;background:rgba(255,255,255,.05)}
-  .tab:hover svg{transform:translateY(-1px);opacity:1}
-  .tab:hover::before{left:30%;right:30%;opacity:1}
-  .tab[aria-selected="true"]{color:#fff;background:rgba(255,255,255,.08)}
-  .tab[aria-selected="true"]::before{display:none}
-  .tab[aria-selected="true"] svg{color:var(--gold);opacity:1}
-  .tab:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
-  .tab-ink{position:absolute;left:0;bottom:0;width:0;height:2px;border-radius:2px;pointer-events:none;opacity:0;
-    background:linear-gradient(90deg,rgba(226,196,138,0),var(--gold),rgba(226,196,138,0));transition:transform .35s cubic-bezier(.3,.7,.2,1),width .35s cubic-bezier(.3,.7,.2,1),opacity .2s}
-  .frames{flex:1;position:relative}
+  body{background:var(--bg);font-family:"Poppins",sans-serif;overflow:hidden}
+
+  /* Pages fill the whole window */
+  .frames{position:fixed;inset:0}
   .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
   .frames iframe[hidden]{display:none}
-  @media (prefers-reduced-motion:reduce){.tab,.tab svg,.tab::before,.tab-ink{transition:none}}
-  @media (max-width:640px){
-    .shell-bar{gap:12px;padding:0 12px}
-    .brand .full{display:none}
-    .tab{padding:0 10px;font-size:12px}
-  }
+
+  /* Menu button, top left */
+  .menu-btn{position:fixed;top:10px;left:10px;z-index:30;display:grid;place-items:center;width:34px;height:34px;border-radius:11px;border:1px solid rgba(91,42,134,.14);
+    background:rgba(255,255,255,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#5B2A86;cursor:pointer;
+    box-shadow:0 6px 18px -10px rgba(43,24,64,.45);transition:background .2s,color .2s,opacity .2s,transform .2s}
+  .menu-btn:hover,.menu-btn:focus-visible{background:#5B2A86;color:#fff;outline:none}
+  .menu-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+  body.open .menu-btn{opacity:0;pointer-events:none;transform:translateX(-6px)}
+  /* thin strip along the left edge: hovering it also opens the menu */
+  .edge{position:fixed;left:0;top:0;bottom:0;width:10px;z-index:25}
+
+  /* Sidebar */
+  .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:40;width:272px;display:flex;flex-direction:column;color:#fff;
+    background:linear-gradient(180deg,var(--plum) 0%,var(--plum2) 100%);visibility:hidden;
+    transform:translateX(-100%);transition:transform .32s cubic-bezier(.3,.7,.2,1),box-shadow .32s,visibility 0s .32s}
+  body.open .sidebar{transform:none;visibility:visible;box-shadow:24px 0 60px -30px rgba(31,16,41,.7);transition:transform .32s cubic-bezier(.3,.7,.2,1),box-shadow .32s}
+  .sidebar::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.6;
+    background:radial-gradient(60% 30% at 0% 0%,rgba(226,196,138,.18),transparent 70%),radial-gradient(70% 30% at 100% 100%,rgba(154,92,214,.22),transparent 70%)}
+  .scrim{position:fixed;inset:0;z-index:35;background:rgba(31,16,41,.18);backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px);opacity:0;pointer-events:none;transition:opacity .3s}
+  body.open .scrim{opacity:1;pointer-events:auto}
+  .brand{position:relative;display:flex;align-items:center;gap:10px;padding:22px 22px 18px;font:700 15px "Poppins",sans-serif;letter-spacing:-.01em}
+  .brand i{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
+  .brand small{display:block;font:600 9.5px/1 "Poppins",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(226,196,138,.8);margin-top:4px}
+  .nav-t{position:relative;padding:8px 24px 8px;font:600 10px/1 "Poppins",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.38)}
+  .tabs{position:relative;flex:1;display:flex;flex-direction:column;gap:2px;padding:4px 12px 12px;overflow-y:auto;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{position:relative;display:flex;align-items:center;gap:12px;width:100%;height:42px;padding:0 14px;border:0;border-radius:12px;background:transparent;text-align:left;
+    color:rgba(255,255,255,.66);font:500 13.5px "Poppins",sans-serif;cursor:pointer;white-space:nowrap;transition:color .18s,background-color .18s}
+  .tab svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .tab:hover{color:#fff;background:rgba(255,255,255,.06)}
+  .tab[aria-selected="true"]{color:#fff;background:linear-gradient(90deg,rgba(226,196,138,.16),rgba(226,196,138,.04))}
+  .tab[aria-selected="true"]::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--gold)}
+  .tab[aria-selected="true"] svg{color:var(--gold);opacity:1}
+  .tab:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+  .tab[hidden]{display:none}
+  /* Signed-in person, at the bottom (auth.js puts the avatar here) */
+  .shell-bar{position:relative;display:flex;align-items:center;gap:12px;margin:0 12px 14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+  .shell-bar .who{min-width:0;flex:1;order:2}
+  .shell-bar .who b{display:block;font:600 13px "Poppins",sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .shell-bar .who span{display:block;font:400 11.5px "Poppins",sans-serif;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .shell-bar .user-menu{order:1;margin-left:0}
+  .shell-bar .um-pop{top:auto;bottom:calc(100% + 16px);right:auto;left:-8px}
+  .shell-bar .um-pop::before{top:auto;bottom:-7px;right:auto;left:20px;transform:rotate(225deg)}
+  @media (prefers-reduced-motion:reduce){.sidebar,.scrim,.menu-btn{transition:none}}
 </style>
 <script src="auth.js"></script>
 </head>
 <body>
-  <header class="shell-bar">
-    <div class="brand"><i></i><span>Artium <span class="full">Offline </span>Intelligence</span></div>
-    <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" data-tab="start" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</button>
-      <button class="tab" role="tab" data-tab="home" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2.5-6 4.5 12 2.5-6H22"/></svg>Business Pulse</button>
-      <button class="tab" role="tab" data-tab="centres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
-      <button class="tab" role="tab" data-tab="dashboard" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>Lead to Purchase</button>
-      <button class="tab" role="tab" data-tab="performance" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Monthly Performance</button>
-      <button class="tab" role="tab" data-tab="learners" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 15c1.8.6 2.8 2.3 3 5"/></svg>Monthly Active Learners</button>
-      <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>Statistics</button>
-      <button class="tab" role="tab" data-tab="analysis" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.7-3.6 3.3-5.5 6.5-5.5 1.2 0 2.3.3 3.2.8"/><circle cx="17.5" cy="16.5" r="2.8"/><path d="M19.6 18.6L21.5 20.5"/></svg>Learner Analysis</button>
-      <button class="tab" role="tab" data-tab="calendar" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Calendar</button>
-      <span class="tab-ink" aria-hidden="true"></span>
-    </nav>
-  </header>
   <main class="frames">
     <iframe id="frame-start" data-src="start.html" title="Home"></iframe>
     <iframe id="frame-home" data-src="home.html" title="Business Pulse" hidden></iframe>
@@ -70,6 +76,27 @@
     <iframe id="frame-analysis" data-src="analysis.html" title="Learner Analysis" hidden></iframe>
     <iframe id="frame-calendar" data-src="calendar.html" title="Calendar" hidden></iframe>
   </main>
+
+  <button class="menu-btn" id="menu-btn" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h11M4 17h16"/></svg></button>
+  <div class="edge" id="edge" aria-hidden="true"></div>
+  <div class="scrim" id="scrim" aria-hidden="true"></div>
+
+  <aside class="sidebar" id="sidebar" aria-label="Pages">
+    <div class="brand"><i></i><div>Artium Academy<small>Offline Intelligence</small></div></div>
+    <div class="nav-t">Pages</div>
+    <nav class="tabs" role="tablist" aria-orientation="vertical">
+      <button class="tab" role="tab" data-tab="start" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</button>
+      <button class="tab" role="tab" data-tab="home" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2.5-6 4.5 12 2.5-6H22"/></svg>Business Pulse</button>
+      <button class="tab" role="tab" data-tab="centres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
+      <button class="tab" role="tab" data-tab="dashboard" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>Lead to Purchase</button>
+      <button class="tab" role="tab" data-tab="performance" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Monthly Performance</button>
+      <button class="tab" role="tab" data-tab="learners" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 15c1.8.6 2.8 2.3 3 5"/></svg>Monthly Active Learners</button>
+      <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>Statistics</button>
+      <button class="tab" role="tab" data-tab="analysis" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.7-3.6 3.3-5.5 6.5-5.5 1.2 0 2.3.3 3.2.8"/><circle cx="17.5" cy="16.5" r="2.8"/><path d="M19.6 18.6L21.5 20.5"/></svg>Learner Analysis</button>
+      <button class="tab" role="tab" data-tab="calendar" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Calendar</button>
+    </nav>
+    <div class="shell-bar"><div class="who" id="who"></div></div>
+  </aside>
 <script>
   const tabs = document.querySelectorAll(".tab");
   function show(name){
@@ -83,21 +110,32 @@
       f.hidden = !on;
     });
     if(location.hash.slice(1) !== name) history.replaceState(null, "", "#" + name);
-    moveInk();
   }
-  // Gold line under the open page; glides to the new tab when you switch
-  function moveInk(){
-    const t = document.querySelector('.tab[aria-selected="true"]:not([hidden])'), ink = document.querySelector(".tab-ink");
-    if(!t){ ink.style.opacity = 0; return; }
-    ink.style.width = (t.offsetWidth - 28) + "px";
-    ink.style.transform = "translateX(" + (t.offsetLeft + 14) + "px)";
-    ink.style.opacity = 1;
-  }
-  window.addEventListener("resize", moveInk);
-  if(document.fonts) document.fonts.ready.then(moveInk);
-  tabs.forEach(t => t.addEventListener("click", () => show(t.dataset.tab)));
+
+  /* Sidebar: opens when the mouse reaches the menu button or the left edge, closes when it leaves; a click or tap also toggles it */
+  const body = document.body, side = document.getElementById("sidebar"), btn = document.getElementById("menu-btn");
+  let closeTimer = null;
+  function open(){ clearTimeout(closeTimer); body.classList.add("open"); btn.setAttribute("aria-expanded", "true"); }
+  function close(){ clearTimeout(closeTimer); body.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+  function closeSoon(){ clearTimeout(closeTimer); closeTimer = setTimeout(() => { if(!side.querySelector(".um-pop.open")) close(); }, 260); }
+  btn.addEventListener("mouseenter", open);
+  document.getElementById("edge").addEventListener("mouseenter", open);
+  side.addEventListener("mouseenter", open);
+  side.addEventListener("mouseleave", closeSoon);
+  btn.addEventListener("click", () => body.classList.contains("open") ? close() : open());
+  document.getElementById("scrim").addEventListener("click", close);
+  document.addEventListener("keydown", e => { if(e.key === "Escape") close(); });
+  tabs.forEach(t => t.addEventListener("click", () => { show(t.dataset.tab); close(); }));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
-  ArtiumAuth.onReady(() => show(location.hash.slice(1) || "start")); // pages load only after sign-in
+
+  // Name and email under the avatar at the bottom of the sidebar
+  const esc = s => String(s || "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  // Every sign-in (and every visit) starts on Home; pages are loaded only after sign-in
+  ArtiumAuth.onReady(s => {
+    const u = s || ArtiumAuth.user || {};
+    document.getElementById("who").innerHTML = (u.name ? `<b>${esc(u.name)}</b>` : "") + `<span>${esc(u.email)}</span>`;
+    show("start");
+  });
 </script>
 </body>
 </html>
