@@ -287,6 +287,374 @@ function buildDigest(){
   };
 }
 
+/* ── Built-in answer engine (no AI, no cost) ──
+   Reads the question, works out what is being asked (metric, breakdown, filters, period), calculates it from the same
+   data as the other pages, and writes the answer: headline, conclusion, reasons, figures, pattern over time,
+   recommended actions and where to see it. */
+const ENGINE=(()=>{
+  const COURSE_GROUPS={
+    instrument:{label:'instrument courses',test:c=>/guitar|keyboard|piano|drum|violin|ukulele|flute|veena|tabla|mridang|sitar|cajon|instrument/i.test(c)},
+    vocal:{label:'vocal courses',test:c=>/vocal|carnatic|hindustani|pfm|karaoke|singing|voice/i.test(c)},
+    south:{label:'South Indian vocal courses',test:c=>/carnatic|pfm - tamil|tamil/i.test(c)},
+    north:{label:'North Indian vocal courses',test:c=>/hindustani|pfm - hindi|hindi/i.test(c)},
+    western:{label:'Western courses',test:c=>/western|guitar|keyboard|piano|drum/i.test(c)}};
+  const METRICS={
+    rate:{label:'renewal rate',kind:'rate',fmt:'pct',words:/renewal rate|retention|renew rate|renewing|drops? ?.?off|losing learners|churn|discontinu|leav|don'?t renew|not renew/i},
+    eff:{label:'renewal collection efficiency',kind:'ratio',fmt:'pct',words:/collection efficiency|efficiency/i},
+    tat:{label:'days to renew',kind:'avg',fmt:'days',lower:true,words:/how long.*renew|days to renew|turnaround|time to renew|late renew/i},
+    renewals:{label:'renewals',kind:'count',fmt:'n',words:/renewals?(?! rate)|renewed/i},
+    due:{label:'renewals due',kind:'count',fmt:'n',words:/due/i},
+    admissions:{label:'admissions',kind:'count',fmt:'n',words:/admission|new learners?|enrol|conversions?(?! %| rate| time)|joined|sign.?ups?|fresh sales(?! atv)/i},
+    collections:{label:'collections',kind:'sum',fmt:'inr',words:/collection|revenue|money|income|earn|sales value|fees? collected|turnover/i},
+    atv:{label:'ATV',kind:'ratio',fmt:'inr',words:/\batv\b|average (transaction|ticket|fee|value)|fee per|per admission|highest fees?|ticket size/i},
+    active:{label:'active learners',kind:'level',fmt:'n',words:/active learners?|\bmal\b|how many learners|learners (now|right now|currently)|capacity|utili[sz]ation|strength/i},
+    appts:{label:'appointments',kind:'count',fmt:'n',funnel:true,words:/appointments?/i},
+    visits:{label:'centre visits',kind:'count',fmt:'n',funnel:true,words:/visits?(?! to)|walk.?ins?|footfall/i},
+    v2c:{label:'visit to admission %',kind:'ratio',fmt:'pct',funnel:true,words:/visit.{0,6}(to|→).{0,6}(conversion|admission)|conversion (rate|%)|convert/i},
+    a2v:{label:'appointment to visit %',kind:'ratio',fmt:'pct',funnel:true,words:/appointments? (to|→) visits?|show.?up/i},
+    tconv:{label:'time to conversion',kind:'avg',fmt:'days',lower:true,funnel:true,words:/time to (conversion|convert|admission)|days to (convert|admission)/i},
+    leads:{label:'leads',kind:'count',fmt:'n',funnel:true,words:/leads?(?! to)/i},
+    spend:{label:'marketing spends',kind:'sum',fmt:'inr',funnel:true,lower:true,words:/spend|marketing budget|ad cost|budget/i},
+    cpl:{label:'cost per lead',kind:'ratio',fmt:'inr',funnel:true,lower:true,words:/\bcpl\b|cost per lead/i},
+    cac:{label:'CAC',kind:'ratio',fmt:'inr',funnel:true,lower:true,words:/\bcac\b|acquisition cost|cost per (admission|acquisition|conversion)/i},
+    cpv:{label:'cost per centre visit',kind:'ratio',fmt:'inr',funnel:true,lower:true,words:/cost per (centre )?visit|cpcv/i}};
+  const ORDER=['cac','cpl','cpv','tconv','v2c','a2v','eff','tat','rate','atv','active','due','appts','visits','leads','spend','renewals','admissions','collections'];
+  const DIMS={centre:/centres?|branch|location/i,course:/courses?|subjects?|programs?|which (instrument|vocal)/i,level:/levels?|grade/i,age:/\bage\b|age.?groups?|kids|children|adults|teens/i,
+    teacher:/teachers?|faculty|tutors?|trainers?/i,package:/packages?|plans?|subscription|duration|months? package|\b(1|3|6|12)[- ]month/i,month:/trend|month by month|monthly|over time|each month|seasonal/i};
+
+  /* ── understanding the question ── */
+  function understand(q){
+    const t=q.toLowerCase(),out={q,t};
+    out.metric=ORDER.find(k=>METRICS[k].words.test(t))||null;
+    if(out.metric==='renewals'&&/rate|%|percent|how (good|well)|best|worst|weak|strong/.test(t))out.metric='rate';
+    if(!out.metric&&/how (is|are|was) (this|the) month|tracking|how are we doing|how (is|are) .* (doing|going|performing|placed)|overall|business|summary|snapshot|pulse|update/.test(t))out.metric='overview';
+    // breakdown: an explicit "by X" / "which X" wins, otherwise any dimension word
+    const dimHit=Object.keys(DIMS).filter(k=>DIMS[k].test(t));
+    const by=t.match(/\b(by|per|across|each|which|what|best|worst|top|lowest|highest)\s+(\w+(\s\w+)?)/g)||[];
+    out.dimHit=dimHit;out.by=by;
+    // filters
+    const f={};
+    CENTRES.forEach(c=>{if(t.includes(c.name.toLowerCase()))(f.centre=f.centre||[]).push(c.name);});
+    if(/\bomr\b|thorai/.test(t))f.centre=[...new Set([...(f.centre||[]),'Thoraipakkam'])];
+    if(/borewell|whitefield|bangalore|bengaluru|blr/.test(t))f.centre=[...new Set([...(f.centre||[]),'Borewell Road'])];
+    if(/chennai/.test(t)&&!f.centre)f.centre=['Alwarpet','Thoraipakkam'];
+    Object.keys(COURSE_GROUPS).forEach(g=>{if(new RegExp('\\b'+g).test(t))f.group=g;});
+    if(/vocals?\b/.test(t)&&!f.group&&!/western vocals?|carnatic|hindustani/.test(t))f.group='vocal';
+    VALUES.course.forEach(v=>{if(v!=='Not mentioned'&&t.includes(v.toLowerCase()))(f.course=f.course||[]).push(v);});
+    if(f.course)delete f.group;
+    VALUES.age.forEach(v=>{if(v!=='Not mentioned'&&t.includes(v.toLowerCase()))(f.age=f.age||[]).push(v);});
+    if(/\b(kids|children|child)\b/.test(t)&&!f.age)f.age=VALUES.age.filter(a=>/^(0|3|5|6)\b/.test(a)||/0 to|6 to 12|3 to/.test(a));
+    VALUES.teacher.forEach(v=>{const first=v.split(/\s+/)[0].toLowerCase();if(v!=='Not mentioned'&&first.length>2&&new RegExp('\\b'+first+'\\b').test(t))(f.teacher=f.teacher||[]).push(v);});
+    VALUES.level.forEach(v=>{if(v!=='Not mentioned'&&t.includes(v.toLowerCase()))(f.level=f.level||[]).push(v);});
+    if(/\bmeta\b|facebook|instagram/.test(t))f.channel='meta';else if(/google/.test(t))f.channel='google';
+    if(/first.?time|first renewal|new learners? renew/.test(t))f.cohort='ft';
+    else if(/repeat|second renewal|loyal|existing learners/.test(t))f.cohort='rp';
+    out.f=f;
+    // breakdown: an explicit "by X" / "which X" wins; otherwise a dimension word that isn't just part of a filter ("instrument courses")
+    const filtered={course:f.group||f.course,centre:f.centre,age:f.age,teacher:f.teacher,level:f.level};
+    out.dim=dimHit.find(k=>by.some(b=>DIMS[k].test(b)))||['teacher','course','age','level','package','centre','month'].find(k=>dimHit.includes(k)&&!filtered[k])||null;
+    // period
+    const mIdx=MONTH_FULL.findIndex(m=>new RegExp('\\b'+m.toLowerCase()+'\\b|\\b'+m.slice(0,3).toLowerCase()+'\\b').test(t));
+    if(/this month|current month|so far|\bcm\b|right now|today|tracking/.test(t))out.period={k0:CUR,k1:CUR,label:MONTH_FULL[CUR%12]+' so far',cm:true};
+    else if(/last month|previous month/.test(t))out.period={k0:CUR-1,k1:CUR-1,label:MONTH_FULL[(CUR-1)%12]};
+    else if(mIdx>=0){let k=Math.floor(CUR/12)*12+mIdx;if(k>CUR)k-=12;const yr=t.match(/20(2\d)/);if(yr)k=(2000+ +yr[1])*12+mIdx;
+      out.period={k0:k,k1:k,label:MONTH_FULL[mIdx]+' '+Math.floor(k/12),cm:k===CUR};}
+    else if(/last (3|three) months|quarter/.test(t))out.period=win(3);
+    else if(/last (6|six) months|half.?year/.test(t))out.period=win(6);
+    else if(/lifetime|all.?time|ever|since (we )?(started|opened|beginning)|overall history|history/.test(t))out.period={k0:0,k1:CUR-1,label:'all records',life:true};
+    else if(/this year|year to date|ytd/.test(t))out.period={k0:Math.floor(CUR/12)*12,k1:CUR-1,label:'this year so far'};
+    else out.period=win(12);
+    if(/since june/.test(t))out.period={k0:Math.floor(CUR/12)*12+5,k1:CUR-1,label:'June to '+MONTH_FULL[(CUR-1)%12]};
+    out.trend=/trend|coming down|going up|improv|getting (better|worse)|declin|rising|falling|over time|since/.test(t);
+    if(out.metric==='active'&&!/month|year|last|lifetime|ago/.test(t))out.period={k0:CUR,k1:CUR,label:'right now',cm:true,now:true};
+    out.best=/best|top|highest|most|strongest|leading/.test(t);out.worst=/worst|lowest|least|weakest|poor|bottom|losing|drop|problem|attention|leak/.test(t);
+    return out;
+  }
+  const win=n=>({k0:CUR-n,k1:CUR-1,label:'the last '+n+' months'});
+
+  /* ── calculations ── */
+  let VALUES={course:[],age:[],teacher:[],level:[],package:[]};
+  function prepare(){
+    const all=[].concat(...Object.values(DATA).map(d=>d.ms));
+    const vals=k=>[...new Set(all.map(m=>m[k]))].sort();
+    VALUES={course:vals('course'),age:vals('age'),teacher:vals('teacher'),level:vals('level'),package:vals('months')};
+  }
+  const DIMKEY={course:'course',age:'age',teacher:'teacher',level:'level',package:'months',centre:'centre'};
+  function pool(f){
+    let L=[].concat(...Object.keys(DATA).map(n=>DATA[n].ms));
+    if(f.centre)L=L.filter(m=>f.centre.includes(m.centre));
+    if(f.group)L=L.filter(m=>COURSE_GROUPS[f.group].test(m.course));
+    if(f.course)L=L.filter(m=>f.course.includes(m.course));
+    if(f.age)L=L.filter(m=>f.age.includes(m.age));
+    if(f.teacher)L=L.filter(m=>f.teacher.includes(m.teacher));
+    if(f.level)L=L.filter(m=>f.level.includes(m.level));
+    if(f.package)L=L.filter(m=>f.package.includes(m.months));
+    return L;
+  }
+  const inP=(d,p)=>{const k=mi(d);return k>=p.k0&&k<=p.k1;};
+  const months=(p,f)=>{if(!p.life)return p.k1-p.k0+1;const ns=(f&&f.centre)||Object.keys(DATA);return Math.max(1,p.k1-Math.min(...ns.map(n=>DATA[n]&&DATA[n].first||p.k1))+1);};
+  // returns {value, n (cases behind it), parts}
+  function calc(mk,L,p,f){
+    const M=METRICS[mk];
+    if(M.funnel)return funnelCalc(mk,p,f);
+    const tx=L.filter(m=>inP(m.d,p)),fs=tx.filter(m=>m.kind==='ft'),rnAll=tx.filter(m=>m.kind==='rp'),rn=f.cohort?rnAll.filter(m=>m.cohort===f.cohort):rnAll;
+    const sum=a=>a.reduce((s,m)=>s+m.amt,0);
+    const endedAll=L.filter(m=>m.end&&inP(m.end,p)&&m.end<=YDAY),ended=f.cohort?endedAll.filter(m=>m.kind===f.cohort):endedAll;
+    switch(mk){
+      case 'admissions':return{value:fs.length,n:fs.length};
+      case 'renewals':return{value:rn.length,n:rn.length};
+      case 'collections':{const v=f.cohort?sum(rn):(/renewal/.test(QT)?sum(rn):/fresh|admission|new/.test(QT)?sum(fs):sum(fs)+sum(rn));return{value:v,n:fs.length+rn.length};}
+      case 'atv':{const useRn=/renewal/.test(QT)||f.cohort,a=useRn?rn:fs;return{value:a.length?sum(a)/a.length:null,n:a.length,sub:useRn?'renewals':'admissions'};}
+      case 'rate':{const r=ended.filter(m=>m.next);return{value:ended.length?r.length/ended.length:null,n:ended.length,renewed:r.length};}
+      case 'tat':{const r=ended.filter(m=>m.next).map(m=>(m.next-m.end)/864e5);return{value:r.length?r.reduce((a,b)=>a+b,0)/r.length:null,n:r.length};}
+      case 'due':{const due=L.filter(m=>m.end&&inP(m.end,p)&&(!f.cohort||m.kind===f.cohort));return{value:due.length,n:due.length};}
+      case 'eff':{const due=L.filter(m=>m.end&&inP(m.end,p)&&(!f.cohort||m.kind===f.cohort)),rr=p.cm?DAYS_TOTAL/DAYS_DONE:1;   // this month: renewals at the current pace
+        return{value:due.length?rn.length*rr/due.length:null,n:due.length};}
+      case 'active':{const at=p.k1>=CUR?TODAY:new Date(Math.floor(p.k1/12),p.k1%12+1,0);
+        const s=new Set(L.filter(m=>m.start&&m.end&&m.start<=at&&m.end>=at&&m.id).map(m=>m.centre+m.id));return{value:s.size,n:s.size};}
+    }
+    return{value:null,n:0};
+  }
+  function funnelCalc(mk,p,f){
+    const names=(f.centre||Object.keys(DATA)).filter(n=>FUN&&FUN[n]);
+    let ap=0,vi=0,ld=0,sp=0,tcD=0,tcN=0,adm=0,hasA=false,hasM=false;
+    const lo=Math.floor(p.k0/12)*10000+(p.k0%12+1)*100,hi=Math.floor(p.k1/12)*10000+(p.k1%12+1)*100+99;
+    names.forEach(n=>{const F=FUN[n];
+      if(F.appts){hasA=true;ap+=F.appts.filter(k=>k>=lo&&k<=hi&&k<=TODAYK).length;}
+      (F.visits||[]).forEach(([v,a])=>{if(v>=lo&&v<=hi&&v<=TODAYK)vi++;if(a&&a>=lo&&a<=hi&&a>=v){tcD+=(ymdToDate(a)-ymdToDate(v))/864e5;tcN++;}});
+      (F.mkt||[]).forEach(r=>{if(r[0]>=lo&&r[0]<=hi&&r[0]<=TODAYK){hasM=true;sp+=f.channel==='google'?r[3]:f.channel==='meta'?r[1]:r[1]+r[3];ld+=f.channel==='google'?r[4]:f.channel==='meta'?r[2]:r[2]+r[4];}});
+      adm+=DATA[n].ms.filter(m=>m.kind==='ft'&&inP(m.d,p)).length;});
+    const r=(a,b)=>b?a/b:null;
+    const v={appts:hasA?ap:null,visits:vi,leads:hasM?ld:null,spend:hasM?sp:null,cpl:hasM?r(sp,ld):null,cac:hasM?r(sp,adm):null,cpv:hasM?r(sp,vi):null,
+      v2c:r(adm,vi),a2v:hasA?r(vi,ap):null,tconv:tcN?tcD/tcN:null}[mk];
+    return{value:v,n:{appts:ap,visits:vi,leads:ld,spend:ld,cpl:ld,cac:adm,cpv:vi,v2c:vi,a2v:ap,tconv:tcN}[mk]||0,adm};
+  }
+  const ymdToDate=k=>new Date(Math.floor(k/10000),Math.floor(k/100)%100-1,k%100);
+  let QT='';
+
+  /* ── formatting ── */
+  const fmt=(v,f)=>v==null||!isFinite(v)?'—':f==='pct'?(v*100).toFixed(1)+'%':f==='inr'?inrF(v):f==='days'?Math.round(v)+' days':Math.round(v).toLocaleString('en-IN');
+  function inrF(v){const a=Math.abs(v);if(a>=1e7)return'₹'+(a/1e7).toFixed(2)+' Cr';if(a>=1e5)return'₹'+(a/1e5).toFixed(2)+' L';return'₹'+Math.round(a).toLocaleString('en-IN');}
+  const diff=(a,b,f)=>{if(a==null||b==null||!isFinite(a)||!isFinite(b))return null;if(f==='pct')return{txt:(a>=b?'+':'−')+Math.abs((a-b)*100).toFixed(1)+' pts',d:a-b};
+    if(!b)return null;const d=(a-b)/b;return{txt:(d>=0?'+':'−')+Math.abs(d*100).toFixed(0)+'%',d};};
+  const B=s=>'**'+s+'**';
+  const isAvgKind=k=>['count','sum'].includes(METRICS[k].kind)&&k!=='due';   // shown per month, with a run-rate
+const isPerMonth=k=>['count','sum'].includes(METRICS[k].kind);           // shown per month (renewals due have no run-rate)
+  const perMonth=(v,p,f)=>v==null?null:v/months(p,f);
+  const scopeTxt=f=>{const bits=[];if(f.centre)bits.push(f.centre.join(' & '));else bits.push('all centres');
+    if(f.group)bits.push(COURSE_GROUPS[f.group].label);if(f.course)bits.push(f.course.join(', '));if(f.age)bits.push('age '+f.age.join(', '));
+    if(f.teacher)bits.push(f.teacher.join(', '));if(f.level)bits.push(f.level.join(', '));if(f.cohort)bits.push(f.cohort==='ft'?'first-time renewals':'repeated renewals');if(f.channel)bits.push(f.channel==='meta'?'Meta':'Google');return bits.join(' · ');};
+
+  /* ── where to see it ── */
+  function where(mk,dim){
+    const W=[],add=(page,section,items)=>W.push({page,section,items});
+    switch(mk){
+      case 'rate':add('Statistics','Renewal Rate by Age Group',['First-time','Repeated','Total']);if(dim!=='age')add('Statistics','Renewal Turnaround',['Renewal rate','Renewed','Memberships ended']);
+        add('Business Pulse','Renewals',['Renewal collection efficiency']);break;
+      case 'eff':add('Business Pulse','Renewals',['Renewal collection efficiency']);add('Monthly Performance Analysis','Renewals Overview',['Renewal collection efficiency %']);break;
+      case 'tat':add('Statistics','Renewal Turnaround',['Admission → first renewal','Renewal → next renewal']);break;
+      case 'renewals':case 'due':add('Business Pulse','Renewals',['Renewals due per month','Successful renewals per month']);add('Monthly Performance Analysis','Renewals Overview',['No. of renewals due','Renewed']);break;
+      case 'admissions':add('Business Pulse','Conversions',['Conversions per month']);add('Monthly Performance Analysis','Admissions Overview',['Conversions']);break;
+      case 'collections':add('Monthly Performance Analysis','Collections Overview',['Collections – Fresh Sales','Collections – Renewals','Collections – Total']);add('Statistics','All-Time Records',['Highest monthly collection']);break;
+      case 'atv':add('Business Pulse','Conversions',['ATV – Fresh Sales']);add('Business Pulse','Renewals',['ATV – Renewals']);break;
+      case 'active':add('Monthly Active Learners','Active learners by month',['Monthly Active Learners','% Active utilisation']);break;
+      case 'appts':case 'a2v':add('Business Pulse','Appointments & Centre Visits',['Appointments per month','Appointments to visits']);add('Monthly Performance Analysis','Admissions Overview',['No. of appointments booked','Appointment to visit %']);break;
+      case 'visits':case 'v2c':case 'tconv':add('Business Pulse','Appointments & Centre Visits',['Centre visits per month']);add('Business Pulse','Conversions',['Visits to conversions','Time to conversion']);break;
+      default:add('Business Pulse','Marketing',['Blended CPL','CAC','Leads per month – Meta','Leads per month – Google']);add('Monthly Performance Analysis','Marketing Overview',['Marketing spends','Blended CPL','CAC','CPCV (cost per centre visit)']);
+    }
+    if(dim==='course'&&!METRICS[mk].funnel)add(mk==='active'?'Monthly Active Learners':'Lead to Purchase',mk==='active'?'Monthly Active Learners by Course':'Admissions Breakdown',['Course-wise']);
+    if(dim==='age'&&mk!=='rate')add(mk==='active'?'Monthly Active Learners':'Statistics',mk==='active'?'Monthly Active Learners by Age Group':'Course Subscription by Age Group',['Age groups']);
+    if(dim==='teacher')add(mk==='active'?'Monthly Active Learners':'Statistics',mk==='active'?'Monthly Active Learners by Teacher':'Renewal Rate by Age Group',[mk==='active'?'Teacher':'Teacher filter']);
+    if(dim==='level')add('Lead to Purchase','Admissions Breakdown',['Course-level-wise']);
+    if(dim==='package')add(mk==='rate'?'Statistics':'Lead to Purchase',mk==='rate'?'Renewal Turnaround':'Admissions Breakdown',[mk==='rate'?'Package':'Subscription-period-wise']);
+    return W.slice(0,3);
+  }
+
+  /* ── building the answer ── */
+  function answer(q){
+    QT=q.toLowerCase();
+    const u=understand(q);
+    if(u.metric==='overview')return overview(u);
+    if(!u.metric)return null;
+    const mk=u.metric,f=u.f,p=Object.assign({},u.period);let M=METRICS[mk];
+    if(mk==='atv')M=Object.assign({},M,{label:/renewal/.test(QT)||f.cohort?'ATV – Renewals':'ATV – Fresh Sales'});
+    if(M.funnel&&u.dim&&!['centre','month'].includes(u.dim))return{headline:`${cap(M.label)} can't be split by ${u.dim} yet`,lead:`Appointments, visits, leads and spends are recorded by centre and date only, so they can't be broken down by ${u.dim}.`,
+      why:['Ask the same question by centre, or over time, and I can answer it.'],followups:[`${cap(M.label)} by centre over the last 6 months`,`How has ${M.label} changed month by month?`],where:where(mk),scope:scopeTxt(f)};
+    const L=pool(f),fmtK=M.fmt;
+    if(METRICS[mk].funnel&&!p.cm){const fs0=funnelStart(f);if(p.k0<fs0){p.k0=fs0;p.life=false;p.label=MONTH_FULL[fs0%12]+' to '+MONTH_FULL[p.k1%12]+' (spends and leads start in '+MONTH_FULL[fs0%12]+')';}}
+    const showAvg=isPerMonth(mk)&&!p.cm&&p.k0!==p.k1;
+    const main=calc(mk,L,p,f),mainV=showAvg?perMonth(main.value,p,f):main.value;
+    if(main.value==null&&!main.n)return{headline:`No ${M.label} to show for ${scopeTxt(f)}`,lead:`There are no records for this in ${p.label}.`,why:['Try a longer period, such as the last 12 months, or a different centre or course.'],
+      followups:[`What is the ${M.label} over the last 12 months?`,`${cap(M.label)} by centre`],where:where(mk,u.dim),scope:scopeTxt(f)+' · '+p.label};
+    // comparison: this month vs usual. Renewal rate and days to renew compare the last full month instead,
+    // because learners whose membership ended a few days ago haven't had time to renew yet.
+    const fStart=M.funnel?funnelStart(f):0;
+    const L12={k0:Math.max(CUR-12,fStart),k1:CUR-1,label:'the last 12 months'};
+    const lagged=['rate','tat'].includes(mk);
+    const single=p.k0===p.k1&&!p.cm;
+    const cmP=single?p:lagged?{k0:CUR-1,k1:CUR-1}:{k0:CUR,k1:CUR,cm:true};
+    const cmLabel=single?MONTH_FULL[p.k0%12]+' '+Math.floor(p.k0/12):lagged?MONTH_FULL[(CUR-1)%12]+' (last full month)':MONTH_FULL[CUR%12]+(isAvgKind(mk)?' run-rate':' so far');
+    const cm=calc(mk,L,cmP,f),usual=calc(mk,L,L12,f);
+    const cmVal=isAvgKind(mk)&&!lagged&&!single?(cm.value==null?null:cm.value/DAYS_DONE*DAYS_TOTAL):cm.value,usualV=isPerMonth(mk)?perMonth(usual.value,L12):usual.value;
+    const dCm=(p.cm&&lagged)||(!single&&p.k0===cmP.k0&&p.k1===cmP.k1&&!p.cm)?null:diff(cmVal,usualV,fmtK);
+    // breakdown
+    const dim=u.dim&&u.dim!=='month'?u.dim:(f.centre&&f.centre.length===1||f.course||f.group?(['rate','admissions','atv','active','renewals'].includes(mk)&&!M.funnel?(f.course?'age':'course'):null):'centre');
+    const rows=breakdown(mk,dim,f,p);
+    // pattern over time (last 6 completed months, plus this month)
+    const series=[];for(let k=Math.max(CUR-6,M.funnel?funnelStart(f):0);k<=CUR-1;k++){const r=calc(mk,L,{k0:k,k1:k},f);series.push([k,r.value,r.n]);}
+    const pat=pattern(series,mk);
+    const unit=showAvg?' a month':'';
+    const scope=scopeTxt(f);
+
+    // headline and lead
+    let headline,lead;const good=x=>x==null||Math.abs(x)<(fmtK==='pct'?.01:.03)?null:(M.lower?x<0:x>0);
+    const top=rows.ok[0],bot=rows.ok[rows.ok.length-1];
+    const gaps=scan(mk,f,p,mainV,u.dim&&u.dim!=='month'?u.dim:null);
+    const wide=top&&bot&&top!==bot&&Math.abs(spread(top,bot,fmtK))>=(fmtK==='pct'?.1:.3);
+    if(u.trend&&pat.first&&pat.last){const up=pat.last[1]>pat.first[1];
+      headline=`${cap(M.label)} has ${up?'risen':'fallen'} from ${fmt(pat.first[1],fmtK)} in ${MONTH_FULL[pat.first[0]%12]} to ${fmt(pat.last[1],fmtK)} in ${MONTH_FULL[pat.last[0]%12]}`;
+      lead=`${up!==!!M.lower?'This is moving the right way':'This is moving the wrong way'}${M.lower?(up?': it now costs more':': it now costs less'):''}. Here's why:`;}
+    else if(u.worst&&!u.best&&!u.dim&&gaps.length){const g=gaps[0];
+      headline=`Biggest gap on ${M.label}: ${g.name} (${g.dim}) at ${fmt(g.v,fmtK)}`;
+      lead=`${g.name} needs the most attention: it sits ${fmtK==='pct'?Math.abs((mainV-g.v)*100).toFixed(1)+' pts':Math.abs(Math.round((1-g.v/mainV)*100))+'%'} below the overall ${fmt(mainV,fmtK)}. Here's why:`;}
+    else if((u.best||u.worst)&&rows.ok.length>1){const pick=u.worst&&!u.best?bot:top;
+      headline=u.best&&u.worst?`${top.name} leads on ${M.label} at ${fmt(top.v,fmtK)}; ${bot.name} trails at ${fmt(bot.v,fmtK)}`
+        :`${pick.name} ${pick===bot?'is the weakest':'leads'} on ${M.label}: ${fmt(pick.v,fmtK)}${pick===top&&bot?`, against ${fmt(bot.v,fmtK)} for ${bot.name}`:`, against ${fmt(mainV,fmtK)} overall`}`;
+      const focus=M.kind==='rate'&&gaps.length?gaps[0]:bot;
+      lead=pick===bot||(u.best&&u.worst)?`${focus.name} needs the most attention on ${M.label}${focus!==bot?' (the most learners lost against the average)':''}. Here's why:`:`${top.name} is the one to learn from on ${M.label}. Here's why:`;}
+    else if(u.worst&&gaps.length){const g=gaps[0];
+      headline=`Biggest gap on ${M.label}: ${g.name} (${g.dim}) at ${fmt(g.v,fmtK)}`;
+      lead=`${g.name} needs the most attention: it sits ${fmtK==='pct'?Math.abs((mainV-g.v)*100).toFixed(1)+' pts':Math.abs(Math.round((1-g.v/mainV)*100))+'%'} below the overall ${fmt(mainV,fmtK)}. Here's why:`;}
+    else{headline=`${cap(M.label)}${f.group||f.course||f.cohort||f.centre||f.age||f.teacher?' for '+scope.replace(/^all centres · /,''):''}: ${fmt(mainV,fmtK)}${unit}`;
+      lead=p.cm&&dCm?`${p.now?'Right now':MONTH_FULL[CUR%12]+' is running'} ${good(dCm.d)===null?(p.now?'it is ':'')+'in line with':(p.now?'it is '+(good(dCm.d)?'above':'below'):good(dCm.d)?'ahead of':'behind')} ${p.now?'its usual level':'a usual month'} on ${M.label}. Here's why:`
+        :wide?`${cap(M.label)} ${showAvg?'averages':'comes to'} ${fmt(mainV,fmtK)}${unit}, but ${top.name} and ${bot.name} are far apart. Here's why:`
+        :dCm&&good(dCm.d)!==null?`${cap(M.label)} is ${good(dCm.d)?'better':'worse'} than usual${M.lower?(dCm.d>0?': it costs more':': it costs less'):''}. Here's why:`
+        :`${cap(M.label)} ${showAvg?'averages':'comes to'} ${fmt(mainV,fmtK)}${unit} over ${p.label}. Here's why:`;}
+    // reasons
+    const why=[];
+    why.push(`${cap(M.label)} for ${scope} ${p.now?'right now':p.cm?'in '+p.label:'over '+p.label}: ${B(fmt(mainV,fmtK)+unit)}${M.kind==='rate'&&main.n?` (${main.renewed} of ${main.n} memberships that ended were renewed)`:''}${showAvg?`, ${fmt(main.value,fmtK)} in total`:''}.`);
+    if(dCm&&single)why.push(`That is ${dCm.txt} against the 12-month average of ${fmt(usualV,fmtK)}${isAvgKind(mk)?' a month':''}.`);
+    else if(dCm&&!p.cm)why.push(lagged?`${MONTH_FULL[(CUR-1)%12]}, the last full month, came in at ${B(fmt(cmVal,fmtK))}, ${dCm.txt} against the 12-month level of ${fmt(usualV,fmtK)}.`:`This month (${DAYS_DONE} of ${DAYS_TOTAL} days) is ${isAvgKind(mk)?'on course for':'at'} ${B(fmt(cmVal,fmtK))}, ${dCm.txt} against the usual ${fmt(usualV,fmtK)}.`);
+    else if(dCm&&p.cm)why.push(M.kind==='level'||mk==='due'?`That is ${dCm.txt} against the 12-month average of ${fmt(usualV,fmtK)}.`:`At the current pace the month ends at ${B(fmt(cmVal,fmtK))}, ${dCm.txt} against the 12-month average of ${fmt(usualV,fmtK)}.`);
+    if(rows.ok.length>1){why.push(`Best: ${B(top.name)} at ${fmt(top.v,fmtK)}; weakest: ${B(bot.name)} at ${fmt(bot.v,fmtK)}${M.kind==='rate'?` (${bot.n} memberships ended)`:''}.`);}
+    if(rows.small.length)why.push(`${rows.small.length} smaller group${rows.small.length>1?'s':''} (fewer than 5 cases) left out of the comparison.`);
+    // figures
+    const figs=[{label:cap(M.label)+(unit?' · per month':'')+(f.centre&&f.centre.length===1?' · '+f.centre[0]:''),value:fmt(mainV,fmtK),note:p.label,tone:'neutral'}];
+    if(dCm)figs.push({label:cmLabel,value:fmt(cmVal,fmtK),note:dCm.txt+' vs usual',tone:good(dCm.d)?'good':'bad'});
+    if(rows.ok.length>1){figs.push({label:'Best · '+top.name,value:fmt(top.v,fmtK),note:rows.label,tone:'good'});figs.push({label:'Weakest · '+bot.name,value:fmt(bot.v,fmtK),note:rows.label,tone:'bad'});}
+    // sections
+    const sections=[];
+    if(rows.ok.length>2)sections.push({title:'By '+rows.label,bullets:rows.ok.slice(0,6).map(r=>`${B(r.name)}: ${fmt(r.v,fmtK)}${r.cap!=null?` · ${(r.cap*100).toFixed(0)}% of capacity`:r.n&&M.kind!=='level'&&!isPerMonth(mk)&&!M.funnel?` · ${r.n} ${M.kind==='rate'?'ended':'cases'}`:''}`)});
+    if(gaps.length)sections.push({title:'Where the biggest gaps are',bullets:gaps.slice(0,4).map(g=>g.du?`${B(g.name)} (${g.dim}): ${fmt(g.now,fmtK)}${p.cm?' on current pace':''} against its usual ${fmt(g.us,fmtK)} a month (${g.du.txt})`:`${B(g.name)} (${g.dim}): ${fmt(g.v,fmtK)} against ${fmt(mainV,fmtK)} overall${M.kind==='rate'?` · ${g.n} ended, about ${g.lost} learners lost against the average`:''}`)});
+    if(pat.bullets.length)sections.push({title:'The pattern over time',bullets:pat.bullets});
+    // actions
+    const actions=recommend(mk,{main,mainV,cmVal,usualV,dCm,rows,top,bot,pat,f,p,good,L,gaps,dim});
+    const ff=followups(mk,u,rows,f);
+    return{headline,lead,why,figures:figs.slice(0,4),sections,actions,where:where(mk,dim||u.dim),followups:ff,scope:scope+' · '+p.label};
+  }
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  const spread=(a,b,f)=>f==='pct'?a.v-b.v:(a.v-b.v)/(b.v||1);
+
+  function breakdown(mk,dim,f,p){
+    if(!dim)return{ok:[],small:[],label:''};
+    const M=METRICS[mk];
+    const key=DIMKEY[dim],names=dim==='centre'?Object.keys(DATA):VALUES[dim==='package'?'package':dim]||[];
+    const out=[];
+    names.forEach(v=>{if(v==='Not mentioned'&&dim!=='centre')return;
+      const ff=Object.assign({},f);if(dim==='centre')ff.centre=[v];else{const k=dim==='package'?'package':dim;ff[k]=[v];if(dim==='course')delete ff.group;}
+      if(dim==='centre'&&f.centre&&!f.centre.includes(v))return;
+      if(dim==='course'&&f.group&&!COURSE_GROUPS[f.group].test(v))return;
+      const r=M.funnel?funnelCalc(mk,p,ff):calc(mk,pool(ff),p,ff);
+      if(r.value==null)return;
+      const val=isPerMonth(mk)&&!p.cm&&p.k0!==p.k1?perMonth(r.value,p,ff):r.value;
+      out.push({name:dim==='package'?(+v===1?'1-month package':v+'-month package'):v,raw:v,v:val,n:r.n,cap:dim==='centre'&&mk==='active'&&CAPACITY[v]?val/CAPACITY[v]:null});});
+    const minN=['rate','atv','tat','eff','v2c','a2v','tconv'].includes(mk)?5:1;
+    const ok=out.filter(r=>r.n>=minN&&!(M.kind!=='rate'&&!r.v)).sort((a,b)=>M.lower?a.v-b.v:b.v-a.v),small=out.filter(r=>r.n<minN);
+    return{ok,small,label:{centre:'centre',course:'course',age:'age group',teacher:'teacher',level:'course level',package:'package'}[dim]};
+  }
+  function pattern(series,mk){
+    const M=METRICS[mk],ok=series.filter(s=>s[1]!=null&&(s[2]>=(M.kind==='rate'?5:1)));if(ok.length<3)return{bullets:[]};
+    const f=M.fmt,b=[];
+    b.push('Last 6 months: '+ok.map(([k,v])=>`${MON[k%12]} ${B(fmt(v,f))}`).join(' · ')+'.');
+    const hi=ok.reduce((a,c)=>c[1]>a[1]?c:a),lo=ok.reduce((a,c)=>c[1]<a[1]?c:a);
+    b.push(`Strongest month: ${MONTH_FULL[hi[0]%12]} (${fmt(hi[1],f)}); weakest: ${MONTH_FULL[lo[0]%12]} (${fmt(lo[1],f)}).`);
+    const h=Math.floor(ok.length/2),a1=ok.slice(0,h).reduce((s,x)=>s+x[1],0)/h,a2=ok.slice(-h).reduce((s,x)=>s+x[1],0)/h,d=diff(a2,a1,f);
+    let trend='steady';if(d&&Math.abs(d.d)>=(f==='pct'?.03:.08))trend=(d.d>0)!==!!M.lower?'improving':'slipping';
+    if(d)b.push(`Recent months are ${trend}: ${d.txt} in the last ${h} months against the ${h} before.`);
+    return{bullets:b,trend,first:ok[0],last:ok[ok.length-1]};
+  }
+  function recommend(mk,c){
+    const M=METRICS[mk],A=[],f=M.fmt,{rows,top,bot,pat,mainV,dCm,gaps}=c;
+    const atv=atvRenewal();
+    // 1. the biggest gaps first, with what is at stake
+    gaps.slice(0,2).forEach(g=>{
+      if(M.kind==='rate')A.push({title:`Put more renewal effort into ${g.name} (${g.dim}).`,detail:`It renews at ${B(fmt(g.v,f))} against ${fmt(mainV,f)} overall. At the average rate about ${B(g.lost+' more learners')} would have stayed${atv?`, roughly ${B(inrF(g.lost*atv))} in renewals`:''} over ${c.p.label}.`});
+      else if(g.du)A.push({title:`Find out why ${g.name} (${g.dim}) is down.`,detail:`It is at ${B(fmt(g.now,f))} against a usual ${fmt(g.us,f)} a month (${g.du.txt}). Check its teachers, batch timings and follow-ups for what changed.`});
+    });
+    // 2. the weakest in the breakdown asked for, judged fairly
+    if(!A.length&&rows.ok.length>1&&bot&&top&&bot!==top&&!isAvgKind(mk)){
+      A.push({title:`${M.lower?'Shift spend away from':'Lift'} ${bot.name}.`,detail:`It sits at ${B(fmt(bot.v,f))} against ${fmt(top.v,f)} for ${top.name}. ${M.lower?'Move budget towards what works at '+top.name+'.':({v2c:'Compare how '+top.name+' follows up after a visit and runs trial classes, and apply it.',a2v:'Compare how '+top.name+' confirms appointments and reminds leads, and apply it.',atv:'Check whether '+top.name+' sells longer packages, and whether the same offer would work here.'}[mk]||'Compare how '+top.name+' runs its batches, follow-ups and class experience, and apply it.')}`});}
+    // 3. this month
+    if(dCm&&c.good(dCm.d)===false&&!['rate','tat'].includes(mk))A.push({title:`Recover ${MONTH_FULL[CUR%12]} in the ${DAYS_TOTAL-DAYS_DONE} days left.`,detail:`The month is tracking ${B(dCm.txt)} against usual on ${M.label}. ${mk==='renewals'||mk==='eff'?'Prioritise calls to learners whose memberships ended this month and haven\'t renewed yet.':mk==='admissions'?'Follow up this month\'s visits and trial classes that haven\'t converted.':'Check which centre or course is causing it.'}`});
+    if(dCm&&c.good(dCm.d)===false&&['rate','tat'].includes(mk))A.push({title:`Review last month's renewals.`,detail:`${MONTH_FULL[(CUR-1)%12]} came in ${B(dCm.txt)} against usual. Call the learners whose memberships ended then and haven't renewed; many come back within 45 days.`});
+    if(mk==='active'&&rows.label==='centre'){const u2=rows.ok.filter(r=>r.cap!=null).sort((a,b)=>a.cap-b.cap);if(u2.length>1){A.length=0;
+      A.push({title:`Fill capacity at ${u2[0].name}.`,detail:`It is at ${B((u2[0].cap*100).toFixed(0)+'%')} of its ${CAPACITY[u2[0].raw]} learner capacity, against ${(u2[u2.length-1].cap*100).toFixed(0)}% at ${u2[u2.length-1].name}. Admissions there have the most room to grow.`});}}
+    if(mk==='active'&&rows.label!=='centre'&&rows.ok.length>2){A.length=0;const lo=rows.ok.slice(-3).map(r=>r.name).join(', ');
+      A.push({title:`Steer new admissions towards ${lo}.`,detail:`They have the fewest active learners (${rows.ok.slice(-3).map(r=>fmt(r.v,f)).join(', ')}), while ${top.name} has ${B(fmt(top.v,f))}. Spreading new learners evens out teaching load.`});return A;}
+    if(mk==='due'){A.length=0;A.push({title:`Plan renewal calls for the ${fmt(c.mainV,f)} memberships due.`,detail:`Start with the ${rows.ok[0]?rows.ok[0].name:'largest group'}${rows.ok[0]?' ('+fmt(rows.ok[0].v,f)+' due)':''}. Calling a week before the end date usually lifts renewals.`});return A;}
+    // 4. learn from the best
+    if(top&&rows.ok.length>1&&A.length<3)A.push({title:`Use ${top.name} as the model.`,detail:`At ${B(fmt(top.v,f))} it is the best ${rows.label}. Note what works there and copy it to the weaker ones.`});
+    if(pat.trend==='slipping'&&A.length<3)A.push({title:`Look into the recent slide.`,detail:`${cap(M.label)} ${/s$/.test(M.label)?'have':'has'} been slipping over the last few months. Check whether it started with a change of teacher, timetable, fees or season.`});
+    if(!A.length)A.push({title:'Keep the current focus.',detail:`${cap(M.label)} is in line with its usual level. Re-check after the month closes.`});
+    return A.slice(0,3);
+  }
+  // Scan course, age group, teacher, package and centre for the segments furthest below the overall figure
+  function scan(mk,f,p,overall,only){
+    const M=METRICS[mk];if(M.funnel||overall==null)return[];
+    const out=[];
+    ['centre','course','age','teacher','package','level'].forEach(dim=>{
+      if(only&&dim!==only)return;
+      if(dim==='teacher'&&M.kind!=='rate')return;   // teacher is missing on many recent entries, so counts by teacher aren't reliable
+      if(dim==='centre'&&f.centre&&f.centre.length===1)return;
+      const r=breakdown(mk,dim,f,p);
+      r.ok.forEach(x=>{
+        if(M.kind==='rate'){if(x.n<20)return;const gap=overall-x.v;if(gap<.05)return;out.push({...x,dim:r.label,lost:Math.round(x.n*gap),score:x.n*gap});}
+        else if(isAvgKind(mk)&&(p.cm||p.k0===p.k1)){const ff=Object.assign({},f);if(dim==='centre')ff.centre=[x.raw];else{ff[dim==='package'?'package':dim]=[x.raw];if(dim==='course')delete ff.group;}
+          const L12=win(12),us=perMonth(calc(mk,pool(ff),L12,ff).value,L12),now=p.cm?(x.v/DAYS_DONE*DAYS_TOTAL):x.v;
+          if(!us||us<3)return;const du=diff(now,us,M.fmt);if(!du||du.d>-.2)return;out.push({...x,dim:r.label,du,now,us,score:-du.d*us});}
+      });
+    });
+    return out.sort((a,b)=>b.score-a.score).slice(0,4);
+  }
+  function funnelStart(f){let s=Infinity;(f.centre||Object.keys(DATA)).forEach(n=>{const F=FUN&&FUN[n];if(F&&F.mkt&&F.mkt.length)s=Math.min(s,...F.mkt.map(r=>Math.floor(r[0]/10000)*12+Math.floor(r[0]/100)%100-1));});return isFinite(s)?s:0;}
+  function atvRenewal(){const L=pool({}).filter(m=>m.kind==='rp'&&inP(m.d,win(12)));return L.length?L.reduce((s,m)=>s+m.amt,0)/L.length:null;}
+  function followups(mk,u,rows,f){
+    const M=METRICS[mk],F=[];
+    if(u.dim!=='course'&&!M.funnel)F.push(`${cap(M.label)} by course`);
+    if(u.dim!=='teacher'&&['rate','active','admissions','renewals'].includes(mk))F.push(`Which teachers have the best and worst ${M.label}?`);
+    if(u.dim!=='age'&&!M.funnel)F.push(`${cap(M.label)} by age group`);
+    if(u.dim!=='centre')F.push(`${cap(M.label)} by centre`);
+    return F.slice(0,2);
+  }
+  function overview(u){
+    const f=u.f,L=pool(f),L12=win(12),cmP={k0:CUR,k1:CUR,cm:true};
+    const ks=['admissions','renewals','collections','eff','active'];
+    const rows=ks.map(k=>{const c=calc(k,L,cmP,f),a=calc(k,L,L12,f);const now=isAvgKind(k)?c.value/DAYS_DONE*DAYS_TOTAL:c.value,us=isAvgKind(k)?perMonth(a.value,L12):a.value;
+      return{k,now,us,so:c.value,d:diff(now,us,METRICS[k].fmt)};});
+    const up=rows.filter(r=>r.d&&r.d.d>0),dn=rows.filter(r=>r.d&&r.d.d<0);
+    const worst=dn.sort((a,b)=>a.d.d-b.d.d)[0],best=up.sort((a,b)=>b.d.d-a.d.d)[0];
+    return{headline:`${MONTH_FULL[CUR%12]} so far: ${best?METRICS[best.k].label+' ahead of usual':'steady'}${worst?', '+METRICS[worst.k].label+' behind':''}`,
+      lead:`${worst?`The area that needs the most attention this month is ${METRICS[worst.k].label}`:'This month is in line with a usual month'}. Here's why:`,
+      why:rows.map(r=>`${cap(METRICS[r.k].label)}: ${B(fmt(r.so,METRICS[r.k].fmt))} so far${isAvgKind(r.k)?`, on course for ${fmt(r.now,METRICS[r.k].fmt)}`:''} against a usual ${fmt(r.us,METRICS[r.k].fmt)}${r.d?` (${r.d.txt})`:''}.`),
+      figures:rows.slice(0,4).map(r=>({label:cap(METRICS[r.k].label)+(isAvgKind(r.k)?' run-rate':''),value:fmt(r.now,METRICS[r.k].fmt),note:r.d?r.d.txt+' vs usual':'',tone:r.d?(r.d.d>=0?'good':'bad'):'neutral'})),
+      sections:[],actions:[worst?{title:`Recover ${METRICS[worst.k].label} in the remaining ${DAYS_TOTAL-DAYS_DONE} days.`,detail:`It is tracking ${worst.d.txt} against usual. Ask "${cap(METRICS[worst.k].label)} by centre this month" to see where the gap is.`}:null,
+        best?{title:`Keep up what's driving ${METRICS[best.k].label}.`,detail:`It is ${best.d.txt} ahead of usual; find out which centre or course is behind it and keep it going.`}:null].filter(Boolean),
+      where:[{page:'Business Pulse',section:'All sections',items:['CM','RR']},{page:'Monthly Performance Analysis',section:'Collections Overview',items:['Actuals','Run-rate']}],
+      followups:[worst?`${cap(METRICS[worst.k].label)} by centre this month`:'Admissions by course this month','Which teachers have the best renewal rate?'],scope:scopeTxt(f)+' · '+MONTH_FULL[CUR%12]+' vs the last 12 months'};
+  }
+  return{answer,prepare};
+})();
+
 /* ── Loading ── */
 let DATA={},FUN=null,CAL=[],READY=false,DIGEST=null;
 async function load(){
@@ -301,7 +669,7 @@ async function load(){
       DATA[c.name]={ms,first:ms.length?Math.min(...ms.filter(m=>m.kind==='ft').map(m=>mi(m.d))):null};});
     [FUN,CAL]=await Promise.all([fun,cal]);
     if(!Object.keys(DATA).length)throw new Error('no data you can see yet');
-    DIGEST=buildDigest();READY=true;
+    ENGINE.prepare();READY=true;
     dot.className='dot';st.textContent='Data up to '+TODAY.getDate()+' '+MON[TODAY.getMonth()];
     document.getElementById('go').disabled=false;
     if(pending){const q=pending;pending=null;ask(q);}
@@ -330,14 +698,22 @@ async function ask(q){
   show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div><div class="thinking"><span class="bars"><i></i><i></i><i></i></span>Reading the numbers and working out the answer…</div>`);
   const go=document.getElementById('go');go.disabled=true;
   try{
-    const j=await ArtiumAuth.call('ask',{question:q,digest:DIGEST});
-    if(!j||!j.answer)throw new Error(j&&j.error||'no answer came back');
-    render(q,j.answer);
-  }catch(e){show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div><div class="err">Sorry, that didn't work: ${esc(e.message)}. Please try again.</div>`);}
+    await new Promise(r=>setTimeout(r,350));   // a short beat so the answer doesn't flash in
+    const a=ENGINE.answer(q);
+    if(a)render(q,a);else helpCard(q);
+  }catch(e){console.error(e);show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div><div class="err">Sorry, that didn't work: ${esc(e.message)}. Please try again.</div>`);}
   go.disabled=false;
 }
 const ICON_Q='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 const ICON_T='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>';
+function helpCard(q){
+  const EX=['What is the renewal rate of instrument courses?','Which teachers have the best and worst renewal rates?','Admissions by course this month','How is this month tracking?',
+    'Renewal rate by age group at Thoraipakkam','Which course has the highest ATV?','Is CAC coming down since June?','How many active learners are there by centre?'];
+  show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div>
+    <div class="a-head">I couldn't match that to the numbers on this site</div>
+    <div class="a-lead">I answer questions about admissions, renewals and renewal rates, collections, ATV, active learners, appointments, visits, leads, spends, CPL and CAC, by centre, course, course level, age group, teacher, package or month.</div>
+    <div class="a-sec"><h3>Try one of these:</h3></div><div class="follow">${EX.map(x=>`<button class="chip" type="button">${esc(x)}</button>`).join('')}</div>`);
+}
 function show(html){const A=document.getElementById('answer');A.hidden=false;A.innerHTML=html;}
 function render(q,a){
   const list=b=>(b||[]).length?`<ul>${b.map(x=>`<li>${rich(x)}</li>`).join('')}</ul>`:'';
@@ -354,7 +730,7 @@ function render(q,a){
     ${(a.actions||[]).length?`<div class="recs"><h3>${ICON_T}Recommended Actions:</h3><ol>${a.actions.map(x=>`<li><span class="t">${rich(x.title)}</span>${rich(x.detail)}</li>`).join('')}</ol></div>`:''}
     ${where?`<div class="where"><div class="where-t">Where to see this</div>${where}</div>`:''}
     ${(a.followups||[]).length?`<div class="follow">${a.followups.slice(0,3).map(f=>`<button class="chip" type="button">${esc(f)}</button>`).join('')}</div>`:''}
-    <div class="a-foot"><span>Worked out by Claude from the site's numbers up to ${TODAY.getDate()} ${MON[TODAY.getMonth()]} ${TODAY.getFullYear()}. Check the page before acting on it.</span><span>${esc(a.scope||'')}</span></div>`);
+    <div class="a-foot"><span>Worked out from the site's numbers up to ${TODAY.getDate()} ${MON[TODAY.getMonth()]} ${TODAY.getFullYear()}. Check the page before acting on it.</span><span>${esc(a.scope||'')}</span></div>`);
 }
 document.getElementById('answer').addEventListener('click',e=>{
   const o=e.target.closest('.open');if(o){try{window.parent.location.hash=o.dataset.tab;}catch(err){}return;}
