@@ -98,6 +98,7 @@
     <div class="shell-bar"><div class="who" id="who"></div></div>
   </aside>
 <script>
+(function(){   // kept private so nothing here replaces the browser's own functions (e.g. window.open, which Google sign-in needs)
   const tabs = document.querySelectorAll(".tab");
   function show(name){
     if(!ArtiumAuth.user) return;   // nothing loads before sign-in
@@ -115,17 +116,17 @@
   /* Sidebar: opens when the mouse reaches the menu button or the left edge, closes when it leaves; a click or tap also toggles it */
   const body = document.body, side = document.getElementById("sidebar"), btn = document.getElementById("menu-btn");
   let closeTimer = null;
-  function open(){ clearTimeout(closeTimer); body.classList.add("open"); btn.setAttribute("aria-expanded", "true"); }
-  function close(){ clearTimeout(closeTimer); body.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
-  function closeSoon(){ clearTimeout(closeTimer); closeTimer = setTimeout(() => { if(!side.querySelector(".um-pop.open")) close(); }, 260); }
-  btn.addEventListener("mouseenter", open);
-  document.getElementById("edge").addEventListener("mouseenter", open);
-  side.addEventListener("mouseenter", open);
+  function openMenu(){ clearTimeout(closeTimer); body.classList.add("open"); btn.setAttribute("aria-expanded", "true"); }
+  function closeMenu(){ clearTimeout(closeTimer); body.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+  function closeSoon(){ clearTimeout(closeTimer); closeTimer = setTimeout(() => { if(!side.querySelector(".um-pop.open")) closeMenu(); }, 260); }
+  btn.addEventListener("mouseenter", openMenu);
+  document.getElementById("edge").addEventListener("mouseenter", openMenu);
+  side.addEventListener("mouseenter", openMenu);
   side.addEventListener("mouseleave", closeSoon);
-  btn.addEventListener("click", () => body.classList.contains("open") ? close() : open());
-  document.getElementById("scrim").addEventListener("click", close);
-  document.addEventListener("keydown", e => { if(e.key === "Escape") close(); });
-  tabs.forEach(t => t.addEventListener("click", () => { show(t.dataset.tab); close(); }));
+  btn.addEventListener("click", () => body.classList.contains("open") ? closeMenu() : openMenu());
+  document.getElementById("scrim").addEventListener("click", closeMenu);
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeMenu(); });
+  tabs.forEach(t => t.addEventListener("click", () => { show(t.dataset.tab); closeMenu(); }));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
   // Name and email under the avatar at the bottom of the sidebar
@@ -136,6 +137,7 @@
     document.getElementById("who").innerHTML = (u.name ? `<b>${esc(u.name)}</b>` : "") + `<span>${esc(u.email)}</span>`;
     show("start");
   });
+})();
 </script>
 </body>
 </html>
