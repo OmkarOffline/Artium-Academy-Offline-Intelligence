@@ -19,12 +19,12 @@
     --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
   }
   body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
-  .page{max-width:1080px;margin:0 auto;padding:56px 32px 72px}
+  .page{max-width:880px;margin:0 auto;padding:64px 32px 72px}
 
   /* Hero */
-  .hero{text-align:center;margin-bottom:28px}
+  .hero{text-align:center;margin-bottom:24px}
   .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-  h1{font:600 38px/1.2 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  h1{font:600 32px/1.25 var(--display);letter-spacing:-.015em;color:var(--ink)}
   .subtitle{font-size:15px;color:var(--muted);margin-top:8px}
 
   /* Ask box */
@@ -37,7 +37,12 @@
   .go{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:15px;border:0;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 8px 18px -10px rgba(91,42,134,.8);transition:transform .1s,opacity .15s}
   .go:hover{transform:translateY(-1px)}
   .go:disabled{opacity:.4;cursor:default;transform:none}
-  .data-state{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .under{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 6px 0;font-size:13px}
+  .data-state{display:inline-flex;align-items:center;gap:7px;color:var(--faint);font-size:12.5px}
+  .try{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;color:var(--faint)}
+  .try button{border:0;background:none;padding:3px 8px;border-radius:999px;font:500 13px var(--body);color:var(--accent);cursor:pointer}
+  .try button:hover{background:var(--accent-soft)}
+  .try i{font-style:normal;color:var(--ghost)}
   .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
   .dot.loading{background:var(--gold);animation:pulse 1s infinite}
   .dot.error{background:var(--bad)}
@@ -109,24 +114,51 @@
   .recent .chip{background:transparent;color:var(--muted)}
 
   @media (max-width:640px){.page{padding:32px 16px 48px}h1{font-size:28px}.ask textarea{font-size:16px}.answer{padding:20px 18px}.loc{flex-direction:column;align-items:flex-start}}
+
+  /* ── Home: light, premium ── */
+  body{background:#F7F4EE}
+  .bg{position:fixed;inset:0;z-index:-2;pointer-events:none;background:linear-gradient(180deg,#FFFCF6 0%,#FBF5EA 100%)}
+  .bg svg{position:absolute;inset:0;width:100%;height:100%}
+  .bg::after{content:"";position:absolute;inset:0;background:radial-gradient(42% 46% at 50% 36%,rgba(255,252,246,.96) 0%,rgba(255,252,246,.75) 55%,rgba(255,252,246,0) 100%)}
+  .page{max-width:1000px;padding:56px 28px 72px}
+  .stage{position:relative;text-align:center;padding:46px 0 26px;isolation:isolate}
+  .kicker{display:inline-flex;align-items:center;gap:10px;font:700 10.5px/1 var(--body);letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+  .kicker::before,.kicker::after{content:"";width:28px;height:1px;background:linear-gradient(90deg,transparent,#C9A66B)}
+  .kicker::after{transform:scaleX(-1)}
+  .stage h1{font:600 40px/1.2 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .stage h1 .nm{background:linear-gradient(100deg,#A8844F,#C9A66B 45%,#8A6A3A);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stage .sub{font:400 16.5px/1.5 var(--body);color:var(--muted);margin:8px 0 30px}
+  .stage .ask{max-width:780px;margin:0 auto;background:rgba(255,255,255,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid #E6DCCB;border-radius:22px;padding:10px 10px 10px 18px;text-align:left;
+    box-shadow:0 1px 0 #fff inset,0 2px 4px rgba(43,25,10,.03),0 24px 50px -24px rgba(91,42,134,.30),0 10px 30px -20px rgba(168,132,79,.35)}
+  .stage .ask:focus-within{border-color:#D4BC92;box-shadow:0 0 0 4px rgba(201,166,107,.18),0 24px 50px -24px rgba(91,42,134,.32)}
+  .spark{flex:none;display:grid;place-items:center;width:34px;height:34px;color:var(--gold)}
+  .stage .ask textarea{font-size:18px;padding:8px 2px}
+  .stage .ask textarea:placeholder-shown{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stage .go{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,#6E33A0,#5B2A86)}
+  .stage .try{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:20px;color:var(--faint);font-size:13px}
+  .stage .try button{border:1px solid #E6DCCB;background:rgba(255,255,255,.7);color:var(--ink2);border-radius:999px;padding:7px 14px;font:500 13px var(--body);cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+  .stage .try button:hover{border-color:#D4BC92;color:var(--accent);background:#fff}
+  .stage .data-state{display:inline-flex;align-items:center;gap:7px;margin-top:16px;color:var(--faint);font-size:12px}
+  .page>.answer,.recent{max-width:1000px;margin-left:auto;margin-right:auto}
+  .answer{background:rgba(255,255,255,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  @media (max-width:760px){.page{padding:28px 14px 48px}.stage h1{font-size:30px}}
 </style>
 </head>
 <body>
+<div class="bg" id="bg" aria-hidden="true"></div>
 <div class="page">
-  <div class="hero">
-    <div class="eyebrow" id="greet">Good afternoon</div>
-    <h1>What would you like to know?</h1>
-    <div class="subtitle">Ask about admissions, renewals, collections, learners, marketing or the calendar. Answers come from the numbers on this site.</div>
-  </div>
-
-  <form class="ask" id="ask">
-    <svg class="q" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <textarea id="q" rows="1" placeholder="e.g. How is October tracking against our usual month?" aria-label="Your question"></textarea>
-    <button class="go" id="go" type="submit" aria-label="Ask"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-  </form>
-  <div class="data-state"><span class="dot loading" id="dot"></span><span id="state">Loading the numbers…</span></div>
-
-  <div class="chips" id="suggest"></div>
+  <header class="stage">
+    <div class="kicker">Artium Offline Intelligence</div>
+    <h1 id="greet">Good afternoon</h1>
+    <div class="sub">What would you like to know today?</div>
+    <form class="ask" id="ask">
+      <span class="spark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" opacity=".7"/></svg></span>
+      <textarea id="q" rows="1" placeholder="Ask anything about the offline business…" aria-label="Your question"></textarea>
+      <button class="go" id="go" type="submit" aria-label="Ask"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+    <div class="try" id="suggest"></div>
+    <div class="data-state"><span class="dot loading" id="dot"></span><span id="state">Loading the numbers…</span></div>
+  </header>
 
   <section class="answer" id="answer" hidden aria-live="polite"></section>
 
@@ -270,7 +302,7 @@ async function load(){
     [FUN,CAL]=await Promise.all([fun,cal]);
     if(!Object.keys(DATA).length)throw new Error('no data you can see yet');
     DIGEST=buildDigest();READY=true;
-    dot.className='dot';st.textContent='Numbers up to '+TODAY.getDate()+' '+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+' · '+Object.keys(DATA).length+' centres';
+    dot.className='dot';st.textContent='Data up to '+TODAY.getDate()+' '+MON[TODAY.getMonth()];
     document.getElementById('go').disabled=false;
     if(pending){const q=pending;pending=null;ask(q);}
   }catch(e){dot.className='dot error';st.textContent='Could not load the numbers: '+e.message;}
@@ -289,7 +321,7 @@ function upcoming(j){
 
 /* ── Asking ── */
 let pending=null;
-const SUGGEST=['How is this month tracking against a usual month?','Where are we losing learners at the first renewal?','Which courses and age groups bring the highest fees?','Which teachers have the best and worst renewal rates?','Is marketing getting more efficient since June?'];
+const SUGGEST=[['This month vs usual','How is this month tracking against a usual month?'],['First-renewal drop-offs','Where are we losing learners at the first renewal?'],['Teachers\' renewal rates','Which teachers have the best and worst renewal rates?']];
 async function ask(q){
   q=q.trim();if(!q)return;
   document.getElementById('q').value=q;fit();
@@ -335,8 +367,8 @@ function fit(){box.style.height='auto';box.style.height=Math.min(box.scrollHeigh
 box.addEventListener('input',fit);
 box.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask(box.value);}});
 document.getElementById('ask').addEventListener('submit',e=>{e.preventDefault();ask(box.value);});
-document.getElementById('suggest').innerHTML=SUGGEST.map(s=>`<button class="chip" type="button">${esc(s)}</button>`).join('');
-document.getElementById('suggest').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c)ask(c.textContent);});
+document.getElementById('suggest').innerHTML='Try'+SUGGEST.map(([s,q])=>`<button type="button" data-q="${esc(q)}" title="${esc(q)}">${esc(s)}</button>`).join('');
+document.getElementById('suggest').addEventListener('click',e=>{const c=e.target.closest('button');if(c)ask(c.dataset.q);});
 function recent(){try{return JSON.parse(localStorage.getItem('artium_home_recent')||'[]');}catch(e){return[];}}
 function remember(q){const r=[q].concat(recent().filter(x=>x!==q)).slice(0,6);try{localStorage.setItem('artium_home_recent',JSON.stringify(r));}catch(e){}showRecent();}
 function showRecent(){const r=recent();document.getElementById('recent').hidden=!r.length;
@@ -348,9 +380,127 @@ showRecent();
 (function greet(){
   const h=new Date().getHours(),part=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   const el=document.getElementById('greet');el.textContent=part;
-  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.textContent=part+', '+(j.salutation?j.salutation+' ':'')+j.first;}).catch(()=>{});
+  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.innerHTML=esc(part)+', <span class="nm">'+esc((j.salutation?j.salutation+' ':'')+j.first)+'</span>';}).catch(()=>{});
 })();
 document.getElementById('go').disabled=true;
+
+/* The placeholder types out example questions */
+(function typing(){
+  const ex=['How is this month tracking against a usual month?','Which age group drops off most at the first renewal?','Which teachers renew best at Thoraipakkam?','Is our cost per admission coming down?','Which course brings the highest fee per admission?'];
+  let i=0,j=0,del=false;
+  (function tick(){if(document.activeElement===box||box.value){box.placeholder='Ask anything about the offline business…';setTimeout(tick,1200);return;}
+    const t=ex[i];j+=del?-1:1;box.placeholder=t.slice(0,j)+(del?'':'|');
+    if(!del&&j===t.length){del=true;setTimeout(tick,2200);return;}
+    if(del&&j===0){del=false;i=(i+1)%ex.length;}
+    setTimeout(tick,del?22:48);})();
+})();
+
+/* Backdrop: a hand-composed line-art frame around the page (data, money, intelligence, education, music),
+   with flowing line bundles, soft colour clouds and dot grids. The centre stays clear for the greeting and answers. */
+(function backdrop(){
+  const W=1600,H=900,G='#C9A66B',GD='#B8955C',L='#A98BD0',LD='#8E6CC0';
+  const o=[];
+  const P=(d,s=G,w=1.3,extra='')=>o.push(`<path d="${d}" stroke="${s}" stroke-width="${w}" ${extra}/>`);
+  // soft colour clouds
+  [[120,140,260,200,'#F1DDB8',.55],[1500,120,240,180,'#E3D6F3',.6],[80,820,320,170,'#E3D6F3',.55],[1520,800,300,200,'#F2DFC0',.5],
+   [820,960,420,140,'#E9DDF5',.45],[1330,520,200,170,'#F4E3C6',.35],[260,520,190,150,'#EEE3F7',.35]]
+    .forEach(([x,y,rx,ry,c,a])=>o.push(`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" opacity="${a}" filter="url(#soft)"/>`));
+  // flowing line bundles
+  const bundle=(x0,y0,c1x,c1y,c2x,c2y,x1,y1,n,dx,dy,grad)=>{for(let i=0;i<n;i++){const k=i-n/2;
+    o.push(`<path d="M${x0+k*dx} ${y0+k*dy}C${c1x+k*dx*1.4} ${c1y+k*dy*1.6} ${c2x+k*dx*.8} ${c2y+k*dy} ${x1+k*dx} ${y1+k*dy}" stroke="url(#${grad})" stroke-width=".7" opacity="${.25+.5*Math.sin(Math.PI*i/n)}"/>`);}};
+  bundle(-40,700,260,560,560,960,980,860,22,2,4.5,'gw');
+  bundle(820,930,1120,800,1360,860,1660,560,22,2.5,4,'lw');
+  bundle(1180,-30,1340,140,1480,40,1660,140,16,3,3,'lw');
+  bundle(-40,200,180,120,360,260,620,130,14,2,3,'gw');
+  // dot grids
+  const grid=(x,y,c,r,gap=13,col=L)=>{for(let i=0;i<c;i++)for(let j=0;j<r;j++)o.push(`<circle cx="${x+i*gap}" cy="${y+j*gap}" r="1.2" fill="${col}" opacity=".45"/>`);};
+  grid(480,40,12,6);grid(1285,292,6,4,12,G);grid(415,740,10,5,13,G);grid(1240,620,6,4,12);grid(170,560,3,6,12,G);grid(1260,760,12,3,12,L);grid(285,885,7,2,12,G);
+  // scattered dots and rings
+  [[185,46,2.4,G],[267,35,2.6,G],[453,60,2.4,G],[1186,147,2.6,L],[1110,160,2.2,G],[1465,40,2,L],[1505,145,2.4,G],[316,442,2.2,G],[495,650,2.6,G],[685,835,2.6,G],
+   [1083,700,2.4,G],[1350,497,2.4,G],[1648,515,2.2,L],[1632,628,2.2,L],[24,828,2.2,G],[1410,890,2.4,G],[1084,908,2.4,L],[78,284,2.2,L],[245,277,2.4,G],[1460,380,2.2,L]]
+    .forEach(([x,y,r,c])=>o.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".7"/>`));
+  [[1186,208,14,G],[1451,335,18,L],[596,715,14,G],[214,476,6,L],[1147,705,9,L],[1274,241,4,L]]
+    .forEach(([x,y,r,c])=>o.push(`<circle cx="${x}" cy="${y}" r="${r}" stroke="${c}" stroke-width="1.2" opacity=".6"/>`));
+  const plus=(x,y,c)=>P(`M${x-6} ${y}H${x+6}M${x} ${y-6}V${y+6}`,c,1.2,'opacity=".7"');plus(1374,522,G);plus(1606,323,L);plus(1445,244,L);
+
+  // ── left side ──
+  // bar chart with gradient bars
+  o.push('<g opacity=".9">');P('M66 154H202M66 154V98',GD,1.2,'opacity=".6"');
+  [[70,118],[92,106],[114,96],[136,92],[158,82],[180,68]].forEach(([x,y],i)=>o.push(`<rect x="${x}" y="${y}" width="14" height="${154-y}" fill="url(#bar${i%2})"/>`));o.push('</g>');
+  // pie chart
+  o.push(`<g transform="translate(314 84)" opacity=".85"><circle r="33" stroke="${L}" stroke-width="1.3"/><path d="M0 0V-33A33 33 0 0 1 31 -10Z" fill="${L}" fill-opacity=".14" stroke="${L}" stroke-width="1.3"/><path d="M0 0L31 -10" stroke="${L}" stroke-width="1.3"/><path d="M0 0L24 23" stroke="${L}" stroke-width="1.3"/></g>`);
+  // graduation cap
+  o.push(`<g transform="translate(352 122)" stroke="${GD}" stroke-width="1.5" opacity=".85" stroke-linejoin="round"><path d="M0 26L54 2L108 26L54 50Z" fill="#F6E9D2" fill-opacity=".6"/><path d="M22 36V58C22 68 86 68 86 58V36"/><path d="M54 26L100 34V54"/><circle cx="100" cy="58" r="3" fill="${G}"/><path d="M100 61L104 70H96Z" fill="${G}"/></g>`);
+  // music note
+  o.push(`<g transform="translate(118 262)" fill="${G}" opacity=".75"><path d="M8 50V10L44 2V38" stroke="${G}" stroke-width="3" fill="none"/><ellipse cx="4" cy="52" rx="9" ry="7"/><ellipse cx="40" cy="42" rx="9" ry="7"/></g>`);
+  // stave with notes
+  o.push('<g transform="translate(184 340)" opacity=".75">');for(let i=0;i<5;i++)P(`M0 ${i*9}H190`,i%2?L:G,.9);
+  [[45,27,L],[125,27,G],[18,54,L]].forEach(([x,y,c])=>o.push(`<circle cx="${x}" cy="${y}" r="4.5" fill="${c}"/>`));P('M49 27V8',L,1.4);o.push('</g>');
+  // guitar
+  o.push(`<g transform="translate(-6 160) rotate(-14 60 220)" stroke="${GD}" stroke-width="1.6" opacity=".55" fill="none">
+    <path d="M60 225C20 230 0 270 10 315C18 350 2 380 20 415C40 455 110 460 140 430C165 405 150 375 150 350C150 320 168 300 150 265C132 230 100 222 60 225Z" fill="#F4E5CC" fill-opacity=".35"/>
+    <circle cx="80" cy="330" r="27" fill="#EBD3A8" fill-opacity=".45"/><path d="M58 0L72 0L74 220L60 220Z" fill="#FBF3E4"/>
+    <path d="M60 -30H74V2H60Z"/><path d="M62 0L64 420M66 0L68 420M70 0L72 420"/><rect x="50" y="400" width="60" height="12" rx="3" transform="rotate(14 80 406)"/></g>`);
+  // line chart with nodes
+  P('M100 718L188 670L216 695L282 632',L,1.4,'opacity=".7"');[[188,670,7,L,1],[216,695,6,L,0],[282,632,8,L,1]].forEach(([x,y,r,c,f])=>o.push(`<circle cx="${x}" cy="${y}" r="${r}" ${f?`fill="${c}" opacity=".55"`:`stroke="${c}" stroke-width="1.5" fill="#fff"`}/>`));
+  P('M242 830L320 790L370 840L418 870L494 826L600 940',G,1.3,'opacity=".7"');[[242,830],[320,790],[370,840],[418,870],[494,826]].forEach(([x,y],i)=>o.push(`<circle cx="${x}" cy="${y}" r="${i%2?7:6}" ${i%2?`fill="${G}" opacity=".6"`:`stroke="${G}" stroke-width="1.5" fill="#fff"`}/>`));
+  // lightbulb with rays
+  o.push(`<g transform="translate(340 662)" stroke="${GD}" stroke-width="1.5" opacity=".8" fill="none"><path d="M26 18C12 18 2 28 2 40C2 50 8 55 13 62V72H39V62C44 55 50 50 50 40C50 28 40 18 26 18Z" fill="#FBF0DC"/><path d="M16 78H36M18 84H34"/><path d="M26 72V54L20 48M26 54L32 48"/>
+    <path d="M26 0V8M-4 14L3 19M56 14L49 19M-10 40H-2M54 40H62"/></g>`);
+  // laptop with chart
+  o.push(`<g transform="translate(54 758) rotate(-6)" stroke="${GD}" stroke-width="1.5" opacity=".8" fill="none"><rect x="0" y="0" width="140" height="92" rx="5" fill="#FFFCF6"/><path d="M-14 104H160L150 116H-4Z" fill="#F6ECDB"/>
+    ${[[24,60],[44,50],[64,42],[84,30],[104,22]].map(([x,y],i)=>`<rect x="${x}" y="${y}" width="12" height="${80-y}" fill="url(#bar${i%2?1:2})" stroke="none"/>`).join('')}</g>`);
+
+  // ── top centre ──
+  P('M972 160L1012 122L1026 136L1048 112',L,1.6,'opacity=".75"');P('M1036 112H1048V124',L,1.6,'opacity=".75"');P('M968 176H1048',L,1.2,'opacity=".5"');
+  o.push(`<g transform="translate(1086 56)" fill="${LD}" opacity=".7"><path d="M8 34V6L34 0V28" stroke="${LD}" stroke-width="2.6" fill="none"/><path d="M8 12L34 6" stroke="${LD}" stroke-width="2.6"/><ellipse cx="4" cy="36" rx="7" ry="5.4"/><ellipse cx="30" cy="30" rx="7" ry="5.4"/></g>`);
+
+  // ── right side ──
+  // neural network brain
+  const brain=[[1218,98],[1238,62],[1274,44],[1318,36],[1362,44],[1400,66],[1428,96],[1432,132],[1414,168],[1376,188],[1334,196],[1290,190],[1248,172],[1224,140],
+    [1260,92],[1296,74],[1338,70],[1376,90],[1398,120],[1380,150],[1342,162],[1300,158],[1266,136],[1292,112],[1330,104],[1360,128],[1318,136],[1244,122]];
+  const near=[];brain.forEach((a,i)=>brain.forEach((b,j)=>{if(j>i){const d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d<52)near.push([a,b]);}}));
+  o.push('<g opacity=".8">');near.forEach(([a,b])=>P(`M${a[0]} ${a[1]}L${b[0]} ${b[1]}`,'#C8B7E3',.9));
+  brain.forEach(([x,y],i)=>o.push(`<circle cx="${x}" cy="${y}" r="${3.5+(i%3)}" fill="${i%2?'#E2CDA6':'#CDBCE6'}"/>`));
+  P('M1334 196L1340 230M1352 192L1362 234',L,1.2);o.push('</g>');
+  // candlestick chart
+  o.push('<g opacity=".7">');[[1563,110,152,128,140],[1586,98,140,112,130],[1608,82,124,92,112],[1630,94,134,104,120],[1652,46,108,66,96]].forEach(([x,t,b,o1,o2],i)=>{P(`M${x} ${t}V${b}`,i%2?L:'#B9A7D8',1.2);o.push(`<rect x="${x-6}" y="${o1}" width="12" height="${o2-o1}" fill="${i%2?'#E9DCF3':'#EFE3D0'}" stroke="${i%2?L:'#C9B9A0'}"/>`);});o.push('</g>');
+  // piano keys
+  o.push(`<g transform="translate(1496 218)" opacity=".8"><rect width="146" height="72" fill="#FFFCF6" stroke="${L}" stroke-width="1.3"/>${Array.from({length:8},(_,i)=>`<path d="M${i*18.25} 0V72" stroke="${L}" stroke-width="1"/>`).join('')}
+    ${[12,30,66,84,102].map((x,i)=>`<rect x="${x}" y="0" width="11" height="42" fill="${i%2?'#E2D3F1':'#EBD9B8'}"/>`).join('')}</g>`);
+  // treble clef (simple engraved style)
+  o.push(`<g transform="translate(1516 336)" stroke="${G}" stroke-width="3" fill="none" opacity=".55" stroke-linecap="round"><path d="M30 120C30 132 18 138 12 130C6 122 16 112 24 118"/><path d="M30 120L22 10C20 -4 40 -2 40 14C40 34 6 50 4 76C2 100 22 112 42 104C62 94 58 66 36 64C18 62 12 82 24 92"/></g>`);
+  // small bar chart
+  [[1360,436],[1378,426],[1396,412],[1414,400]].forEach(([x,y],i)=>o.push(`<rect x="${x}" y="${y}" width="10" height="${452-y}" fill="url(#bar${i%2?1:0})" opacity=".8"/>`));
+  // coin stack and rupee coin
+  o.push(`<g transform="translate(1420 492)" stroke="${GD}" stroke-width="1.5" opacity=".85" fill="#FBF1DF">
+    ${[64,48,32,16,0].map(y=>`<path d="M0 ${y+12}V${y+20}C0 ${y+30} 66 ${y+30} 66 ${y+20}V${y+12}"/><ellipse cx="33" cy="${y+12}" rx="33" ry="10"/>`).join('')}
+    <circle cx="82" cy="62" r="34" fill="#FFF8EC"/><circle cx="82" cy="62" r="27" fill="none"/>
+    <path d="M70 46H94M70 54H94M70 46C86 46 86 64 70 64L88 80" fill="none" stroke-width="2.2"/></g>`);
+  // trend line with nodes and bars
+  P('M1168 762L1218 712L1254 734L1355 630L1428 604',G,1.4,'opacity=".7"');[[1168,762,6,0],[1218,712,7,1],[1254,734,6,0],[1355,630,7,1],[1428,604,5,1]].forEach(([x,y,r,f])=>o.push(`<circle cx="${x}" cy="${y}" r="${r}" ${f?`fill="${f&&x>1300?L:G}" opacity=".65"`:`stroke="${G}" stroke-width="1.5" fill="#fff"`}/>`));
+  [[1322,710],[1352,688],[1382,664],[1410,646]].forEach(([x,y],i)=>o.push(`<rect x="${x}" y="${y}" width="16" height="${740-y}" fill="url(#bar${i%2})" opacity=".85"/>`));P('M1296 740H1440',GD,1.1,'opacity=".5"');
+  // report document
+  o.push(`<g transform="translate(1530 658)" stroke="${L}" stroke-width="1.3" opacity=".85"><rect width="108" height="158" rx="4" fill="#FFFCF8"/><path d="M14 20H58M14 30H66M14 40H44" stroke-width="2"/>
+    ${[[16,96],[32,84],[48,72],[64,58]].map(([x,y],i)=>`<rect x="${x}" y="${y}" width="10" height="${118-y}" fill="url(#bar${i%2?1:2})" stroke="none"/>`).join('')}
+    <circle cx="70" cy="122" r="20" fill="#F7E8CD" stroke="${G}"/><path d="M70 122V102A20 20 0 0 1 90 122Z" fill="#EFD9AF" stroke="${G}"/><path d="M14 140H44" stroke-width="2"/></g>`);
+  // gears
+  const gear=(cx,cy,r,teeth,col)=>{let d='';for(let i=0;i<teeth*2;i++){const a=i/(teeth*2)*Math.PI*2,rr=i%2?r:r*1.22,a2=(i+1)/(teeth*2)*Math.PI*2;
+    d+=(i?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1)+'L'+(cx+rr*Math.cos(a2)).toFixed(1)+' '+(cy+rr*Math.sin(a2)).toFixed(1);}
+    o.push(`<g stroke="${col}" stroke-width="1.5" opacity=".7"><path d="${d}Z" fill="#FBF6FE"/><circle cx="${cx}" cy="${cy}" r="${r*.42}"/></g>`);};
+  gear(1474,842,30,10,L);gear(1546,874,24,9,LD);
+
+  const svg=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" fill="none" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg">
+    <defs><filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="38"/></filter>
+      <linearGradient id="gw" x1="0" x2="1"><stop offset="0" stop-color="#C9A66B"/><stop offset=".6" stop-color="#C9A66B"/><stop offset="1" stop-color="#A98BD0"/></linearGradient>
+      <linearGradient id="lw" x1="0" x2="1"><stop offset="0" stop-color="#A98BD0"/><stop offset="1" stop-color="#C9A66B"/></linearGradient>
+      <linearGradient id="bar0" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6CFA3"/><stop offset="1" stop-color="#E6CFA3" stop-opacity=".15"/></linearGradient>
+      <linearGradient id="bar1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CDB9EA"/><stop offset="1" stop-color="#CDB9EA" stop-opacity=".15"/></linearGradient>
+      <linearGradient id="bar2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9A0E0"/><stop offset="1" stop-color="#B9A0E0" stop-opacity=".2"/></linearGradient></defs>
+    ${o.join('')}</svg>`;
+  document.getElementById('bg').innerHTML=svg;
+})();
+
 load();
 </script>
 </body>
