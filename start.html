@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--gold-soft:#FBF4E8;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1080px;margin:0 auto;padding:56px 32px 72px}
+
+  /* Hero */
+  .hero{text-align:center;margin-bottom:28px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+  h1{font:600 38px/1.2 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:8px}
+
+  /* Ask box */
+  .ask{position:relative;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:22px;padding:10px 10px 10px 22px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 22px 44px -28px rgba(75,31,111,.35);transition:border-color .15s,box-shadow .15s}
+  .ask:focus-within{border-color:#CDB9E3;box-shadow:0 0 0 4px rgba(91,42,134,.10),0 22px 44px -28px rgba(75,31,111,.35)}
+  .ask svg.q{flex:none;color:var(--gold)}
+  .ask textarea{flex:1;border:0;outline:0;resize:none;background:none;font:400 17px/1.5 var(--body);color:var(--ink);padding:8px 0;max-height:140px}
+  .ask textarea::placeholder{color:var(--faint)}
+  .go{flex:none;display:grid;place-items:center;width:46px;height:46px;border-radius:15px;border:0;background:var(--accent);color:#fff;cursor:pointer;box-shadow:0 8px 18px -10px rgba(91,42,134,.8);transition:transform .1s,opacity .15s}
+  .go:hover{transform:translateY(-1px)}
+  .go:disabled{opacity:.4;cursor:default;transform:none}
+  .data-state{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--muted)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
+  .chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 14px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+  .chip:hover{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+
+  /* Answer */
+  .answer{margin-top:34px;background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,rgba(255,255,255,.55) 100%);border:1px solid #E9E5EE;border-radius:26px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:26px 28px 24px}
+  .answer[hidden]{display:none}
+  .a-q{display:flex;align-items:flex-start;gap:10px;font:500 14px/1.5 var(--body);color:var(--muted);margin-bottom:16px}
+  .a-q b{color:var(--ink2);font-weight:600}
+  .a-head{position:relative;padding-left:16px;font:600 21px/1.35 var(--display);color:var(--ink);margin-bottom:10px}
+  .a-head::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:4px;border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .a-body{font-size:15px;line-height:1.7;color:var(--ink2);max-width:860px}
+  .a-body p+p{margin-top:8px}
+  .a-body b{color:var(--ink);font-weight:600}
+
+  .a-lead{font:600 16px/1.55 var(--display);color:var(--accent);background:var(--accent-soft);border-radius:14px;padding:12px 16px;margin:4px 0 6px;max-width:900px}
+  .a-sec{margin-top:18px;max-width:900px}
+  .a-sec h3{font:600 15px/1.4 var(--display);color:var(--ink);margin-bottom:6px}
+  .a-sec ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+  .a-sec li{position:relative;padding-left:20px;font-size:14.5px;line-height:1.6;color:var(--ink2)}
+  .a-sec li::before{content:"";position:absolute;left:4px;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--gold)}
+  .a-sec li b{color:var(--ink);font-weight:600}
+  .a-sec.act li::before{border-radius:2px;background:var(--accent)}
+  .fig .s.up{color:var(--ok);font-weight:600}.fig .s.dn{color:var(--bad);font-weight:600}
+  .a-split{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+  .recs{margin-top:22px;background:linear-gradient(180deg,#FCF7EE 0%,#FBF4E8 100%);border:1px solid #EEDDC0;border-radius:18px;padding:18px 20px 16px;max-width:none}
+  .recs h3{display:flex;align-items:center;gap:8px;font:600 16px/1.4 var(--display);color:#6E4E1E;margin-bottom:12px}
+  .recs h3 svg{color:var(--gold)}
+  .recs ol{list-style:none;counter-reset:r;display:flex;flex-direction:column;gap:12px}
+  .recs li{counter-increment:r;position:relative;padding-left:38px;font-size:14.5px;line-height:1.6;color:var(--ink2)}
+  .recs li::before{content:counter(r);position:absolute;left:0;top:1px;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;border:1px solid #E6D2AE;font:700 12.5px var(--display);color:#8A6A3A}
+  .recs li .t{display:block;font:600 14.5px/1.5 var(--display);color:var(--ink);margin-bottom:2px}
+  .recs li b{color:var(--ink);font-weight:600}
+  .figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:20px}
+  .fig{background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);padding:14px 16px 12px}
+  .fig .l{font:600 11px/1.35 var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+  .fig .v{font:600 24px/1.2 var(--display);color:var(--accent);margin-top:6px;font-variant-numeric:tabular-nums}
+  .fig .s{font-size:12px;color:var(--muted);margin-top:3px}
+
+  .where{margin-top:22px}
+  .where-t{font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+  .loc{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:11px 12px 11px 16px;margin-top:8px}
+  .crumbs{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}
+  .crumbs b{font:600 13.5px var(--display);color:var(--ink)}
+  .crumbs i{font-style:normal;color:var(--ghost)}
+  .crumbs span.col{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 10px;font-weight:600;font-size:12.5px}
+  .open{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 14px;font:600 12.5px var(--body);color:var(--accent);cursor:pointer;text-decoration:none}
+  .open:hover{background:var(--accent-soft);border-color:#E0D4EE}
+
+  .a-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px dashed var(--line);font-size:12px;color:var(--faint)}
+  .follow{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .follow .chip{font-size:12.5px;padding:6px 12px}
+
+  .thinking{display:flex;align-items:center;gap:12px;font:500 14px var(--body);color:var(--muted)}
+  .bars{display:flex;gap:4px}.bars i{width:5px;height:16px;border-radius:3px;background:var(--gold);animation:b 1s infinite ease-in-out}
+  .bars i:nth-child(2){animation-delay:.15s}.bars i:nth-child(3){animation-delay:.3s}
+  @keyframes b{0%,100%{transform:scaleY(.4);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+  .err{color:var(--bad);font-size:14px}
+
+  .recent{margin-top:28px}
+  .recent-t{font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px;text-align:center}
+  .recent .chips{margin-top:0}
+  .recent .chip{background:transparent;color:var(--muted)}
+
+  @media (max-width:640px){.page{padding:32px 16px 48px}h1{font-size:28px}.ask textarea{font-size:16px}.answer{padding:20px 18px}.loc{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hero">
+    <div class="eyebrow" id="greet">Good afternoon</div>
+    <h1>What would you like to know?</h1>
+    <div class="subtitle">Ask about admissions, renewals, collections, learners, marketing or the calendar. Answers come from the numbers on this site.</div>
+  </div>
+
+  <form class="ask" id="ask">
+    <svg class="q" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <textarea id="q" rows="1" placeholder="e.g. How is October tracking against our usual month?" aria-label="Your question"></textarea>
+    <button class="go" id="go" type="submit" aria-label="Ask"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </form>
+  <div class="data-state"><span class="dot loading" id="dot"></span><span id="state">Loading the numbers…</span></div>
+
+  <div class="chips" id="suggest"></div>
+
+  <section class="answer" id="answer" hidden aria-live="polite"></section>
+
+  <div class="recent" id="recent" hidden><div class="recent-t">Recent questions</div><div class="chips" id="recent-list"></div></div>
+</div>
+<script>
+/* ── Home: ask a question about the business ──
+   The page reads the same data the other pages use (receipts, appointments, visits, spends, calendar), sums it up into
+   monthly figures and breakdowns by course, course level, age group, teacher and package, and sends that summary with the
+   question to Claude through the data service. Learner names and phone numbers never leave the page. */
+const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
+const CAPACITY={'Alwarpet':540,'Thoraipakkam':630,'Borewell Road':720};   // Monthly Active Learners capacity
+const PAGES={   // page names as Claude cites them → tab on this site
+  'Business Pulse':'home','Monthly Performance Analysis':'performance','Statistics':'stats','Monthly Active Learners':'learners',
+  'Learner Analysis':'analysis','Lead to Purchase':'dashboard','Calendar':'calendar','Offline Centres':'centres'};
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const mi=d=>d.getFullYear()*12+d.getMonth();
+const ym=k=>Math.floor(k/12)+'-'+String(k%12+1).padStart(2,'0');            // 2026-10
+const ymiOf=k=>Math.floor(k/10000)*12+Math.floor(k/100)%100-1;               // month index of yyyymmdd
+const dayK=d=>d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+const TODAY=new Date(),CUR=mi(TODAY),TODAYK=dayK(TODAY);
+const YDAY=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()-1);
+const DAYS_TOTAL=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0).getDate(),DAYS_DONE=TODAY.getDate();
+const r1=x=>Math.round(x*10)/10,r0=x=>Math.round(x);
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rich=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');   // **bold** from Claude, everything else as plain text
+
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+}
+
+/* ── Building the summary ── */
+const clean=v=>{const s=String(v||'').trim();return s||'Not mentioned';};
+function memberships(name,fs,rn){
+  // every Fresh Sales or Renewals entry is a membership; it is "due" for renewal when it ends
+  const L=[];
+  const add=(r,kind)=>{const d=parseDate(r[0]);if(!d)return;const e=parseDate(r[23]),s=parseDate(r[22]);
+    L.push({centre:name,kind,id:String(r[3]||'').trim().toUpperCase(),d,amt:parseNum(r[kind==='ft'?17:16]),
+      start:s&&s.getFullYear()>=2020?s:null,end:e&&e.getFullYear()>=2020?e:null,
+      course:clean(r[8]),level:clean(r[9]),age:clean(r[6]),months:clean(r[12]),teacher:clean(r[29])});};
+  fs.forEach(r=>add(r,'ft'));rn.forEach(r=>add(r,'rp'));
+  // renewal entries: first-time (first renewal after admission) or repeated; and whether each membership was renewed
+  const byId=new Map();L.forEach(m=>{if(m.id)(byId.get(m.id)||byId.set(m.id,[]).get(m.id)).push(m);});
+  byId.forEach(list=>{list.sort((a,b)=>a.d-b.d||(a.kind==='ft'?-1:1));
+    let renewedBefore=false;
+    list.forEach((m,i)=>{if(m.kind==='rp'){m.cohort=renewedBefore?'rp':(list.slice(0,i).some(x=>x.kind==='ft')?'ft':'rp');renewedBefore=true;}
+      const next=list.slice(i+1).find(x=>x.kind==='rp'&&x.d>=m.d);m.next=next?next.d:null;});});
+  L.forEach(m=>{if(m.kind==='rp'&&!m.cohort)m.cohort='rp';});
+  return L;
+}
+const WINDOWS={cm:[CUR,CUR],l3:[CUR-3,CUR-1],l12:[CUR-12,CUR-1],life:[0,CUR]};
+function inW(d,w){const k=mi(d);return k>=WINDOWS[w][0]&&k<=WINDOWS[w][1];}
+
+function buildDigest(){
+  const names=CENTRES.map(c=>c.name).filter(n=>DATA[n]);
+  const all=[].concat(...names.map(n=>DATA[n].ms));
+  const groups=[...names.map(n=>[n,DATA[n].ms]),['All centres',all]];
+  // 1. month by month
+  const MH=['month','admissions','collections_fresh_sales','renewals','collections_renewals','renewals_first_time','renewals_repeated',
+    'due_first_time','due_repeated','renewed_of_due_first_time','renewed_of_due_repeated','active_learners','appointments','centre_visits',
+    'leads_meta','leads_google','spend_meta','spend_google','avg_days_visit_to_admission'];
+  const monthly={};
+  groups.forEach(([g,ms])=>{
+    const M={},row=k=>M[k]||(M[k]=MH.map((h,i)=>i?0:ym(k))),idx=h=>MH.indexOf(h);
+    const act={};
+    ms.forEach(m=>{const k=mi(m.d),r=row(k);
+      if(m.kind==='ft'){r[idx('admissions')]++;r[idx('collections_fresh_sales')]+=m.amt;}
+      else{r[idx('renewals')]++;r[idx('collections_renewals')]+=m.amt;r[idx(m.cohort==='ft'?'renewals_first_time':'renewals_repeated')]++;}
+      if(m.end&&m.end<=TODAY){const e=row(mi(m.end));e[idx(m.kind==='ft'?'due_first_time':'due_repeated')]++;
+        if(m.next)e[idx(m.kind==='ft'?'renewed_of_due_first_time':'renewed_of_due_repeated')]++;}
+      else if(m.end&&mi(m.end)===CUR){row(CUR)[idx(m.kind==='ft'?'due_first_time':'due_repeated')]++;if(m.next)row(CUR)[idx(m.kind==='ft'?'renewed_of_due_first_time':'renewed_of_due_repeated')]++;}
+      if(m.start&&m.end&&m.id)for(let k2=mi(m.start);k2<=Math.min(mi(m.end),CUR);k2++)(act[k2]=act[k2]||new Set()).add(m.id);
+    });
+    Object.keys(act).forEach(k=>{row(+k)[idx('active_learners')]=act[k].size;});
+    const F=g==='All centres'?names.map(n=>FUN&&FUN[n]).filter(Boolean):[FUN&&FUN[g]].filter(Boolean);
+    const tc={};
+    F.forEach(f=>{(f.appts||[]).forEach(k=>{if(k<=TODAYK)row(ymiOf(k))[idx('appointments')]++;});
+      (f.visits||[]).forEach(([v,a])=>{if(v>TODAYK)return;row(ymiOf(v))[idx('centre_visits')]++;
+        if(a&&a>=v&&a<=TODAYK){const k=ymiOf(a),t=tc[k]||(tc[k]=[0,0]);t[0]+=(new Date(Math.floor(a/10000),Math.floor(a/100)%100-1,a%100)-new Date(Math.floor(v/10000),Math.floor(v/100)%100-1,v%100))/864e5;t[1]++;}});
+      (f.mkt||[]).forEach(([k,ms2,ml,gs,gl])=>{if(k>TODAYK)return;const r=row(ymiOf(k));r[idx('spend_meta')]+=ms2;r[idx('leads_meta')]+=ml;r[idx('spend_google')]+=gs;r[idx('leads_google')]+=gl;});});
+    Object.keys(tc).forEach(k=>{row(+k)[idx('avg_days_visit_to_admission')]=r1(tc[k][0]/tc[k][1]);});
+    monthly[g]=Object.keys(M).map(Number).filter(k=>k<=CUR).sort((a,b)=>a-b).map(k=>M[k].map((v,i)=>typeof v==='number'&&i!==MH.length-1?r0(v):v));
+  });
+  // 2. breakdowns by course, course level, age group, teacher and package
+  const DH=['centre','value','period','admissions','collections_fresh_sales','renewals','collections_renewals','memberships_ended','renewed','renewal_rate_pct','avg_days_end_to_renewal','active_learners_now'];
+  const dims={};
+  ['course','level','age','teacher','months'].forEach(dim=>{
+    const out=[];
+    groups.forEach(([g,ms])=>{
+      const vals=[...new Set(ms.map(m=>m[dim]))];
+      vals.forEach(v=>{const mv=ms.filter(m=>m[dim]===v);
+        const now=new Set(mv.filter(m=>m.start&&m.end&&m.start<=TODAY&&m.end>=TODAY&&m.id).map(m=>m.id)).size;
+        Object.keys(WINDOWS).forEach(w=>{
+          const tx=mv.filter(m=>inW(m.d,w)),fs=tx.filter(m=>m.kind==='ft'),rn=tx.filter(m=>m.kind==='rp');
+          const due=mv.filter(m=>m.end&&m.end<=YDAY&&inW(m.end,w)),ren=due.filter(m=>m.next);
+          const tat=ren.map(m=>(m.next-m.end)/864e5);
+          if(!fs.length&&!rn.length&&!due.length)return;
+          out.push([g,v,w,fs.length,r0(fs.reduce((s,m)=>s+m.amt,0)),rn.length,r0(rn.reduce((s,m)=>s+m.amt,0)),due.length,ren.length,
+            due.length?r1(ren.length/due.length*100):null,tat.length?r0(tat.reduce((a,b)=>a+b,0)/tat.length):null,w==='cm'?now:null]);
+        });
+      });
+    });
+    dims[{course:'course',level:'course_level',age:'age_group',teacher:'teacher',months:'package_months'}[dim]]={columns:DH,rows:out};
+  });
+  // 3. which courses each age group picks (admissions, last 12 months and lifetime)
+  const ca={};all.filter(m=>m.kind==='ft').forEach(m=>{const k=m.course+' | '+m.age;const x=ca[k]||(ca[k]=[0,0]);if(inW(m.d,'l12'))x[0]++;x[1]++;});
+  const courseByAge={columns:['course | age group','admissions_last_12_months','admissions_lifetime'],rows:Object.keys(ca).map(k=>[k,...ca[k]])};
+  return{
+    as_of:TODAY.toDateString(),current_month:ym(CUR),day_of_month:DAYS_DONE,days_in_month:DAYS_TOTAL,
+    periods:{cm:'current month so far',l3:'last 3 completed months ('+ym(CUR-3)+' to '+ym(CUR-1)+')',l12:'last 12 completed months ('+ym(CUR-12)+' to '+ym(CUR-1)+')',life:'all records'},
+    centres:CENTRES.filter(c=>DATA[c.name]).map(c=>({name:c.name,city:c.city,first_month:DATA[c.name].first?ym(DATA[c.name].first):null,capacity_active_learners:CAPACITY[c.name]})),
+    monthly_columns:MH,monthly,
+    breakdowns:dims,course_by_age_group:courseByAge,
+    upcoming_calendar:CAL
+  };
+}
+
+/* ── Loading ── */
+let DATA={},FUN=null,CAL=[],READY=false,DIGEST=null;
+async function load(){
+  const st=document.getElementById('state'),dot=document.getElementById('dot');
+  try{
+    const fun=ArtiumAuth.call('funnel',{}).then(j=>j&&j.funnel||{}).catch(()=>({}));
+    const cal=ArtiumAuth.call('holidays',{}).then(j=>upcoming(j)).catch(()=>[]);
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')]).catch(()=>null)));
+    CENTRES.forEach((c,i)=>{if(!res[i])return;
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);
+      const ms=memberships(c.name,mine(res[i][0]),mine(res[i][1]));
+      DATA[c.name]={ms,first:ms.length?Math.min(...ms.filter(m=>m.kind==='ft').map(m=>mi(m.d))):null};});
+    [FUN,CAL]=await Promise.all([fun,cal]);
+    if(!Object.keys(DATA).length)throw new Error('no data you can see yet');
+    DIGEST=buildDigest();READY=true;
+    dot.className='dot';st.textContent='Numbers up to '+TODAY.getDate()+' '+MON[TODAY.getMonth()]+' '+TODAY.getFullYear()+' · '+Object.keys(DATA).length+' centres';
+    document.getElementById('go').disabled=false;
+    if(pending){const q=pending;pending=null;ask(q);}
+  }catch(e){dot.className='dot error';st.textContent='Could not load the numbers: '+e.message;}
+}
+// next 60 days from the Calendar page: public holidays (by city), festivals, special days and our own entries
+function upcoming(j){
+  if(!j||!j.events)return[];
+  const lo=TODAYK,hi=dayK(new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()+60)),out=[];
+  (j.state||[]).forEach(h=>{if(h.date>=lo&&h.date<=hi)out.push({date:h.date,name:h.name,type:'Public holiday',city:h.city});});
+  (j.events||[]).forEach(e=>{if(e.date>=lo&&e.date<=hi&&e.type!=='Public holiday')out.push({date:e.date,name:e.name,type:'Festival / observance'});});
+  (j.special||[]).forEach(s=>{const d=+s.date;if(d>=lo&&d<=hi)out.push({date:d,name:s.name,type:'Special day (social media)'});});
+  (j.entries||[]).forEach(e=>{if(+e.to>=lo&&+e.from<=hi)out.push({date:+e.from,to:+e.to,name:e.title,type:e.type,centre:e.centre});});
+  (j.changes||[]).forEach(c=>out.push({date:+c.from,name:c.name,type:'Holiday change: '+c.kind+(c.to?' to '+c.to:''),city:c.city}));
+  return out.sort((a,b)=>a.date-b.date);
+}
+
+/* ── Asking ── */
+let pending=null;
+const SUGGEST=['How is this month tracking against a usual month?','Where are we losing learners at the first renewal?','Which courses and age groups bring the highest fees?','Which teachers have the best and worst renewal rates?','Is marketing getting more efficient since June?'];
+async function ask(q){
+  q=q.trim();if(!q)return;
+  document.getElementById('q').value=q;fit();
+  if(!READY){pending=q;show(`<div class="thinking"><span class="bars"><i></i><i></i><i></i></span>Loading the numbers first…</div>`);return;}
+  remember(q);
+  show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div><div class="thinking"><span class="bars"><i></i><i></i><i></i></span>Reading the numbers and working out the answer…</div>`);
+  const go=document.getElementById('go');go.disabled=true;
+  try{
+    const j=await ArtiumAuth.call('ask',{question:q,digest:DIGEST});
+    if(!j||!j.answer)throw new Error(j&&j.error||'no answer came back');
+    render(q,j.answer);
+  }catch(e){show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div><div class="err">Sorry, that didn't work: ${esc(e.message)}. Please try again.</div>`);}
+  go.disabled=false;
+}
+const ICON_Q='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+const ICON_T='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>';
+function show(html){const A=document.getElementById('answer');A.hidden=false;A.innerHTML=html;}
+function render(q,a){
+  const list=b=>(b||[]).length?`<ul>${b.map(x=>`<li>${rich(x)}</li>`).join('')}</ul>`:'';
+  const pages=(window.ArtiumAuth&&ArtiumAuth.pages)||[];
+  const where=(a.where||[]).map(w=>{const key=PAGES[w.page];
+    return`<div class="loc"><div class="crumbs"><b>${esc(w.page)}</b>${w.section?`<i>›</i>${esc(w.section)}`:''}${(w.items||[]).length?'<i>›</i>'+(w.items||[]).map(x=>`<span class="col">${esc(x)}</span>`).join(''):''}</div>
+      ${key&&pages.includes(key)?`<button class="open" type="button" data-tab="${key}">Open page →</button>`:''}</div>`;}).join('');
+  show(`<div class="a-q">${ICON_Q}<span>You asked: <b>${esc(q)}</b></span></div>
+    <div class="a-head">${rich(a.headline)}</div>
+    ${a.lead?`<div class="a-lead">${rich(a.lead)}</div>`:''}
+    ${(a.why||[]).length?`<div class="a-sec">${list(a.why)}</div>`:''}
+    ${(a.figures||[]).length?`<div class="figs">${a.figures.slice(0,4).map(f=>`<div class="fig"><div class="l">${esc(f.label)}</div><div class="v">${esc(f.value)}</div>${f.note?`<div class="s ${f.tone==='good'?'up':f.tone==='bad'?'dn':''}">${esc(f.note)}</div>`:''}</div>`).join('')}</div>`:''}
+    ${(a.sections||[]).map(s=>`<div class="a-sec"><h3>${esc(String(s.title||'').replace(/:?$/,':'))}</h3>${list(s.bullets)}</div>`).join('')}
+    ${(a.actions||[]).length?`<div class="recs"><h3>${ICON_T}Recommended Actions:</h3><ol>${a.actions.map(x=>`<li><span class="t">${rich(x.title)}</span>${rich(x.detail)}</li>`).join('')}</ol></div>`:''}
+    ${where?`<div class="where"><div class="where-t">Where to see this</div>${where}</div>`:''}
+    ${(a.followups||[]).length?`<div class="follow">${a.followups.slice(0,3).map(f=>`<button class="chip" type="button">${esc(f)}</button>`).join('')}</div>`:''}
+    <div class="a-foot"><span>Worked out by Claude from the site's numbers up to ${TODAY.getDate()} ${MON[TODAY.getMonth()]} ${TODAY.getFullYear()}. Check the page before acting on it.</span><span>${esc(a.scope||'')}</span></div>`);
+}
+document.getElementById('answer').addEventListener('click',e=>{
+  const o=e.target.closest('.open');if(o){try{window.parent.location.hash=o.dataset.tab;}catch(err){}return;}
+  const c=e.target.closest('.chip');if(c){window.scrollTo({top:0,behavior:'smooth'});ask(c.textContent);}
+});
+
+/* ── Box, suggestions, recent questions ── */
+const box=document.getElementById('q');
+function fit(){box.style.height='auto';box.style.height=Math.min(box.scrollHeight,140)+'px';}
+box.addEventListener('input',fit);
+box.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask(box.value);}});
+document.getElementById('ask').addEventListener('submit',e=>{e.preventDefault();ask(box.value);});
+document.getElementById('suggest').innerHTML=SUGGEST.map(s=>`<button class="chip" type="button">${esc(s)}</button>`).join('');
+document.getElementById('suggest').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c)ask(c.textContent);});
+function recent(){try{return JSON.parse(localStorage.getItem('artium_home_recent')||'[]');}catch(e){return[];}}
+function remember(q){const r=[q].concat(recent().filter(x=>x!==q)).slice(0,6);try{localStorage.setItem('artium_home_recent',JSON.stringify(r));}catch(e){}showRecent();}
+function showRecent(){const r=recent();document.getElementById('recent').hidden=!r.length;
+  document.getElementById('recent-list').innerHTML=r.map(s=>`<button class="chip" type="button">${esc(s)}</button>`).join('');}
+document.getElementById('recent-list').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c)ask(c.textContent);});
+showRecent();
+
+/* ── Greeting: Good morning / afternoon / evening, with salutation and first name from the team list ── */
+(function greet(){
+  const h=new Date().getHours(),part=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const el=document.getElementById('greet');el.textContent=part;
+  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.textContent=part+', '+(j.salutation?j.salutation+' ':'')+j.first;}).catch(()=>{});
+})();
+document.getElementById('go').disabled=true;
+load();
+</script>
+</body>
+</html>
