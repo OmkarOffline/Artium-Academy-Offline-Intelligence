@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--card:#fff;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#C9C5CF;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;
+    --ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .controls{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:8px;box-shadow:var(--shadow)}
+  .month-btn{width:36px;height:38px;border:0;border-radius:12px;background:var(--bg);color:var(--ink2);font-size:18px;cursor:pointer;display:grid;place-items:center}
+  .month-btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+  .month-btn:disabled{opacity:.35;cursor:default}
+  .month-label{min-width:150px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+
+  /* Centre toggle */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:22px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Grid: metrics and month figures stay put on the left; dates scroll sideways, latest first */
+  .grid-wrap{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+  .scroll{overflow-x:auto;scrollbar-width:thin}
+  table{border-collapse:separate;border-spacing:0;font-size:13.5px;min-width:100%;font-variant-numeric:tabular-nums}
+  th,td{padding:0 12px;height:40px;white-space:nowrap;text-align:right;border-bottom:1px solid #F1EEEA;background:#fff}
+  thead th{height:auto;padding:13px 12px 11px;font:600 12.5px/1.2 var(--display);color:var(--ink);border-bottom:1px solid var(--border);background:#FBFAF8;vertical-align:bottom}
+  thead th small{display:block;font:500 11px var(--body);color:var(--faint);margin-top:3px}
+  .m{position:sticky;left:0;z-index:2;text-align:left;min-width:232px;width:232px;font-weight:500;color:var(--ink)}
+  .s{position:sticky;z-index:2;min-width:104px;width:104px;background:#FCFBF9}
+  .s1{left:232px}.s2{left:336px}.s3{left:440px}.s4{left:544px;min-width:122px;width:122px;box-shadow:8px 0 12px -10px rgba(43,24,64,.25);border-right:1px solid var(--border)}
+  thead .m,thead .s{background:#F7F5F1}
+  thead .m{font:600 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .d{min-width:84px}
+  td.zero{color:var(--ghost)}
+  .off{background:#FAF8F4!important}thead .off{background:#F2EEE7!important;color:var(--muted)}
+  .today{background:#F6F0FC!important}thead .today{background:#EBE0F7!important;color:var(--accent)}
+  thead .today small{color:var(--accent)}
+  tr.grp td{height:32px;background:#FBFAF8;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border-bottom:1px solid var(--line)}
+  tr.tot td{font-weight:600}tr.tot td.m{color:var(--accent)}
+  .neg{color:var(--bad)}.pos{color:var(--ok)}
+  td .na{color:var(--faint);font-size:12px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;padding:12px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+  .legend span{display:inline-flex;align-items:center;gap:6px}.sq{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+  .notes{margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.6}
+  .notes b{color:var(--ink2);font-weight:600}
+  .ast{color:var(--gold);font-weight:700;margin-left:1px}
+  .empty{padding:48px;text-align:center;color:var(--muted)}
+
+  @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}.header-right{align-items:flex-start}h1{font-size:28px}
+    .m{min-width:170px;width:170px}.s{min-width:92px;width:92px}.s1{left:170px}.s2{left:262px}.s3{left:354px}.s4{left:446px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Daily Tracker</h1>
+      <div class="subtitle">Day-by-day numbers for the month, with the month so far against target</div>
+    </div>
+    <div class="header-right">
+      <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <div class="controls">
+        <button class="month-btn" id="prev" aria-label="Previous month"><i class="ti ti-chevron-left"></i></button>
+        <div class="month-label" id="month-label">—</div>
+        <button class="month-btn" id="next" aria-label="Next month"><i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <div class="grid-wrap">
+    <div class="scroll" id="sc"><table id="grid"></table></div>
+    <div class="legend"><span><i class="sq" style="background:#EBE0F7"></i>Today (so far)</span><span><i class="sq" style="background:#F2EEE7"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span></div>
+  </div>
+  <div class="notes" id="notes"></div>
+</div>
+
+<script>
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const OFF_DAY=1;   // Monday: centres are closed; left out of RR
+
+/* Rows, in the same flow as the team's tracker. kind: count / money (summed per day), ratio (month to date), atv (that day), run, pct */
+const ROWS=[
+  {g:'Appointments & visits'},
+  {id:'appts', label:'Appointments booked', kind:'count', tkey:'appts'},
+  {id:'visits',label:'Centre visits',       kind:'count', tkey:'visits'},
+  {id:'av',    label:'Appointments to visits %', kind:'ratio', num:'visits', den:'appts'},
+  {g:'Fresh sales'},
+  {id:'fs',    label:'No. of fresh sales',  kind:'count', tkey:'conv'},
+  {id:'fc',    label:'Fresh sales collections', kind:'money', tkey:'fscol'},
+  {id:'af',    label:'ATV – fresh sales',   kind:'atv', num:'fc', den:'fs'},
+  {id:'vc',    label:'Visits to conversions %', kind:'ratio', num:'fs', den:'visits'},
+  {g:'Renewals'},
+  {id:'rn',    label:'No. of renewals',     kind:'count', tkey:'renewed'},
+  {id:'rc',    label:'Renewal collections', kind:'money', tkey:'rncol'},
+  {id:'ar',    label:'ATV – renewals',      kind:'atv', num:'rc', den:'rn'},
+  {g:'Total (₹)'},
+  {id:'tc',    label:'Total collections',   kind:'money', tot:true},
+  {id:'cu',    label:'Running total',       kind:'run'},
+  {id:'pc',    label:'% of target reached', kind:'pct'}
+];
+
+/* ── Utils ── */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function parseDate(str){
+  if(!str)return null;const s=str.trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const fmtN=v=>(v<0?'−':'')+Math.round(Math.abs(v)).toLocaleString('en-IN');
+const fmtP=v=>v.toFixed(1)+'%';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+}
+
+/* ── State ── */
+const now=new Date();
+let viewY=now.getFullYear(),viewM=now.getMonth(),selCentre='All';
+try{const c=localStorage.getItem('artium_daily_centre');if(c&&(c==='All'||CENTRES.some(x=>x.name===c)))selCentre=c;}catch(e){}
+let DATA={},FUN=null,TARGETS={},loaded=false;
+const monthKey=(y,m)=>y+'-'+String(m+1).padStart(2,'0');
+
+/* One centre's figures for every day of the month: D[id][day-1]. Appointments are counted on the day they were booked. */
+function daily(name,y,m){
+  const n=new Date(y,m+1,0).getDate(),z=()=>Array(n).fill(0),D={fs:z(),fc:z(),rn:z(),rc:z(),appts:null,visits:null};
+  const d=DATA[name];
+  if(d){
+    const put=(rows,cnt,amt,col)=>rows.forEach(r=>{const t=parseDate(r[0]);if(t&&t.getFullYear()===y&&t.getMonth()===m){D[cnt][t.getDate()-1]++;D[amt][t.getDate()-1]+=parseNum(r[col]);}});
+    put(d.fs,'fs','fc',17);put(d.rn,'rn','rc',16);   // Fresh Sales: amount in R; Renewals: amount in Q
+  }
+  const F=FUN&&FUN[name],lo=(y*100+m+1)*100;
+  const byDay=list=>{const a=z();list.forEach(k=>{if(k>lo&&k<=lo+n)a[k-lo-1]++;});return a;};
+  if(F&&F.booked&&F.booked.length&&Math.min(...F.booked)<=lo+n)D.appts=byDay(F.booked);
+  if(F&&F.visits&&F.visits.length&&Math.min(...F.visits.map(v=>v[0]))<=lo+n)D.visits=byDay(F.visits.map(v=>v[0]));
+  D.tc=D.fc.map((v,i)=>v+D.rc[i]);
+  return D;
+}
+
+/* Selected centre(s): daily figures added up, and targets. For All centres a metric's target is the sum over centres that have one;
+   its surplus / deficit then compares only those centres, so a centre without a target doesn't count as a surplus. */
+function figures(y,m){
+  const list=selCentre==='All'?CENTRES:CENTRES.filter(c=>c.name===selCentre);
+  const per=list.map(c=>({c,D:daily(c.name,y,m),T:(TARGETS[monthKey(y,m)]||{})[c.name]||{}}));
+  const n=new Date(y,m+1,0).getDate(),add=(id,f=per)=>{const ok=f.filter(p=>p.D[id]);if(!ok.length)return null;return Array(n).fill(0).map((_,i)=>ok.reduce((s,p)=>s+p.D[id][i],0));};
+  const D={};['fs','fc','rn','rc','tc','appts','visits'].forEach(id=>D[id]=add(id));
+  const T={},Dt={},missing={};
+  ROWS.filter(r=>r.tkey||r.tot).forEach(r=>{
+    const keys=r.tot?['fscol','rncol']:[r.tkey];
+    const has=per.filter(p=>keys.every(k=>p.T[k]!=null)&&p.D[r.id]);
+    if(!has.length){T[r.id]=null;return;}
+    T[r.id]=has.reduce((s,p)=>s+keys.reduce((a,k)=>a+p.T[k],0),0);
+    Dt[r.id]=add(r.id,has);
+    const miss=per.filter(p=>p.D[r.id]&&!has.includes(p)).map(p=>p.c.name);if(miss.length)missing[r.label]=miss;
+  });
+  // Ratio and ATV targets: worked out only from centres that have both targets (e.g. fresh sales ÷ centre visits)
+  const TK={};ROWS.filter(r=>r.tkey).forEach(r=>TK[r.id]=r.tkey);
+  ROWS.filter(r=>r.kind==='ratio'||r.kind==='atv').forEach(r=>{
+    const both=per.filter(p=>p.T[TK[r.num]]!=null&&p.T[TK[r.den]]!=null);
+    const nu=both.reduce((s,p)=>s+p.T[TK[r.num]],0),de=both.reduce((s,p)=>s+p.T[TK[r.den]],0);
+    T[r.id]=both.length&&de?nu/de:null;
+  });
+  // Ratio actuals: only centres that record both (Borewell Road's visits don't count against appointments it doesn't record)
+  const P={};ROWS.filter(r=>r.kind==='ratio').forEach(r=>{const ok=per.filter(p=>p.D[r.num]&&p.D[r.den]);P[r.id]=ok.length?{nu:add(r.num,ok),de:add(r.den,ok)}:null;});
+  return {D,T,Dt,P,missing,n};
+}
+
+/* Days that count: every day except Mondays */
+function workDays(y,m,upto){let k=0;for(let d=1;d<=upto;d++)if(new Date(y,m,d).getDay()!==OFF_DAY)k++;return k;}
+
+function render(){
+  const cur=viewY===now.getFullYear()&&viewM===now.getMonth(),future=viewY>now.getFullYear()||(viewY===now.getFullYear()&&viewM>now.getMonth());
+  document.getElementById('month-label').textContent=MONTH_FULL[viewM]+' '+viewY;
+  document.getElementById('next').disabled=cur;
+  document.getElementById('eyebrow').textContent=selCentre==='All'?'All centres':selCentre+' · '+CENTRES.find(c=>c.name===selCentre).city;
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const grid=document.getElementById('grid'),notes=document.getElementById('notes');
+  if(!loaded){grid.innerHTML='<tr><td class="empty">Loading…</td></tr>';notes.innerHTML='';return;}
+  const {D,T,Dt,P,missing,n}=figures(viewY,viewM);
+  const upto=cur?now.getDate():n;                       // days shown, latest first
+  const gone=workDays(viewY,viewM,upto),all=workDays(viewY,viewM,n);
+  const ORD=[...Array(upto).keys()].reverse();
+  const off=i=>new Date(viewY,viewM,i+1).getDay()===OFF_DAY;
+  const sum=a=>a?a.slice(0,upto).reduce((s,v)=>s+v,0):null;
+  const cum=a=>{let c=0;return a.map(v=>c+=v);};
+
+  let h='<thead><tr><th class="m">Metric</th><th class="s s1">Month so far</th><th class="s s2">Target</th><th class="s s3">RR</th><th class="s s4">Surplus / Deficit</th>';
+  for(const i of ORD){const dt=new Date(viewY,viewM,i+1),t=cur&&i===upto-1;
+    h+=`<th class="d ${off(i)?'off':''} ${t?'today':''}">${i+1} ${MON[viewM]}<small>${t?'Today':WD[dt.getDay()]}</small></th>`;}
+  h+='</tr></thead><tbody>';
+  const cell=(i,txt,cls='')=>`<td class="d ${off(i)?'off':''} ${cur&&i===upto-1?'today':''} ${cls}">${txt}</td>`;
+  const summary=(so,t,rr,gap)=>`<td class="s s1"><b>${so}</b></td><td class="s s2">${t}</td><td class="s s3">${rr}</td><td class="s s4 ${gap&&gap.v<0?'neg':gap&&gap.v>0?'pos':''}">${gap?gap.t:''}</td>`;
+  const totT=T.tc;
+  ROWS.forEach(r=>{
+    if(r.g){h+=`<tr class="grp"><td class="m">${r.g}</td><td class="s s1"></td><td class="s s2"></td><td class="s s3"></td><td class="s s4"></td><td colspan="${upto}"></td></tr>`;return;}
+    let row=`<tr class="${r.tot?'tot':''}"><td class="m">${r.label}</td>`;
+    if(r.kind==='count'||r.kind==='money'){
+      const a=D[r.id];
+      if(!a){row+=summary('<span class="na">Not recorded</span>','','',null)+ORD.map(i=>cell(i,'–','zero')).join('');}
+      else{
+        const so=sum(a),t=T[r.id],rr=gone?so/gone*all:null,mine=Dt[r.id]?sum(Dt[r.id]):so,g=t!=null?mine-t:null;
+        row+=summary(fmtN(so),t!=null?fmtN(t)+(missing[r.label]?'<sup class="ast">*</sup>':''):'',rr!=null&&cur?fmtN(rr):'',g!=null?{v:g,t:(g>0?'+':'')+fmtN(g)}:null);
+        row+=ORD.map(i=>cell(i,a[i]?fmtN(a[i]):'0',a[i]?'':'zero')).join('');
+      }
+    }else if(r.kind==='ratio'){   // month to date up to each day
+      const nu=P[r.id]&&P[r.id].nu,de=P[r.id]&&P[r.id].de;
+      if(!nu||!de){row+=summary('<span class="na">Not recorded</span>','','',null)+ORD.map(i=>cell(i,'–','zero')).join('');}
+      else{
+        const cn=cum(nu),cd=cum(de),so=cd[upto-1]?cn[upto-1]/cd[upto-1]*100:null;
+        const t=T[r.id]!=null?T[r.id]*100:null,g=so!=null&&t!=null?so-t:null;
+        row+=summary(so!=null?fmtP(so):'–',t!=null?fmtP(t):'','',g!=null?{v:g,t:(g>0?'+':'−')+Math.abs(g).toFixed(1)+' pts'}:null);
+        row+=ORD.map(i=>cd[i]?cell(i,fmtP(cn[i]/cd[i]*100)):cell(i,'–','zero')).join('');
+      }
+    }else if(r.kind==='atv'){
+      const nu=D[r.num],de=D[r.den],so=sum(de)?sum(nu)/sum(de):null;
+      const t=T[r.id],g=so!=null&&t!=null?so-t:null;
+      row+=summary(so!=null?fmtN(so):'–',t!=null?fmtN(t):'','',g!=null?{v:g,t:(g>0?'+':'')+fmtN(g)}:null);
+      row+=ORD.map(i=>de[i]?cell(i,fmtN(nu[i]/de[i])):cell(i,'–','zero')).join('');
+    }else if(r.kind==='run'){
+      const c=cum(D.tc);row+=summary('','','',null)+ORD.map(i=>cell(i,fmtN(c[i]))).join('');
+    }else if(r.kind==='pct'){
+      const c=cum(Dt.tc||D.tc);
+      if(!totT){row+=summary('<span class="na">No target</span>','','',null)+ORD.map(i=>cell(i,'–','zero')).join('');}
+      else row+=summary(fmtP(c[upto-1]/totT*100),'','',null)+ORD.map(i=>cell(i,fmtP(c[i]/totT*100))).join('');
+    }
+    h+=row+'</tr>';
+  });
+  grid.innerHTML=future?'<tr><td class="empty">This month hasn\'t started yet.</td></tr>':h+'</tbody>';
+  document.getElementById('sc').scrollLeft=0;
+
+  // Notes: what's missing, in plain words
+  const msgs=[];
+  if(!TARGETS[monthKey(viewY,viewM)])msgs.push(`<b>No targets set for ${MONTH_FULL[viewM]} ${viewY}.</b> Add them on the Targets page.`);
+  else Object.keys(missing).forEach(k=>msgs.push(`<sup class="ast">*</sup><b>${k}:</b> no target for ${missing[k].join(', ')}, so the target and surplus / deficit leave ${missing[k].length>1?'them':'it'} out.`));
+  const noAppt=(selCentre==='All'?CENTRES:CENTRES.filter(c=>c.name===selCentre)).filter(c=>!(FUN&&FUN[c.name]&&FUN[c.name].booked));
+  if(FUN&&noAppt.length)msgs.push(`<b>${noAppt.map(c=>c.name).join(', ')}:</b> no appointments sheet connected, so ${noAppt.length>1?'they are':'it is'} left out of appointment figures.`);
+  notes.innerHTML=msgs.join('<br>');
+}
+
+function buildToggle(){
+  document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+    .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+  document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_daily_centre',selCentre);}catch(e){}render();});
+}
+buildToggle();
+document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
+document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
+
+async function load(){
+  render();
+  try{
+    const [res,fun,tg]=await Promise.all([
+      Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')]))),
+      ArtiumAuth.call('funnel',{}).catch(()=>null),
+      ArtiumAuth.call('targets',{}).catch(()=>null)
+    ]);
+    CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
+    FUN=fun&&fun.funnel||null;TARGETS=tg&&tg.targets||{};loaded=true;
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+}
+load();
+</script>
+</body>
+</html>

@@ -155,15 +155,9 @@ const CENTRES=[
   {city:'Bangalore', name:'Borewell Road'}
 ];
 
-/* ── Monthly targets, by month and centre. Filled in once the targets sheet is connected.
-   e.g. TARGETS['2026-10']['Alwarpet']={leads:600, appts:240, visits:150, conv:45, fscol:900000, spend:300000, due:120, renewed:100, rncol:700000} */
-const TARGETS={
-  '2026-10':{
-    'Alwarpet':     {conv:40, fscol:360000, renewed:108, rncol:864000},
-    'Thoraipakkam': {conv:50, fscol:510000, renewed:105, rncol:1050000},
-    'Borewell Road':{conv:60, fscol:810000, renewed:2,   rncol:25000}
-  }
-};
+/* ── Monthly targets, by month and centre: set on the Targets page and read from the data service.
+   e.g. TARGETS['2026-10']['Alwarpet']={leads:600, appts:240, visits:150, conv:45, fscol:900000, spend:300000, renewed:100, rncol:700000} */
+const TARGETS={};
 
 /* ── Metrics ──
    kind 'base'  : a number counted or summed for the month → gets Run-rate and Goal per day
@@ -458,6 +452,7 @@ async function load(){
   render();
   try{
     ArtiumAuth.call('funnel',{}).then(j=>{FUN=j&&j.funnel||null;render();}).catch(()=>{});   // leads, appointments, visits, spends
+    ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets)Object.assign(TARGETS,j.targets);render();}).catch(()=>{});   // monthly targets (Targets page)
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
     CENTRES.forEach((c,i)=>{
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
