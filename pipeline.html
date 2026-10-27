@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renewal Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;--warn:#9A6200;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}.ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+
+  /* Period: a month, or any date range */
+  .period{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:7px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .seg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px}
+  .seg button{border:0;background:none;border-radius:9px;padding:7px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(31,26,36,.15)}
+  .mbtn{width:34px;height:36px;border:0;border-radius:10px;background:var(--bg);color:var(--ink2);font-size:16px;cursor:pointer}
+  .mbtn:hover{background:var(--accent-soft);color:var(--accent)}
+  .mlabel{min-width:140px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+  .range{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .range input{font:500 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:7px 10px}
+  .range input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  #prange[hidden]{display:none}
+  .quick{display:inline-flex;gap:4px}
+  .quick button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 11px;font:600 12px var(--body);color:var(--ink2);cursor:pointer}
+  .quick button:hover{background:var(--accent-soft);color:var(--accent)}
+
+  /* Totals for the period */
+  .kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+  .kpi{position:relative;background:#fff;border:1px solid var(--border);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow);overflow:hidden}
+  .kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c,#C9A66B)}
+  .kpi .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .kpi .v{font:700 30px/1.1 var(--display);color:var(--ink);margin-top:10px;font-variant-numeric:tabular-nums}
+  .kpi .s{font-size:13px;color:var(--muted);margin-top:6px}.kpi .s b{color:var(--ink);font-weight:600}
+  .kpi.main{background:linear-gradient(135deg,#3A1A5A 0%,#5B2A86 100%);border-color:transparent;color:#fff}
+  .kpi.main::before{background:linear-gradient(90deg,#E9CF9E,#C9A66B)}
+  .kpi.main .k{color:#E9CF9E}.kpi.main .v{color:#fff;font-size:34px}.kpi.main .s{color:rgba(255,255,255,.75)}.kpi.main .s b{color:#fff}
+  .prog{height:8px;border-radius:6px;background:rgba(255,255,255,.18);margin-top:14px;overflow:hidden;display:flex}
+  .prog i{display:block;height:100%}
+  .prog .p1{background:#7BD3A4}.prog .p2{background:#F2B8B0}
+  .legend{display:flex;gap:14px;margin-top:8px;font-size:11.5px;color:rgba(255,255,255,.75)}.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+
+  /* List */
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;box-shadow:0 24px 48px -36px rgba(75,31,111,.25);padding:18px 22px 22px}
+  .ptop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .ptitle{position:relative;padding-left:16px;font:600 20px/1.3 var(--display);color:var(--ink)}
+  .ptitle::before{content:"";position:absolute;left:0;top:50%;width:4px;height:20px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
+  .ptitle small{font:400 13px var(--body);color:var(--muted);margin-left:8px}
+  .flt{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .flt button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;border-radius:10px;padding:7px 13px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
+  .flt button span{font:600 11.5px var(--body);color:var(--muted);background:#F3F1F6;border-radius:999px;padding:1px 8px}
+  .flt button[aria-pressed="true"]{background:var(--accent);color:#fff}.flt button[aria-pressed="true"] span{background:rgba(255,255,255,.2);color:#fff}
+  .flt .d{width:7px;height:7px;border-radius:50%}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);scrollbar-width:thin}
+  table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  th,td{padding:12px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);position:sticky;top:0}
+  th.n,td.n{text-align:right}
+  td{font:400 14px var(--body);color:var(--ink2)}
+  td.amt{font:600 14.5px var(--display);color:var(--accent)}
+  tbody tr:hover td{background:#FCFBFE}
+  /* Promised date and Learner stay in view while the table scrolls sideways */
+  tbody td:nth-child(-n+2),thead th:nth-child(-n+2){position:sticky;z-index:1;background:#fff}
+  thead th:nth-child(-n+2){background:#FAF9F7;z-index:2}
+  td:nth-child(1),th:nth-child(1){left:0;min-width:128px}
+  td:nth-child(2),th:nth-child(2){left:128px;box-shadow:8px 0 10px -10px rgba(43,24,64,.3)}
+  tr.wk td{position:static!important;box-shadow:none!important}
+  tr.wk td{background:#FBFAF8;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:8px 14px}
+  tr.wk td span{color:var(--muted);letter-spacing:.04em;margin-left:8px;text-transform:none;font-weight:600}
+  tr.done td{color:var(--muted)}tr.done td.amt{color:var(--ok)}
+  .date b{display:block;font:600 14px var(--display);color:var(--ink)}
+  .date small{font-size:12px;color:var(--faint)}
+  .date small.late{color:var(--bad);font-weight:600}.date small.soon{color:var(--warn);font-weight:600}
+  .who b{display:block;font:600 14px var(--body);color:var(--ink)}
+  .who small{font:500 11.5px var(--body);color:var(--faint)}
+  .ctr{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font:600 12px var(--body)}
+  .st{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);border-radius:999px;padding:4px 10px;white-space:nowrap}
+  .st i{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .st.paid{background:#E5F4EC;color:var(--ok)}.st.wait{background:#F3F1F6;color:var(--ink2)}.st.late{background:#FDECEB;color:var(--bad)}.st.lost{background:#F3F1F6;color:var(--faint);text-decoration:line-through}
+  .sub{display:block;font-size:11.5px;color:var(--faint);margin-top:3px}
+  .pr{display:inline-block;font:600 11.5px var(--body);border-radius:6px;padding:2px 8px}
+  .pr.hi{background:#E5F4EC;color:var(--ok)}.pr.md{background:#FBF1DC;color:var(--warn)}.pr.lo{background:#FDECEB;color:var(--bad)}.pr.na{color:var(--faint)}
+  .gaps{background:#fff;border:1px solid #F0DDB5;border-radius:20px;padding:14px 16px 16px;margin-bottom:22px;box-shadow:var(--shadow)}
+  .gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 4px 12px}.gh b{font:600 15px var(--display);color:var(--ink)}.gh span{font-size:13px;color:var(--muted)}
+  .gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .gtile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;border:1px solid #F0DDB5;background:#FFF9EC;border-radius:14px;padding:12px 14px;cursor:pointer;font:inherit}
+  .gtile:hover{border-color:#E2BE73}
+  .gtile.on{background:#7A5A22;border-color:#7A5A22}.gtile.on *{color:#fff!important}
+  .gtile.zero{background:#fff;border-color:var(--border)}.gtile.zero .gn{color:var(--ok)}
+  .gn{grid-row:1/3;font:700 28px/1 var(--display);color:#8A5A00;min-width:36px}
+  .gl b{display:block;font:600 14px var(--body);color:var(--ink)}.gl small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .ga{grid-column:2;font-size:12px;color:#8A5A00;margin-top:4px}
+  .miss{display:inline-block;font:600 11.5px var(--body);color:var(--bad);background:#FDECEB;border-radius:6px;padding:2px 7px}
+  @media (max-width:900px){.gtiles{grid-template-columns:1fr}}
+  .note{min-width:160px;max-width:220px;white-space:normal;font-size:13px;color:var(--muted);line-height:1.4}
+  .tel{letter-spacing:.01em}
+  .empty{padding:36px;text-align:center;color:var(--muted);font-size:14px;white-space:normal}
+  .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--faint)}
+  @media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}}
+  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.panel{padding:12px;border-radius:22px}.kpis{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Renewal Pipeline</h1>
+      <div class="subtitle">Learners who have committed to renew, by the date they promised to pay</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <div class="bar">
+    <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+    <div class="period">
+      <div class="seg" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
+      <div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="mbtn" id="prev" aria-label="Previous month">‹</button><div class="mlabel" id="mlabel">—</div><button class="mbtn" id="next" aria-label="Next month">›</button></div>
+      <div id="prange" class="range" hidden><input type="date" id="from" aria-label="From"><span>to</span><input type="date" id="to" aria-label="To">
+        <span class="quick"><button type="button" data-q="week">This week</button><button type="button" data-q="next7">Next 7 days</button><button type="button" data-q="late">All overdue</button></span></div>
+    </div>
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="gaps" id="gaps"></div>
+  <section class="panel">
+    <div class="ptop"><div class="ptitle" id="ptitle">Promised payments</div><div class="flt" id="flt" role="group" aria-label="Show"></div></div>
+    <div class="tbl-wrap"><table id="t"></table></div>
+    <div class="foot"><span id="foot-l"></span><span>Promised date and amount come from the Next Call Date and Expected columns of Fresh Sales and Renewals.</span></div>
+  </section>
+</div>
+
+<script>
+const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const inr=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtD=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'—';
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fromIso=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const days=(a,b)=>Math.round((b-a)/864e5);
+const valid=d=>d&&d.getFullYear()>=2020?d:null;
+async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
+let DATA={},ITEMS=null,GAPS=[];
+
+/* Columns used: A Date · D Learner ID · E Name · H Mobile · I Course · M No. of months · Q / R amount paid · X Membership end date · Z Renewal Status · AD Teacher
+   and, sent by the data service after AD: 33 Description · 34 Next Call Date (promised payment date) · 35 Expected (promised amount) · 36 Probability of Conversion.
+   Every row is one membership. A row with a promised date and amount is one promised renewal. It counts as renewed when the same Learner ID
+   has a later payment (or its Renewal Status says Renewed); as "won't renew" when the status says so; otherwise it is still to come. */
+function build(){
+  const T=[];
+  CENTRES.forEach(c=>{const d=DATA[c.name];if(!d)return;
+    [['fs',d.fs,17],['rn',d.rn,16]].forEach(([tab,rows,amt])=>rows.forEach(r=>{const date=parseDate(r[0]);if(!date)return;
+      T.push({r,centre:c.name,tab,date,id:String(r[3]||'').trim().toUpperCase(),paid:parseNum(r[amt]),m:parseNum(r[12]),end:valid(parseDate(r[23])),status:String(r[25]||'').trim(),
+        desc:String(r[32]||'').trim(),ncd:valid(parseDate(r[33])),exp:parseNum(r[34]),prob:String(r[35]||'').trim()});}));});
+  const byId=new Map();T.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
+  byId.forEach(l=>l.sort((a,b)=>a.date-b.date));
+  // Due for renewal: the latest membership of each Learner ID that hasn't been renewed yet (no later Renewals entry), and isn't marked Won't renew.
+  // Those with a promised date and amount are in the pipeline; the rest are listed by what is missing.
+  GAPS=[];byId.forEach(l=>{const t=l[l.length-1];if(!t.end||/will not renew|discontinu|refund|^renewed$/i.test(t.status))return;
+    const miss=!t.ncd&&!(t.exp>0)?'none':t.ncd&&!(t.exp>0)?'noamt':!t.ncd?'nodate':'';if(!miss)return;
+    const phone=String(t.r[7]||'').replace(/\D/g,'').slice(-10);
+    GAPS.push({...t,miss,phone,name:String(t.r[4]||'').trim(),course:String(t.r[8]||'').trim(),teacher:String(t.r[29]||'').trim()});});
+  return T.filter(t=>t.ncd&&t.exp>0).map(t=>{
+    const later=(byId.get(t.id)||[]).find(x=>x!==t&&x.date>t.date&&x.tab==='rn');
+    let state='wait',paidOn=null,paidAmt=0;
+    if(later){state='paid';paidOn=later.date;paidAmt=later.paid;}
+    else if(/^renewed$/i.test(t.status)){state='paid';paidOn=valid(parseDate(t.r[26]));}
+    else if(/will not renew|discontinu|refund/i.test(t.status))state='lost';
+    if(state==='wait'&&t.ncd<TODAY)state='late';
+    const phone=String(t.r[7]||'').replace(/\D/g,'').slice(-10);
+    return {...t,state,paidOn,paidAmt,phone,name:String(t.r[4]||'').trim(),course:String(t.r[8]||'').trim(),teacher:String(t.r[29]||'').trim()};
+  });
+}
+
+/* ── State ── */
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_rp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,show='all';
+const GAP=[['none','No date or amount','Membership ended by yesterday; nothing promised yet'],['noamt','Date, but no amount','Promised date entered, Expected is blank'],['nodate','Amount, but no date','Expected entered, Next Call Date is blank']];
+const STATES=[['all','All'],['wait','Yet to pay','#B3AFBB'],['late','Overdue','#D9534F'],['paid','Renewed','#2DA06A'],['lost',"Won't renew",'#9A96A3']];
+
+/* The list for one kind of missing promise */
+function renderGap(list,sel,P){
+  const g=GAP.find(x=>x[0]===show);
+  document.getElementById('flt').innerHTML=`<button type="button" aria-pressed="false" id="back-all">← Back to promised payments</button>`;
+  document.getElementById('back-all').onclick=()=>{show='all';render();};
+  list=list.slice().sort((a,b)=>a.end-b.end);
+  document.getElementById('ptitle').innerHTML=`${esc(g[1])} <small>${list.length} learner${list.length===1?'':'s'} · due ${esc(P.label)}</small>`;
+  const head=['Membership ended','Learner',...(sel?[]:['Centre']),'Phone','Course','Package',{t:'Last paid',n:1},'Promised date','Expected','Note'];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">Nothing missing here. Every learner due ${esc(P.label)} has this filled in.</td></tr>`;
+  list.forEach(x=>{const d=days(x.end,TODAY);
+    const when=d>0?`<small class="late">${d} day${d===1?'':'s'} ago</small>`:d===0?'<small class="soon">Today</small>':`<small>in ${-d} day${d===-1?'':'s'}</small>`;
+    h+=`<tr><td class="date"><b>${WD[x.end.getDay()]}, ${x.end.getDate()} ${MON[x.end.getMonth()]}</b>${when}</td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${x.phone.length===10?x.phone.slice(0,5)+' '+x.phone.slice(5):'—'}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
+      <td>${x.m?x.m+(x.m===1?' month':' months'):'—'}</td><td class="n">${inr(x.paid)}</td>
+      <td>${x.ncd?fmtD(x.ncd):'<span class="miss">Missing</span>'}</td><td>${x.exp>0?inr(x.exp):'<span class="miss">Missing</span>'}</td>
+      <td class="note">${esc(x.desc)||'<span style="color:var(--faint)">—</span>'}</td></tr>`;});
+  document.getElementById('t').innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`Due ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+function period(){
+  if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
+  const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);
+  return{a,b,label:fmtD(a)+' to '+fmtD(b)};
+}
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+  document.getElementById('pmonth').style.display=mode==='month'?'flex':'none';document.getElementById('prange').hidden=mode!=='range';
+  const P=period();document.getElementById('mlabel').textContent=P.label;
+  if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
+  const t=document.getElementById('t'),k=document.getElementById('kpis');
+  if(!ITEMS){t.innerHTML='<tr><td class="empty">Loading…</td></tr>';k.innerHTML='';return;}
+  const all=ITEMS.filter(x=>(!sel||x.centre===sel.name)&&x.ncd>=P.a&&x.ncd<=P.b);
+  // Totals
+  const sum=(l,f)=>l.reduce((s,x)=>s+f(x),0),by=s=>all.filter(x=>x.state===s);
+  const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),promised=sum(all,x=>x.exp),got=sum(paid,x=>x.paidAmt||x.exp);
+  const toCome=sum(wait,x=>x.exp)+sum(late,x=>x.exp),pct=v=>promised?Math.min(100,v/promised*100):0;
+  k.innerHTML=`<div class="kpi main"><div class="k">Promised · ${esc(P.label)}</div><div class="v">${inr(promised)}</div><div class="s"><b>${all.length}</b> learner${all.length===1?'':'s'} have promised to renew</div>
+      <div class="prog"><i class="p1" style="width:${pct(sum(paid,x=>x.exp))}%"></i><i class="p2" style="width:${pct(sum(late,x=>x.exp))}%"></i></div>
+      <div class="legend"><span><i style="background:#7BD3A4"></i>Renewed</span><span><i style="background:#F2B8B0"></i>Overdue</span><span><i style="background:rgba(255,255,255,.3)"></i>Yet to pay</span></div></div>
+    <div class="kpi" style="--c:#2DA06A"><div class="k">Renewed</div><div class="v">${inr(got)}</div><div class="s"><b>${paid.length}</b> of ${all.length} learners${all.length?` · ${Math.round(paid.length/all.length*100)}%`:''}</div></div>
+    <div class="kpi" style="--c:#C9A66B"><div class="k">Still to collect</div><div class="v">${inr(toCome)}</div><div class="s"><b>${wait.length+late.length}</b> learners · ${wait.length} yet to pay, ${late.length} overdue</div></div>
+    <div class="kpi" style="--c:#D9534F"><div class="k">Overdue</div><div class="v">${inr(sum(late,x=>x.exp))}</div><div class="s"><b>${late.length}</b> learner${late.length===1?'':'s'} past their promised date${lost.length?` · ${lost.length} won't renew`:''}</div></div>`;
+  // Learners due in this period whose promise is missing or incomplete
+  const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
+  const due=GAPS.filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(x.miss!=='none'||x.end<=Y));
+  const gc={};GAP.forEach(([g])=>gc[g]=due.filter(x=>x.miss===g));
+  document.getElementById('gaps').innerHTML=`<div class="gh"><b>Not in the pipeline yet</b><span>Learners due for renewal in ${esc(P.label)} who haven't renewed, and whose promise is missing or incomplete</span></div>
+    <div class="gtiles">${GAP.map(([g,l,d])=>`<button type="button" class="gtile${show===g?' on':''}${gc[g].length?'':' zero'}" data-g="${g}"><span class="gn">${gc[g].length}</span><span class="gl"><b>${l}</b><small>${d}</small></span><span class="ga">${gc[g].length?'Paid last time: '+inr(sum(gc[g],x=>x.paid)):''}</span></button>`).join('')}</div>`;
+  document.querySelectorAll('.gtile').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
+  if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
+  // Filter
+  const cnt={all:all.length,wait:wait.length,late:late.length,paid:paid.length,lost:lost.length};
+  document.getElementById('flt').innerHTML=STATES.filter(([s])=>s!=='lost'||cnt.lost).map(([s,l,c])=>`<button type="button" data-s="${s}" aria-pressed="${show===s}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${cnt[s]}</span></button>`).join('');
+  document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{show=b.dataset.s;render();});
+  const list=(show==='all'?all:all.filter(x=>x.state===show)).slice().sort((a,b)=>a.ncd-b.ncd||b.exp-a.exp);
+  document.getElementById('ptitle').innerHTML=`Promised payments <small>${list.length} learner${list.length===1?'':'s'} · ${inr(sum(list,x=>x.exp))}</small>`;
+  // Table, grouped by week (Monday to Sunday)
+  const head=['Promised date','Learner',...(sel?[]:['Centre']),'Phone','Course','Package','Membership ended',{t:'Expected',n:1},'Probability','Note','Status'];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No promised payments ${show==='all'?'':'with this status '}between ${fmtD(P.a)} and ${fmtD(P.b)}.</td></tr>`;
+  let wk='';
+  list.forEach(x=>{
+    const mon=new Date(x.ncd);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));const key=iso(mon);
+    if(key!==wk){wk=key;const sun=new Date(mon);sun.setDate(sun.getDate()+6);const wl=list.filter(y=>y.ncd>=mon&&y.ncd<=sun);
+      h+=`<tr class="wk"><td colspan="${head.length}">Week of ${mon.getDate()} ${MON[mon.getMonth()]}<span>${wl.length} learner${wl.length===1?'':'s'} · ${inr(sum(wl,y=>y.exp))}</span></td></tr>`;}
+    const d=days(TODAY,x.ncd);
+    const when=x.state==='late'?`<small class="late">${-d} day${-d===1?'':'s'} late</small>`:x.state==='wait'?(d===0?'<small class="soon">Today</small>':`<small class="${d<=3?'soon':''}">in ${d} day${d===1?'':'s'}</small>`):'';
+    const st=x.state==='paid'?`<span class="st paid"><i></i>Renewed</span><span class="sub">${x.paidOn?fmtD(x.paidOn):''}${x.paidAmt?' · '+inr(x.paidAmt):''}</span>`
+      :x.state==='late'?'<span class="st late"><i></i>Overdue</span>':x.state==='lost'?`<span class="st lost"><i></i>Won't renew</span>`:'<span class="st wait"><i></i>Yet to pay</span>';
+    const pr=/high/i.test(x.prob)?'hi':/med/i.test(x.prob)?'md':/low/i.test(x.prob)?'lo':'na';
+    h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.ncd.getDay()]}, ${x.ncd.getDate()} ${MON[x.ncd.getMonth()]}</b>${when}</td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${x.phone.length===10?x.phone.slice(0,5)+' '+x.phone.slice(5):'—'}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
+      <td>${x.m?x.m+(x.m===1?' month':' months'):'—'}</td><td>${fmtD(x.end)}</td><td class="n amt">${inr(x.exp)}</td>
+      <td>${x.prob?`<span class="pr ${pr}">${esc(x.prob)}</span>`:'<span class="pr na">—</span>'}</td><td class="note">${esc(x.desc)||'<span style="color:var(--faint)">—</span>'}</td><td>${st}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+
+/* ── Controls ── */
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_rp_centre',selCentre);}catch(e){}render();});
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='range'&&!rFrom){rFrom=new Date(viewY,viewM,1);rTo=new Date(viewY,viewM+1,0);}render();});
+document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
+document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
+['from','to'].forEach(id=>document.getElementById(id).onchange=e=>{const d=fromIso(e.target.value);if(!d)return;if(id==='from')rFrom=d;else rTo=d;if(rFrom&&rTo&&rFrom>rTo)[rFrom,rTo]=[rTo,rFrom];render();});
+document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{const q=b.dataset.q;
+  if(q==='week'){rFrom=new Date(TODAY);rFrom.setDate(rFrom.getDate()-((rFrom.getDay()+6)%7));rTo=new Date(rFrom);rTo.setDate(rTo.getDate()+6);show='all';}
+  if(q==='next7'){rFrom=new Date(TODAY);rTo=new Date(TODAY);rTo.setDate(rTo.getDate()+6);show='all';}
+  if(q==='late'){const l=(ITEMS||[]).filter(x=>x.state==='late').map(x=>x.ncd);rFrom=l.length?new Date(Math.min(...l)):new Date(TODAY);rTo=new Date(TODAY);rTo.setDate(rTo.getDate()-1);show='late';}
+  render();});
+
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
+    ITEMS=build();
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';render();
+  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+}
+load();
+</script>
+</body>
+</html>
