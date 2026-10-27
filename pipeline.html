@@ -110,6 +110,28 @@
   .sub{display:block;font-size:11.5px;color:var(--faint);margin-top:3px}
   .pr{display:inline-block;font:600 11.5px var(--body);border-radius:6px;padding:2px 8px}
   .pr.hi{background:#E5F4EC;color:var(--ok)}.pr.md{background:#FBF1DC;color:var(--warn)}.pr.lo{background:#FDECEB;color:var(--bad)}.pr.na{color:var(--faint)}
+  .sumbox{margin-bottom:22px}
+  .sumhead{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:2px 4px 12px;cursor:pointer;text-align:left;font:inherit}
+  .st-t{position:relative;padding-left:16px;font:600 18px/1.3 var(--display);color:var(--ink)}
+  .st-t::before{content:"";position:absolute;left:0;top:50%;width:4px;height:18px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
+  .sumline{display:none;flex-wrap:wrap;gap:6px;flex:1}
+  .sumline span{font-size:12.5px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:999px;padding:4px 11px}.sumline b{color:var(--ink);font-weight:600;margin-left:3px}
+  .sumbox .chev{margin-left:auto;width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s;flex:none}
+  .sumhead:hover .chev{background:var(--accent-soft);color:var(--accent)}
+  .sumbox.closed .chev{transform:rotate(-90deg)}
+  .sumbox.closed .sumbody{display:none}.sumbox.closed .sumline{display:flex}
+  .sumbody .gaps{margin-bottom:0}
+  .ren{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .rs{padding:16px 22px;border-left:1px solid var(--line)}.rs:first-child{border-left:0}
+  .rs .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .rs .v{font:700 28px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
+  .rs .s{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:10px}
+  .split{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .split span{font-size:12px;color:var(--muted);background:#F6F4F9;border-radius:999px;padding:3px 10px}.split b{color:var(--ink);font-weight:600}
+  .rs.eff .v{color:var(--accent)}.rs.eff.ok .v{color:var(--ok)}.rs.eff.mid .v{color:var(--warn)}.rs.eff.low .v{color:var(--bad)}
+  .rs .bar{flex:1;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;max-width:160px}.rs .bar i{display:block;height:100%;background:currentColor}
+  .rs.eff.ok .bar{color:var(--ok)}.rs.eff.mid .bar{color:#C9A66B}.rs.eff.low .bar{color:var(--bad)}
+  @media (max-width:900px){.ren{grid-template-columns:1fr}.rs{border-left:0;border-top:1px solid var(--line)}.rs:first-child{border-top:0}}
   .gaps{background:#fff;border:1px solid #F0DDB5;border-radius:20px;padding:14px 16px 16px;margin-bottom:22px;box-shadow:var(--shadow)}
   .gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 4px 12px}.gh b{font:600 15px var(--display);color:var(--ink)}.gh span{font-size:13px;color:var(--muted)}
   .gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -149,8 +171,11 @@
         <span class="quick"><button type="button" data-q="week">This week</button><button type="button" data-q="next7">Next 7 days</button><button type="button" data-q="late">All overdue</button></span></div>
     </div>
   </div>
-  <div class="kpis" id="kpis"></div>
-  <div class="gaps" id="gaps"></div>
+  <section class="sumbox" id="sumbox">
+    <button type="button" class="sumhead" id="sumhead" aria-expanded="true" aria-controls="sumbody"><span class="st-t">Summary</span><span class="sumline" id="sumline"></span>
+      <span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
+    <div class="sumbody" id="sumbody"><div class="ren" id="ren"></div><div class="kpis" id="kpis"></div><div class="gaps" id="gaps"></div></div>
+  </section>
   <section class="panel">
     <div class="ptop"><div class="ptitle" id="ptitle">Promised payments</div><div class="flt" id="flt" role="group" aria-label="Show"></div></div>
     <div class="tbl-wrap"><table id="t"></table></div>
@@ -181,7 +206,7 @@ const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate
 const days=(a,b)=>Math.round((b-a)/864e5);
 const valid=d=>d&&d.getFullYear()>=2020?d:null;
 async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
-let DATA={},ITEMS=null,GAPS=[];
+let DATA={},ITEMS=null,GAPS=[],ALL=[];   // ALL: every membership row, for the renewal totals
 
 /* Columns used: A Date · D Learner ID · E Name · H Mobile · I Course · M No. of months · Q / R amount paid · X Membership end date · Z Renewal Status · AD Teacher
    and, sent by the data service after AD: 33 Description · 34 Next Call Date (promised payment date) · 35 Expected (promised amount) · 36 Probability of Conversion.
@@ -195,6 +220,9 @@ function build(){
         desc:String(r[32]||'').trim(),ncd:valid(parseDate(r[33])),exp:parseNum(r[34]),prob:String(r[35]||'').trim()});}));});
   const byId=new Map();T.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
   byId.forEach(l=>l.sort((a,b)=>a.date-b.date));
+  // For every renewal: when was the membership it renews due? (the end date of the same Learner ID's previous entry)
+  byId.forEach(l=>l.forEach((t,i)=>{if(t.tab==='rn'&&i>0)t.prevEnd=l[i-1].end;}));
+  ALL=T;
   // Due for renewal: the latest membership of each Learner ID that hasn't been renewed yet (no later Renewals entry), and isn't marked Won't renew.
   // Those with a promised date and amount are in the pipeline; the rest are listed by what is missing.
   GAPS=[];byId.forEach(l=>{const t=l[l.length-1];if(!t.end||/will not renew|discontinu|refund|^renewed$/i.test(t.status))return;
@@ -215,6 +243,7 @@ function build(){
 
 /* ── State ── */
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_rp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+let sumOpen=(()=>{try{return localStorage.getItem('artium_rp_summary')!=='closed';}catch(e){return true;}})();
 let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,show='all';
 const GAP=[['none','No date or amount','Membership ended by yesterday; nothing promised yet'],['noamt','Date, but no amount','Promised date entered, Expected is blank'],['nodate','Amount, but no date','Expected entered, Next Call Date is blank']];
 const STATES=[['all','All'],['wait','Yet to pay','#B3AFBB'],['late','Overdue','#D9534F'],['paid','Renewed','#2DA06A'],['lost',"Won't renew",'#9A96A3']];
@@ -256,6 +285,17 @@ function render(){
   const t=document.getElementById('t'),k=document.getElementById('kpis');
   if(!ITEMS){t.innerHTML='<tr><td class="empty">Loading…</td></tr>';k.innerHTML='';return;}
   const all=ITEMS.filter(x=>(!sel||x.centre===sel.name)&&x.ncd>=P.a&&x.ncd<=P.b);
+  // Renewals in the period, as on Monthly Performance Analysis: due = memberships ending in the period (Fresh Sales and Renewals);
+  // renewed = every renewal paid in the period, whenever it was due; efficiency = renewed ÷ due
+  const inP=d=>d&&d>=P.a&&d<=P.b,mine=x=>!sel||x.centre===sel.name;
+  const dueN=ALL.filter(x=>mine(x)&&inP(x.end)).length,rnl=ALL.filter(x=>mine(x)&&x.tab==='rn'&&inP(x.date));
+  const rCur=rnl.filter(x=>inP(x.prevEnd)).length,rPrev=rnl.filter(x=>x.prevEnd&&x.prevEnd<P.a).length,rAdv=rnl.filter(x=>x.prevEnd&&x.prevEnd>P.b).length,rUnk=rnl.length-rCur-rPrev-rAdv;
+  const eff=dueN?rnl.length/dueN*100:null,eCls=eff==null?'':eff>=90?'ok':eff>=70?'mid':'low';
+  document.getElementById('ren').innerHTML=`<div class="rs"><div class="k">Due for renewal</div><div class="v">${dueN.toLocaleString('en-IN')}</div><div class="s">memberships ending ${esc(P.label)}</div></div>
+    <div class="rs"><div class="k">Renewed</div><div class="v">${rnl.length.toLocaleString('en-IN')}</div>
+      <div class="split"><span><b>${rCur}</b> due ${mode==='month'?'this month':'in this range'}</span><span><b>${rPrev}</b> due earlier</span><span><b>${rAdv}</b> in advance</span>${rUnk?`<span><b>${rUnk}</b> no earlier entry</span>`:''}</div></div>
+    <div class="rs eff ${eCls}"><div class="k">Renewal collection efficiency</div><div class="v">${eff==null?'–':Math.round(eff)+'%'}</div><div class="s">${rnl.length} renewals against ${dueN} due${eff!=null?`<span class="bar"><i style="width:${Math.min(100,eff)}%"></i></span>`:''}</div></div>`;
+  const missN=GAPS.filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(x.miss!=='none'||x.end<=new Date(TODAY.getTime()-864e5))).length;
   // Totals
   const sum=(l,f)=>l.reduce((s,x)=>s+f(x),0),by=s=>all.filter(x=>x.state===s);
   const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),promised=sum(all,x=>x.exp),got=sum(paid,x=>x.paidAmt||x.exp);
@@ -263,9 +303,12 @@ function render(){
   k.innerHTML=`<div class="kpi main"><div class="k">Promised · ${esc(P.label)}</div><div class="v">${inr(promised)}</div><div class="s"><b>${all.length}</b> learner${all.length===1?'':'s'} have promised to renew</div>
       <div class="prog"><i class="p1" style="width:${pct(sum(paid,x=>x.exp))}%"></i><i class="p2" style="width:${pct(sum(late,x=>x.exp))}%"></i></div>
       <div class="legend"><span><i style="background:#7BD3A4"></i>Renewed</span><span><i style="background:#F2B8B0"></i>Overdue</span><span><i style="background:rgba(255,255,255,.3)"></i>Yet to pay</span></div></div>
-    <div class="kpi" style="--c:#2DA06A"><div class="k">Renewed</div><div class="v">${inr(got)}</div><div class="s"><b>${paid.length}</b> of ${all.length} learners${all.length?` · ${Math.round(paid.length/all.length*100)}%`:''}</div></div>
+    <div class="kpi" style="--c:#2DA06A"><div class="k">Promises kept</div><div class="v">${inr(got)}</div><div class="s"><b>${paid.length}</b> of ${all.length} learners${all.length?` · ${Math.round(paid.length/all.length*100)}%`:''}</div></div>
     <div class="kpi" style="--c:#C9A66B"><div class="k">Still to collect</div><div class="v">${inr(toCome)}</div><div class="s"><b>${wait.length+late.length}</b> learners · ${wait.length} yet to pay, ${late.length} overdue</div></div>
     <div class="kpi" style="--c:#D9534F"><div class="k">Overdue</div><div class="v">${inr(sum(late,x=>x.exp))}</div><div class="s"><b>${late.length}</b> learner${late.length===1?'':'s'} past their promised date${lost.length?` · ${lost.length} won't renew`:''}</div></div>`;
+  document.getElementById('sumline').innerHTML=[`<span>Due <b>${dueN}</b></span>`,`<span>Renewed <b>${rnl.length}</b></span>`,`<span>Efficiency <b>${eff==null?'–':Math.round(eff)+'%'}</b></span>`,
+    `<span>Promised <b>${inr(promised)}</b></span>`,`<span>Overdue <b>${inr(sum(late,x=>x.exp))}</b></span>`,`<span>Not in pipeline <b>${missN}</b></span>`].join('');
+  const sb=document.getElementById('sumbox');sb.classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
   // Learners due in this period whose promise is missing or incomplete
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
   const due=GAPS.filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(x.miss!=='none'||x.end<=Y));
@@ -305,6 +348,7 @@ function render(){
 }
 
 /* ── Controls ── */
+document.getElementById('sumhead').onclick=()=>{sumOpen=!sumOpen;try{localStorage.setItem('artium_rp_summary',sumOpen?'open':'closed');}catch(e){}render();};
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
   .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
 document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_rp_centre',selCentre);}catch(e){}render();});
