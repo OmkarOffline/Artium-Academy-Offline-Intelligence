@@ -49,8 +49,17 @@
   .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px;white-space:nowrap}
   .tray-sub{font-size:13.5px;color:var(--muted);margin:-6px 2px 14px;line-height:1.5}
 
-  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  .tbl-wrap{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
   table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  /* Many columns: the table keeps its natural width and scrolls sideways; # and Learner stay in view while scrolling */
+  .tbl-wrap table{width:max-content;min-width:100%}
+  .tbl-wrap th:nth-child(-n+2),.tbl-wrap td:nth-child(-n+2){position:sticky;z-index:1;background:#fff}
+  .tbl-wrap th:nth-child(-n+2){background:#FAF9F7}
+  .tbl-wrap th:nth-child(1),.tbl-wrap td:nth-child(1){left:0;width:52px;min-width:52px}
+  .tbl-wrap th:nth-child(2),.tbl-wrap td:nth-child(2){left:52px;box-shadow:8px 0 10px -10px rgba(43,24,64,.3)}
+  .tbl-wrap tbody tr:hover td:nth-child(-n+2){background:#FCFBFE}
+  .scroll-hint{display:none;font-size:12px;color:var(--faint);margin:-6px 4px 10px;text-align:right}
+  .scroll-hint.on{display:block}
   th,td{padding:12px 16px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
   th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
   th.n,td.n{text-align:right}
@@ -60,6 +69,9 @@
   tbody tr:last-child td{border-bottom:0}
   tbody tr:hover td{background:#FCFBFE}
   .rk{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border-radius:999px;background:#F3F1F6;color:var(--muted);font:600 12.5px var(--display)}
+  td:has(>.who){white-space:normal;min-width:180px;max-width:220px}
+  .who small{display:block;line-height:1.45}
+  th,td{padding-left:12px;padding-right:12px}
   .who b{display:block;font:600 14px var(--body);color:var(--ink)}
   .who small{font:500 11.5px var(--body);color:var(--faint);letter-spacing:.02em}
   .multi{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.35}
@@ -71,6 +83,15 @@
   .pk{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--display);color:var(--ink)}
   .pk .arr{color:var(--faint);font-weight:400}
   .pk.dn .to{color:var(--bad)}.pk.up .to{color:var(--ok)}
+  .flt{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;margin:0 2px 14px;box-shadow:var(--shadow)}
+  .flt button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;border-radius:10px;padding:7px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
+  .flt button span{font:600 11.5px var(--body);color:var(--muted);background:#F3F1F6;border-radius:999px;padding:1px 8px}
+  .flt button:hover{background:var(--accent-soft)}
+  .flt button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .flt button[aria-pressed="true"] span{background:rgba(255,255,255,.2);color:#fff}
+  .flt .d{width:7px;height:7px;border-radius:50%}.flt .d.on{background:#2DA06A}.flt .d.off{background:#B3AFBB}
+  .nw{white-space:nowrap}
+  .tel{font-variant-numeric:tabular-nums;letter-spacing:.01em}
   .more{display:block;margin:14px auto 0;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 18px;font:600 13px var(--body);color:var(--accent);cursor:pointer}
   .more:hover{background:var(--accent-soft)}
   .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
@@ -142,22 +163,27 @@ function build(names){
   ok.forEach(t=>{(ids.get(t.id)||ids.set(t.id,{id:t.id,centre:t.centre,course:'',name:'',phone:'',adm:null,ren:[],all:[]}).get(t.id)).all.push(t);});
   ids.forEach(x=>{x.all.sort((a,b)=>a.date-b.date);x.adm=x.all.find(t=>t.fs)||null;x.ren=x.all.filter(t=>!t.fs&&(!x.adm||t.date>=x.adm.date));
     const last=x.all[x.all.length-1];x.course=last.r[8]||x.all.map(t=>t.r[8]).filter(Boolean).pop()||'';x.name=(x.all.map(t=>t.r[4]).filter(Boolean).pop())||'';x.phone=phoneOf(x.adm?x.adm.r:last.r);
+    x.age=x.all.map(t=>String(t.r[6]||'').trim()).filter(Boolean).pop()||'';
     x.lastEnd=x.all.map(t=>t.end).filter(Boolean).sort((a,b)=>b-a)[0]||null;x.active=!!(x.lastEnd&&x.lastEnd>=TODAY);x.person=person[x.id];});
   const P=new Map();
   ids.forEach(x=>{(P.get(x.person)||P.set(x.person,{key:x.person,ids:[]}).get(x.person)).ids.push(x);});
   P.forEach(p=>{p.name=p.ids.map(x=>x.name).filter(Boolean)[0]||'';p.centres=[...new Set(p.ids.map(x=>x.centre))];p.phone=p.ids[0].phone;
     p.all=p.ids.flatMap(x=>x.all).sort((a,b)=>a.date-b.date);p.first=(p.all.find(t=>t.fs)||p.all[0]).date;
+    p.age=p.all.map(t=>String(t.r[6]||'').trim()).filter(Boolean).pop()||'';p.admDate=(p.all.find(t=>t.fs)||{}).date||null;
     p.lastEnd=p.ids.map(x=>x.lastEnd).filter(Boolean).sort((a,b)=>b-a)[0]||null;p.active=p.ids.some(x=>x.active);p.paid=p.all.reduce((s,t)=>s+t.paid,0);});
   return {ids:[...ids.values()],people:[...P.values()]};
 }
 
 /* Cells */
-const whoP=p=>`<div class="who"><b>${esc(p.name)||'—'}</b><small>${p.ids.map(x=>esc(x.id)).join(' · ')}</small></div>`;
+const whoP=p=>`<div class="who"><b>${esc(p.name)||'—'}</b><small>${p.ids.map(x=>`<span class="nw">${esc(x.id)}</span>`).join(' · ')}</small></div>`;
 const whoI=x=>`<div class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></div>`;
 const ctr=list=>[].concat(list).map(n=>`<span class="ctr">${esc(n)}</span>`).join(' ');
-const courses=p=>p.ids.length===1?esc(p.ids[0].course)||'—':`<div class="multi">${p.ids.map(x=>`<span>${esc(x.course)||'—'}</span>`).join('')}</div>`;
+const uniq=p=>[...new Set(p.ids.map(x=>x.course||'—'))];   // a course bought again under a new Learner ID is listed once
+const courses=p=>{const c=uniq(p);return c.length===1?esc(c[0]):`<div class="multi">${c.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;};
 const status=a=>a?'<span class="st on"><i></i>Active</span>':'<span class="st off"><i></i>Not active</span>';
 const move=(a,b)=>`<span class="pk ${b>a?'up':'dn'}"><span>${pkg(a)}</span><span class="arr">→</span><span class="to">${pkg(b)}</span></span>`;
+const tel=p=>p&&p.length===10?`<span class="tel">${p.slice(0,5)} ${p.slice(5)}</span>`:'—';
+const age=a=>a?esc(a):'<span style="color:var(--faint)">—</span>';
 const ordinal=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:n%10<4?n%10:0]);
 
 /* The groups. Each: who is in it (list), how it's sorted, the table, and the two figures for its card preview. */
@@ -167,45 +193,51 @@ const GROUPS=[
    icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.5h.01"/>',
    list:D=>D.people.map(p=>{const one=p.all.filter(t=>t.m===1),r1=one.filter(t=>!t.fs).length;return{p,one:one.length,r1,tenure:span(p.first,p.active?TODAY:p.lastEnd)};})
      .filter(x=>x.r1>=2).sort((a,b)=>b.one-a.one||b.p.paid-a.p.paid),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Course',{t:'1-month payments',n:1},{t:'All payments',n:1},{t:'Tenure',n:1},'Status'],
-   row:(x,all)=>[whoP(x.p),...(all?[ctr(x.p.centres)]:[]),courses(x.p),{v:x.one,key:1},{v:x.p.all.length},{v:x.tenure},status(x.p.active)],
+   act:x=>x.p.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date',{t:'1-month payments',n:1},{t:'All payments',n:1},{t:'Tenure',n:1},'Status'],
+   row:(x,all)=>[whoP(x.p),...(all?[ctr(x.p.centres)]:[]),tel(x.p.phone),age(x.p.age),courses(x.p),fmtD(x.p.admDate),{v:x.one,key:1},{v:x.p.all.length},{v:x.tenure},status(x.p.active)],
    pv:x=>[x.p.name,x.one+' × 1 month']},
   {id:'y1',k:'Admissions',title:'Year-One Commitments',short:'Learners who joined with a package of 12 months or more.',
    sub:'Admissions for 12 months or more, newest first.',
    icon:'<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',
    list:D=>D.ids.filter(x=>x.adm&&x.adm.m>=12).sort((a,b)=>b.adm.date-a.adm.date),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Admission date',{t:'Package',n:1},{t:'Paid at admission',n:1},{t:'Renewals since',n:1},'Status'],
-   row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),esc(x.course)||'—',fmtD(x.adm.date),{v:pkg(x.adm.m)},{v:inr(x.adm.paid),key:1},{v:x.ren.length},status(x.active)],
+   act:x=>x.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date',{t:'Package',n:1},{t:'Paid at admission',n:1},{t:'Renewals since',n:1},'Status'],
+   row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),{v:pkg(x.adm.m)},{v:inr(x.adm.paid),key:1},{v:x.ren.length},status(x.active)],
    pv:x=>[x.name,pkg(x.adm.m)]},
   {id:'up',k:'Upgrades',title:'Trial-to-Long-Term Upgraders',short:'Joined for 1 month, then renewed for 3 months or more the first time.',
    sub:'Learners who joined for 1 month and whose first renewal was for 3 months or more. A first renewal of 1 or 2 months doesn\'t count, even if a longer one came later.',
    icon:'<path d="M4 20L20 4M20 4h-7M20 4v7"/>',
    list:D=>D.ids.filter(x=>x.adm&&x.adm.m===1&&x.ren.length&&x.ren[0].m>=3).sort((a,b)=>b.ren[0].date-a.ren[0].date),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined','First renewal',{t:'Package',n:1},{t:'Paid at first renewal',n:1},'Status'],
-   row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.ren[0].date),{v:move(1,x.ren[0].m)},{v:inr(x.ren[0].paid),key:1},status(x.active)],
+   act:x=>x.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','First renewal',{t:'Package',n:1},{t:'Paid at first renewal',n:1},'Status'],
+   row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.ren[0].date),{v:move(1,x.ren[0].m)},{v:inr(x.ren[0].paid),key:1},status(x.active)],
    pv:x=>[x.name,'1 → '+x.ren[0].m+' months']},
   {id:'lt',unit:['renewal','renewals'],k:'Renewal habits',title:'Long-Term Renewers',short:'Learners who renewed for 12 months or more, at any renewal.',
    sub:'Every renewal of 12 months or more, newest first. It can be the learner\'s first renewal or a later one.',
    icon:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
    list:D=>D.ids.flatMap(x=>x.ren.map((t,i)=>({x,t,n:i+1}))).filter(o=>o.t.m>=12).sort((a,b)=>b.t.date-a.t.date),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Renewed on',{t:'Which renewal',n:1},{t:'Package',n:1},{t:'Paid',n:1},'Status'],
-   row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),esc(o.x.course)||'—',fmtD(o.t.date),{v:ordinal(o.n)},{v:pkg(o.t.m)},{v:inr(o.t.paid),key:1},status(o.x.active)],
+   act:o=>o.x.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Renewed on',{t:'Which renewal',n:1},{t:'Package',n:1},{t:'Paid',n:1},'Status'],
+   row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),tel(o.x.phone),age(o.x.age),esc(o.x.course)||'—',fmtD(o.x.adm&&o.x.adm.date),fmtD(o.t.date),{v:ordinal(o.n)},{v:pkg(o.t.m)},{v:inr(o.t.paid),key:1},status(o.x.active)],
    pv:o=>[o.x.name,pkg(o.t.m)]},
   {id:'mc',k:'Courses',title:'Multi-Course Joiners',short:'Learners who joined two or more courses on the same day.',
    sub:'Learners whose admissions for two or more courses share the same date. Newest first.',
    icon:'<rect x="3" y="7" width="13" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/>',
    list:D=>D.people.map(p=>{const by={};p.ids.filter(x=>x.adm).forEach(x=>{const k=+x.adm.date;(by[k]=by[k]||[]).push(x);});const g=Object.values(by).filter(a=>a.length>1).sort((a,b)=>b[0].adm.date-a[0].adm.date)[0];return g?{p,g}:null;})
      .filter(Boolean).sort((a,b)=>b.g[0].adm.date-a.g[0].adm.date),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Courses','Admission date',{t:'Courses',n:1},{t:'Paid at admission',n:1},'Status'],
-   row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),`<div class="multi">${o.g.map(x=>`<span>${esc(x.course)||'—'}</span>`).join('')}</div>`,fmtD(o.g[0].adm.date),{v:o.g.length},{v:inr(o.g.reduce((s,x)=>s+x.adm.paid,0)),key:1},status(o.p.active)],
+   act:o=>o.p.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Courses','Admission date',{t:'Courses',n:1},{t:'Paid at admission',n:1},'Status'],
+   row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),tel(o.p.phone),age(o.p.age),`<div class="multi">${o.g.map(x=>`<span>${esc(x.course)||'—'}</span>`).join('')}</div>`,fmtD(o.g[0].adm.date),{v:o.g.length},{v:inr(o.g.reduce((s,x)=>s+x.adm.paid,0)),key:1},status(o.p.active)],
    pv:o=>[o.p.name,o.g.length+' courses']},
   {id:'ao',k:'Courses',title:'Course Add-Ons',short:'Learners who started one course and joined another later.',
    sub:'Learners who joined a second course on a later date than their first. Newest add-on first.',
    icon:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
    list:D=>D.people.map(p=>{const a=p.ids.filter(x=>x.adm).sort((u,v)=>u.adm.date-v.adm.date);if(a.length<2)return null;const later=a.filter(x=>+x.adm.date>+a[0].adm.date);if(!later.length)return null;
        const add=later[later.length-1];return{p,first:a[0],add,gap:Math.round((add.adm.date-a[0].adm.date)/864e5)};}).filter(Boolean).sort((a,b)=>b.add.adm.date-a.add.adm.date),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'First course','Joined','Added course','Added on',{t:'Gap',n:1},'Status'],
-   row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),esc(o.first.course)||'—',fmtD(o.first.adm.date),esc(o.add.course)||'—',fmtD(o.add.adm.date),{v:span(o.first.adm.date,o.add.adm.date),key:1},status(o.p.active)],
+   act:o=>o.p.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','First course','Admission date','Added course','Added on',{t:'Gap',n:1},'Status'],
+   row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),tel(o.p.phone),age(o.p.age),esc(o.first.course)||'—',fmtD(o.first.adm.date),esc(o.add.course)||'—',fmtD(o.add.adm.date),{v:span(o.first.adm.date,o.add.adm.date),key:1},status(o.p.active)],
    pv:o=>[o.p.name,'+ '+(o.add.course||'course')]},
   {id:'fam',unit:['family','families'],k:'Households',title:'Families',short:'One phone number shared by two or more learners: siblings or a parent and child.',
    sub:'Learners registered with the same phone number but different names. Biggest families first, then by total paid.',
@@ -213,33 +245,38 @@ const GROUPS=[
    list:D=>{const F=new Map();D.people.forEach(p=>{if(!p.phone)return;(F.get(p.phone)||F.set(p.phone,[]).get(p.phone)).push(p);});
      return [...F.values()].filter(m=>m.length>1).map(m=>({m,paid:m.reduce((s,p)=>s+p.paid,0),active:m.filter(p=>p.active).length,centres:[...new Set(m.flatMap(p=>p.centres))]}))
        .sort((a,b)=>b.m.length-a.m.length||b.paid-a.paid);},
-   head:all=>['#','Members',...(all?['Centre']:[]),'Courses',{t:'Members',n:1},{t:'Active now',n:1},{t:'Paid together',n:1}],
-   row:(o,all)=>[`<div class="multi">${o.m.map(p=>`<span><b style="font-weight:600;color:var(--ink)">${esc(p.name)||'—'}</b></span>`).join('')}</div>`,...(all?[ctr(o.centres)]:[]),
-     `<div class="multi">${o.m.map(p=>`<span>${p.ids.map(x=>esc(x.course)||'—').join(', ')}</span>`).join('')}</div>`,{v:o.m.length},{v:o.active},{v:inr(o.paid),key:1}],
+   act:o=>o.active>0,actLabel:['Any member active','No member active'],
+   head:all=>['#','Members',...(all?['Centre']:[]),'Phone','Age group','Courses','Admission date',{t:'Members',n:1},{t:'Active now',n:1},{t:'Paid together',n:1}],
+   row:(o,all)=>[`<div class="multi">${o.m.map(p=>`<span><b style="font-weight:600;color:var(--ink)">${esc(p.name)||'—'}</b></span>`).join('')}</div>`,...(all?[ctr(o.centres)]:[]),tel(o.m[0].phone),
+     `<div class="multi">${o.m.map(p=>`<span>${age(p.age)}</span>`).join('')}</div>`,
+     `<div class="multi">${o.m.map(p=>`<span>${uniq(p).map(esc).join(', ')}</span>`).join('')}</div>`,
+     `<div class="multi">${o.m.map(p=>`<span>${fmtD(p.admDate)}</span>`).join('')}</div>`,{v:o.m.length},{v:o.active},{v:inr(o.paid),key:1}],
    pv:o=>[o.m.map(p=>String(p.name).split(' ')[0]).join(' & '),o.m.length+' members']},
   {id:'drop',k:'Win-back',title:'One-Month Drop-offs',short:'Joined for 1 month and never renewed: a win-back call list.',
    sub:'Learners who joined a course for 1 month, whose membership has ended, and who never renewed it. Most recently ended first, since they are the easiest to win back.',
    icon:'<path d="M3 3l18 18"/><path d="M10.6 5.1A8 8 0 0 1 20 12a8 8 0 0 1-1.3 4.4M6.3 6.3A8 8 0 0 0 12 20a8 8 0 0 0 5.7-2.3"/>',
    list:D=>D.ids.filter(x=>x.adm&&x.adm.m===1&&!x.ren.length&&x.adm.end&&x.adm.end<TODAY).sort((a,b)=>b.adm.end-a.adm.end),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined','Membership ended',{t:'Since it ended',n:1},{t:'Other courses',n:1}],
+   act:(x,D)=>{const o=D.people.find(p=>p.key===x.person);return !!(o&&o.ids.some(y=>y!==x&&y.active));},actLabel:['Active in another course','Not active'],
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Membership ended',{t:'Since it ended',n:1},{t:'Other courses',n:1}],
    row:(x,all,D)=>{const others=D.people.find(p=>p.key===x.person);const n=others?others.ids.filter(y=>y!==x&&y.active).length:0;
-     return[whoI(x),...(all?[ctr(x.centre)]:[]),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.adm.end),{v:span(x.adm.end,TODAY),key:1},{v:n?n+' active':'—'}];},
+     return[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.adm.end),{v:span(x.adm.end,TODAY),key:1},{v:n?n+' active':'—'}];},
    pv:x=>[x.name,'ended '+fmtD(x.adm.end)]},
   {id:'down',k:'Early warning',title:'Downgraders',short:'Learners who renewed for a shorter package than their last one.',
    sub:'Renewals for fewer months than the learner\'s previous payment for the same course, e.g. 12 months down to 3. Most recent first: a sign the learner may be losing interest.',
    icon:'<path d="M4 4l16 16M20 20h-7M20 20v-7"/>',
    list:D=>D.ids.map(x=>{let hit=null;x.all.forEach((t,i)=>{if(i&&!t.fs&&t.m&&x.all[i-1].m&&t.m<x.all[i-1].m)hit={from:x.all[i-1].m,to:t.m,t};});return hit?{x,...hit}:null;})
      .filter(Boolean).sort((a,b)=>b.t.date-a.t.date),
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Renewed on',{t:'Package',n:1},{t:'Paid',n:1},'Status'],
-   row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),esc(o.x.course)||'—',fmtD(o.t.date),{v:move(o.from,o.to)},{v:inr(o.t.paid),key:1},status(o.x.active)],
+   act:o=>o.x.active,
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Renewed on',{t:'Package',n:1},{t:'Paid',n:1},'Status'],
+   row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),tel(o.x.phone),age(o.x.age),esc(o.x.course)||'—',fmtD(o.x.adm&&o.x.adm.date),fmtD(o.t.date),{v:move(o.from,o.to)},{v:inr(o.t.paid),key:1},status(o.x.active)],
    pv:o=>[o.x.name,o.from+' → '+pkg(o.to)]}
 ];
 
 /* Sections are built once; their tables are filled on every render. The landing cards come from cardnav.js. */
 document.getElementById('groups').innerHTML=GROUPS.map(g=>`<section class="tray" id="sec-${g.id}">
   <div class="tray-head"><div class="tray-title">${g.title}</div><span class="badge" id="b-${g.id}">…</span></div>
-  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button></div></section>`).join('');
-const PAGE=25,shown={};
+  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="flt" id="f-${g.id}" role="group" aria-label="Show"></div><div class="scroll-hint" id="h-${g.id}">Scroll sideways for more columns →</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button></div></section>`).join('');
+const PAGE=25,shown={},flt={};   // flt[group] = 'all' | 'on' | 'off'
 let D=null,L={};
 
 function render(){
@@ -252,16 +289,24 @@ function render(){
   GROUPS.forEach(g=>{
     const t=document.getElementById('t-'+g.id),more=document.getElementById('m-'+g.id);
     const head='<thead><tr>'+g.head(all).map(h=>typeof h==='string'?`<th>${h}</th>`:`<th class="n">${h.t}</th>`).join('')+'</tr></thead>';
-    if(!D){t.innerHTML=head+'<tbody><tr><td colspan="10" class="empty">Loading…</td></tr></tbody>';more.hidden=true;return;}
-    const list=L[g.id]=g.list(D),n=Math.min(list.length,shown[g.id]||PAGE);
-    const u=g.unit||['learner','learners'];document.getElementById('b-'+g.id).textContent=list.length.toLocaleString('en-IN')+' '+u[list.length===1?0:1];
+    if(!D){t.innerHTML=head+'<tbody><tr><td colspan="14" class="empty">Loading…</td></tr></tbody>';more.hidden=true;return;}
+    const full=L[g.id]=g.list(D),on=full.filter(x=>g.act(x,D)),f=flt[g.id]||'all';
+    const list=f==='on'?on:f==='off'?full.filter(x=>!g.act(x,D)):full,n=Math.min(list.length,shown[g.id]||PAGE);
+    const lab=g.actLabel||['Active','Not active'],cnt=[['all','All',full.length],['on',lab[0],on.length],['off',lab[1],full.length-on.length]];
+    const fb=document.getElementById('f-'+g.id);
+    fb.innerHTML=cnt.map(([k,l,c])=>`<button type="button" data-f="${k}" aria-pressed="${f===k}">${k==='on'?'<i class="d on"></i>':k==='off'?'<i class="d off"></i>':''}${l}<span>${c.toLocaleString('en-IN')}</span></button>`).join('');
+    fb.querySelectorAll('button').forEach(b=>b.onclick=()=>{flt[g.id]=b.dataset.f;shown[g.id]=PAGE;render();});
+    const u=g.unit||['learner','learners'];document.getElementById('b-'+g.id).textContent=full.length.toLocaleString('en-IN')+' '+u[list.length===1?0:1];
     t.innerHTML=head+'<tbody>'+(list.length?list.slice(0,n).map((x,i)=>`<tr><td><span class="rk">${i+1}</span></td>${g.row(x,all,D).map(c=>typeof c==='object'?`<td class="n${c.key?' key':''}">${c.v}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')
-      :'<tr><td colspan="10" class="empty">No learners in this group yet</td></tr>')+'</tbody>';
+      :`<tr><td colspan="14" class="empty">${full.length?'No one here with this filter':'No learners in this group yet'}</td></tr>`)+'</tbody>';
     more.hidden=n>=list.length;more.textContent='Show more ('+(list.length-n).toLocaleString('en-IN')+' left)';
     more.onclick=()=>{shown[g.id]=n+PAGE;render();};
   });
   if(window.CardNav)CardNav.refresh();
+  requestAnimationFrame(hints);
 }
+function hints(){GROUPS.forEach(g=>{const w=document.getElementById('t-'+g.id).parentNode;document.getElementById('h-'+g.id).classList.toggle('on',w.scrollWidth>w.clientWidth+2);});}
+window.addEventListener('resize',hints);document.addEventListener('click',e=>{if(e.target.closest('.cn-card'))requestAnimationFrame(hints);});addEventListener('popstate',()=>requestAnimationFrame(hints));
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_fg_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
