@@ -159,6 +159,29 @@
   .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
   .btn:disabled{opacity:.6;cursor:default}
   @media (max-width:640px){.ins-bg{padding:0;place-items:end stretch}.ins{border-radius:22px 22px 0 0;max-height:92vh}.ins-head,.ins-body{padding-left:18px;padding-right:18px}}
+  .tools{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .rib{display:inline-flex;align-items:center;gap:8px;border:1px solid #E6D3A8;background:#FFF9EC;color:#7A5A22;border-radius:12px;padding:9px 14px;font:600 13px var(--body);cursor:pointer;margin:0 2px 14px}
+  .rib svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+  .rib span{background:#F3E2BC;border-radius:999px;padding:1px 8px;font-size:11.5px}
+  .rib:hover:not(:disabled){background:#FBF1DC}
+  .rib[aria-expanded="true"]{background:#7A5A22;border-color:#7A5A22;color:#fff}.rib[aria-expanded="true"]:hover{background:#674B1B}.rib[aria-expanded="true"] span{background:rgba(255,255,255,.22)}
+  .rib:disabled{border-color:var(--border);background:#fff;color:var(--faint);cursor:default}.rib:disabled span{background:#F3F1F6}
+  .rip{border:1px solid #EADCC2;background:linear-gradient(180deg,#FFFCF5,#fff);border-radius:18px;padding:16px 18px;margin:0 0 16px}
+  .rip-sum{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .rip-k{font-size:13.5px;color:var(--muted)}.rip-k b{color:var(--ink)}
+  .rip-types{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:3px}
+  .rip-types button{border:0;background:none;border-radius:9px;padding:6px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  .rip-types button span{font-size:11px;color:var(--muted)}
+  .rip-types button[aria-pressed="true"]{background:var(--accent);color:#fff}.rip-types button[aria-pressed="true"] span{color:#fff}
+  .rip-types button.pos[aria-pressed="true"]{background:var(--ok)}.rip-types button.neg[aria-pressed="true"]{background:var(--bad)}.rip-types button.req[aria-pressed="true"]{background:#8A5A00}
+  .rip-themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:14px}
+  .thm{display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit}
+  .thm b{font:600 13px var(--body);color:var(--ink)}
+  .thm .cnts{display:flex;gap:4px;flex-wrap:wrap}.thm .ty{font-style:normal;text-transform:none;letter-spacing:0;font-size:11px}
+  .thm:hover{border-color:#CDBFE0}.thm[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .rip-f{font-size:13px;color:var(--muted);margin:-4px 0 10px}.link.sm{padding:0 0 0 6px;font-size:12.5px}
+  .rip-list{max-height:560px;overflow-y:auto;padding-right:4px}
+  .rip .conv-top .who-l{font-weight:600}.rip .conv-top .who-l .lname{font:600 14px var(--display)}
   .more{display:block;margin:14px auto 0;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 18px;font:600 13px var(--body);color:var(--accent);cursor:pointer}
   .more:hover{background:var(--accent-soft)}
   .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
@@ -274,6 +297,7 @@ const GROUPS=[
    act:x=>x.p.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date',{t:'1-month payments',n:1},{t:'All payments',n:1},{t:'Tenure',n:1},'Status'],
    row:(x,all)=>[whoP(x.p),...(all?[ctr(x.p.centres)]:[]),tel(x.p.phone),age(x.p.age),courses(x.p),fmtD(x.p.admDate),{v:x.one,key:1},{v:x.p.all.length},{v:x.tenure},status(x.p.active)],
+   who:x=>[x.p],
    pv:x=>[x.p.name,x.one+' × 1 month']},
   {id:'y1',k:'Admissions',title:'Year-One Commitments',short:'Learners who joined with a package of 12 months or more.',
    sub:'Admissions for 12 months or more, newest first.',
@@ -282,6 +306,7 @@ const GROUPS=[
    act:x=>x.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date',{t:'Package',n:1},{t:'Paid at admission',n:1},{t:'Renewals since',n:1},'Status'],
    row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),{v:pkg(x.adm.m)},{v:inr(x.adm.paid),key:1},{v:x.ren.length},status(x.active)],
+   who:x=>[PEOPLE.get(x.person)],
    pv:x=>[x.name,pkg(x.adm.m)]},
   {id:'up',k:'Upgrades',title:'Trial-to-Long-Term Upgraders',short:'Joined for 1 month, then renewed for 3 months or more the first time.',
    sub:'Learners who joined for 1 month and whose first renewal was for 3 months or more. A first renewal of 1 or 2 months doesn\'t count, even if a longer one came later.',
@@ -290,6 +315,7 @@ const GROUPS=[
    act:x=>x.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','First renewal',{t:'Package',n:1},{t:'Paid at first renewal',n:1},'Status'],
    row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.ren[0].date),{v:move(1,x.ren[0].m)},{v:inr(x.ren[0].paid),key:1},status(x.active)],
+   who:x=>[PEOPLE.get(x.person)],
    pv:x=>[x.name,'1 → '+x.ren[0].m+' months']},
   {id:'lt',unit:['renewal','renewals'],k:'Renewal habits',title:'Long-Term Renewers',short:'Learners who renewed for 12 months or more, at any renewal.',
    sub:'Every renewal of 12 months or more, newest first. It can be the learner\'s first renewal or a later one.',
@@ -298,6 +324,7 @@ const GROUPS=[
    act:o=>o.x.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Renewed on',{t:'Which renewal',n:1},{t:'Package',n:1},{t:'Paid',n:1},'Status'],
    row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),tel(o.x.phone),age(o.x.age),esc(o.x.course)||'—',fmtD(o.x.adm&&o.x.adm.date),fmtD(o.t.date),{v:ordinal(o.n)},{v:pkg(o.t.m)},{v:inr(o.t.paid),key:1},status(o.x.active)],
+   who:o=>[PEOPLE.get(o.x.person)],
    pv:o=>[o.x.name,pkg(o.t.m)]},
   {id:'mc',k:'Courses',title:'Multi-Course Joiners',short:'Learners who joined two or more courses on the same day.',
    sub:'Learners whose admissions for two or more courses share the same date. Newest first.',
@@ -307,6 +334,7 @@ const GROUPS=[
    act:o=>o.p.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Courses','Admission date',{t:'Courses',n:1},{t:'Paid at admission',n:1},'Status'],
    row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),tel(o.p.phone),age(o.p.age),`<div class="multi">${o.g.map(x=>`<span>${esc(x.course)||'—'}</span>`).join('')}</div>`,fmtD(o.g[0].adm.date),{v:o.g.length},{v:inr(o.g.reduce((s,x)=>s+x.adm.paid,0)),key:1},status(o.p.active)],
+   who:o=>[o.p],
    pv:o=>[o.p.name,o.g.length+' courses']},
   {id:'ao',k:'Courses',title:'Course Add-Ons',short:'Learners who started one course and joined another later.',
    sub:'Learners who joined a second course on a later date than their first. Newest add-on first.',
@@ -316,6 +344,7 @@ const GROUPS=[
    act:o=>o.p.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','First course','Admission date','Added course','Added on',{t:'Gap',n:1},'Status'],
    row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),tel(o.p.phone),age(o.p.age),esc(o.first.course)||'—',fmtD(o.first.adm.date),esc(o.add.course)||'—',fmtD(o.add.adm.date),{v:span(o.first.adm.date,o.add.adm.date),key:1},status(o.p.active)],
+   who:o=>[o.p],
    pv:o=>[o.p.name,'+ '+(o.add.course||'course')]},
   {id:'fam',unit:['family','families'],k:'Households',title:'Families',short:'Learners from the same family: recorded in the sheet, or sharing a phone number.',
    sub:'Learners linked by the Relationship and "Learner ID of the 1st Joinee" columns in Fresh Sales, plus learners with the same phone number but different names. Biggest families first. Families found only by phone number are worth recording in the sheet.',
@@ -349,6 +378,7 @@ const GROUPS=[
      `<div class="multi">${o.m.map(p=>`<span>${fmtD(p.admDate)}</span>`).join('')}</div>`,
      o.src==='rec'?'<span class="src rec">Recorded</span>':o.src==='both'?'<span class="src rec">Recorded</span> <span class="src ph">Same phone</span>':'<span class="src ph">Same phone only</span>',
      {v:o.m.length},{v:o.active},{v:inr(o.paid),key:1}],
+   who:o=>o.m,
    pv:o=>[o.m.map(p=>String(p.name).split(' ')[0]).join(' & '),o.m.length+' members']},
   {id:'drop',k:'Win-back',title:'One-Month Drop-offs',short:'Joined for 1 month and never renewed: a win-back call list.',
    sub:'Learners who joined a course for 1 month, whose membership has ended, and who never renewed it. Most recently ended first, since they are the easiest to win back.',
@@ -358,6 +388,7 @@ const GROUPS=[
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Membership ended',{t:'Since it ended',n:1},{t:'Other courses',n:1}],
    row:(x,all,D)=>{const others=D.people.find(p=>p.key===x.person);const n=others?others.ids.filter(y=>y!==x&&y.active).length:0;
      return[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.adm.end),{v:span(x.adm.end,TODAY),key:1},{v:n?n+' active':'—'}];},
+   who:x=>[PEOPLE.get(x.person)],
    pv:x=>[x.name,'ended '+fmtD(x.adm.end)]},
   {id:'down',k:'Early warning',title:'Downgraders',short:'Learners who renewed for a shorter package than their last one.',
    sub:'Renewals for fewer months than the learner\'s previous payment for the same course, e.g. 12 months down to 3. Most recent first: a sign the learner may be losing interest.',
@@ -367,14 +398,15 @@ const GROUPS=[
    act:o=>o.x.active,
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Renewed on',{t:'Package',n:1},{t:'Paid',n:1},'Status'],
    row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),tel(o.x.phone),age(o.x.age),esc(o.x.course)||'—',fmtD(o.x.adm&&o.x.adm.date),fmtD(o.t.date),{v:move(o.from,o.to)},{v:inr(o.t.paid),key:1},status(o.x.active)],
+   who:o=>[PEOPLE.get(o.x.person)],
    pv:o=>[o.x.name,o.from+' → '+pkg(o.to)]}
 ];
 
 /* Sections are built once; their tables are filled on every render. The landing cards come from cardnav.js. */
 document.getElementById('groups').innerHTML=GROUPS.map(g=>`<section class="tray" id="sec-${g.id}">
   <div class="tray-head"><div class="tray-title">${g.title}</div><span class="badge" id="b-${g.id}">…</span></div>
-  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="flt" id="f-${g.id}" role="group" aria-label="Show"></div><div class="scroll-hint" id="h-${g.id}">Scroll sideways for more columns →</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button><div id="n-${g.id}"></div></div></section>`).join('');
-const PAGE=25,shown={},flt={};   // flt[group] = 'all' | 'on' | 'off'
+  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="tools"><div class="flt" id="f-${g.id}" role="group" aria-label="Show"></div><button type="button" class="rib" id="rb-${g.id}" aria-expanded="false"></button></div><div class="rip" id="rp-${g.id}" hidden></div><div class="scroll-hint" id="h-${g.id}">Scroll sideways for more columns →</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button><div id="n-${g.id}"></div></div></section>`).join('');
+const PAGE=25,shown={},flt={},rOpen={},rTheme={},rType={};   // Read insights: open?, theme and type picked   // flt[group] = 'all' | 'on' | 'off'
 let D=null,L={};
 
 function render(){
@@ -398,6 +430,7 @@ function render(){
     t.innerHTML=head+'<tbody>'+(list.length?list.slice(0,n).map((x,i)=>`<tr><td><span class="rk">${i+1}</span></td>${g.row(x,all,D).map(c=>typeof c==='object'?`<td class="n${c.key?' key':''}">${c.v}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')
       :`<tr><td colspan="14" class="empty">${full.length?'No one here with this filter':'No learners in this group yet'}</td></tr>`)+'</tbody>';
     document.getElementById('n-'+g.id).innerHTML=g.note?g.note(full):'';
+    readPanel(g,list);
     more.hidden=n>=list.length;more.textContent='Show more ('+(list.length-n).toLocaleString('en-IN')+' left)';
     more.onclick=()=>{shown[g.id]=n+PAGE;render();};
   });
@@ -415,6 +448,35 @@ document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.datas
 /* Card previews: how many learners, then the first two in the group's order */
 CardNav.init({back:'All focus groups',cards:GROUPS.map(g=>({id:'sec-'+g.id,k:g.k,title:g.title,short:g.short,icon:g.icon,go:'Open the list',
   preview:()=>{const list=L[g.id];if(!D||!list)return null;if(!list.length)return[];const u=g.unit||['learner','learners'];return[[u[1][0].toUpperCase()+u[1].slice(1)+' in this group',list.length.toLocaleString('en-IN')]].concat(list.slice(0,2).map(g.pv));}}))});
+
+/* Read insights: every conversation logged for the learners in this list (follows the centre and Active filters) */
+function readPanel(g,list){
+  const btn=document.getElementById('rb-'+g.id),panel=document.getElementById('rp-'+g.id);
+  const people=new Map();list.forEach(x=>(g.who(x)||[]).forEach(p=>{if(p)people.set(p.key,p);}));
+  const owner=new Map();people.forEach(p=>p.ids.forEach(x=>owner.set(x.id,p)));
+  const conv=INS.map(e=>({e,p:e.ids.map(i=>owner.get(String(i).toUpperCase())).find(Boolean)})).filter(c=>c.p).sort((a,b)=>(b.e.date+b.e.at).localeCompare(a.e.date+a.e.at));
+  const n=conv.length,open=!!rOpen[g.id]&&n>0;
+  btn.disabled=!n;btn.setAttribute('aria-expanded',open);
+  btn.innerHTML=`<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${!insReady?'Loading insights…':n?(open?'Hide insights':'Read insights'):'No insights yet'}${n?`<span>${n}</span>`:''}`;
+  btn.onclick=()=>{rOpen[g.id]=!rOpen[g.id];render();};
+  panel.hidden=!open;if(!open){panel.innerHTML='';return;}
+  // Summary: each theme with its positives, concerns and requests (click to focus the list on that theme / type)
+  const all=conv.flatMap(c=>c.e.items),T=t=>(TYPES.find(x=>x[0]===t)||['','neg'])[1];
+  const th=rTheme[g.id]||'',ty=rType[g.id]||'',keep=i=>(!th||i.theme===th)&&(!ty||i.type===ty);
+  const rows=THEMES.map(t=>{const its=all.filter(i=>i.theme===t);return{t,n:its.length,c:TYPES.map(([y])=>its.filter(i=>i.type===y).length)};}).filter(r=>r.n).sort((a,b)=>b.n-a.n);
+  const people_n=new Set(conv.map(c=>c.p.key)).size,fu=conv.filter(c=>c.e.follow).length;
+  panel.innerHTML=`<div class="rip-sum"><div class="rip-k"><b>${n}</b> conversation${n>1?'s':''} with <b>${people_n}</b> learner${people_n>1?'s':''} · <b>${all.length}</b> insight${all.length>1?'s':''}${fu?` · <b>${fu}</b> follow-up${fu>1?'s':''}`:''}</div>
+      <div class="rip-types">${[['','All'],...TYPES.map(([y,c])=>[y,y])].map(([y,l])=>`<button type="button" data-ty="${y}" class="${y?T(y):''}" aria-pressed="${ty===y}">${l}${y?`<span>${all.filter(i=>i.type===y).length}</span>`:''}</button>`).join('')}</div></div>
+    <div class="rip-themes">${rows.map(r=>`<button type="button" class="thm" data-th="${esc(r.t)}" aria-pressed="${th===r.t}"><b>${esc(r.t)}</b><span class="cnts">${r.c.map((k,i)=>k?`<i class="ty ${TYPES[i][1]}">${k} ${TYPES[i][0].toLowerCase()}</i>`:'').join('')}</span></button>`).join('')}</div>
+    ${th||ty?`<div class="rip-f">Showing ${[th,ty&&ty.toLowerCase()+'s'].filter(Boolean).map(esc).join(' · ')} <button type="button" class="link sm" data-clear="1">Show everything</button></div>`:''}
+    <div class="rip-list">${conv.map(({e,p})=>{const its=e.items.filter(keep);if(!its.length)return'';
+      return `<article class="conv"><div class="conv-top"><span class="who-l">${lname(p)}</span><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span><span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
+        <ul>${its.map(i=>`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`).join('')}</ul>
+        ${e.follow&&!th&&!ty?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}</article>`;}).join('')}</div>`;
+  panel.querySelectorAll('[data-ty]').forEach(b=>b.onclick=()=>{rType[g.id]=b.dataset.ty;render();});
+  panel.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{rTheme[g.id]=rTheme[g.id]===b.dataset.th?'':b.dataset.th;render();});
+  const c=panel.querySelector('[data-clear]');if(c)c.onclick=()=>{rTheme[g.id]='';rType[g.id]='';render();};
+}
 
 /* Dialog */
 document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidden><div class="ins" role="dialog" aria-modal="true" aria-labelledby="ins-name">
