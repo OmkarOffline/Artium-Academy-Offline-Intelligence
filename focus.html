@@ -182,6 +182,20 @@
   .rip-f{font-size:13px;color:var(--muted);margin:-4px 0 10px}.link.sm{padding:0 0 0 6px;font-size:12.5px}
   .rip-list{max-height:560px;overflow-y:auto;padding-right:4px}
   .rip .conv-top .who-l{font-weight:600}.rip .conv-top .who-l .lname{font:600 14px var(--display)}
+  .ty.rsn{background:#EFE7F8;color:var(--accent)}
+  .rchips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:2px}
+  .rchip{display:inline-block;font:600 12px var(--body);color:var(--accent);background:#F4EEFA;border:1px solid #E3D6F2;border-radius:999px;padding:2px 9px;white-space:nowrap}
+  .rip-types button.rsn[aria-pressed="true"]{background:var(--accent)}
+  .why{border:1px solid #E3D6F2;background:#FBF8FE;border-radius:14px;padding:14px;margin-bottom:16px}
+  .why-h{font:600 14px var(--display);color:var(--ink);margin-bottom:10px}.why-h small,.ins-h small{font:500 12px var(--body);color:var(--faint);letter-spacing:0;text-transform:none;margin-left:6px}
+  .rgrid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .rbtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 13px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .rbtn i{display:grid;place-items:center;width:15px;height:15px;border-radius:50%;background:#F0ECF5;color:var(--muted);font:700 10px var(--body);font-style:normal}
+  .rbtn:hover{border-color:#CDBFE0}
+  .rbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.rbtn[aria-pressed="true"] i{background:rgba(255,255,255,.25);color:#fff}
+  .why textarea{width:100%;font:400 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 11px;resize:vertical;line-height:1.45}
+  .why textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .ins-h.sub{margin-top:4px}
   .more{display:block;margin:14px auto 0;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 18px;font:600 13px var(--body);color:var(--accent);cursor:pointer}
   .more:hover{background:var(--accent-soft)}
   .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
@@ -271,7 +285,17 @@ function build(names){
 let PEOPLE=new Map(),INS=[],STAFF=[],ME='',insReady=false;
 const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Other'];
 const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
+/* Reasons for discontinuing (One-Month Drop-offs). Saved as one insight of type "Reason"; several reasons are kept together, separated by "; " */
+const REASONS=[['Personal Reasons'],['No Visible Progress'],['Unhappy with Curriculum'],['Unhappy with Teacher'],['Unhappy with Staff'],['Scheduling Mismatch'],['Relocated'],
+  ['Affordability Issues'],['Lost Interest'],['Long Distance'],['Prioritising Other Commitments'],['Did Not Start'],['Ghosting'],
+  ['Admission Restricted','Restricted by the academy due to behavioural or other relevant issues'],['Transferred to Online','The learner preferred to learn online due to relocation or other issues'],['Too young']];
+const RTYPE=['Reason','rsn'],ALLTYPES=TYPES.concat([RTYPE]);
+const reasonsOf=i=>i.type==='Reason'?String(i.theme).split(';').map(x=>x.trim()).filter(Boolean):[];
+const itemHTML=(i,T)=>i.type==='Reason'?`<li><span class="ty rsn">Reason</span><div><span class="rchips">${reasonsOf(i).map(r=>`<b class="rchip">${esc(r)}</b>`).join('')}</span>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`
+  :`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`;
 const entriesOf=p=>{if(!p)return[];const ids=new Set(p.ids.map(x=>x.id));return INS.filter(e=>e.ids.some(i=>ids.has(String(i).toUpperCase())));};
+const reasonCell=p=>{const r=entriesOf(p).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at)).flatMap(e=>e.items).find(i=>i.type==='Reason');
+  return r?`<span class="rchips">${reasonsOf(r).map(x=>`<b class="rchip">${esc(x)}</b>`).join('')}</span>`:'<span style="color:var(--faint)">—</span>';};
 const lname=(p,fallback)=>{if(!p)return esc(fallback)||'—';const n=entriesOf(p).length;
   return `<button type="button" class="lname" data-p="${esc(p.key)}" title="Read or add insights">${esc(p.name||fallback)||'—'}</button>${n?`<span class="ncount" title="${n} conversation${n>1?'s':''} logged"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${n}</span>`:''}`;};
 
@@ -385,9 +409,9 @@ const GROUPS=[
    icon:'<path d="M3 3l18 18"/><path d="M10.6 5.1A8 8 0 0 1 20 12a8 8 0 0 1-1.3 4.4M6.3 6.3A8 8 0 0 0 12 20a8 8 0 0 0 5.7-2.3"/>',
    list:D=>D.ids.filter(x=>x.adm&&x.adm.m===1&&!x.ren.length&&x.adm.end&&x.adm.end<TODAY).sort((a,b)=>b.adm.end-a.adm.end),
    act:(x,D)=>{const o=D.people.find(p=>p.key===x.person);return !!(o&&o.ids.some(y=>y!==x&&y.active));},actLabel:['Active in another course','Not active'],
-   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Membership ended',{t:'Since it ended',n:1},{t:'Other courses',n:1}],
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','Course','Admission date','Membership ended',{t:'Since it ended',n:1},{t:'Other courses',n:1},'Reason logged'],
    row:(x,all,D)=>{const others=D.people.find(p=>p.key===x.person);const n=others?others.ids.filter(y=>y!==x&&y.active).length:0;
-     return[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.adm.end),{v:span(x.adm.end,TODAY),key:1},{v:n?n+' active':'—'}];},
+     return[whoI(x),...(all?[ctr(x.centre)]:[]),tel(x.phone),age(x.age),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.adm.end),{v:span(x.adm.end,TODAY),key:1},{v:n?n+' active':'—'},reasonCell(PEOPLE.get(x.person))];},
    who:x=>[PEOPLE.get(x.person)],
    pv:x=>[x.name,'ended '+fmtD(x.adm.end)]},
   {id:'down',k:'Early warning',title:'Downgraders',short:'Learners who renewed for a shorter package than their last one.',
@@ -461,17 +485,19 @@ function readPanel(g,list){
   btn.onclick=()=>{rOpen[g.id]=!rOpen[g.id];render();};
   panel.hidden=!open;if(!open){panel.innerHTML='';return;}
   // Summary: each theme with its positives, concerns and requests (click to focus the list on that theme / type)
-  const all=conv.flatMap(c=>c.e.items),T=t=>(TYPES.find(x=>x[0]===t)||['','neg'])[1];
-  const th=rTheme[g.id]||'',ty=rType[g.id]||'',keep=i=>(!th||i.theme===th)&&(!ty||i.type===ty);
-  const rows=THEMES.map(t=>{const its=all.filter(i=>i.theme===t);return{t,n:its.length,c:TYPES.map(([y])=>its.filter(i=>i.type===y).length)};}).filter(r=>r.n).sort((a,b)=>b.n-a.n);
+  const all=conv.flatMap(c=>c.e.items),T=t=>(ALLTYPES.find(x=>x[0]===t)||['','neg'])[1];
+  const th=rTheme[g.id]||'',ty=rType[g.id]||'',keep=i=>(!th||i.theme===th||reasonsOf(i).includes(th))&&(!ty||i.type===ty);
+  const TY=ALLTYPES.filter(([y])=>all.some(i=>i.type===y));   // only the types that have been logged here
+  const rows=REASONS.map(([t])=>{const k=all.filter(i=>reasonsOf(i).includes(t)).length;return{t,n:k,c:TY.map(([y])=>y==='Reason'?k:0)};}).filter(r=>r.n).sort((a,b)=>b.n-a.n)
+    .concat(THEMES.map(t=>{const its=all.filter(i=>i.theme===t&&i.type!=='Reason');return{t,n:its.length,c:TY.map(([y])=>its.filter(i=>i.type===y).length)};}).filter(r=>r.n).sort((a,b)=>b.n-a.n));
   const people_n=new Set(conv.map(c=>c.p.key)).size,fu=conv.filter(c=>c.e.follow).length;
   panel.innerHTML=`<div class="rip-sum"><div class="rip-k"><b>${n}</b> conversation${n>1?'s':''} with <b>${people_n}</b> learner${people_n>1?'s':''} · <b>${all.length}</b> insight${all.length>1?'s':''}${fu?` · <b>${fu}</b> follow-up${fu>1?'s':''}`:''}</div>
-      <div class="rip-types">${[['','All'],...TYPES.map(([y,c])=>[y,y])].map(([y,l])=>`<button type="button" data-ty="${y}" class="${y?T(y):''}" aria-pressed="${ty===y}">${l}${y?`<span>${all.filter(i=>i.type===y).length}</span>`:''}</button>`).join('')}</div></div>
-    <div class="rip-themes">${rows.map(r=>`<button type="button" class="thm" data-th="${esc(r.t)}" aria-pressed="${th===r.t}"><b>${esc(r.t)}</b><span class="cnts">${r.c.map((k,i)=>k?`<i class="ty ${TYPES[i][1]}">${k} ${TYPES[i][0].toLowerCase()}</i>`:'').join('')}</span></button>`).join('')}</div>
-    ${th||ty?`<div class="rip-f">Showing ${[th,ty&&ty.toLowerCase()+'s'].filter(Boolean).map(esc).join(' · ')} <button type="button" class="link sm" data-clear="1">Show everything</button></div>`:''}
+      <div class="rip-types">${[['','All'],...TY.map(([y,c])=>[y,y==='Reason'?'Reasons':y])].map(([y,l])=>`<button type="button" data-ty="${y}" class="${y?T(y):''}" aria-pressed="${ty===y}">${l}${y?`<span>${all.filter(i=>i.type===y).length}</span>`:''}</button>`).join('')}</div></div>
+    <div class="rip-themes">${rows.map(r=>`<button type="button" class="thm" data-th="${esc(r.t)}" aria-pressed="${th===r.t}"><b>${esc(r.t)}</b><span class="cnts">${r.c.map((k,i)=>k?`<i class="ty ${TY[i][1]}">${k} ${TY[i][0]==='Reason'?(k>1?'learners':'learner'):TY[i][0].toLowerCase()}</i>`:'').join('')}</span></button>`).join('')}</div>
+    ${th||ty?`<div class="rip-f">Showing ${[th,ty&&(ty==='Reason'?'reasons for leaving':ty.toLowerCase()+'s')].filter(Boolean).map(esc).join(' · ')} <button type="button" class="link sm" data-clear="1">Show everything</button></div>`:''}
     <div class="rip-list">${conv.map(({e,p})=>{const its=e.items.filter(keep);if(!its.length)return'';
       return `<article class="conv"><div class="conv-top"><span class="who-l">${lname(p)}</span><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span><span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
-        <ul>${its.map(i=>`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`).join('')}</ul>
+        <ul>${its.slice().sort((a,b)=>(b.type==='Reason')-(a.type==='Reason')).map(i=>itemHTML(i,T)).join('')}</ul>
         ${e.follow&&!th&&!ty?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}</article>`;}).join('')}</div>`;
   panel.querySelectorAll('[data-ty]').forEach(b=>b.onclick=()=>{rType[g.id]=b.dataset.ty;render();});
   panel.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{rTheme[g.id]=rTheme[g.id]===b.dataset.th?'':b.dataset.th;render();});
@@ -483,25 +509,26 @@ document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidde
   <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div></div>
     <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="ins-body"><div id="ins-hist"></div><div id="ins-form"></div></div></div></div>`);
-let cur=null,draft=null;
+let cur=null,draft=null,ctx='';
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const dShow=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:esc(s);};
-function openIns(key){
-  const p=PEOPLE.get(key);if(!p)return;cur=p;
+function openIns(key,from){
+  const p=PEOPLE.get(key);if(!p)return;cur=p;ctx=from||'';
+  document.getElementById('ins-eye').textContent=ctx==='drop'?'Why they left · Learner insights':'Learner insights';
   document.getElementById('ins-name').textContent=p.name||'—';
   const crs=[...new Set(p.ids.map(x=>x.course).filter(Boolean))].join(', ');
   document.getElementById('ins-meta').innerHTML=[p.ids.map(x=>esc(x.id)).join(' · '),esc(p.centres.join(', ')),p.phone?`${p.phone.slice(0,5)} ${p.phone.slice(5)}`:'',esc(p.age),esc(crs),p.active?'<span class="st on"><i></i>Active</span>':'<span class="st off"><i></i>Not active</span>'].filter(Boolean).join('<span class="sep">·</span>');
   draft=entriesOf(p).length?null:blank();
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
-const blank=()=>({date:today(),with:'Parent',how:'Call',items:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
-function closeIns(){if(draft&&draft.items.some(i=>i.note.trim())&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;}
+const blank=()=>({date:today(),with:'Parent',how:'Call',reasons:[],why:'',items:ctx==='drop'?[]:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
+function closeIns(){if(draft&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>i.note.trim()))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;}
 function paintIns(){
   const list=entriesOf(cur).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
-  const T=t=>(TYPES.find(x=>x[0]===t)||['','neg'])[1];
+  const T=t=>(ALLTYPES.find(x=>x[0]===t)||['','neg'])[1];
   document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv">
       <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span><span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
-      <ul>${e.items.map(i=>`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`).join('')}</ul>
+      <ul>${e.items.slice().sort((a,b)=>(b.type==='Reason')-(a.type==='Reason')).map(i=>itemHTML(i,T)).join('')}</ul>
       ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
     </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
   const f=document.getElementById('ins-form');
@@ -510,12 +537,16 @@ function paintIns(){
   f.innerHTML=`<div class="ins-h">New conversation</div>
     <div class="frow"><label>Date<input type="date" id="f-date" value="${draft.date}" max="${today()}"></label>
       <label>Spoke with${seg('with',['Parent','Learner','Both'],draft.with)}</label><label>How${seg('how',['Call','In centre','WhatsApp'],draft.how)}</label></div>
+    ${ctx==='drop'?`<div class="why"><div class="why-h">Reason for discontinuing <small>Pick one or more</small></div>
+      <div class="rgrid">${REASONS.map(([r,tip])=>`<button type="button" class="rbtn" data-r="${esc(r)}" aria-pressed="${draft.reasons.includes(r)}"${tip?` title="${esc(tip)}"`:''}>${esc(r)}${tip?'<i>?</i>':''}</button>`).join('')}</div>
+      <textarea id="f-why" rows="3" placeholder="In their words: what made them stop, and would they come back?">${esc(draft.why)}</textarea></div>
+      <div class="ins-h sub">Other insights <small>optional</small></div>`:''}
     <div class="items">${draft.items.map((it,i)=>`<div class="item" data-i="${i}">
       <div class="item-top"><select data-k="theme" aria-label="Theme"><option value="">Pick a theme</option>${THEMES.map(t=>`<option${t===it.theme?' selected':''}>${t}</option>`).join('')}</select>
         <div class="seg ty-seg" data-k="type">${TYPES.map(([t,c])=>`<button type="button" class="${c}" data-v="${t}" aria-pressed="${t===it.type}">${t}</button>`).join('')}</div>
-        ${draft.items.length>1?`<button type="button" class="rm" data-rm="${i}" aria-label="Remove this insight"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:''}</div>
+        ${draft.items.length>1||ctx==='drop'?`<button type="button" class="rm" data-rm="${i}" aria-label="Remove this insight"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:''}</div>
       <textarea data-k="note" rows="2" placeholder="What did they say?">${esc(it.note)}</textarea></div>`).join('')}</div>
-    <button type="button" class="link" id="f-more"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add another insight</button>
+    <button type="button" class="link" id="f-more"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>${draft.items.length?'Add another insight':'Add an insight'}</button>
     <div class="fu-box${draft.showFollow?' open':''}"><button type="button" class="link" id="f-fu">${draft.showFollow?'Follow-up':'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a follow-up (optional)'}</button>
       ${draft.showFollow?`<div class="frow"><label class="grow">What needs doing<input id="f-act" value="${esc(draft.follow.action)}" placeholder="e.g. Plan a student showcase next month"></label>
         <label>Owner<input id="f-own" list="staff-list" value="${esc(draft.follow.owner)}" placeholder="Name"></label><label>Due<input type="date" id="f-due" value="${draft.follow.due}"></label></div>
@@ -530,6 +561,8 @@ function paintIns(){
     el.querySelectorAll('.ty-seg button').forEach(b=>b.onclick=()=>{it.type=b.dataset.v;paintIns();});
     const rm=el.querySelector('.rm');if(rm)rm.onclick=()=>{draft.items.splice(+rm.dataset.rm,1);paintIns();};});
   document.getElementById('f-date').onchange=e=>draft.date=e.target.value;
+  f.querySelectorAll('.rbtn').forEach(b=>b.onclick=()=>{const r=b.dataset.r,k=draft.reasons.indexOf(r);if(k<0)draft.reasons.push(r);else draft.reasons.splice(k,1);paintIns();});
+  const why=document.getElementById('f-why');if(why)why.oninput=e=>draft.why=e.target.value;
   document.getElementById('f-more').onclick=()=>{draft.items.push({theme:'',type:'',note:''});paintIns();const t=f.querySelectorAll('textarea');t[t.length-1].focus();};
   document.getElementById('f-fu').onclick=()=>{draft.showFollow=true;paintIns();};
   ['f-act','f-own','f-due'].forEach((id,k)=>{const el=document.getElementById(id);if(el)el.oninput=el.onchange=e=>draft.follow[['action','owner','due'][k]]=e.target.value;});
@@ -538,8 +571,10 @@ function paintIns(){
 }
 async function saveIns(){
   const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim());
-  if(!items.length){msg.textContent='Write at least one insight.';return;}
-  if(items.some(i=>!i.theme||!i.type)){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
+  if(ctx==='drop'&&!draft.reasons.length&&draft.why.trim()){msg.textContent='Pick at least one reason for discontinuing.';return;}
+  if(draft.reasons.length)items.unshift({theme:REASONS.map(r=>r[0]).filter(r=>draft.reasons.includes(r)).join('; '),type:'Reason',note:draft.why.trim()});
+  if(!items.length){msg.textContent=ctx==='drop'?'Pick a reason for discontinuing, or write an insight.':'Write at least one insight.';return;}
+  if(items.some(i=>i.type!=='Reason'&&(!i.theme||!i.type))){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
   const b=document.getElementById('f-save');b.disabled=true;b.textContent='Saving…';
   try{
     const j=await ArtiumAuth.call('saveInsight',{entry:{ids:cur.ids.map(x=>x.id),name:cur.name,centre:cur.centres.join(', '),date:draft.date,with:draft.with,how:draft.how,items,
@@ -548,7 +583,7 @@ async function saveIns(){
     INS=j.insights||INS;draft=null;paintIns();render();
   }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"you don't have permission to add insights":e.message);b.disabled=false;b.textContent='Save conversation';}
 }
-document.addEventListener('click',e=>{const n=e.target.closest('.lname');if(n){openIns(n.dataset.p);return;}if(e.target.id==='ins'||e.target.closest('#ins-x'))closeIns();});
+document.addEventListener('click',e=>{const n=e.target.closest('.lname');if(n){const sec=n.closest('section.tray');openIns(n.dataset.p,sec?sec.id.replace('sec-',''):'');return;}if(e.target.id==='ins'||e.target.closest('#ins-x'))closeIns();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('ins').hidden)closeIns();});
 function loadInsights(){ArtiumAuth.call('insights',{}).then(j=>{if(j&&!j.error){INS=j.insights||[];STAFF=j.staff||[];ME=j.me||'';}insReady=true;render();if(cur)paintIns();}).catch(()=>{insReady=true;});}
 
