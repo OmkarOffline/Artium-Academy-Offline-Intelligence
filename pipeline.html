@@ -136,6 +136,10 @@
   .tl .bar{display:block;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;margin-top:4px}.tl .bar i{display:block;height:100%;background:currentColor}
   .tl.eff.ok .s{color:var(--ok)}.tl.eff.mid .s{color:#C9A66B}.tl.eff.low .s{color:var(--bad)}
   .tl.rr{background:linear-gradient(135deg,#3A1A5A,#5B2A86);border-color:transparent}.tl.rr .k{color:#E9CF9E}.tl.rr .v{color:#fff}.tl.rr .s{color:rgba(255,255,255,.75)}
+  .tg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 4px;font-size:12px;color:var(--muted)}.tg b{color:var(--ink);font-weight:600}
+  .tg sup{color:var(--gold);font-weight:700}
+  .gap{font:600 11.5px var(--body);border-radius:999px;padding:2px 8px;white-space:nowrap}.gap.up{background:#E5F4EC;color:var(--ok)}.gap.dn{background:#FDECEB;color:var(--bad)}
+  .tl.rr .tg{color:rgba(255,255,255,.75)}.tl.rr .tg b{color:#fff}.tl.rr .gap.up{background:rgba(123,211,164,.22);color:#9BE3BB}.tl.rr .gap.dn{background:rgba(242,184,176,.22);color:#F6C3BC}
   .pnote{font-size:12.5px;color:var(--muted);margin:12px 4px 0}.pnote b{color:var(--ink)}
   @media (max-width:1200px){.tiles{grid-template-columns:repeat(3,1fr)}}
   @media (max-width:700px){.tiles{grid-template-columns:1fr 1fr}}
@@ -225,7 +229,7 @@ const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate
 const days=(a,b)=>Math.round((b-a)/864e5);
 const valid=d=>d&&d.getFullYear()>=2020?d:null;
 async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
-let DATA={},ITEMS=null,GAPS=[],ALL=[];   // ALL: every membership row, for the renewal totals
+let DATA={},ITEMS=null,GAPS=[],ALL=[],TARGETS={};   // TARGETS['2026-10']['Alwarpet']={renewed, rncol, …} from the Targets page   // ALL: every membership row, for the renewal totals
 
 /* Columns used: A Date · D Learner ID · E Name · H Mobile · I Course · M No. of months · Q / R amount paid · X Membership end date · Z Renewal Status · AD Teacher
    and, sent by the data service after AD: 33 Description · 34 Next Call Date (promised payment date) · 35 Expected (promised amount) · 36 Probability of Conversion.
@@ -318,19 +322,26 @@ function render(){
   // Pipeline: promised renewals not paid yet (yet to pay + overdue); run-rate = what is in hand + what is promised
   const pipe=wait.concat(late),expN=pipe.length,expAmt=sum(pipe,x=>x.exp),expAtv=expN?expAmt/expN:null;
   const rrN=rnl.length+expN,rrAmt=col+expAmt,rrEff=dueN?rrN/dueN*100:null;
+  // Targets (monthly, set on the Targets page): in Month view only. For All centres, actual and target both cover the centres that have a target.
+  const tg=mode==='month'?(TARGETS[viewY+'-'+String(viewM+1).padStart(2,'0')]||{}):{},cs=(sel?[sel]:CENTRES).map(c=>c.name);
+  const tgt=key=>{const has=cs.filter(c=>tg[c]&&tg[c][key]!=null);return has.length?{v:has.reduce((s,c)=>s+tg[c][key],0),has,all:has.length===cs.length}:null;};
+  const T={n:tgt('renewed'),amt:tgt('rncol')};
+  const actFor=(has,f)=>sum(rnl.filter(x=>has.includes(x.centre)),f);
+  const vs=(t,actual,isAmt)=>{if(!t)return'';const d=actual-t.v,pc=t.v?d/t.v*100:0,fmt=v=>isAmt?inr(Math.abs(v)):Math.abs(Math.round(v)).toLocaleString('en-IN');
+    return `<div class="tg"><span>Target <b>${isAmt?inr(t.v):t.v.toLocaleString('en-IN')}</b>${t.all?'':'<sup title="Not every centre has this target">*</sup>'}</span><span class="gap ${d>=0?'up':'dn'}">${d>=0?'▲ Ahead':'▼ Behind'} ${fmt(d)} · ${Math.abs(Math.round(pc))}%</span></div>`;};
   const n=v=>v.toLocaleString('en-IN'),tile=(k,v,sub,cls='')=>`<div class="tl ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
   document.getElementById('ren').innerHTML=`<div class="grp"><div class="gt">Current status <span>${esc(P.label)}${mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth()?' · so far':''}</span></div><div class="tiles">
       ${tile('No. of renewals due',n(dueN),'memberships ending in this period')}
-      ${tile('Renewed',n(rnl.length),`<span class="split"><span><b>${rCur}</b> due ${mode==='month'?'this month':'in range'}</span><span><b>${rPrev}</b> due earlier</span><span><b>${rAdv}</b> in advance</span>${rUnk?`<span><b>${rUnk}</b> no earlier entry</span>`:''}</span>`)}
+      ${tile('Renewed',n(rnl.length),vs(T.n,T.n?actFor(T.n.has,()=>1):0,false)+`<span class="split"><span><b>${rCur}</b> due ${mode==='month'?'this month':'in range'}</span><span><b>${rPrev}</b> due earlier</span><span><b>${rAdv}</b> in advance</span>${rUnk?`<span><b>${rUnk}</b> no earlier entry</span>`:''}</span>`)}
       ${tile('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%',eff==null?'':`<span class="bar"><i style="width:${Math.min(100,eff)}%"></i></span>`,'eff '+eCls)}
-      ${tile('Collections – Renewals',inr(col),'')}
+      ${tile('Collections – Renewals',inr(col),vs(T.amt,T.amt?actFor(T.amt.has,x=>x.paid):0,true))}
       ${tile('ATV – Renewals',atv==null?'–':inr(atv),'')}</div></div>
     <div class="grp pipe"><div class="gt">Pipeline <span>promised, not paid yet</span></div><div class="tiles">
       ${tile('No. of expected renewals',n(expN),`${wait.length} yet to pay · <b class="lt">${late.length} overdue</b>`)}
-      ${tile('Run-rate · renewals',n(rrN),rrEff==null?'':`${Math.round(rrEff)}% of renewals due`,'rr')}
+      ${tile('Run-rate · renewals',n(rrN),(rrEff==null?'':`${Math.round(rrEff)}% of renewals due`)+vs(T.n,T.n?actFor(T.n.has,()=>1)+pipe.filter(x=>T.n.has.includes(x.centre)).length:0,false),'rr')}
       ${tile('Expected renewal collection',inr(expAmt),late.length?`<b class="lt">${inr(sum(late,x=>x.exp))}</b> of it overdue`:'')}
       ${tile('Expected ATV',expAtv==null?'–':inr(expAtv),'')}
-      ${tile('Run-rate · collections',inr(rrAmt),'','rr')}</div>
+      ${tile('Run-rate · collections',inr(rrAmt),vs(T.amt,T.amt?actFor(T.amt.has,x=>x.paid)+sum(pipe.filter(x=>T.amt.has.includes(x.centre)),x=>x.exp):0,true),'rr')}</div>
       <div class="pnote">Promises kept so far: <b>${paid.length}</b> of ${all.length} learners who promised · ${inr(sum(paid,x=>x.paidAmt||x.exp))}${lost.length?` · <b>${lost.length}</b> won't renew`:''}</div></div>`;
   k.innerHTML='';
   document.getElementById('sumline').innerHTML=[`<span>Due <b>${n(dueN)}</b></span>`,`<span>Renewed <b>${n(rnl.length)}</b></span>`,`<span>Efficiency <b>${eff==null?'–':Math.round(eff)+'%'}</b></span>`,
@@ -395,6 +406,7 @@ async function load(){
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
     CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
     ITEMS=build();
+    ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets){TARGETS=j.targets;render();}}).catch(()=>{});   // monthly targets (Targets page)
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('dot').className='dot';render();
