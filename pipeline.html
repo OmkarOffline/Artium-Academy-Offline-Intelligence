@@ -110,8 +110,10 @@
   .sub{display:block;font-size:11.5px;color:var(--faint);margin-top:3px}
   .pr{display:inline-block;font:600 11.5px var(--body);border-radius:6px;padding:2px 8px}
   .pr.hi{background:#E5F4EC;color:var(--ok)}.pr.md{background:#FBF1DC;color:var(--warn)}.pr.lo{background:#FDECEB;color:var(--bad)}.pr.na{color:var(--faint)}
-  .sumbox{margin-bottom:22px}
-  .sumhead{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:2px 4px 12px;cursor:pointer;text-align:left;font:inherit}
+  .sumbox{margin-bottom:22px;background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:6px 20px 20px}
+  .sumbox.closed{padding-bottom:6px}
+  .sumhead{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:14px 2px 14px;cursor:pointer;text-align:left;font:inherit}
   .st-t{position:relative;padding-left:16px;font:600 18px/1.3 var(--display);color:var(--ink)}
   .st-t::before{content:"";position:absolute;left:0;top:50%;width:4px;height:18px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
   .sumline{display:none;flex-wrap:wrap;gap:6px;flex:1}
@@ -121,7 +123,24 @@
   .sumbox.closed .chev{transform:rotate(-90deg)}
   .sumbox.closed .sumbody{display:none}.sumbox.closed .sumline{display:flex}
   .sumbody .gaps{margin-bottom:0}
-  .ren{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .grp{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:14px 16px 16px;margin-bottom:14px}
+  .grp.pipe{background:linear-gradient(180deg,#FBF8FE,#fff);border-color:#E3D6F2}
+  .gt{font:600 15px var(--display);color:var(--ink);margin:0 4px 12px}.gt span{font:400 13px var(--body);color:var(--muted);margin-left:8px}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .tl{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;min-width:0}
+  .tl .k{font:700 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);line-height:1.35}
+  .tl .v{font:700 24px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
+  .tl .s{font-size:12px;color:var(--muted);margin-top:6px}.tl .s b{color:var(--ink);font-weight:600}.tl .s b.lt{color:var(--bad)}
+  .tl .split{display:flex;flex-wrap:wrap;gap:4px}.tl .split span{background:#F6F4F9;border-radius:999px;padding:2px 8px;font-size:11.5px}
+  .tl.eff .v{color:var(--accent)}.tl.eff.ok .v{color:var(--ok)}.tl.eff.mid .v{color:var(--warn)}.tl.eff.low .v{color:var(--bad)}
+  .tl .bar{display:block;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;margin-top:4px}.tl .bar i{display:block;height:100%;background:currentColor}
+  .tl.eff.ok .s{color:var(--ok)}.tl.eff.mid .s{color:#C9A66B}.tl.eff.low .s{color:var(--bad)}
+  .tl.rr{background:linear-gradient(135deg,#3A1A5A,#5B2A86);border-color:transparent}.tl.rr .k{color:#E9CF9E}.tl.rr .v{color:#fff}.tl.rr .s{color:rgba(255,255,255,.75)}
+  .pnote{font-size:12.5px;color:var(--muted);margin:12px 4px 0}.pnote b{color:var(--ink)}
+  @media (max-width:1200px){.tiles{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:700px){.tiles{grid-template-columns:1fr 1fr}}
+  .ren{display:block;margin-bottom:0}
+  .ren-old{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
   .rs{padding:16px 22px;border-left:1px solid var(--line)}.rs:first-child{border-left:0}
   .rs .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
   .rs .v{font:700 28px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
@@ -174,7 +193,7 @@
   <section class="sumbox" id="sumbox">
     <button type="button" class="sumhead" id="sumhead" aria-expanded="true" aria-controls="sumbody"><span class="st-t">Summary</span><span class="sumline" id="sumline"></span>
       <span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
-    <div class="sumbody" id="sumbody"><div class="ren" id="ren"></div><div class="kpis" id="kpis"></div><div class="gaps" id="gaps"></div></div>
+    <div class="sumbody" id="sumbody"><div class="ren" id="ren"></div><div id="kpis"></div><div class="gaps" id="gaps"></div></div>
   </section>
   <section class="panel">
     <div class="ptop"><div class="ptitle" id="ptitle">Promised payments</div><div class="flt" id="flt" role="group" aria-label="Show"></div></div>
@@ -291,23 +310,31 @@ function render(){
   const dueN=ALL.filter(x=>mine(x)&&inP(x.end)).length,rnl=ALL.filter(x=>mine(x)&&x.tab==='rn'&&inP(x.date));
   const rCur=rnl.filter(x=>inP(x.prevEnd)).length,rPrev=rnl.filter(x=>x.prevEnd&&x.prevEnd<P.a).length,rAdv=rnl.filter(x=>x.prevEnd&&x.prevEnd>P.b).length,rUnk=rnl.length-rCur-rPrev-rAdv;
   const eff=dueN?rnl.length/dueN*100:null,eCls=eff==null?'':eff>=90?'ok':eff>=70?'mid':'low';
-  document.getElementById('ren').innerHTML=`<div class="rs"><div class="k">Due for renewal</div><div class="v">${dueN.toLocaleString('en-IN')}</div><div class="s">memberships ending ${esc(P.label)}</div></div>
-    <div class="rs"><div class="k">Renewed</div><div class="v">${rnl.length.toLocaleString('en-IN')}</div>
-      <div class="split"><span><b>${rCur}</b> due ${mode==='month'?'this month':'in this range'}</span><span><b>${rPrev}</b> due earlier</span><span><b>${rAdv}</b> in advance</span>${rUnk?`<span><b>${rUnk}</b> no earlier entry</span>`:''}</div></div>
-    <div class="rs eff ${eCls}"><div class="k">Renewal collection efficiency</div><div class="v">${eff==null?'–':Math.round(eff)+'%'}</div><div class="s">${rnl.length} renewals against ${dueN} due${eff!=null?`<span class="bar"><i style="width:${Math.min(100,eff)}%"></i></span>`:''}</div></div>`;
   const missN=GAPS.filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(x.miss!=='none'||x.end<=new Date(TODAY.getTime()-864e5))).length;
-  // Totals
   const sum=(l,f)=>l.reduce((s,x)=>s+f(x),0),by=s=>all.filter(x=>x.state===s);
-  const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),promised=sum(all,x=>x.exp),got=sum(paid,x=>x.paidAmt||x.exp);
-  const toCome=sum(wait,x=>x.exp)+sum(late,x=>x.exp),pct=v=>promised?Math.min(100,v/promised*100):0;
-  k.innerHTML=`<div class="kpi main"><div class="k">Promised · ${esc(P.label)}</div><div class="v">${inr(promised)}</div><div class="s"><b>${all.length}</b> learner${all.length===1?'':'s'} have promised to renew</div>
-      <div class="prog"><i class="p1" style="width:${pct(sum(paid,x=>x.exp))}%"></i><i class="p2" style="width:${pct(sum(late,x=>x.exp))}%"></i></div>
-      <div class="legend"><span><i style="background:#7BD3A4"></i>Renewed</span><span><i style="background:#F2B8B0"></i>Overdue</span><span><i style="background:rgba(255,255,255,.3)"></i>Yet to pay</span></div></div>
-    <div class="kpi" style="--c:#2DA06A"><div class="k">Promises kept</div><div class="v">${inr(got)}</div><div class="s"><b>${paid.length}</b> of ${all.length} learners${all.length?` · ${Math.round(paid.length/all.length*100)}%`:''}</div></div>
-    <div class="kpi" style="--c:#C9A66B"><div class="k">Still to collect</div><div class="v">${inr(toCome)}</div><div class="s"><b>${wait.length+late.length}</b> learners · ${wait.length} yet to pay, ${late.length} overdue</div></div>
-    <div class="kpi" style="--c:#D9534F"><div class="k">Overdue</div><div class="v">${inr(sum(late,x=>x.exp))}</div><div class="s"><b>${late.length}</b> learner${late.length===1?'':'s'} past their promised date${lost.length?` · ${lost.length} won't renew`:''}</div></div>`;
-  document.getElementById('sumline').innerHTML=[`<span>Due <b>${dueN}</b></span>`,`<span>Renewed <b>${rnl.length}</b></span>`,`<span>Efficiency <b>${eff==null?'–':Math.round(eff)+'%'}</b></span>`,
-    `<span>Promised <b>${inr(promised)}</b></span>`,`<span>Overdue <b>${inr(sum(late,x=>x.exp))}</b></span>`,`<span>Not in pipeline <b>${missN}</b></span>`].join('');
+  const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost');
+  // Current status: renewals paid in the period
+  const col=sum(rnl,x=>x.paid),atv=rnl.length?col/rnl.length:null;
+  // Pipeline: promised renewals not paid yet (yet to pay + overdue); run-rate = what is in hand + what is promised
+  const pipe=wait.concat(late),expN=pipe.length,expAmt=sum(pipe,x=>x.exp),expAtv=expN?expAmt/expN:null;
+  const rrN=rnl.length+expN,rrAmt=col+expAmt,rrEff=dueN?rrN/dueN*100:null;
+  const n=v=>v.toLocaleString('en-IN'),tile=(k,v,sub,cls='')=>`<div class="tl ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
+  document.getElementById('ren').innerHTML=`<div class="grp"><div class="gt">Current status <span>${esc(P.label)}${mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth()?' · so far':''}</span></div><div class="tiles">
+      ${tile('No. of renewals due',n(dueN),'memberships ending in this period')}
+      ${tile('Renewed',n(rnl.length),`<span class="split"><span><b>${rCur}</b> due ${mode==='month'?'this month':'in range'}</span><span><b>${rPrev}</b> due earlier</span><span><b>${rAdv}</b> in advance</span>${rUnk?`<span><b>${rUnk}</b> no earlier entry</span>`:''}</span>`)}
+      ${tile('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%',eff==null?'':`<span class="bar"><i style="width:${Math.min(100,eff)}%"></i></span>`,'eff '+eCls)}
+      ${tile('Collections – Renewals',inr(col),'')}
+      ${tile('ATV – Renewals',atv==null?'–':inr(atv),'')}</div></div>
+    <div class="grp pipe"><div class="gt">Pipeline <span>promised, not paid yet</span></div><div class="tiles">
+      ${tile('No. of expected renewals',n(expN),`${wait.length} yet to pay · <b class="lt">${late.length} overdue</b>`)}
+      ${tile('Run-rate · renewals',n(rrN),rrEff==null?'':`${Math.round(rrEff)}% of renewals due`,'rr')}
+      ${tile('Expected renewal collection',inr(expAmt),late.length?`<b class="lt">${inr(sum(late,x=>x.exp))}</b> of it overdue`:'')}
+      ${tile('Expected ATV',expAtv==null?'–':inr(expAtv),'')}
+      ${tile('Run-rate · collections',inr(rrAmt),'','rr')}</div>
+      <div class="pnote">Promises kept so far: <b>${paid.length}</b> of ${all.length} learners who promised · ${inr(sum(paid,x=>x.paidAmt||x.exp))}${lost.length?` · <b>${lost.length}</b> won't renew`:''}</div></div>`;
+  k.innerHTML='';
+  document.getElementById('sumline').innerHTML=[`<span>Due <b>${n(dueN)}</b></span>`,`<span>Renewed <b>${n(rnl.length)}</b></span>`,`<span>Efficiency <b>${eff==null?'–':Math.round(eff)+'%'}</b></span>`,
+    `<span>Collected <b>${inr(col)}</b></span>`,`<span>Expected <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Run-rate <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`,`<span>Not in pipeline <b>${missN}</b></span>`].join('');
   const sb=document.getElementById('sumbox');sb.classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
   // Learners due in this period whose promise is missing or incomplete
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
