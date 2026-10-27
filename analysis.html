@@ -96,6 +96,39 @@
   .who sup{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:3px;padding:0 4px;border-radius:999px;background:var(--gold);color:#fff;font:700 10.5px/1 var(--display);vertical-align:super;cursor:help}
   .ctr{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font:600 12px var(--body)}
   .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
+
+  /* Landing: one 3:4 card per analysis; opening one shows its table as a sub-page */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,300px));gap:24px}
+  .acard{position:relative;aspect-ratio:3/4;display:flex;flex-direction:column;border:1px solid #E6E1EC;border-radius:24px;padding:24px;cursor:pointer;text-align:left;overflow:hidden;
+    background:linear-gradient(180deg,#fff 0%,#FBF9FD 100%);box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 44px -32px rgba(75,31,111,.35);transition:transform .2s,box-shadow .2s,border-color .2s;font:inherit;color:inherit}
+  .acard:hover{transform:translateY(-3px);border-color:#D8CBE8;box-shadow:0 30px 50px -30px rgba(75,31,111,.45)}
+  .acard:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  .acard::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#C9A66B,var(--gold))}
+  .acard .art{position:absolute;right:-30px;top:-30px;width:170px;height:170px;opacity:.55;pointer-events:none}
+  .acard .ic{position:relative;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--accent);color:#fff;box-shadow:0 10px 20px -10px rgba(91,42,134,.7)}
+  .acard .ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .acard .k{position:relative;margin-top:22px;font:700 10.5px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .acard h3{position:relative;margin-top:8px;font:600 21px/1.25 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .acard p{position:relative;margin-top:8px;font-size:13px;line-height:1.5;color:var(--muted)}
+  .acard .podium{position:relative;margin-top:auto;display:flex;flex-direction:column;gap:8px;padding-top:18px;border-top:1px dashed #E4DEEB}
+  .acard .pr{display:flex;align-items:center;gap:10px;font-size:13px}
+  .acard .pr i{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font:600 11px var(--display);font-style:normal;color:#fff}
+  .acard .pr:nth-child(1) i{background:linear-gradient(180deg,#E9CF9E,#C9A66B)}
+  .acard .pr:nth-child(2) i{background:linear-gradient(180deg,#DCD9E2,#B8B3C2)}
+  .acard .pr:nth-child(3) i{background:linear-gradient(180deg,#E6C3A5,#BF8E66)}
+  .acard .pr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink2)}
+  .acard .pr b{font:600 13px var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+  .acard .go{position:relative;display:flex;align-items:center;justify-content:space-between;margin-top:16px;font:600 13px var(--body);color:var(--accent)}
+  .acard .go span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--accent-soft);transition:background .2s,color .2s}
+  .acard:hover .go span{background:var(--accent);color:#fff}
+  .back{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:7px 14px 7px 10px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;margin-bottom:18px;box-shadow:var(--shadow)}
+  .back:hover{background:var(--accent-soft);color:var(--accent);border-color:#E0D4EE}
+  .sub-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:4px 0 6px}
+  .sub-head h2{position:relative;padding-left:16px;font:600 26px/1.25 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .sub-head h2::before{content:"";position:absolute;left:0;top:50%;width:4px;height:26px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .sub-p{font-size:13.5px;color:var(--muted);margin:0 0 16px 16px}
+  @media (max-width:900px){.cards{grid-template-columns:1fr 1fr;gap:14px}.acard{padding:18px;border-radius:20px}.acard h3{font-size:17px}.acard p{display:none}}
+  @media (max-width:520px){.cards{grid-template-columns:1fr}.acard{aspect-ratio:auto;min-height:340px}}
   @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}}
 </style>
 </head>
@@ -174,22 +207,28 @@ const crs=x=>x.courses.length===1?`<div class="crs">${esc(x.courses[0][1].course
 const ctr=x=>[...x.centres].map(n=>`<span class="ctr">${esc(n)}</span>`).join(' ');
 
 const SECTIONS=[
-  {id:'adm',title:'Top 10 Highest-Paying Admissions',sub:'Learners who paid the most when they joined. A learner who joined more than one course is counted once, with all their admissions added together.',
+  {id:'adm',k:'Admissions',short:'Learners who paid the most when they joined.',val:x=>inr(x.fsPaid),icon:'<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',title:'Top 10 Highest-Paying Admissions',sub:'Learners who paid the most when they joined. A learner who joined more than one course is counted once, with all their admissions added together.',
    head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Admission date',{t:'Months',n:1},{t:'Paid at admission',n:1}],
-   rows:(names,all)=>people(names).filter(x=>x.fsPaid>0).sort((a,b)=>b.fsPaid-a.fsPaid).slice(0,10)
+   list:names=>people(names).filter(x=>x.fsPaid>0).sort((a,b)=>b.fsPaid-a.fsPaid).slice(0,10),
+   rows:(names,all,L)=>L
      .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),fmtD(x.first),{v:num(x.admMonths),n:1},{v:inr(x.fsPaid),n:1,tot:1}])},
-  {id:'ren',title:'Top 10 Most Renewed Learners',sub:'Learners who have renewed the most times, across all their courses. Ties go to the higher total paid.',
+  {id:'ren',k:'Loyalty',short:'Learners who have renewed the most times.',val:x=>x.renewals+' renewals',icon:'<path d="M20 11a8 8 0 0 0-14.6-4.5M4 4v3.5h3.5"/><path d="M4 13a8 8 0 0 0 14.6 4.5M20 20v-3.5h-3.5"/>',title:'Top 10 Most Renewed Learners',sub:'Learners who have renewed the most times, across all their courses. Ties go to the higher total paid.',
    head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined',{t:'Months purchased',n:1},{t:'Total paid',n:1},{t:'No. of renewals',n:1}],
-   rows:(names,all)=>people(names).filter(x=>x.renewals).sort((a,b)=>b.renewals-a.renewals||b.total-a.total).slice(0,10)
+   list:names=>people(names).filter(x=>x.renewals).sort((a,b)=>b.renewals-a.renewals||b.total-a.total).slice(0,10),
+   rows:(names,all,L)=>L
      .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),fmtD(x.first),{v:num(x.months),n:1},{v:inr(x.total),n:1},{v:num(x.renewals),n:1,tot:1}])},
-  {id:'ltv',title:'Top 10 Highest Lifetime Spenders',sub:'Total paid by each learner across all their courses: what they paid when they joined plus every renewal.',
+  {id:'ltv',k:'Lifetime value',short:'Total paid by each learner: admission plus every renewal.',val:x=>inr(x.total),icon:'<path d="M6 3h12l3 5-9 13L3 8z"/><path d="M3 8h18M9 3l3 18 3-18"/>',title:'Top 10 Highest Lifetime Spenders',sub:'Total paid by each learner across all their courses: what they paid when they joined plus every renewal.',
    head:all=>['#','Learner',...(all?['Centre']:[]),'Course',{t:'No. of renewals',n:1},{t:'Paid at admission',n:1},{t:'Paid in renewals',n:1},{t:'Total paid',n:1}],
-   rows:(names,all)=>people(names).sort((a,b)=>b.total-a.total).slice(0,10)
+   list:names=>people(names).sort((a,b)=>b.total-a.total).slice(0,10),
+   rows:(names,all,L)=>L
      .map(x=>[who(x),...(all?[ctr(x)]:[]),crs(x),{v:num(x.renewals),n:1},{v:inr(x.fsPaid),n:1},{v:inr(x.rnPaid),n:1},{v:inr(x.total),n:1,tot:1}])}
 ];
 
-const closed=(()=>{try{return JSON.parse(localStorage.getItem('artium_la_closed')||'{}');}catch(e){return{};}})();
-function toggleSec(id){closed[id]=!closed[id];try{localStorage.setItem('artium_la_closed',JSON.stringify(closed));}catch(e){}document.getElementById('sec-'+id).classList.toggle('closed',!!closed[id]);}
+/* Which analysis is open: none = the landing cards. Kept in the address so the browser's back button returns to the cards. */
+let openId=(location.hash.slice(1)&&SECTIONS.some(s=>s.id===location.hash.slice(1)))?location.hash.slice(1):null;
+function openSec(id){openId=id;history.pushState(null,'',id?'#'+id:location.pathname+location.search);render();window.scrollTo(0,0);}
+window.addEventListener('popstate',()=>{const h=location.hash.slice(1);openId=SECTIONS.some(s=>s.id===h)?h:null;render();});
+const ART='<svg class="art" viewBox="0 0 170 170" aria-hidden="true"><g fill="none" stroke="#C9A66B" stroke-width=".8">'+[...Array(9)].map((_,i)=>`<circle cx="120" cy="50" r="${14+i*11}" opacity="${(0.9-i*0.08).toFixed(2)}"/>`).join('')+'</g><g fill="#B79BD6">'+[...Array(7)].map((_,i)=>`<circle cx="${40+i*16}" cy="${150-i*13}" r="2"/>`).join('')+'</g></svg>';
 
 function render(){
   const sel=CENTRES.find(c=>c.name===selCentre);
@@ -197,16 +236,29 @@ function render(){
   document.getElementById('subtitle').textContent=sel?'Our most valuable learners — '+sel.name+', '+sel.city:'Our most valuable learners — all centres combined';
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   const names=sel?[sel.name]:CENTRES.map(c=>c.name),all=!sel,ready=names.every(n=>DATA[n]);
-  document.getElementById('sections').innerHTML=SECTIONS.map(s=>{
-    const head=s.head(all).map(h=>typeof h==='string'?`<th>${h}</th>`:`<th class="n">${h.t}</th>`).join('');
-    const rows=ready?s.rows(names,all):null;
-    const body=!ready?`<tr><td colspan="9" class="empty">Loading…</td></tr>`:!rows.length?`<tr><td colspan="9" class="empty">No entries yet</td></tr>`:
-      rows.map((cells,i)=>`<tr class="r${i+1}"><td><span class="rk">${i+1}</span></td>${cells.map(c=>typeof c==='string'?`<td>${c}</td>`:`<td class="${c.n?'n':''}${c.tot?' tot':''}">${c.v}</td>`).join('')}</tr>`).join('');
-    return`<section class="tray${closed[s.id]?' closed':''}" id="sec-${s.id}">
-      <div class="tray-head" onclick="toggleSec('${s.id}')" role="button" aria-expanded="${!closed[s.id]}"><div class="tray-title">${s.title}</div>
-        <div class="right"><span class="badge">Top 10</span><span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></div></div>
-      <div class="tray-body"><div class="tray-sub">${s.sub}</div><div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div></div>
-    </section>`;}).join('');
+  const box=document.getElementById('sections');
+  const s=SECTIONS.find(x=>x.id===openId);
+  if(!s){   // landing: one card per analysis, with its top 3 as a preview
+    box.innerHTML='<div class="cards">'+SECTIONS.map(s=>{
+      const L=ready?s.list(names):null;
+      const pod=!ready?'<div class="pr"><span style="color:var(--faint)">Loading…</span></div>':!L.length?'<div class="pr"><span style="color:var(--faint)">No entries yet</span></div>'
+        :L.slice(0,3).map((x,i)=>`<div class="pr"><i>${i+1}</i><span>${esc(x.name)||'—'}</span><b>${s.val(x)}</b></div>`).join('');
+      return `<button class="acard" onclick="openSec('${s.id}')" aria-label="${esc(s.title)}">${ART}
+        <div class="ic"><svg viewBox="0 0 24 24">${s.icon}</svg></div>
+        <div class="k">${s.k}</div><h3>${s.title}</h3><p>${s.short}</p>
+        <div class="podium">${pod}</div>
+        <div class="go">View all 10<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+      </button>`;}).join('')+'</div>';
+    return;
+  }
+  // sub-page: the full table for the chosen analysis
+  const head=s.head(all).map(h=>typeof h==='string'?`<th>${h}</th>`:`<th class="n">${h.t}</th>`).join('');
+  const rows=ready?s.rows(names,all,s.list(names)):null;
+  const body=!ready?`<tr><td colspan="9" class="empty">Loading…</td></tr>`:!rows.length?`<tr><td colspan="9" class="empty">No entries yet</td></tr>`:
+    rows.map((cells,i)=>`<tr class="r${i+1}"><td><span class="rk">${i+1}</span></td>${cells.map(c=>typeof c==='string'?`<td>${c}</td>`:`<td class="${c.n?'n':''}${c.tot?' tot':''}">${c.v}</td>`).join('')}</tr>`).join('');
+  box.innerHTML=`<button class="back" onclick="history.length>1&&location.hash?history.back():openSec(null)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>All analyses</button>
+    <div class="sub-head"><h2>${s.title}</h2><span class="badge">Top 10</span></div><div class="sub-p">${s.sub}</div>
+    <div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_la_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();

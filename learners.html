@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="cardnav.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -179,7 +180,7 @@
     </div>
   </section>
   <div id="sample-note"></div>
-  <section class="tray">
+  <section class="tray" id="sec-mal">
     <div class="tray-head"><div class="tray-title">Active learners by month</div><span class="badge" id="months-badge">—</span></div>
     <div class="tbl-wrap"><table id="mal"></table></div>
     <div class="defs">
@@ -197,7 +198,7 @@
       </div>
     </div>
   </section>
-  <section class="tray">
+  <section class="tray" id="sec-ar">
     <div class="tray-head"><div class="tray-title">Admission Requirement</div><span class="badge" id="ar-badge">—</span></div>
     <div class="tbl-wrap"><table class="ar" id="ar"></table></div>
     <div class="defs">
@@ -213,7 +214,7 @@
       </div>
     </div>
   </section>
-  <section class="tray">
+  <section class="tray" id="sec-c">
     <div class="tray-head"><div class="tray-title">Monthly Active Learners by Course</div><span class="badge" id="c-badge">—</span></div>
     <div class="tbl-wrap"><table id="mal-c"></table></div>
     <div class="defs">
@@ -224,7 +225,7 @@
       </div>
     </div>
   </section>
-  <section class="tray">
+  <section class="tray" id="sec-ag">
     <div class="tray-head"><div class="tray-title">Monthly Active Learners by Age Group</div><span class="badge" id="ag-badge">—</span></div>
     <div class="tbl-wrap"><table id="mal-ag"></table></div>
     <div class="defs">
@@ -235,7 +236,7 @@
       </div>
     </div>
   </section>
-  <section class="tray">
+  <section class="tray" id="sec-t">
     <div class="tray-head"><div class="tray-title">Monthly Active Learners by Teacher</div><span class="badge" id="t-badge">—</span></div>
     <div class="tbl-wrap"><table id="mal-t"></table></div>
     <div class="defs">
@@ -391,6 +392,7 @@ function render(){
   document.getElementById('mal').innerHTML=head+'<tbody>'+body+'</tbody>';
   renderAR(names);
   renderSplits(names,head,v);
+  if(window.CardNav)CardNav.refresh();
 }
 
 
@@ -500,6 +502,31 @@ async function load(){
   }
 }
 function toggleDefs(b,id){const l=document.getElementById(id||'defs-list');l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+
+/* Landing: one card per section with a short preview; clicking opens that section on its own (see cardnav.js).
+   Previews read this month's column (the first one) from each table once it has loaded. */
+const LOADED=()=>CENTRES.every(c=>DATA[c.name]);
+const rowsOf=id=>[...document.querySelectorAll('#'+id+' tbody tr')].map(r=>[...r.cells].map(c=>c.innerText.trim())).filter(r=>r.length>1&&r[0]);
+const nowCol=r=>parseInt(String(r[1]).replace(/[^\d\-−]/g,'').replace('−','-'),10)||0;
+const topNow=id=>rowsOf(id).filter(r=>!/^total$|not mentioned$/i.test(r[0])).sort((a,b)=>nowCol(b)-nowCol(a)).filter(r=>nowCol(r)>0).map(r=>[r[0],r[1]+' active']);
+const thisMonth=()=>MON[LAST%12];
+CardNav.init({back:'All sections',cards:[
+  {id:'sec-mal',k:'Overview',title:'Active Learners by Month',short:'Opening balance, admissions, renewals due and done, and capacity, month by month.',go:'Open monthly table',
+   icon:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+   preview:()=>{if(!LOADED())return null;const R=rowsOf('mal'),f=l=>(R.find(r=>r[0].replace(/^(ADD|LESS)/,'').trim().toLowerCase()===l.toLowerCase())||[])[1];
+     return [['Monthly Active Learners · '+thisMonth(),f('Monthly Active Learners')],['Net gain / loss',f('Net gain / loss')],['Capacity utilisation',f('Capacity utilisation %')]].filter(x=>x[1]);}},
+  {id:'sec-ar',k:'Planning',short:'Admissions each course still needs to reach 70% of its teachers\' capacity.',go:'Open requirement',
+   icon:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".5"/>',
+   preview:()=>{if(!LOADED())return null;const R=rowsOf('ar'),need=R.filter(r=>!/^total/i.test(r[0])).map(r=>[r[0].split('\n')[0].replace(/\s*(South|North) Vocals$/,''),parseInt(String(r[r.length-1]).replace(/[^\d\-−]/g,'').replace('−','-'),10)||0]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+     const tot=R.find(r=>/^total/i.test(r[0]));if(tot&&!(parseInt(String(tot[1]).replace(/\D/g,''),10)>0))return[['Teacher counts','Not available yet']];   // no teachers found for the centre(s)
+     return need.length?need.map(x=>[x[0],x[1]+' admissions needed']):[['Every course','No admissions needed']];}},
+  {id:'sec-c',k:'Courses',title:'Learners by Course',short:'Monthly Active Learners for every course.',go:'Open by course',
+   icon:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',preview:()=>LOADED()?topNow('mal-c'):null},
+  {id:'sec-ag',k:'Age groups',title:'Learners by Age Group',short:'Monthly Active Learners for every age group.',go:'Open by age group',
+   icon:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 15c1.8.6 2.8 2.3 3 5"/>',preview:()=>LOADED()?topNow('mal-ag'):null},
+  {id:'sec-t',k:'Teachers',title:'Learners by Teacher',short:'Monthly Active Learners for every teacher, current and past.',go:'Open by teacher',
+   icon:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',preview:()=>LOADED()?topNow('mal-t'):null}
+]});
 load();
 </script>
 </body>

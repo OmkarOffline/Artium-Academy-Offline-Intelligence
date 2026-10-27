@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Groups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<script src="cardnav.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .tray-sub{font-size:13.5px;color:var(--muted);margin:-6px 2px 14px;line-height:1.5}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  th,td{padding:12px 16px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2)}
+  th.n,td.n{text-align:right}
+  td{font:400 14px var(--body);color:var(--ink2)}
+  td.n{font:500 14px var(--display)}
+  td.key{font:600 14.5px var(--display);color:var(--accent)}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:#FCFBFE}
+  .rk{display:inline-grid;place-items:center;min-width:28px;height:28px;padding:0 6px;border-radius:999px;background:#F3F1F6;color:var(--muted);font:600 12.5px var(--display)}
+  .who b{display:block;font:600 14px var(--body);color:var(--ink)}
+  .who small{font:500 11.5px var(--body);color:var(--faint);letter-spacing:.02em}
+  .multi{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.35}
+  .multi small{color:var(--faint);font-size:12px}
+  .ctr{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font:600 12px var(--body)}
+  .st{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);border-radius:999px;padding:3px 10px}
+  .st.on{background:#E5F4EC;color:var(--ok)}.st.off{background:#F3F1F6;color:var(--muted)}
+  .st i{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .pk{display:inline-flex;align-items:center;gap:6px;font:600 13px var(--display);color:var(--ink)}
+  .pk .arr{color:var(--faint);font-weight:400}
+  .pk.dn .to{color:var(--bad)}.pk.up .to{color:var(--ok)}
+  .more{display:block;margin:14px auto 0;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 18px;font:600 13px var(--body);color:var(--accent);cursor:pointer}
+  .more:hover{background:var(--accent-soft)}
+  .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
+  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Focus Groups</h1>
+      <div class="subtitle" id="subtitle">Groups of learners worth a closer look</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <div id="groups"></div>
+</div>
+
+<script>
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const inr=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const fmtD=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'—';
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pkg=m=>m?m+(m===1?' month':' months'):'—';
+const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const valid=d=>d&&d.getFullYear()>=2020?d:null;   // blank end dates show up as years before 2020
+/* Time between two dates as months and days, e.g. "14m 08d" */
+function span(a,b){if(!a||!b||b<a)return'—';let m=(b.getFullYear()-a.getFullYear())*12+b.getMonth()-a.getMonth(),d=b.getDate()-a.getDate();
+  if(d<0){m--;d+=new Date(b.getFullYear(),b.getMonth(),0).getDate();}return m+'m '+String(d).padStart(2,'0')+'d';}
+async function fetchTab(centre,tab){
+  const rows=await ArtiumAuth.fetchRows(centre,tab);
+  return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');
+}
+let DATA={};
+
+/* Columns used: A Date · C Academy · D Learner ID · E Learner's name · H Mobile number · I Course · M No. of months · Q Net coaching fees (Renewals) · R Total receipts (Fresh Sales) · X Membership end date
+   Each course gets its own Learner ID. The same person = same mobile number (last 10 digits) AND same name (letters only, any case).
+   The same mobile number with a different name is a different learner, e.g. a sibling: that is how Families are found. */
+const phoneOf=r=>String(r[7]||'').replace(/\D/g,'').slice(-10);
+const nameKey=r=>String(r[4]||'').toLowerCase().replace(/[^a-z]/g,'');
+
+/* Every transaction, tidied: one list per Learner ID (a course), and one record per person */
+function build(names){
+  const T=[];
+  names.forEach(n=>{const d=DATA[n];if(!d)return;
+    d.fs.forEach(r=>T.push({r,centre:n,fs:true,date:parseDate(r[0]),id:String(r[3]||'').trim().toUpperCase(),m:parseNum(r[12]),paid:parseNum(r[17]),end:valid(parseDate(r[23]))}));
+    d.rn.forEach(r=>T.push({r,centre:n,fs:false,date:parseDate(r[0]),id:String(r[3]||'').trim().toUpperCase(),m:parseNum(r[12]),paid:parseNum(r[16]),end:valid(parseDate(r[23]))}));});
+  const ok=T.filter(t=>t.id&&t.date);
+  // Person of each Learner ID: from its admission row if there is one, else its first row
+  const person={},label={};
+  ok.slice().sort((a,b)=>(b.fs-a.fs)||(a.date-b.date)).forEach(t=>{if(person[t.id])return;const p=phoneOf(t.r),k=nameKey(t.r);person[t.id]=p&&k?p+'|'+k:'id:'+t.id;});
+  const ids=new Map();
+  ok.forEach(t=>{(ids.get(t.id)||ids.set(t.id,{id:t.id,centre:t.centre,course:'',name:'',phone:'',adm:null,ren:[],all:[]}).get(t.id)).all.push(t);});
+  ids.forEach(x=>{x.all.sort((a,b)=>a.date-b.date);x.adm=x.all.find(t=>t.fs)||null;x.ren=x.all.filter(t=>!t.fs&&(!x.adm||t.date>=x.adm.date));
+    const last=x.all[x.all.length-1];x.course=last.r[8]||x.all.map(t=>t.r[8]).filter(Boolean).pop()||'';x.name=(x.all.map(t=>t.r[4]).filter(Boolean).pop())||'';x.phone=phoneOf(x.adm?x.adm.r:last.r);
+    x.lastEnd=x.all.map(t=>t.end).filter(Boolean).sort((a,b)=>b-a)[0]||null;x.active=!!(x.lastEnd&&x.lastEnd>=TODAY);x.person=person[x.id];});
+  const P=new Map();
+  ids.forEach(x=>{(P.get(x.person)||P.set(x.person,{key:x.person,ids:[]}).get(x.person)).ids.push(x);});
+  P.forEach(p=>{p.name=p.ids.map(x=>x.name).filter(Boolean)[0]||'';p.centres=[...new Set(p.ids.map(x=>x.centre))];p.phone=p.ids[0].phone;
+    p.all=p.ids.flatMap(x=>x.all).sort((a,b)=>a.date-b.date);p.first=(p.all.find(t=>t.fs)||p.all[0]).date;
+    p.lastEnd=p.ids.map(x=>x.lastEnd).filter(Boolean).sort((a,b)=>b-a)[0]||null;p.active=p.ids.some(x=>x.active);p.paid=p.all.reduce((s,t)=>s+t.paid,0);});
+  return {ids:[...ids.values()],people:[...P.values()]};
+}
+
+/* Cells */
+const whoP=p=>`<div class="who"><b>${esc(p.name)||'—'}</b><small>${p.ids.map(x=>esc(x.id)).join(' · ')}</small></div>`;
+const whoI=x=>`<div class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></div>`;
+const ctr=list=>[].concat(list).map(n=>`<span class="ctr">${esc(n)}</span>`).join(' ');
+const courses=p=>p.ids.length===1?esc(p.ids[0].course)||'—':`<div class="multi">${p.ids.map(x=>`<span>${esc(x.course)||'—'}</span>`).join('')}</div>`;
+const status=a=>a?'<span class="st on"><i></i>Active</span>':'<span class="st off"><i></i>Not active</span>';
+const move=(a,b)=>`<span class="pk ${b>a?'up':'dn'}"><span>${pkg(a)}</span><span class="arr">→</span><span class="to">${pkg(b)}</span></span>`;
+const ordinal=n=>n+(['th','st','nd','rd'][(n%100>10&&n%100<14)?0:n%10<4?n%10:0]);
+
+/* The groups. Each: who is in it (list), how it's sorted, the table, and the two figures for its card preview. */
+const GROUPS=[
+  {id:'m2m',k:'Renewal habits',title:'Month-to-Month Renewers',short:'Learners who have renewed for 1 month two or more times.',
+   sub:'Learners who renewed for 1 month at least twice, ranked by their number of 1-month payments (a 1-month admission counts too). Tenure runs from their admission to the end of their membership, or to today if they are still active.',
+   icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 17.5h.01"/>',
+   list:D=>D.people.map(p=>{const one=p.all.filter(t=>t.m===1),r1=one.filter(t=>!t.fs).length;return{p,one:one.length,r1,tenure:span(p.first,p.active?TODAY:p.lastEnd)};})
+     .filter(x=>x.r1>=2).sort((a,b)=>b.one-a.one||b.p.paid-a.p.paid),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course',{t:'1-month payments',n:1},{t:'All payments',n:1},{t:'Tenure',n:1},'Status'],
+   row:(x,all)=>[whoP(x.p),...(all?[ctr(x.p.centres)]:[]),courses(x.p),{v:x.one,key:1},{v:x.p.all.length},{v:x.tenure},status(x.p.active)],
+   pv:x=>[x.p.name,x.one+' × 1 month']},
+  {id:'y1',k:'Admissions',title:'Year-One Commitments',short:'Learners who joined with a package of 12 months or more.',
+   sub:'Admissions for 12 months or more, newest first.',
+   icon:'<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/>',
+   list:D=>D.ids.filter(x=>x.adm&&x.adm.m>=12).sort((a,b)=>b.adm.date-a.adm.date),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Admission date',{t:'Package',n:1},{t:'Paid at admission',n:1},{t:'Renewals since',n:1},'Status'],
+   row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),esc(x.course)||'—',fmtD(x.adm.date),{v:pkg(x.adm.m)},{v:inr(x.adm.paid),key:1},{v:x.ren.length},status(x.active)],
+   pv:x=>[x.name,pkg(x.adm.m)]},
+  {id:'up',k:'Upgrades',title:'Trial-to-Long-Term Upgraders',short:'Joined for 1 month, then renewed for 3 months or more the first time.',
+   sub:'Learners who joined for 1 month and whose first renewal was for 3 months or more. A first renewal of 1 or 2 months doesn\'t count, even if a longer one came later.',
+   icon:'<path d="M4 20L20 4M20 4h-7M20 4v7"/>',
+   list:D=>D.ids.filter(x=>x.adm&&x.adm.m===1&&x.ren.length&&x.ren[0].m>=3).sort((a,b)=>b.ren[0].date-a.ren[0].date),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined','First renewal',{t:'Package',n:1},{t:'Paid at first renewal',n:1},'Status'],
+   row:(x,all)=>[whoI(x),...(all?[ctr(x.centre)]:[]),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.ren[0].date),{v:move(1,x.ren[0].m)},{v:inr(x.ren[0].paid),key:1},status(x.active)],
+   pv:x=>[x.name,'1 → '+x.ren[0].m+' months']},
+  {id:'lt',unit:['renewal','renewals'],k:'Renewal habits',title:'Long-Term Renewers',short:'Learners who renewed for 12 months or more, at any renewal.',
+   sub:'Every renewal of 12 months or more, newest first. It can be the learner\'s first renewal or a later one.',
+   icon:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+   list:D=>D.ids.flatMap(x=>x.ren.map((t,i)=>({x,t,n:i+1}))).filter(o=>o.t.m>=12).sort((a,b)=>b.t.date-a.t.date),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Renewed on',{t:'Which renewal',n:1},{t:'Package',n:1},{t:'Paid',n:1},'Status'],
+   row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),esc(o.x.course)||'—',fmtD(o.t.date),{v:ordinal(o.n)},{v:pkg(o.t.m)},{v:inr(o.t.paid),key:1},status(o.x.active)],
+   pv:o=>[o.x.name,pkg(o.t.m)]},
+  {id:'mc',k:'Courses',title:'Multi-Course Joiners',short:'Learners who joined two or more courses on the same day.',
+   sub:'Learners whose admissions for two or more courses share the same date. Newest first.',
+   icon:'<rect x="3" y="7" width="13" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3"/>',
+   list:D=>D.people.map(p=>{const by={};p.ids.filter(x=>x.adm).forEach(x=>{const k=+x.adm.date;(by[k]=by[k]||[]).push(x);});const g=Object.values(by).filter(a=>a.length>1).sort((a,b)=>b[0].adm.date-a[0].adm.date)[0];return g?{p,g}:null;})
+     .filter(Boolean).sort((a,b)=>b.g[0].adm.date-a.g[0].adm.date),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Courses','Admission date',{t:'Courses',n:1},{t:'Paid at admission',n:1},'Status'],
+   row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),`<div class="multi">${o.g.map(x=>`<span>${esc(x.course)||'—'}</span>`).join('')}</div>`,fmtD(o.g[0].adm.date),{v:o.g.length},{v:inr(o.g.reduce((s,x)=>s+x.adm.paid,0)),key:1},status(o.p.active)],
+   pv:o=>[o.p.name,o.g.length+' courses']},
+  {id:'ao',k:'Courses',title:'Course Add-Ons',short:'Learners who started one course and joined another later.',
+   sub:'Learners who joined a second course on a later date than their first. Newest add-on first.',
+   icon:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+   list:D=>D.people.map(p=>{const a=p.ids.filter(x=>x.adm).sort((u,v)=>u.adm.date-v.adm.date);if(a.length<2)return null;const later=a.filter(x=>+x.adm.date>+a[0].adm.date);if(!later.length)return null;
+       const add=later[later.length-1];return{p,first:a[0],add,gap:Math.round((add.adm.date-a[0].adm.date)/864e5)};}).filter(Boolean).sort((a,b)=>b.add.adm.date-a.add.adm.date),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'First course','Joined','Added course','Added on',{t:'Gap',n:1},'Status'],
+   row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),esc(o.first.course)||'—',fmtD(o.first.adm.date),esc(o.add.course)||'—',fmtD(o.add.adm.date),{v:span(o.first.adm.date,o.add.adm.date),key:1},status(o.p.active)],
+   pv:o=>[o.p.name,'+ '+(o.add.course||'course')]},
+  {id:'fam',unit:['family','families'],k:'Households',title:'Families',short:'One phone number shared by two or more learners: siblings or a parent and child.',
+   sub:'Learners registered with the same phone number but different names. Biggest families first, then by total paid.',
+   icon:'<circle cx="8" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20c.5-3.5 2.8-5.5 5.5-5.5s5 2 5.5 5.5M14 20c.3-2.6 1.6-4.2 3.5-4.2S20.7 17.4 21 20"/>',
+   list:D=>{const F=new Map();D.people.forEach(p=>{if(!p.phone)return;(F.get(p.phone)||F.set(p.phone,[]).get(p.phone)).push(p);});
+     return [...F.values()].filter(m=>m.length>1).map(m=>({m,paid:m.reduce((s,p)=>s+p.paid,0),active:m.filter(p=>p.active).length,centres:[...new Set(m.flatMap(p=>p.centres))]}))
+       .sort((a,b)=>b.m.length-a.m.length||b.paid-a.paid);},
+   head:all=>['#','Members',...(all?['Centre']:[]),'Courses',{t:'Members',n:1},{t:'Active now',n:1},{t:'Paid together',n:1}],
+   row:(o,all)=>[`<div class="multi">${o.m.map(p=>`<span><b style="font-weight:600;color:var(--ink)">${esc(p.name)||'—'}</b></span>`).join('')}</div>`,...(all?[ctr(o.centres)]:[]),
+     `<div class="multi">${o.m.map(p=>`<span>${p.ids.map(x=>esc(x.course)||'—').join(', ')}</span>`).join('')}</div>`,{v:o.m.length},{v:o.active},{v:inr(o.paid),key:1}],
+   pv:o=>[o.m.map(p=>String(p.name).split(' ')[0]).join(' & '),o.m.length+' members']},
+  {id:'drop',k:'Win-back',title:'One-Month Drop-offs',short:'Joined for 1 month and never renewed: a win-back call list.',
+   sub:'Learners who joined a course for 1 month, whose membership has ended, and who never renewed it. Most recently ended first, since they are the easiest to win back.',
+   icon:'<path d="M3 3l18 18"/><path d="M10.6 5.1A8 8 0 0 1 20 12a8 8 0 0 1-1.3 4.4M6.3 6.3A8 8 0 0 0 12 20a8 8 0 0 0 5.7-2.3"/>',
+   list:D=>D.ids.filter(x=>x.adm&&x.adm.m===1&&!x.ren.length&&x.adm.end&&x.adm.end<TODAY).sort((a,b)=>b.adm.end-a.adm.end),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Joined','Membership ended',{t:'Since it ended',n:1},{t:'Other courses',n:1}],
+   row:(x,all,D)=>{const others=D.people.find(p=>p.key===x.person);const n=others?others.ids.filter(y=>y!==x&&y.active).length:0;
+     return[whoI(x),...(all?[ctr(x.centre)]:[]),esc(x.course)||'—',fmtD(x.adm.date),fmtD(x.adm.end),{v:span(x.adm.end,TODAY),key:1},{v:n?n+' active':'—'}];},
+   pv:x=>[x.name,'ended '+fmtD(x.adm.end)]},
+  {id:'down',k:'Early warning',title:'Downgraders',short:'Learners who renewed for a shorter package than their last one.',
+   sub:'Renewals for fewer months than the learner\'s previous payment for the same course, e.g. 12 months down to 3. Most recent first: a sign the learner may be losing interest.',
+   icon:'<path d="M4 4l16 16M20 20h-7M20 20v-7"/>',
+   list:D=>D.ids.map(x=>{let hit=null;x.all.forEach((t,i)=>{if(i&&!t.fs&&t.m&&x.all[i-1].m&&t.m<x.all[i-1].m)hit={from:x.all[i-1].m,to:t.m,t};});return hit?{x,...hit}:null;})
+     .filter(Boolean).sort((a,b)=>b.t.date-a.t.date),
+   head:all=>['#','Learner',...(all?['Centre']:[]),'Course','Renewed on',{t:'Package',n:1},{t:'Paid',n:1},'Status'],
+   row:(o,all)=>[whoI(o.x),...(all?[ctr(o.x.centre)]:[]),esc(o.x.course)||'—',fmtD(o.t.date),{v:move(o.from,o.to)},{v:inr(o.t.paid),key:1},status(o.x.active)],
+   pv:o=>[o.x.name,o.from+' → '+pkg(o.to)]}
+];
+
+/* Sections are built once; their tables are filled on every render. The landing cards come from cardnav.js. */
+document.getElementById('groups').innerHTML=GROUPS.map(g=>`<section class="tray" id="sec-${g.id}">
+  <div class="tray-head"><div class="tray-title">${g.title}</div><span class="badge" id="b-${g.id}">…</span></div>
+  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button></div></section>`).join('');
+const PAGE=25,shown={};
+let D=null,L={};
+
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  document.getElementById('subtitle').textContent=sel?'Groups of learners worth a closer look — '+sel.name+', '+sel.city:'Groups of learners worth a closer look — all centres combined';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name),all=!sel,ready=names.every(n=>DATA[n]);
+  D=ready?build(names):null;L={};
+  GROUPS.forEach(g=>{
+    const t=document.getElementById('t-'+g.id),more=document.getElementById('m-'+g.id);
+    const head='<thead><tr>'+g.head(all).map(h=>typeof h==='string'?`<th>${h}</th>`:`<th class="n">${h.t}</th>`).join('')+'</tr></thead>';
+    if(!D){t.innerHTML=head+'<tbody><tr><td colspan="10" class="empty">Loading…</td></tr></tbody>';more.hidden=true;return;}
+    const list=L[g.id]=g.list(D),n=Math.min(list.length,shown[g.id]||PAGE);
+    const u=g.unit||['learner','learners'];document.getElementById('b-'+g.id).textContent=list.length.toLocaleString('en-IN')+' '+u[list.length===1?0:1];
+    t.innerHTML=head+'<tbody>'+(list.length?list.slice(0,n).map((x,i)=>`<tr><td><span class="rk">${i+1}</span></td>${g.row(x,all,D).map(c=>typeof c==='object'?`<td class="n${c.key?' key':''}">${c.v}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')
+      :'<tr><td colspan="10" class="empty">No learners in this group yet</td></tr>')+'</tbody>';
+    more.hidden=n>=list.length;more.textContent='Show more ('+(list.length-n).toLocaleString('en-IN')+' left)';
+    more.onclick=()=>{shown[g.id]=n+PAGE;render();};
+  });
+  if(window.CardNav)CardNav.refresh();
+}
+
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_fg_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_fg_centre',selCentre);}catch(e){}render();});
+
+/* Card previews: how many learners, then the first two in the group's order */
+CardNav.init({back:'All focus groups',cards:GROUPS.map(g=>({id:'sec-'+g.id,k:g.k,title:g.title,short:g.short,icon:g.icon,go:'Open the list',
+  preview:()=>{const list=L[g.id];if(!D||!list)return null;if(!list.length)return[];const u=g.unit||['learner','learners'];return[[u[1][0].toUpperCase()+u[1].slice(1)+' in this group',list.length.toLocaleString('en-IN')]].concat(list.slice(0,2).map(g.pv));}}))});
+
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{
+      const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);   // Academy (column C)
+      DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};
+    });
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){
+    document.getElementById('updated').textContent='Error — '+e.message;
+    document.getElementById('dot').className='dot error';
+  }
+}
+load();
+</script>
+</body>
+</html>

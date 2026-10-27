@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Targets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;--ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28)}
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .controls{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:8px;box-shadow:var(--shadow)}
+  .month-btn{width:36px;height:38px;border:0;border-radius:12px;background:var(--bg);color:var(--ink2);font-size:16px;cursor:pointer}
+  .month-btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+  .month-btn:disabled{opacity:.35;cursor:default}
+  .month-label{min-width:150px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+  .card{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .status{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+  .tag{font:600 11.5px var(--body);padding:4px 10px;border-radius:999px;white-space:nowrap}
+  .tag.set{background:#E5F4EC;color:var(--ok)}.tag.rev{background:#FBF1DC;color:#9A6200}.tag.none{background:#F3F1F6;color:var(--muted)}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:11px;padding:9px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
+  .btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .btn.primary:hover:not(:disabled){background:#4A2170;color:#fff}
+  .tbl{overflow-x:auto}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;font-size:14px}
+  th,td{padding:0 16px;height:52px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{height:auto;padding:14px 16px 12px;background:#FBFAF8;font:600 13px/1.2 var(--display);color:var(--ink);vertical-align:bottom}
+  th small{display:block;font:700 9.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  th:first-child,td:first-child{text-align:left}
+  td:first-child{font-weight:500;color:var(--ink);min-width:230px}
+  tr.grp td{height:34px;background:#FBFAF8;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .cell{display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .in{width:132px;height:36px;border:1px solid var(--border);border-radius:10px;padding:0 12px;text-align:right;font:500 14px var(--body);color:var(--ink);background:#fff;font-variant-numeric:tabular-nums}
+  .in:hover:not(:disabled){border-color:#CDBFE0}
+  .in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .in::placeholder{color:var(--faint)}
+  .in:disabled{background:transparent;border-color:transparent;color:var(--ink)}
+  .in.changed{border-color:var(--accent);background:#F6F0FC}
+  .was{font-size:11px;color:var(--faint);text-decoration:line-through}
+  td.sum,th.sum{background:#FCFBF9}td.sum{font-weight:600;color:var(--ink)}
+  tr.calc td{color:var(--muted);font-size:13.5px}tr.calc td:first-child{font-weight:400;color:var(--muted)}
+  .wo{margin-left:8px;font:600 10px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);background:#F4F2EF;border-radius:6px;padding:2px 6px}
+  .save{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:#F6F0FC;border-top:1px solid #E3D6F2}
+  .save[hidden]{display:none}
+  .save span{font-size:13.5px;color:var(--accent);font-weight:600}
+  .msg{padding:12px 20px;font-size:13px;border-top:1px solid var(--line)}
+  .msg.ok{color:var(--ok);background:#F2FAF5}.msg.err{color:var(--bad);background:#FDF3F2}
+  .side h3{font:600 16px var(--display);color:var(--ink);padding:16px 20px;border-bottom:1px solid var(--line)}
+  .log{list-style:none;max-height:640px;overflow-y:auto}
+  .log li{padding:13px 20px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5}
+  .log li b{color:var(--ink);font-weight:600}
+  .log .when{display:block;font-size:11.5px;color:var(--faint);margin-bottom:2px}
+  .log .ch{color:var(--muted)}.log .ch s{color:var(--faint)}.log .ch em{font-style:normal;color:var(--ink);font-weight:600}
+  .rf{font:700 9.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:#9A6200;background:#FBF1DC;border-radius:6px;padding:2px 6px;margin-left:6px}
+  .note{padding:14px 20px;font-size:12.5px;color:var(--muted);line-height:1.6}
+  .empty-log{padding:20px;font-size:13px;color:var(--faint)}
+  @media (max-width:1100px){.layout{grid-template-columns:1fr}}
+  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.header-right{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div><div class="eyebrow">Planning</div><h1>Targets</h1>
+      <div class="subtitle">Set each month's targets per centre, or reforecast them. Every page reads its targets from here.</div></div>
+    <div class="header-right">
+      <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <div class="controls"><button class="month-btn" id="prev" aria-label="Previous month">‹</button><div class="month-label" id="month-label">—</div><button class="month-btn" id="next" aria-label="Next month">›</button></div>
+    </div>
+  </header>
+  <div class="layout">
+    <div class="card">
+      <div class="bar"><div class="status" id="status"></div><button class="btn" id="copy" type="button"></button></div>
+      <div class="tbl"><table id="t"></table></div>
+      <div class="save" id="save" hidden><span id="save-n"></span><div style="display:flex;gap:8px"><button class="btn" id="discard" type="button">Discard</button><button class="btn primary" id="go" type="button">Save targets</button></div></div>
+      <div class="msg" id="msg" hidden></div>
+    </div>
+    <div class="card side"><h3>Changes</h3><ul class="log" id="log"></ul>
+      <div class="note">A change made after the month has started is marked as a reforecast. Every change is kept, so earlier targets can always be looked up.</div></div>
+  </div>
+</div>
+<script>
+const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+/* Rows: targets you type (key = name used by the data service), and figures worked out from them */
+const ROWS=[{g:'Marketing'},{k:'leads',l:'Leads'},{k:'spend',l:'Marketing spend',inr:1},
+  {g:'Appointments & visits'},{k:'appts',l:'Appointments booked'},{k:'visits',l:'Centre visits'},
+  {g:'Fresh sales'},{k:'conv',l:'No. of fresh sales'},{k:'fscol',l:'Fresh sales collections',inr:1},
+  {c:'ATV – fresh sales',f:t=>t.conv&&t.fscol!=null?t.fscol/t.conv:null,need:['conv','fscol']},
+  {c:'Visits to conversions %',f:t=>t.visits&&t.conv!=null?t.conv/t.visits*100:null,p:1,need:['visits','conv']},
+  {g:'Renewals'},{k:'renewed',l:'No. of renewals'},{k:'rncol',l:'Renewal collections',inr:1},
+  {c:'ATV – renewals',f:t=>t.renewed&&t.rncol!=null?t.rncol/t.renewed:null,need:['renewed','rncol']},
+  {g:'Total'},{c:'Total collections',f:t=>t.fscol!=null||t.rncol!=null?(t.fscol||0)+(t.rncol||0):null,need:[]}];
+const KEYS=ROWS.filter(r=>r.k).map(r=>r.k),LABEL={};ROWS.filter(r=>r.k).forEach(r=>LABEL[r.l]=r.k);
+const fmt=v=>Math.round(v).toLocaleString('en-IN');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now=new Date();let viewY=now.getFullYear(),viewM=now.getMonth();
+const key=(y,m)=>y+'-'+String(m+1).padStart(2,'0'),label=(y,m)=>MON[m]+' '+y;
+let TG={},CHANGES=[],canEdit=false,loaded=false,EDIT={};   // EDIT['Alwarpet|conv']=number or '' (cleared)
+const saved=(c,k)=>{const t=(TG[key(viewY,viewM)]||{})[c];return t&&t[k]!=null?t[k]:null;};
+const cur=(c,k)=>{const e=EDIT[c+'|'+k];return e===undefined?saved(c,k):e===''?null:e;};
+const changedKeys=()=>Object.keys(EDIT).filter(x=>{const [c,k]=x.split('|'),e=EDIT[x];return (e===''?null:e)!==saved(c,k);});
+
+function render(){
+  document.getElementById('month-label').textContent=MONTH_FULL[viewM]+' '+viewY;
+  document.getElementById('next').disabled=(viewY*12+viewM)>=(now.getFullYear()*12+now.getMonth()+12);   // up to a year ahead
+  const t=document.getElementById('t');
+  if(!loaded){t.innerHTML='<tr><td style="padding:28px;color:var(--muted)">Loading…</td></tr>';return;}
+  let h='<thead><tr><th>Metric</th>'+CENTRES.map(c=>`<th><small>${c.city}</small>${c.name}</th>`).join('')+`<th class="sum"><small>${CENTRES.length} centres</small>All centres</th></tr></thead><tbody>`;
+  ROWS.forEach(r=>{
+    if(r.g){h+=`<tr class="grp"><td colspan="${CENTRES.length+2}">${r.g}</td></tr>`;return;}
+    if(r.c){   // worked out; All centres uses only centres that have every figure it needs
+      const per=CENTRES.map(c=>{const o={};KEYS.forEach(k=>o[k]=cur(c.name,k));return o;});
+      const vals=per.map(o=>r.f(o)),ok=per.filter(o=>r.need.every(k=>o[k]!=null)),all={};
+      KEYS.forEach(k=>{const s=(r.need.length?ok:per).filter(o=>o[k]!=null);all[k]=s.length?s.reduce((a,o)=>a+o[k],0):null;});
+      const a=r.f(all),f=v=>v==null?'–':r.p?v.toFixed(1)+'%':fmt(v);
+      h+=`<tr class="calc"><td>${r.c}<span class="wo">worked out</span></td>${vals.map(v=>`<td>${f(v)}</td>`).join('')}<td class="sum">${f(a)}</td></tr>`;return;}
+    let s=0,any=false;
+    h+=`<tr><td>${r.l}</td>`+CENTRES.map(c=>{const v=cur(c.name,r.k),sv=saved(c.name,r.k),ch=EDIT[c.name+'|'+r.k]!==undefined&&v!==sv;if(v!=null){s+=v;any=true;}
+      return `<td><span class="cell"><input class="in${ch?' changed':''}" inputmode="numeric" data-c="${c.name}" data-k="${r.k}" value="${v==null?'':fmt(v)}" placeholder="${canEdit?'Not set':'–'}" ${canEdit?'':'disabled'} aria-label="${esc(r.l+', '+c.name)}">${ch?`<span class="was">${sv==null?'not set':fmt(sv)}</span>`:''}</span></td>`;}).join('')+`<td class="sum">${any?fmt(s):'–'}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+  t.querySelectorAll('.in').forEach(i=>{
+    i.onfocus=()=>{i.value=i.value.replace(/,/g,'');i.select();};
+    i.onchange=i.onblur=()=>{const raw=i.value.replace(/[^\d.]/g,'');const k=i.dataset.c+'|'+i.dataset.k;
+      const v=raw===''?'':Math.round(+raw);if((v===''?null:v)===saved(i.dataset.c,i.dataset.k))delete EDIT[k];else EDIT[k]=v;render();};
+    i.onkeydown=e=>{if(e.key==='Enter')i.blur();};
+  });
+  // Status: who set this month's targets, and how many times they were reforecast
+  const L=label(viewY,viewM),mine=CHANGES.filter(c=>c.month===L).sort((a,b)=>a.when-b.when),start=new Date(viewY,viewM,1).getTime();
+  const has=CENTRES.some(c=>KEYS.some(k=>saved(c.name,k)!=null));
+  const revs=new Set(mine.filter(c=>c.when>=start).map(c=>Math.floor(c.when/60000))).size;   // one save = one reforecast
+  const dd=ms=>new Date(ms).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+  document.getElementById('status').innerHTML=!has?'<span class="tag none">No targets yet</span>'+(canEdit?'Type them in below and save.':'')
+    :(revs?`<span class="tag rev">Reforecast ${revs===1?'once':revs+' times'}</span>`:'<span class="tag set">Targets set</span>')
+      +(!mine.length?'':mine[0].from===''?`Set ${dd(mine[0].when)} by ${esc(who(mine[0].who))}${dd(mine[mine.length-1].when)!==dd(mine[0].when)?' · last changed '+dd(mine[mine.length-1].when):''}`
+        :`Last changed ${dd(mine[mine.length-1].when)} by ${esc(who(mine[mine.length-1].who))}`);
+  const pm=viewM?viewM-1:11,py=viewM?viewY:viewY-1,prevT=TG[key(py,pm)];
+  const copy=document.getElementById('copy');copy.textContent=`Copy ${MONTH_FULL[pm]}'s targets`;copy.hidden=!canEdit;copy.disabled=!prevT;
+  const n=changedKeys().length;document.getElementById('save').hidden=!n;document.getElementById('save-n').textContent=n+(n===1?' change':' changes')+' not saved yet';
+  // Changes panel: this month's history, newest first
+  const lst=mine.slice().reverse();
+  document.getElementById('log').innerHTML=lst.length?lst.map(c=>`<li><span class="when">${new Date(c.when).toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})} · ${esc(who(c.who))}</span>
+    <b>${esc(c.centre)}</b> · ${esc(c.metric)}${c.when>=start&&c.from!==''?'<span class="rf">Reforecast</span>':''}<div class="ch">${c.from===''?'Set to':`<s>${fmtAny(c.from,c.metric)}</s> →`} <em>${c.to===''?'cleared':fmtAny(c.to,c.metric)}</em></div></li>`).join('')
+    :`<div class="empty-log">No changes for ${MONTH_FULL[viewM]} yet.</div>`;
+}
+const fmtAny=(v,metric)=>v===''||v==null?'–':fmt(+v);
+const who=e=>{const s=String(e||'').split('@')[0];return s?s.charAt(0).toUpperCase()+s.slice(1).replace(/[._]/g,' '):'—';};
+const flash=(t,ok)=>{const m=document.getElementById('msg');m.hidden=false;m.className='msg '+(ok?'ok':'err');m.textContent=t;clearTimeout(flash.t);flash.t=setTimeout(()=>m.hidden=true,6000);};
+
+const go=d=>{if(changedKeys().length&&!confirm('You have changes that are not saved. Leave them?'))return;EDIT={};viewM+=d;if(viewM<0){viewM=11;viewY--;}if(viewM>11){viewM=0;viewY++;}render();};
+document.getElementById('prev').onclick=()=>go(-1);document.getElementById('next').onclick=()=>go(1);
+document.getElementById('discard').onclick=()=>{EDIT={};render();};
+document.getElementById('copy').onclick=()=>{const pm=viewM?viewM-1:11,py=viewM?viewY:viewY-1,P=TG[key(py,pm)]||{};
+  CENTRES.forEach(c=>KEYS.forEach(k=>{const v=P[c.name]&&P[c.name][k]!=null?P[c.name][k]:'';if((v===''?null:v)!==saved(c.name,k))EDIT[c.name+'|'+k]=v;else delete EDIT[c.name+'|'+k];}));render();};
+document.getElementById('go').onclick=async()=>{
+  const b=document.getElementById('go');b.disabled=true;b.textContent='Saving…';
+  try{
+    const by={};changedKeys().forEach(x=>{const [c,k]=x.split('|');(by[c]=by[c]||{})[k]=EDIT[x];});
+    let j=null;for(const c of Object.keys(by)){j=await ArtiumAuth.call('saveTargets',{month:key(viewY,viewM),centre:c,values:by[c]});if(!j||j.error)throw new Error(j&&j.error||'Could not save');}
+    if(j){TG=j.targets||TG;CHANGES=j.changes||CHANGES;}EDIT={};flash('Saved. Every page now uses these targets.',true);
+  }catch(e){flash(e.message==='not-allowed'?"You don't have permission to change targets.":'Could not save: '+e.message,false);}
+  b.disabled=false;b.textContent='Save targets';render();
+};
+window.addEventListener('beforeunload',e=>{if(changedKeys().length){e.preventDefault();e.returnValue='';}});
+
+async function load(){
+  render();
+  try{
+    const j=await ArtiumAuth.call('targets',{});if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
+    TG=j.targets||{};CHANGES=j.changes||[];canEdit=!!j.canEdit;loaded=true;
+    const t=new Date();document.getElementById('updated').textContent=(canEdit?'':'View only · ')+'Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';render();
+  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+}
+load();
+</script>
+</body>
+</html>
