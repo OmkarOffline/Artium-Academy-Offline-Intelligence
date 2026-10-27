@@ -91,7 +91,74 @@
   .flt button[aria-pressed="true"] span{background:rgba(255,255,255,.2);color:#fff}
   .flt .d{width:7px;height:7px;border-radius:50%}.flt .d.on{background:#2DA06A}.flt .d.off{background:#B3AFBB}
   .nw{white-space:nowrap}
+  .mem{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+  .rel{font:600 10.5px var(--body);font-style:normal;color:var(--muted);background:#F3F1F6;border-radius:6px;padding:1px 6px;white-space:nowrap}
+  .rel.first{background:#FBF1DC;color:#8A5A00}
+  .src{display:inline-block;font:600 11.5px var(--body);border-radius:999px;padding:3px 9px;white-space:nowrap;margin:1px 0}
+  .src.rec{background:#E5F4EC;color:var(--ok)}.src.ph{background:#F3F1F6;color:var(--muted)}
+  .dnote{margin-top:14px;border:1px solid #F0DDB5;background:#FFF9EC;border-radius:14px;padding:12px 16px;font-size:13px;color:#7A5A22}
+  .dnote ul{margin:6px 0 0 18px}.dnote li{margin:2px 0}
   .tel{font-variant-numeric:tabular-nums;letter-spacing:.01em}
+  .lname{border:0;background:none;padding:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left;border-bottom:1px dashed #C9B6DE}
+  .lname:hover{color:var(--accent);border-bottom-color:var(--accent)}
+  .ncount{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:1px 7px 1px 5px;border-radius:999px;background:#FBF1DC;color:#8A5A00;font:700 11px var(--body);vertical-align:middle}
+  .ncount svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+  /* Insights dialog */
+  .ins-bg{position:fixed;inset:0;z-index:50;background:rgba(31,16,41,.38);backdrop-filter:blur(2px);display:grid;place-items:center;padding:24px}
+  .ins-bg[hidden]{display:none}
+  .ins{width:min(760px,100%);max-height:calc(100vh - 48px);display:flex;flex-direction:column;background:#fff;border-radius:24px;box-shadow:0 40px 80px -30px rgba(31,16,41,.6);overflow:hidden}
+  .ins-head{position:relative;display:flex;justify-content:space-between;gap:16px;padding:24px 28px 18px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FBF8FE,#fff)}
+  .ins-head::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#C9A66B,var(--gold))}
+  .ins-head h2{font:600 24px/1.2 var(--display);color:var(--ink)}
+  .ins-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+  .ins-meta .sep{color:#D3CEDA}
+  .ins-x{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+  .ins-x:hover{background:var(--accent-soft);color:var(--accent)}
+  .ins-x svg,.rm svg,.link svg,.btn-add svg,.fu svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .ins-body{overflow-y:auto;padding:20px 28px 26px}
+  .ins-h{font:700 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:4px 0 12px}
+  .ins-h span{color:var(--muted);margin-left:4px}
+  .ins-empty{font-size:13.5px;color:var(--faint);margin-bottom:18px}
+  .conv{border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:12px;background:#FCFBFD}
+  .conv-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;font-size:13px;color:var(--muted);margin-bottom:8px}
+  .conv-top b{font:600 14px var(--display);color:var(--ink)}.conv-top .by{margin-left:auto;font-size:12px;color:var(--faint)}
+  .conv ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+  .conv li{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:baseline;font-size:13.5px;line-height:1.45}
+  .conv li .ty{justify-self:start}
+  .conv li b{display:block;color:var(--ink);font-weight:600}.conv li .nt{display:block;color:var(--ink2)}
+  .ty{font:700 10px var(--body);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 7px;white-space:nowrap}
+  .ty.pos{background:#E5F4EC;color:var(--ok)}.ty.neg{background:#FDECEB;color:var(--bad)}.ty.req{background:#FBF1DC;color:#8A5A00}
+  .fu{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);font-size:13px;color:var(--ink2)}
+  .fu svg{color:var(--accent);margin-top:2px;flex:none}
+  .btn-add{display:inline-flex;align-items:center;gap:8px;border:1px dashed #CDBFE0;background:#FBF8FE;color:var(--accent);border-radius:14px;padding:12px 18px;font:600 14px var(--body);cursor:pointer;width:100%;justify-content:center}
+  .btn-add:hover{background:var(--accent-soft)}
+  .frow{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px}
+  .frow label{display:flex;flex-direction:column;gap:6px;font:600 11.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .frow label.grow{flex:1;min-width:220px}
+  .frow input,.item select,.item textarea{font:400 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px 11px;background:#fff;text-transform:none;letter-spacing:0}
+  .frow input:focus,.item select:focus,.item textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .seg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:10px;padding:3px}
+  .seg button{border:0;background:none;border-radius:8px;padding:6px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;text-transform:none;letter-spacing:0}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(31,26,36,.15)}
+  .ty-seg button.pos[aria-pressed="true"]{background:#E5F4EC;color:var(--ok)}
+  .ty-seg button.neg[aria-pressed="true"]{background:#FDECEB;color:var(--bad)}
+  .ty-seg button.req[aria-pressed="true"]{background:#FBF1DC;color:#8A5A00}
+  .items{display:flex;flex-direction:column;gap:10px}
+  .item{border:1px solid var(--border);border-radius:14px;padding:12px;background:#fff}
+  .item-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:8px}
+  .item select{min-width:280px}
+  .item textarea{width:100%;resize:vertical;line-height:1.45}
+  .rm{margin-left:auto;width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--faint);cursor:pointer;display:grid;place-items:center}
+  .rm:hover{background:#FDECEB;color:var(--bad)}
+  .link{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;padding:10px 2px}
+  .fu-box{margin-top:4px;border-top:1px solid var(--line);padding-top:4px}
+  .fu-box.open .link{cursor:default;font:700 11px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ins-msg{min-height:18px;font-size:13px;color:var(--bad);margin-top:6px}
+  .ins-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+  .btn{border:1px solid var(--border);background:#fff;border-radius:11px;padding:9px 16px;font:600 13.5px var(--body);color:var(--ink2);cursor:pointer}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .btn:disabled{opacity:.6;cursor:default}
+  @media (max-width:640px){.ins-bg{padding:0;place-items:end stretch}.ins{border-radius:22px 22px 0 0;max-height:92vh}.ins-head,.ins-body{padding-left:18px;padding-right:18px}}
   .more{display:block;margin:14px auto 0;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 18px;font:600 13px var(--body);color:var(--accent);cursor:pointer}
   .more:hover{background:var(--accent-soft)}
   .empty{padding:28px;text-align:center;color:var(--muted);font-size:14px}
@@ -164,6 +231,8 @@ function build(names){
   ids.forEach(x=>{x.all.sort((a,b)=>a.date-b.date);x.adm=x.all.find(t=>t.fs)||null;x.ren=x.all.filter(t=>!t.fs&&(!x.adm||t.date>=x.adm.date));
     const last=x.all[x.all.length-1];x.course=last.r[8]||x.all.map(t=>t.r[8]).filter(Boolean).pop()||'';x.name=(x.all.map(t=>t.r[4]).filter(Boolean).pop())||'';x.phone=phoneOf(x.adm?x.adm.r:last.r);
     x.age=x.all.map(t=>String(t.r[6]||'').trim()).filter(Boolean).pop()||'';
+    const rl=x.adm?String(x.adm.r[30]||'').trim():'',fj=x.adm?String(x.adm.r[31]||'').trim().toUpperCase():'';   // Relationship · Learner ID of the 1st Joinee (Fresh Sales)
+    x.rel=/^(none|na|n\/a|-|)$/i.test(rl)?'':rl;x.joinee=/^[A-Z]{2,4}-\d+$/.test(fj)?fj:'';
     x.lastEnd=x.all.map(t=>t.end).filter(Boolean).sort((a,b)=>b-a)[0]||null;x.active=!!(x.lastEnd&&x.lastEnd>=TODAY);x.person=person[x.id];});
   const P=new Map();
   ids.forEach(x=>{(P.get(x.person)||P.set(x.person,{key:x.person,ids:[]}).get(x.person)).ids.push(x);});
@@ -171,12 +240,21 @@ function build(names){
     p.all=p.ids.flatMap(x=>x.all).sort((a,b)=>a.date-b.date);p.first=(p.all.find(t=>t.fs)||p.all[0]).date;
     p.age=p.all.map(t=>String(t.r[6]||'').trim()).filter(Boolean).pop()||'';p.admDate=(p.all.find(t=>t.fs)||{}).date||null;
     p.lastEnd=p.ids.map(x=>x.lastEnd).filter(Boolean).sort((a,b)=>b-a)[0]||null;p.active=p.ids.some(x=>x.active);p.paid=p.all.reduce((s,t)=>s+t.paid,0);});
+  PEOPLE=P;
   return {ids:[...ids.values()],people:[...P.values()]};
 }
 
+/* ── Insights from conversations: click a learner's name to read past conversations and log a new one ── */
+let PEOPLE=new Map(),INS=[],STAFF=[],ME='',insReady=false;
+const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Other'];
+const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
+const entriesOf=p=>{if(!p)return[];const ids=new Set(p.ids.map(x=>x.id));return INS.filter(e=>e.ids.some(i=>ids.has(String(i).toUpperCase())));};
+const lname=(p,fallback)=>{if(!p)return esc(fallback)||'—';const n=entriesOf(p).length;
+  return `<button type="button" class="lname" data-p="${esc(p.key)}" title="Read or add insights">${esc(p.name||fallback)||'—'}</button>${n?`<span class="ncount" title="${n} conversation${n>1?'s':''} logged"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${n}</span>`:''}`;};
+
 /* Cells */
-const whoP=p=>`<div class="who"><b>${esc(p.name)||'—'}</b><small>${p.ids.map(x=>`<span class="nw">${esc(x.id)}</span>`).join(' · ')}</small></div>`;
-const whoI=x=>`<div class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></div>`;
+const whoP=p=>`<div class="who"><b>${lname(p)}</b><small>${p.ids.map(x=>`<span class="nw">${esc(x.id)}</span>`).join(' · ')}</small></div>`;
+const whoI=x=>`<div class="who"><b>${lname(PEOPLE.get(x.person),x.name)}</b><small>${esc(x.id)}</small></div>`;
 const ctr=list=>[].concat(list).map(n=>`<span class="ctr">${esc(n)}</span>`).join(' ');
 const uniq=p=>[...new Set(p.ids.map(x=>x.course||'—'))];   // a course bought again under a new Learner ID is listed once
 const courses=p=>{const c=uniq(p);return c.length===1?esc(c[0]):`<div class="multi">${c.map(x=>`<span>${esc(x)}</span>`).join('')}</div>`;};
@@ -239,18 +317,38 @@ const GROUPS=[
    head:all=>['#','Learner',...(all?['Centre']:[]),'Phone','Age group','First course','Admission date','Added course','Added on',{t:'Gap',n:1},'Status'],
    row:(o,all)=>[whoP(o.p),...(all?[ctr(o.p.centres)]:[]),tel(o.p.phone),age(o.p.age),esc(o.first.course)||'—',fmtD(o.first.adm.date),esc(o.add.course)||'—',fmtD(o.add.adm.date),{v:span(o.first.adm.date,o.add.adm.date),key:1},status(o.p.active)],
    pv:o=>[o.p.name,'+ '+(o.add.course||'course')]},
-  {id:'fam',unit:['family','families'],k:'Households',title:'Families',short:'One phone number shared by two or more learners: siblings or a parent and child.',
-   sub:'Learners registered with the same phone number but different names. Biggest families first, then by total paid.',
+  {id:'fam',unit:['family','families'],k:'Households',title:'Families',short:'Learners from the same family: recorded in the sheet, or sharing a phone number.',
+   sub:'Learners linked by the Relationship and "Learner ID of the 1st Joinee" columns in Fresh Sales, plus learners with the same phone number but different names. Biggest families first. Families found only by phone number are worth recording in the sheet.',
    icon:'<circle cx="8" cy="7" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2.5 20c.5-3.5 2.8-5.5 5.5-5.5s5 2 5.5 5.5M14 20c.3-2.6 1.6-4.2 3.5-4.2S20.7 17.4 21 20"/>',
-   list:D=>{const F=new Map();D.people.forEach(p=>{if(!p.phone)return;(F.get(p.phone)||F.set(p.phone,[]).get(p.phone)).push(p);});
-     return [...F.values()].filter(m=>m.length>1).map(m=>({m,paid:m.reduce((s,p)=>s+p.paid,0),active:m.filter(p=>p.active).length,centres:[...new Set(m.flatMap(p=>p.centres))]}))
-       .sort((a,b)=>b.m.length-a.m.length||b.paid-a.paid);},
+   list:D=>{
+     // Join people into families: a recorded link (learner → their 1st joinee) or a shared phone number. Union-find over people.
+     const up=new Map(),find=k=>{while(up.get(k)!==k){up.set(k,up.get(up.get(k)));k=up.get(k);}return k;},join=(a,b)=>{a=find(a);b=find(b);if(a!==b)up.set(a,b);};
+     D.people.forEach(p=>up.set(p.key,p.key));
+     const byId=new Map(D.ids.map(x=>[x.id,x])),how=new Map(),issues=[],firsts=new Set();
+     D.ids.forEach(x=>{if(!x.rel&&!x.joinee)return;const j=byId.get(x.joinee);
+       if(!x.joinee||!j){issues.push(`<b>${esc(x.id)}</b> (${esc(x.name)}): ${x.joinee?'1st joinee '+esc(x.joinee)+' isn\'t in Fresh Sales':'Relationship filled in, but no 1st joinee ID'}`);return;}
+       if(j===x||j.person===x.person){issues.push(`<b>${esc(x.id)}</b> (${esc(x.name)}): 1st joinee points to the same learner`);return;}
+       join(x.person,j.person);firsts.add(j.person);how.set(x.person,'rec');how.set(j.person,'rec');});
+     const ph=new Map();D.people.forEach(p=>{if(p.phone)(ph.get(p.phone)||ph.set(p.phone,[]).get(p.phone)).push(p);});
+     const phoneLinked=new Set();ph.forEach(list=>{if(list.length<2)return;list.forEach(p=>{join(p.key,list[0].key);phoneLinked.add(p.key);});});
+     const F=new Map();D.people.forEach(p=>{const r=find(p.key);(F.get(r)||F.set(r,[]).get(r)).push(p);});
+     const out=[...F.values()].filter(m=>m.length>1).map(m=>{
+       const rec=m.some(p=>how.get(p.key)==='rec'),phn=m.some(p=>phoneLinked.has(p.key));
+       const tag=p=>firsts.has(p.key)?'1st joinee':(p.ids.map(x=>x.rel).filter(Boolean)[0]||'');
+       m.sort((a,b)=>(firsts.has(b.key)-firsts.has(a.key))||(a.first-b.first));
+       return {m,tag,src:rec&&phn?'both':rec?'rec':'phone',paid:m.reduce((s,p)=>s+p.paid,0),active:m.filter(p=>p.active).length,centres:[...new Set(m.flatMap(p=>p.centres))],phones:[...new Set(m.map(p=>p.phone).filter(Boolean))]};
+     }).sort((a,b)=>b.m.length-a.m.length||b.paid-a.paid);
+     out.issues=issues;return out;},
+   note:list=>list.issues&&list.issues.length?`<div class="dnote"><b>To check in Fresh Sales:</b><ul>${list.issues.map(i=>`<li>${i}</li>`).join('')}</ul></div>`:'',
    act:o=>o.active>0,actLabel:['Any member active','No member active'],
-   head:all=>['#','Members',...(all?['Centre']:[]),'Phone','Age group','Courses','Admission date',{t:'Members',n:1},{t:'Active now',n:1},{t:'Paid together',n:1}],
-   row:(o,all)=>[`<div class="multi">${o.m.map(p=>`<span><b style="font-weight:600;color:var(--ink)">${esc(p.name)||'—'}</b></span>`).join('')}</div>`,...(all?[ctr(o.centres)]:[]),tel(o.m[0].phone),
+   head:all=>['#','Members',...(all?['Centre']:[]),'Phone','Age group','Courses','Admission date','How we know',{t:'Members',n:1},{t:'Active now',n:1},{t:'Paid together',n:1}],
+   row:(o,all)=>[`<div class="multi">${o.m.map(p=>`<span class="mem">${lname(p)}${o.tag(p)?`<i class="rel${o.tag(p)==='1st joinee'?' first':''}">${esc(o.tag(p))}</i>`:''}</span>`).join('')}</div>`,...(all?[ctr(o.centres)]:[]),
+     `<div class="multi">${o.m.map(p=>`<span>${tel(p.phone)}</span>`).join('')}</div>`,
      `<div class="multi">${o.m.map(p=>`<span>${age(p.age)}</span>`).join('')}</div>`,
      `<div class="multi">${o.m.map(p=>`<span>${uniq(p).map(esc).join(', ')}</span>`).join('')}</div>`,
-     `<div class="multi">${o.m.map(p=>`<span>${fmtD(p.admDate)}</span>`).join('')}</div>`,{v:o.m.length},{v:o.active},{v:inr(o.paid),key:1}],
+     `<div class="multi">${o.m.map(p=>`<span>${fmtD(p.admDate)}</span>`).join('')}</div>`,
+     o.src==='rec'?'<span class="src rec">Recorded</span>':o.src==='both'?'<span class="src rec">Recorded</span> <span class="src ph">Same phone</span>':'<span class="src ph">Same phone only</span>',
+     {v:o.m.length},{v:o.active},{v:inr(o.paid),key:1}],
    pv:o=>[o.m.map(p=>String(p.name).split(' ')[0]).join(' & '),o.m.length+' members']},
   {id:'drop',k:'Win-back',title:'One-Month Drop-offs',short:'Joined for 1 month and never renewed: a win-back call list.',
    sub:'Learners who joined a course for 1 month, whose membership has ended, and who never renewed it. Most recently ended first, since they are the easiest to win back.',
@@ -275,7 +373,7 @@ const GROUPS=[
 /* Sections are built once; their tables are filled on every render. The landing cards come from cardnav.js. */
 document.getElementById('groups').innerHTML=GROUPS.map(g=>`<section class="tray" id="sec-${g.id}">
   <div class="tray-head"><div class="tray-title">${g.title}</div><span class="badge" id="b-${g.id}">…</span></div>
-  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="flt" id="f-${g.id}" role="group" aria-label="Show"></div><div class="scroll-hint" id="h-${g.id}">Scroll sideways for more columns →</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button></div></section>`).join('');
+  <div class="tray-body"><div class="tray-sub">${g.sub}</div><div class="flt" id="f-${g.id}" role="group" aria-label="Show"></div><div class="scroll-hint" id="h-${g.id}">Scroll sideways for more columns →</div><div class="tbl-wrap"><table id="t-${g.id}"></table></div><button class="more" id="m-${g.id}" hidden>Show more</button><div id="n-${g.id}"></div></div></section>`).join('');
 const PAGE=25,shown={},flt={};   // flt[group] = 'all' | 'on' | 'off'
 let D=null,L={};
 
@@ -299,6 +397,7 @@ function render(){
     const u=g.unit||['learner','learners'];document.getElementById('b-'+g.id).textContent=full.length.toLocaleString('en-IN')+' '+u[list.length===1?0:1];
     t.innerHTML=head+'<tbody>'+(list.length?list.slice(0,n).map((x,i)=>`<tr><td><span class="rk">${i+1}</span></td>${g.row(x,all,D).map(c=>typeof c==='object'?`<td class="n${c.key?' key':''}">${c.v}</td>`:`<td>${c}</td>`).join('')}</tr>`).join('')
       :`<tr><td colspan="14" class="empty">${full.length?'No one here with this filter':'No learners in this group yet'}</td></tr>`)+'</tbody>';
+    document.getElementById('n-'+g.id).innerHTML=g.note?g.note(full):'';
     more.hidden=n>=list.length;more.textContent='Show more ('+(list.length-n).toLocaleString('en-IN')+' left)';
     more.onclick=()=>{shown[g.id]=n+PAGE;render();};
   });
@@ -317,7 +416,82 @@ document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.datas
 CardNav.init({back:'All focus groups',cards:GROUPS.map(g=>({id:'sec-'+g.id,k:g.k,title:g.title,short:g.short,icon:g.icon,go:'Open the list',
   preview:()=>{const list=L[g.id];if(!D||!list)return null;if(!list.length)return[];const u=g.unit||['learner','learners'];return[[u[1][0].toUpperCase()+u[1].slice(1)+' in this group',list.length.toLocaleString('en-IN')]].concat(list.slice(0,2).map(g.pv));}}))});
 
+/* Dialog */
+document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidden><div class="ins" role="dialog" aria-modal="true" aria-labelledby="ins-name">
+  <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div></div>
+    <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="ins-body"><div id="ins-hist"></div><div id="ins-form"></div></div></div></div>`);
+let cur=null,draft=null;
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const dShow=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:esc(s);};
+function openIns(key){
+  const p=PEOPLE.get(key);if(!p)return;cur=p;
+  document.getElementById('ins-name').textContent=p.name||'—';
+  const crs=[...new Set(p.ids.map(x=>x.course).filter(Boolean))].join(', ');
+  document.getElementById('ins-meta').innerHTML=[p.ids.map(x=>esc(x.id)).join(' · '),esc(p.centres.join(', ')),p.phone?`${p.phone.slice(0,5)} ${p.phone.slice(5)}`:'',esc(p.age),esc(crs),p.active?'<span class="st on"><i></i>Active</span>':'<span class="st off"><i></i>Not active</span>'].filter(Boolean).join('<span class="sep">·</span>');
+  draft=entriesOf(p).length?null:blank();
+  paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
+}
+const blank=()=>({date:today(),with:'Parent',how:'Call',items:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
+function closeIns(){if(draft&&draft.items.some(i=>i.note.trim())&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;}
+function paintIns(){
+  const list=entriesOf(cur).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
+  const T=t=>(TYPES.find(x=>x[0]===t)||['','neg'])[1];
+  document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv">
+      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span><span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
+      <ul>${e.items.map(i=>`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`).join('')}</ul>
+      ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
+    </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
+  const f=document.getElementById('ins-form');
+  if(!draft){f.innerHTML=`<button type="button" class="btn-add" id="ins-new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log a conversation</button>`;document.getElementById('ins-new').onclick=()=>{draft=blank();paintIns();};return;}
+  const seg=(name,opts,val)=>`<div class="seg" data-f="${name}">${opts.map(o=>`<button type="button" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}</div>`;
+  f.innerHTML=`<div class="ins-h">New conversation</div>
+    <div class="frow"><label>Date<input type="date" id="f-date" value="${draft.date}" max="${today()}"></label>
+      <label>Spoke with${seg('with',['Parent','Learner','Both'],draft.with)}</label><label>How${seg('how',['Call','In centre','WhatsApp'],draft.how)}</label></div>
+    <div class="items">${draft.items.map((it,i)=>`<div class="item" data-i="${i}">
+      <div class="item-top"><select data-k="theme" aria-label="Theme"><option value="">Pick a theme</option>${THEMES.map(t=>`<option${t===it.theme?' selected':''}>${t}</option>`).join('')}</select>
+        <div class="seg ty-seg" data-k="type">${TYPES.map(([t,c])=>`<button type="button" class="${c}" data-v="${t}" aria-pressed="${t===it.type}">${t}</button>`).join('')}</div>
+        ${draft.items.length>1?`<button type="button" class="rm" data-rm="${i}" aria-label="Remove this insight"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:''}</div>
+      <textarea data-k="note" rows="2" placeholder="What did they say?">${esc(it.note)}</textarea></div>`).join('')}</div>
+    <button type="button" class="link" id="f-more"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add another insight</button>
+    <div class="fu-box${draft.showFollow?' open':''}"><button type="button" class="link" id="f-fu">${draft.showFollow?'Follow-up':'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a follow-up (optional)'}</button>
+      ${draft.showFollow?`<div class="frow"><label class="grow">What needs doing<input id="f-act" value="${esc(draft.follow.action)}" placeholder="e.g. Plan a student showcase next month"></label>
+        <label>Owner<input id="f-own" list="staff-list" value="${esc(draft.follow.owner)}" placeholder="Name"></label><label>Due<input type="date" id="f-due" value="${draft.follow.due}"></label></div>
+        <datalist id="staff-list">${STAFF.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:''}</div>
+    <div class="ins-msg" id="ins-msg"></div>
+    <div class="ins-actions"><button type="button" class="btn" id="f-cancel">Cancel</button><button type="button" class="btn primary" id="f-save">Save conversation</button></div>`;
+  // keep the draft in step with the form
+  f.querySelectorAll('.seg[data-f]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{draft[g.dataset.f]=b.dataset.v;paintIns();}));
+  f.querySelectorAll('.item').forEach(el=>{const it=draft.items[+el.dataset.i];
+    el.querySelector('select').onchange=e=>it.theme=e.target.value;
+    el.querySelector('textarea').oninput=e=>it.note=e.target.value;
+    el.querySelectorAll('.ty-seg button').forEach(b=>b.onclick=()=>{it.type=b.dataset.v;paintIns();});
+    const rm=el.querySelector('.rm');if(rm)rm.onclick=()=>{draft.items.splice(+rm.dataset.rm,1);paintIns();};});
+  document.getElementById('f-date').onchange=e=>draft.date=e.target.value;
+  document.getElementById('f-more').onclick=()=>{draft.items.push({theme:'',type:'',note:''});paintIns();const t=f.querySelectorAll('textarea');t[t.length-1].focus();};
+  document.getElementById('f-fu').onclick=()=>{draft.showFollow=true;paintIns();};
+  ['f-act','f-own','f-due'].forEach((id,k)=>{const el=document.getElementById(id);if(el)el.oninput=el.onchange=e=>draft.follow[['action','owner','due'][k]]=e.target.value;});
+  document.getElementById('f-cancel').onclick=()=>{draft=entriesOf(cur).length?null:blank();if(!entriesOf(cur).length)closeIns();else paintIns();};
+  document.getElementById('f-save').onclick=saveIns;
+}
+async function saveIns(){
+  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim());
+  if(!items.length){msg.textContent='Write at least one insight.';return;}
+  if(items.some(i=>!i.theme||!i.type)){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
+  const b=document.getElementById('f-save');b.disabled=true;b.textContent='Saving…';
+  try{
+    const j=await ArtiumAuth.call('saveInsight',{entry:{ids:cur.ids.map(x=>x.id),name:cur.name,centre:cur.centres.join(', '),date:draft.date,with:draft.with,how:draft.how,items,
+      follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
+    if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
+    INS=j.insights||INS;draft=null;paintIns();render();
+  }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"you don't have permission to add insights":e.message);b.disabled=false;b.textContent='Save conversation';}
+}
+document.addEventListener('click',e=>{const n=e.target.closest('.lname');if(n){openIns(n.dataset.p);return;}if(e.target.id==='ins'||e.target.closest('#ins-x'))closeIns();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('ins').hidden)closeIns();});
+function loadInsights(){ArtiumAuth.call('insights',{}).then(j=>{if(j&&!j.error){INS=j.insights||[];STAFF=j.staff||[];ME=j.me||'';}insReady=true;render();if(cur)paintIns();}).catch(()=>{insReady=true;});}
+
 async function load(){
+  loadInsights();
   render();
   try{
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
