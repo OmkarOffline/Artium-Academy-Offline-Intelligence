@@ -191,6 +191,9 @@
   table.rr .na{color:var(--ghost);font-weight:400}
   table.rr .sg small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
   table.rr tr.tot .sg{background:var(--accent-soft)}
+  table.rr tr.subt td{background:#F8F4FC;border-top:1px solid #E6DCF1;border-bottom:1px solid #E6DCF1}
+  table.rr tr.subt td.metric{font:600 14px var(--display);color:var(--accent)}
+  table.rr tr.subt td small{color:var(--accent);opacity:.75}
   table.rr .metric{min-width:240px;max-width:240px}
   .util.xtra{color:var(--accent);background:var(--accent-soft)}   /* renewals with nothing due: not a score, so no score colour */
   .lgd{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
@@ -238,6 +241,7 @@
         <div class="def"><div class="dt">Due, Renewed, % Renewed and Yet to renew:</div><p>Memberships ending from January to the end of this month: how many were due, how many have renewed so far, and how many haven't renewed yet. % Renewed is Renewed out of Due.</p></div>
         <div class="def"><div class="dt">Won't renew:</div><p>Learners who haven't renewed and are marked "Will Not Renew".</p></div>
         <div class="def"><div class="dt">Opportunity:</div><p>Yet to renew minus Won't renew: the learners who haven't renewed and haven't said no. These are the ones to reach out to.</p></div>
+        <div class="def"><div class="dt">Total and Grand total:</div><p>Total, above Past teachers, adds up the current teachers: those with an admission or renewal in the last 3 months. Grand total, at the bottom, also adds past teachers and entries with no teacher.</p></div>
         <div class="def"><div class="dt">Folding and sorting:</div><p>The arrow beside each group of summary columns folds it away, and brings it back. Click a summary column's heading to rank teachers by it; click again to go back to the usual order.</p></div>
         <div class="def"><div class="dt">This month:</div><p>Covers every membership ending this month, including those whose end date hasn't arrived yet.</p></div>
       </div>
@@ -254,6 +258,7 @@
         <div class="def"><div class="dt">Due:</div><p>Memberships ending in that month, under the teacher who taught them.</p></div>
         <div class="def"><div class="dt">Renewed:</div><p>Every renewal paid in that month — learners due that month, learners due in earlier months who paid late, and learners who paid in advance. Each renewal counts under the teacher of the membership being renewed.</p></div>
         <div class="def"><div class="dt">Last 3M, 6M, 12M and Lifetime:</div><p>Those months put together: every renewal closed in them out of everything due in them, for completed months only. This month is left out until it's over.</p></div>
+        <div class="def"><div class="dt">Total and Grand total:</div><p>Total, above Past teachers, adds up the current teachers: those with an admission or renewal in the last 3 months. Grand total, at the bottom, also adds past teachers and entries with no teacher.</p></div>
         <div class="def"><div class="dt">Folding and sorting:</div><p>The arrow beside the summary columns folds them away, and brings them back. Click a summary column's heading to rank teachers by it; click again to go back to the usual order.</p></div>
         <div class="def"><div class="dt">Renewal %:</div><p>Renewed against due for that month. It can go above 100% when late payments and advance renewals come in. The month's figure is final once the month is over. The totals match Renewal collection efficiency on the Renewal Pipeline page.</p></div>
       </div>
@@ -405,10 +410,13 @@ function rrTable(id,o,lastEntry,groups){
   const sums=s=>groups.map(g=>sumCells(g,s)).join('');
   const row=(t,cls,label)=>`<tr class="${cls}"><td class="metric">${label}</td>${sums(ST[t])}${MONTHS.map(k=>rrCell(o[t][k],k)).join('')}</tr>`;
   let body=cur.map(t=>row(t,'',esc(t))).join('');
-  if(o['']&&inView(''))body+=row('','nm','Teacher not mentioned');
+  // Current teachers' total, then past teachers, then entries with no teacher, then the grand total
+  const curAll={};cur.forEach(t=>Object.keys(o[t]).forEach(k=>{const s=curAll[k]=curAll[k]||{due:0,ren:0,lost:0};s.due+=o[t][k].due;s.ren+=o[t][k].ren;s.lost+=o[t][k].lost||0;}));
+  if(cur.length&&(past.length||(o['']&&inView(''))))body+=`<tr class="subt"><td class="metric">Total</td>${sums(stats(curAll))}${MONTHS.map(k=>rrCell(curAll[k],k)).join('')}</tr>`;
   const span=1+groups.reduce((s,g)=>s+GROUPS[g].cols.length+1,0);
   if(past.length)body+=`<tr class="sep"><td class="metric">Past teachers</td><td colspan="${span-1+MONTHS.length}"></td></tr>`+past.map(t=>row(t,'past',esc(t)+(isFinite(lastEntry[t])?`<small> · last entry ${MON[lastEntry[t]%12]} ${String(Math.floor(lastEntry[t]/12)).slice(2)}</small>`:''))).join('');
-  body+=`<tr class="tot"><td class="metric">Total</td>${sums(STall)}${MONTHS.map(k=>rrCell(all[k],k)).join('')}</tr>`;
+  if(o['']&&inView(''))body+=row('','nm','Teacher not mentioned');
+  body+=`<tr class="tot"><td class="metric">Grand total</td>${sums(STall)}${MONTHS.map(k=>rrCell(all[k],k)).join('')}</tr>`;
   // Header: the group's title spans its columns; a slim handle at the end folds the group away and stays as a vertical tab
   const CHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
   const gTop=groups.map(g=>{const G=GROUPS[g],t=typeof G.title==='function'?G.title():G.title;
