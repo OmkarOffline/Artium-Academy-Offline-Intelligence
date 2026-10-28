@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<script src="cardnav.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Filters (collapsible, like Lead to Purchase) */
+  .filters{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);margin-bottom:26px}
+  .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;cursor:pointer;user-select:none}
+  .filters-head .t{display:flex;align-items:center;gap:10px;font:600 16px var(--display);color:var(--ink)}
+  .filters-head .t svg{color:var(--accent)}
+  .f-badge{background:var(--accent-soft);color:var(--accent);font:600 12px var(--body);border-radius:999px;padding:3px 10px}
+  .f-badge.on{background:var(--accent);color:#fff}
+  .f-chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s}
+  .filters.closed .f-chev{transform:rotate(-90deg)}
+  .filters.closed .filters-body{display:none}
+  .filters-body{border-top:1px solid var(--line);padding:18px 22px 20px}
+  .f-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+  .f-group{display:flex;flex-direction:column;gap:6px}
+  .f-group label{font:600 12px var(--body);color:var(--ink2)}
+  .f-group select{height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer}
+  .f-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .f-group select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .f-clear{margin-top:14px;border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;padding:0}
+  .f-clear:disabled{color:var(--ghost);cursor:default}
+  @media (max-width:900px){.f-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+  /* Section tray */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  /* Month-by-month table: newest month first, scroll right for history */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:100%}   /* few months: columns stretch to fill */
+  th,td{padding:13px 16px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);min-width:92px}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);vertical-align:bottom}
+  thead tr.yr th{padding:14px 16px 4px;border-bottom:0;font:700 10px/1 var(--body);letter-spacing:.16em;color:var(--gold);text-align:left}
+  thead tr.mo th{padding-top:4px}
+  th.cur{color:var(--accent)}
+  th.cur small{display:block;font:500 10px/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--accent);opacity:.8}
+  .yb{border-left:1px solid var(--border)}
+  .metric{position:sticky;left:0;z-index:1;text-align:left;background:#fff;min-width:380px;max-width:380px;white-space:normal;padding-left:22px;border-right:1px solid var(--border)}
+  th.metric{background:#FAF9F7;z-index:2}
+  td{font:500 14px var(--display);color:var(--ink2)}
+  td.metric{font:500 14px var(--body);color:var(--ink)}
+  td.metric .k{display:inline-block;width:22px;font:700 11px var(--body);color:var(--gold);vertical-align:baseline}
+  td.metric .op{display:inline-block;width:46px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);vertical-align:baseline}   /* notional Add / Less column */
+  tr.add td.metric .op{color:var(--ok)}
+  tr.less td.metric .op{color:var(--bad)}
+  td.metric .lb{display:inline-block;width:calc(100% - 46px);vertical-align:top}
+  thead tr.yr th.metric{padding-left:68px}   /* 'Particulars' lines up with the row names */
+  td.zero{color:var(--ghost);font-weight:400}
+  tr.sum td{font-weight:600;color:var(--ink);background:#FCFBF9}
+  tr.sum td.metric{font-weight:600}
+  tr.less td:not(.metric){color:var(--bad)}
+  tr.less td.zero{color:var(--ghost)}
+  tr.add td:not(.metric):not(.zero){color:var(--ok)}
+  tr.mal td{background:var(--accent-soft);font-weight:700;color:var(--accent)}
+  tr.signed td{font-weight:600}
+  tr.signed td.pos{color:var(--ok)}
+  tr.signed td.neg{color:var(--bad)}
+  tbody tr:last-child td{border-bottom:0}
+  tr.mal td.metric{font:700 15px var(--display);color:var(--accent)}
+  tr.spacer td{height:12px;padding:0;background:#FAF9F7;border-bottom:1px solid var(--line)}
+  tbody tr:not(.mal):not(.spacer):hover td{background:#FCFBFE}
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs-list{margin:12px 0 0;padding:18px 22px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:16px}
+  .defs-list[hidden]{display:none}
+  .def .dt{font:600 13.5px/1.3 var(--display);color:var(--ink);margin-bottom:3px}
+  .def p{font-size:13.5px;line-height:1.6;color:var(--muted);max-width:980px}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+  table.ar{width:100%;table-layout:fixed}
+  table.ar th,table.ar td{min-width:0}
+  table.ar th{white-space:normal}
+  table.ar td.metric,table.ar th.metric{min-width:0;max-width:none;width:26%;padding-left:22px}
+  table.ar td.metric small{display:block;font:400 11.5px var(--body);color:var(--faint);margin-top:2px}
+  table.ar tr.pair td{border-bottom-color:transparent}
+  table.ar tr.total td{background:#FCFBF9;font-weight:700;color:var(--ink);border-top:1px solid var(--border)}
+  table.ar td.need,table.ar tr.total td.need{color:var(--bad);font-weight:700}
+  table.ar td.ok,table.ar tr.total td.ok{color:var(--ok);font-weight:700}
+  table.ar td.na{color:var(--ghost);font-weight:400}
+  .util{display:inline-block;min-width:58px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+  .util.hi{color:var(--ok);background:#E5F4EC}
+  .util.mid{color:#9A6200;background:#FBF1DC}
+  .util.lo{color:var(--bad);background:#FDECEB}
+  .util.top{color:#1D4ED8;background:#E6EEFB}
+  /* Monthly Active Learners split by course & teacher, and by age group */
+  tr.grp td{font-weight:600;color:var(--ink);background:#FCFBF9;cursor:pointer}
+  tr.grp td.metric{font:600 14px var(--display);color:var(--ink)}
+  tr.grp td.metric .ar{display:inline-block;width:16px;color:var(--muted);transition:transform .15s}
+  tr.grp.shut td.metric .ar{transform:rotate(-90deg)}
+  tr.sub td.metric{padding-left:46px;color:var(--ink2);font-weight:400}
+  tr.sub td{font-weight:400}
+  tr.nm td.metric{color:var(--faint);font-style:italic}
+  tr.tot td{background:var(--accent-soft);font-weight:700;color:var(--accent);border-bottom:0}
+  tr.tot td.metric{font:700 15px var(--display);color:var(--accent)}
+  td.neg{color:var(--bad)}
+  tr.sep td{background:#FAF9F7;font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding-top:14px;padding-bottom:10px}
+  tr.past td{color:var(--faint)}
+  tr.past td.metric{color:var(--muted)}
+  tr.past td.metric small{color:var(--faint);font-size:11.5px}
+  /* Capacity utilisation: second most important row, a lighter version of the Monthly Active Learners row */
+  tr.cu td{background:#FBF8FD;border-top:1px solid #EFE7F6}
+  tr.cu td.metric{font:600 14.5px var(--display);color:var(--accent)}
+  .sample{display:inline-flex;align-items:center;gap:6px;background:#FFF6E5;border:1px solid #F0DDB5;color:#8A5A00;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:14px}
+
+  @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
+    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.metric{min-width:200px;max-width:200px}}
+
+  /* Renewal tables: one cell per teacher per month — renewal % with renewed of due underneath */
+  table.rr td{padding-top:10px;padding-bottom:10px}
+  table.rr td .util{min-width:54px}
+  table.rr td small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
+  table.rr tr.tot td small{color:var(--accent);opacity:.75}
+  table.rr tr.past td .util{opacity:.75}
+  .lgd{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
+  .lgd .util{min-width:0;padding:2px 9px;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Teacher Performance</h1>
+      <div class="subtitle" id="subtitle">Active learners and renewals, teacher by teacher</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+
+  <section class="tray" id="sec-t">
+    <div class="tray-head"><div class="tray-title">Monthly Active Learners by Teacher</div><span class="badge" id="t-badge">—</span></div>
+    <div class="tbl-wrap"><table id="mal-t"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="t-defs" onclick="toggleDefs(this,'t-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="t-defs" hidden>
+        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as on the Monthly Active Learners page, but only for that teacher. The Total row matches Monthly Active Learners there.</p></div>
+        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no teacher filled in. They still count in the totals.</p></div>
+        <div class="def"><div class="dt">Current and past teachers:</div><p>Current teachers have active learners this month and an admission or renewal in the last 3 months; they're listed first, biggest first. Past teachers are listed below, with the month of their last admission or renewal.</p></div>
+        <div class="def"><div class="dt">Active months:</div><p>A teacher's numbers start in the month of their first admission or renewal and stop after the month their last membership ends. Every other month shows 0.</p></div>
+        <div class="def"><div class="dt">Outside a teacher's active months:</div><p>Learners still counted against a teacher outside those months — usually a membership with no end date. They're kept here so the Total still matches.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tray" id="sec-coh">
+    <div class="tray-head"><div class="tray-title">Cohort Renewals</div><span class="badge" id="coh-badge">—</span></div>
+    <div class="lgd" id="coh-lgd"></div>
+    <div class="tbl-wrap"><table class="rr" id="coh"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="coh-defs" onclick="toggleDefs(this,'coh-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="coh-defs" hidden>
+        <div class="def"><div class="dt">Cohort:</div><p>Every learner whose membership ends in that month, under the teacher who taught that membership.</p></div>
+        <div class="def"><div class="dt">Renewed:</div><p>Learners in the cohort who have renewed so far, whenever they paid — early, on time or late. The figure keeps rising as late payers renew, so older months can still change.</p></div>
+        <div class="def"><div class="dt">Renewal %:</div><p>The share of the cohort that has renewed so far. It tells you how well the teacher held on to that group of learners.</p></div>
+        <div class="def"><div class="dt">This month:</div><p>Covers every membership ending this month, including those whose end date hasn't arrived yet.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tray" id="sec-act">
+    <div class="tray-head"><div class="tray-title">Renewals Closed in the Month</div><span class="badge" id="act-badge">—</span></div>
+    <div class="lgd" id="act-lgd"></div>
+    <div class="tbl-wrap"><table class="rr" id="act"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="act-defs" onclick="toggleDefs(this,'act-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="act-defs" hidden>
+        <div class="def"><div class="dt">Due:</div><p>Memberships ending in that month, under the teacher who taught them.</p></div>
+        <div class="def"><div class="dt">Renewed:</div><p>Every renewal paid in that month — learners due that month, learners due in earlier months who paid late, and learners who paid in advance. Each renewal counts under the teacher of the membership being renewed.</p></div>
+        <div class="def"><div class="dt">Renewal %:</div><p>Renewed against due for that month. It can go above 100% when late payments and advance renewals come in. The month's figure is final once the month is over. The totals match Renewal collection efficiency on the Renewal Pipeline page.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const START={y:2024,m:4};   // May 2024 — Alwarpet, the first centre, opened
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const mi=d=>d.getFullYear()*12+d.getMonth();
+const valid=d=>d&&d.getFullYear()>=2020?d:null;
+async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cell=(r,c)=>String(r[c]||'').trim();
+
+const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate()),FIRST=START.y*12+START.m,LAST=mi(now);
+let DATA={},MONTHS=[];
+function firstMonth(names){
+  let f=LAST;
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const t=parseDate(r[0]);if(t&&t.getFullYear()>=2020){const k=mi(t);if(k<f)f=k;}});});
+  return Math.max(f,FIRST);
+}
+
+/* ── Monthly Active Learners by Teacher: the same calculation as the Monthly Active Learners page ── */
+function countsFor(name,pred){
+  const d=DATA[name],c={};
+  const bump=(k,key)=>{(c[k]=c[k]||{adm:0,due:0,ren:0})[key]++;};
+  const end=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020&&t<=TODAY?t:null;};
+  d.fs.filter(pred).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'adm');const e=end(r);if(e)bump(mi(e),'due');});
+  d.rn.filter(pred).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'ren');const e=end(r);if(e)bump(mi(e),'due');});
+  return c;
+}
+function malSeries(names,pred){
+  const per=names.map(n=>countsFor(n,pred)),out={};let open=0;
+  for(let k=FIRST;k<=LAST;k++){const s={adm:0,due:0,ren:0};per.forEach(c=>{const x=c[k];if(x)for(const f in s)s[f]+=x[f];});open=open+s.adm-s.due+s.ren;out[k]=open;}
+  return MONTHS.map(k=>out[k]);
+}
+const yb=k=>(k===MONTHS[0]||Math.floor(k/12)!==Math.floor((k+1)/12))?' yb':'';
+function malCells(vals){return vals.map((x,i)=>`<td class="${x===0?'zero':x<0?'neg':''}${yb(MONTHS[i])}">${x<0?'−':''}${Math.abs(x).toLocaleString('en-IN')}</td>`).join('');}
+function head(label){
+  const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
+  return`<thead><tr class="yr"><th class="metric" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">${label}</th>${years.map(y=>`<th class="yb" colspan="${y.n}">${y.y}</th>`).join('')}</tr>
+    <tr class="mo">${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+}
+function renderMAL(names){
+  const el=document.getElementById('mal-t');
+  const rows=names.flatMap(n=>DATA[n].fs.concat(DATA[n].rn));
+  const totals=malSeries(names,()=>true);
+  const span={};
+  rows.forEach(r=>{const t=cell(r,29);if(!t)return;const d=parseDate(r[0]),e=parseDate(r[23]);const x=span[t]=span[t]||{first:Infinity,last:-Infinity,end:-Infinity};
+    if(d){x.first=Math.min(x.first,mi(d));x.last=Math.max(x.last,mi(d));}if(e&&e.getFullYear()>=2020)x.end=Math.max(x.end,mi(e));});
+  const adj=MONTHS.map(()=>0);
+  const tRows=Object.keys(span).map(t=>{const x=span[t],stop=Math.max(x.end,x.last),raw=malSeries(names,r=>cell(r,29)===t);
+    const vals=raw.map((val,i)=>{const k=MONTHS[i];if(k<x.first||k>stop){adj[i]+=val;return 0;}return val;});
+    return{t,vals,active:x.last>=LAST-2&&vals[0]>0};}).filter(x=>x.vals.some(y=>y!==0));
+  const act=tRows.filter(x=>x.active).sort((a,b)=>b.vals[0]-a.vals[0]||a.t.localeCompare(b.t));
+  const past=tRows.filter(x=>!x.active).sort((a,b)=>span[b.t].last-span[a.t].last||a.t.localeCompare(b.t));
+  const nm=malSeries(names,r=>cell(r,29)==='');
+  let body=act.map(x=>`<tr><td class="metric">${esc(x.t)}</td>${malCells(x.vals)}</tr>`).join('');
+  if(nm.some(y=>y!==0))body+=`<tr class="nm"><td class="metric">Teacher not mentioned</td>${malCells(nm)}</tr>`;
+  if(adj.some(y=>y!==0))body+=`<tr class="nm"><td class="metric">Outside a teacher's active months</td>${malCells(adj)}</tr>`;
+  if(past.length)body+=`<tr class="sep"><td class="metric">Past teachers</td><td colspan="${MONTHS.length}"></td></tr>`+past.map(x=>`<tr class="past"><td class="metric">${esc(x.t)}<small> · last entry ${MON[span[x.t].last%12]} ${String(Math.floor(span[x.t].last/12)).slice(2)}</small></td>${malCells(x.vals)}</tr>`).join('');
+  el.innerHTML=head('Teacher')+'<tbody>'+body+`<tr class="tot"><td class="metric">Total</td>${malCells(totals)}</tr></tbody>`;
+  document.getElementById('t-badge').textContent=MON[LAST%12]+' '+Math.floor(LAST/12)+': '+totals[0].toLocaleString('en-IN')+' active · '+act.length+' current teacher'+(act.length===1?'':'s');
+}
+
+/* ── Renewals by teacher ──
+   Every row of Fresh Sales and Renewals is one membership (A date · D Learner ID · X end date · Z Renewal Status · AD teacher).
+   A membership counts as renewed when the same Learner ID has a later Renewals entry, or its Renewal Status says Renewed.
+   Cohort: memberships ending in the month (whole month), and how many of them have renewed so far — under the membership's teacher.
+   Closed in the month: the same dues, against every renewal paid in the month — under the teacher of the membership being renewed. */
+function renewals(names){
+  const T=[];
+  names.forEach(n=>[['fs',DATA[n].fs],['rn',DATA[n].rn]].forEach(([tab,rows])=>rows.forEach(r=>{const date=parseDate(r[0]);if(!date)return;
+    T.push({tab,date,id:cell(r,3).toUpperCase(),end:valid(parseDate(r[23])),status:cell(r,25),teacher:cell(r,29)});})));
+  const byId=new Map();T.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
+  byId.forEach(l=>{l.sort((a,b)=>a.date-b.date);l.forEach((t,i)=>{
+    if(t.tab==='rn'&&i>0)t.prevTeacher=l[i-1].teacher;
+    t.renewed=l.some(x=>x!==t&&x.tab==='rn'&&x.date>t.date)||/^renewed$/i.test(t.status);});});
+  T.forEach(t=>{if(!t.id)t.renewed=/^renewed$/i.test(t.status);});
+  const coh={},act={},put=(o,t,k,f)=>{const a=o[t]=o[t]||{};(a[k]=a[k]||{due:0,ren:0})[f]++;};
+  T.forEach(t=>{
+    if(t.end){const k=mi(t.end);if(k<=LAST){put(coh,t.teacher,k,'due');if(t.renewed)put(coh,t.teacher,k,'ren');put(act,t.teacher,k,'due');}}
+    if(t.tab==='rn'){const k=mi(t.date);put(act,t.prevTeacher!=null&&t.prevTeacher!==''?t.prevTeacher:t.teacher,k,'ren');}
+  });
+  // When did each teacher last have an admission or renewal? (current = in the last 3 months)
+  const lastEntry={};T.forEach(t=>{if(t.teacher)lastEntry[t.teacher]=Math.max(lastEntry[t.teacher]||-Infinity,mi(t.date));});
+  return{coh,act,lastEntry};
+}
+const band=p=>p>=90?'hi':p>=70?'mid':'lo';
+function rrCell(x,k){
+  const c=yb(k);
+  if(!x||(!x.due&&!x.ren))return`<td class="zero${c}">—</td>`;
+  if(!x.due)return`<td class="${c}"><span class="util top">+${x.ren}</span><small>none due</small></td>`;
+  const p=x.ren/x.due*100;
+  return`<td class="${c}"><span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren} of ${x.due}</small></td>`;
+}
+function rrTable(id,o,lastEntry){
+  const all={};Object.values(o).forEach(a=>Object.keys(a).forEach(k=>{const s=all[k]=all[k]||{due:0,ren:0};s.due+=a[k].due;s.ren+=a[k].ren;}));
+  const inView=t=>MONTHS.some(k=>o[t][k]&&(o[t][k].due||o[t][k].ren));
+  const names=Object.keys(o).filter(t=>t&&inView(t));
+  const cur=names.filter(t=>lastEntry[t]>=LAST-2),past=names.filter(t=>!(lastEntry[t]>=LAST-2));
+  const dueNow=t=>((o[t][LAST]||{}).due||0)+((o[t][LAST-1]||{}).due||0);
+  cur.sort((a,b)=>dueNow(b)-dueNow(a)||a.localeCompare(b));past.sort((a,b)=>(lastEntry[b]||0)-(lastEntry[a]||0)||a.localeCompare(b));
+  const row=(t,cls,label)=>`<tr class="${cls}"><td class="metric">${label}</td>${MONTHS.map(k=>rrCell(o[t][k],k)).join('')}</tr>`;
+  let body=cur.map(t=>row(t,'',esc(t))).join('');
+  if(o['']&&inView(''))body+=row('','nm','Teacher not mentioned');
+  if(past.length)body+=`<tr class="sep"><td class="metric">Past teachers</td><td colspan="${MONTHS.length}"></td></tr>`+past.map(t=>row(t,'past',esc(t)+(isFinite(lastEntry[t])?`<small> · last entry ${MON[lastEntry[t]%12]} ${String(Math.floor(lastEntry[t]/12)).slice(2)}</small>`:''))).join('');
+  body+=`<tr class="tot"><td class="metric">Total</td>${MONTHS.map(k=>rrCell(all[k],k)).join('')}</tr>`;
+  document.getElementById(id).innerHTML=head('Teacher')+'<tbody>'+body+'</tbody>';
+  return{all,cur};
+}
+const LGD='<span class="util hi">90%+</span><span class="util mid">70–89%</span><span class="util lo">below 70%</span><span>Each cell: renewal % and renewed of due</span>';
+
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_tp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_tp_centre',selCentre);}catch(e){}render();});
+
+let R=null;
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  document.getElementById('subtitle').textContent='Active learners and renewals, teacher by teacher — '+(sel?sel.name+', '+sel.city:'all centres combined');
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name);
+  if(!LOADED()){['mal-t','coh','act'].forEach(id=>document.getElementById(id).innerHTML='<tbody><tr><td class="metric">Loading…</td></tr></tbody>');if(window.CardNav)CardNav.refresh();return;}
+  const from=firstMonth(names);MONTHS=[];for(let k=LAST;k>=from;k--)MONTHS.push(k);
+  renderMAL(names);
+  const rn=renewals(names);
+  const a=rrTable('coh',rn.coh,rn.lastEntry),b=rrTable('act',rn.act,rn.lastEntry);
+  const pc=x=>x&&x.due?Math.round(x.ren/x.due*100)+'%':'—',lbl=MON[LAST%12]+' '+Math.floor(LAST/12);
+  document.getElementById('coh-badge').textContent=lbl+' cohort: '+pc(a.all[LAST])+' renewed so far';
+  document.getElementById('act-badge').textContent=lbl+': '+pc(b.all[LAST])+' till date';
+  document.getElementById('coh-lgd').innerHTML=document.getElementById('act-lgd').innerHTML=LGD;
+  R={a,b,rn};
+  if(window.CardNav)CardNav.refresh();
+}
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    render();
+  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+}
+function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+
+/* Landing: one card per section (see cardnav.js) */
+const LOADED=()=>CENTRES.every(c=>DATA[c.name]);
+const rowsOf=id=>[...document.querySelectorAll('#'+id+' tbody tr')].map(r=>[...r.cells].map(c=>c.innerText.trim())).filter(r=>r.length>1&&r[0]);
+const nowCol=r=>parseInt(String(r[1]).replace(/[^\d\-−]/g,'').replace('−','-'),10)||0;
+// Renewal previews: last full month, current teachers with the most due
+function rrPreview(key){
+  if(!LOADED()||!R)return null;const o=R.rn[key],k=LAST-1;
+  return R[key==='coh'?'a':'b'].cur.map(t=>[t,o[t][k]]).filter(x=>x[1]&&x[1].due).sort((p,q)=>q[1].due-p[1].due).slice(0,3)
+    .map(([t,x])=>[t+' · '+MON[k%12],Math.round(x.ren/x.due*100)+'% · '+x.ren+' of '+x.due]);
+}
+CardNav.init({back:'All sections',cards:[
+  {id:'sec-t',k:'Active learners',title:'Learners by Teacher',short:'Monthly Active Learners for every teacher, current and past.',go:'Open by teacher',
+   icon:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',
+   preview:()=>LOADED()?rowsOf('mal-t').filter(r=>!/^total$|not mentioned$|^past teachers$|active months$/i.test(r[0])).sort((a,b)=>nowCol(b)-nowCol(a)).filter(r=>nowCol(r)>0).map(r=>[r[0],r[1]+' active']):null},
+  {id:'sec-coh',k:'Renewals · by cohort',title:'Cohort Renewals',short:'Of the learners due each month, how many have renewed so far. Keeps updating as late payers renew.',go:'Open cohorts',
+   icon:'<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2.5 20c.5-3 2.7-4.5 5.5-4.5s5 1.5 5.5 4.5M13 15.6c.9-.1 2-.1 3-.1 2.8 0 5 1.5 5.5 4.5"/>',
+   preview:()=>rrPreview('coh')},
+  {id:'sec-act',k:'Renewals · by month',title:'Renewals Closed in the Month',short:'Every renewal paid in the month — on time, late or in advance — against what was due.',go:'Open monthly renewals',
+   icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8.5 15.5l2.2 2.2 4.8-4.8"/>',
+   preview:()=>rrPreview('act')}
+]});
+load();
+</script>
+</body>
+</html>

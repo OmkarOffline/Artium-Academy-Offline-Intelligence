@@ -13,7 +13,7 @@
   const SCOPES='openid email profile';
   const KEY='artium_oi_auth';
   // Each page file and the name used for it in the access list
-  const PAGE_OF={'start.html':'start','home.html':'home','daily.html':'daily','pipeline.html':'pipeline','targets.html':'targets','dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance','learners.html':'learners','stats.html':'stats','analysis.html':'analysis','focus.html':'focus','calendar.html':'calendar'};
+  const PAGE_OF={'start.html':'start','home.html':'home','daily.html':'daily','pipeline.html':'pipeline','targets.html':'targets','dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance','learners.html':'learners','teachers.html':'teachers','stats.html':'stats','analysis.html':'analysis','focus.html':'focus','calendar.html':'calendar'};
 
   /* ── Inside the landing page: borrow its sign-in ── */
   if(window.parent!==window){
