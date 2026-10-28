@@ -187,6 +187,7 @@
   table.rr.fold-perf th.gh:has([onclick*="'perf'"]) span,table.rr.fold-year th.gh:has([onclick*="'year'"]) span{opacity:1;max-height:200px}
   table.rr .num{font:600 14px var(--display);color:var(--ink)}
   table.rr .num.left{color:var(--accent);font-weight:700}
+  table.rr .num.lost{color:var(--muted);font-weight:500}
   table.rr .na{color:var(--ghost);font-weight:400}
   table.rr .sg small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
   table.rr tr.tot .sg{background:var(--accent-soft)}
@@ -234,7 +235,9 @@
         <div class="def"><div class="dt">Renewed:</div><p>Learners in the cohort who have renewed so far, whenever they paid — early, on time or late. The figure keeps rising as late payers renew, so older months can still change.</p></div>
         <div class="def"><div class="dt">Renewal %:</div><p>The share of the cohort that has renewed so far. It tells you how well the teacher held on to that group of learners.</p></div>
         <div class="def"><div class="dt">Last 3M, 6M, 12M and Lifetime:</div><p>All the cohorts in those months put together: renewed out of due, for completed months only. This month is left out until it's over. Recent cohorts are still renewing, so the last 3 months usually read lower than 12 months — that alone doesn't mean the teacher has slipped.</p></div>
-        <div class="def"><div class="dt">This year so far:</div><p>Memberships ending from January to the end of this month: how many were due, how many have renewed, and how many are still to renew — the learners to reach out to. Those marked "Will Not Renew" are counted in To renew and shown underneath.</p></div>
+        <div class="def"><div class="dt">Due, Renewed, % Renewed and Yet to renew:</div><p>Memberships ending from January to the end of this month: how many were due, how many have renewed so far, and how many haven't renewed yet. % Renewed is Renewed out of Due.</p></div>
+        <div class="def"><div class="dt">Won't renew:</div><p>Learners who haven't renewed and are marked "Will Not Renew".</p></div>
+        <div class="def"><div class="dt">Opportunity:</div><p>Yet to renew minus Won't renew: the learners who haven't renewed and haven't said no. These are the ones to reach out to.</p></div>
         <div class="def"><div class="dt">Folding and sorting:</div><p>The arrow beside each group of summary columns folds it away, and brings it back. Click a summary column's heading to rank teachers by it; click again to go back to the usual order.</p></div>
         <div class="def"><div class="dt">This month:</div><p>Covers every membership ending this month, including those whose end date hasn't arrived yet.</p></div>
       </div>
@@ -367,7 +370,7 @@ function rrCell(x,k){
    This year so far (Cohort Renewals only) — memberships ending from January to this month: due, renewed, still to renew. */
 const GROUPS={
   perf:{title:'Over time',cols:[['m3','Last 3M',3],['m6','Last 6M',6],['m12','Last 12M',12],['life','Lifetime',Infinity]]},
-  year:{title:()=>Math.floor(LAST/12)+' so far',cols:[['ydue','Due'],['yren','Renewed'],['yleft','To renew']]}
+  year:{title:()=>Math.floor(LAST/12)+' so far',cols:[['ydue','Due'],['yren','Renewed'],['ypct','% Renewed'],['yleft','Yet to renew'],['ylost',"Won't renew"],['yopp','Opportunity']]}
 };
 const FOLD=(()=>{try{return JSON.parse(localStorage.getItem('artium_tp_fold')||'{}');}catch(e){return{};}})();
 const SORT={};
@@ -377,7 +380,7 @@ function sortBy(id,key){SORT[id]=SORT[id]===key?null:key;render();}
 function sumWin(m,a,b){const s={due:0,ren:0,lost:0};if(!m)return s;for(const k in m){const n=+k;if(n>=a&&n<=b){s.due+=m[k].due;s.ren+=m[k].ren;s.lost+=m[k].lost||0;}}return s;}
 function stats(m){
   const r={};GROUPS.perf.cols.forEach(([key,,n])=>r[key]=sumWin(m,n===Infinity?-Infinity:LAST-n,LAST-1));
-  const y=sumWin(m,Math.floor(LAST/12)*12,LAST);r.ydue=y.due;r.yren=y.ren;r.yleft=y.due-y.ren;r.ylost=y.lost;
+  const y=sumWin(m,Math.floor(LAST/12)*12,LAST);r.ydue=y.due;r.yren=y.ren;r.yleft=y.due-y.ren;r.ylost=y.lost;r.yopp=r.yleft-r.ylost;r.ypct=y.due?y.ren/y.due*100:null;
   return r;
 }
 const pctOf=x=>x&&x.due?x.ren/x.due*100:null;
@@ -385,8 +388,9 @@ function sumCells(g,s){
   if(g==='perf')return GROUPS.perf.cols.map(([key],i)=>{const x=s[key],p=pctOf(x);
     return`<td class="sg sg-perf${i===0?' g0':''}"><div class="sw">${p==null?'<span class="na">—</span>':`<span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren.toLocaleString('en-IN')} of ${x.due.toLocaleString('en-IN')}</small>`}</div></td>`;}).join('')+'<td class="gh"></td>';
   const n=v=>v?v.toLocaleString('en-IN'):'<span class="na">0</span>';
-  return`<td class="sg sg-year g0"><div class="sw"><b class="num">${n(s.ydue)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num">${n(s.yren)}</b></div></td>
-    <td class="sg sg-year"><div class="sw"><b class="num left">${n(s.yleft)}</b>${s.ylost?`<small>${s.ylost} won't renew</small>`:''}</div></td><td class="gh"></td>`;
+  return`<td class="sg sg-year g0"><div class="sw"><b class="num">${n(s.ydue)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num">${n(s.yren)}</b></div></td><td class="sg sg-year"><div class="sw">${s.ypct==null?'<span class="na">—</span>':`<span class="util ${band(s.ypct)}">${Math.round(s.ypct)}%</span>`}</div></td>
+    <td class="sg sg-year"><div class="sw"><b class="num">${n(s.yleft)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num lost">${n(s.ylost)}</b></div></td>
+    <td class="sg sg-year"><div class="sw"><b class="num left">${n(s.yopp)}</b></div></td><td class="gh"></td>`;
 }
 function rrTable(id,o,lastEntry,groups){
   const all={};Object.values(o).forEach(a=>Object.keys(a).forEach(k=>{const s=all[k]=all[k]||{due:0,ren:0,lost:0};s.due+=a[k].due;s.ren+=a[k].ren;s.lost+=a[k].lost||0;}));
