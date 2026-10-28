@@ -163,6 +163,35 @@
   table.rr td small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
   table.rr tr.tot td small{color:var(--accent);opacity:.75}
   table.rr tr.past td .util{opacity:.75}
+
+  /* Summary groups before the months: fold away sideways with one click */
+  table.rr{min-width:0;width:max-content}   /* no stretching, so folded columns close right up */
+  table.rr .sg{min-width:0;padding:0;background:#FCFAFE}
+  table.rr thead .sg{background:#F6F1FB}
+  table.rr .sg .sw{max-width:140px;overflow:hidden;padding:10px 14px;white-space:nowrap;transition:max-width .32s cubic-bezier(.3,.7,.2,1),padding .32s,opacity .2s}
+  table.rr thead tr.mo .sg .sw{padding:4px 10px 12px}
+  table.rr .sg.g0{border-left:1px solid #E6DCF1}
+  table.rr th.gt .sw{padding:14px 14px 4px;font:700 10px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);text-align:left}
+  table.rr .gh{min-width:30px;width:30px;max-width:30px;padding:0;background:#F6F1FB;border-right:1px solid #E6DCF1}
+  table.rr tbody .gh{background:#F9F5FC}
+  .gbtn{display:flex;flex-direction:column;align-items:center;gap:8px;width:30px;height:100%;min-height:74px;padding:10px 0;border:0;background:none;color:var(--accent);cursor:pointer}
+  .gbtn:hover{background:#EDE3F7}
+  .gbtn svg{transition:transform .32s}
+  .gbtn span{writing-mode:vertical-rl;transform:rotate(180deg);font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s}
+  .sbtn{border:0;background:none;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);cursor:pointer;padding:2px 4px;border-radius:6px}
+  .sbtn:hover{background:#EDE3F7;color:var(--accent)}
+  th.on .sbtn{color:var(--accent)}
+  table.rr.fold-perf .sg-perf .sw,table.rr.fold-year .sg-year .sw{max-width:0;padding-left:0!important;padding-right:0!important;opacity:0}
+  table.rr.fold-perf .sg-perf.g0,table.rr.fold-year .sg-year.g0{border-left-color:transparent}
+  table.rr.fold-perf th.gh:has([onclick*="'perf'"]) svg,table.rr.fold-year th.gh:has([onclick*="'year'"]) svg{transform:rotate(180deg)}
+  table.rr.fold-perf th.gh:has([onclick*="'perf'"]) span,table.rr.fold-year th.gh:has([onclick*="'year'"]) span{opacity:1;max-height:200px}
+  table.rr .num{font:600 14px var(--display);color:var(--ink)}
+  table.rr .num.left{color:var(--accent);font-weight:700}
+  table.rr .na{color:var(--ghost);font-weight:400}
+  table.rr .sg small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
+  table.rr tr.tot .sg{background:var(--accent-soft)}
+  table.rr .metric{min-width:240px;max-width:240px}
+  .util.xtra{color:var(--accent);background:var(--accent-soft)}   /* renewals with nothing due: not a score, so no score colour */
   .lgd{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
   .lgd .util{min-width:0;padding:2px 9px;font-size:11.5px}
 </style>
@@ -204,6 +233,9 @@
         <div class="def"><div class="dt">Cohort:</div><p>Every learner whose membership ends in that month, under the teacher who taught that membership.</p></div>
         <div class="def"><div class="dt">Renewed:</div><p>Learners in the cohort who have renewed so far, whenever they paid — early, on time or late. The figure keeps rising as late payers renew, so older months can still change.</p></div>
         <div class="def"><div class="dt">Renewal %:</div><p>The share of the cohort that has renewed so far. It tells you how well the teacher held on to that group of learners.</p></div>
+        <div class="def"><div class="dt">Last 3M, 6M, 12M and Lifetime:</div><p>All the cohorts in those months put together: renewed out of due, for completed months only. This month is left out until it's over. Recent cohorts are still renewing, so the last 3 months usually read lower than 12 months — that alone doesn't mean the teacher has slipped.</p></div>
+        <div class="def"><div class="dt">This year so far:</div><p>Memberships ending from January to the end of this month: how many were due, how many have renewed, and how many are still to renew — the learners to reach out to. Those marked "Will Not Renew" are counted in To renew and shown underneath.</p></div>
+        <div class="def"><div class="dt">Folding and sorting:</div><p>The arrow beside each group of summary columns folds it away, and brings it back. Click a summary column's heading to rank teachers by it; click again to go back to the usual order.</p></div>
         <div class="def"><div class="dt">This month:</div><p>Covers every membership ending this month, including those whose end date hasn't arrived yet.</p></div>
       </div>
     </div>
@@ -218,6 +250,8 @@
       <div class="defs-list" id="act-defs" hidden>
         <div class="def"><div class="dt">Due:</div><p>Memberships ending in that month, under the teacher who taught them.</p></div>
         <div class="def"><div class="dt">Renewed:</div><p>Every renewal paid in that month — learners due that month, learners due in earlier months who paid late, and learners who paid in advance. Each renewal counts under the teacher of the membership being renewed.</p></div>
+        <div class="def"><div class="dt">Last 3M, 6M, 12M and Lifetime:</div><p>Those months put together: every renewal closed in them out of everything due in them, for completed months only. This month is left out until it's over.</p></div>
+        <div class="def"><div class="dt">Folding and sorting:</div><p>The arrow beside the summary columns folds them away, and brings them back. Click a summary column's heading to rank teachers by it; click again to go back to the usual order.</p></div>
         <div class="def"><div class="dt">Renewal %:</div><p>Renewed against due for that month. It can go above 100% when late payments and advance renewals come in. The month's figure is final once the month is over. The totals match Renewal collection efficiency on the Renewal Pipeline page.</p></div>
       </div>
     </div>
@@ -311,39 +345,79 @@ function renewals(names){
     if(t.tab==='rn'&&i>0)t.prevTeacher=l[i-1].teacher;
     t.renewed=l.some(x=>x!==t&&x.tab==='rn'&&x.date>t.date)||/^renewed$/i.test(t.status);});});
   T.forEach(t=>{if(!t.id)t.renewed=/^renewed$/i.test(t.status);});
-  const coh={},act={},put=(o,t,k,f)=>{const a=o[t]=o[t]||{};(a[k]=a[k]||{due:0,ren:0})[f]++;};
+  const coh={},act={},put=(o,t,k,f)=>{const a=o[t]=o[t]||{};(a[k]=a[k]||{due:0,ren:0,lost:0})[f]++;};
   T.forEach(t=>{
-    if(t.end){const k=mi(t.end);if(k<=LAST){put(coh,t.teacher,k,'due');if(t.renewed)put(coh,t.teacher,k,'ren');put(act,t.teacher,k,'due');}}
+    if(t.end){const k=mi(t.end);if(k<=LAST){put(coh,t.teacher,k,'due');if(t.renewed)put(coh,t.teacher,k,'ren');else if(/will not renew|discontinu|refund/i.test(t.status))put(coh,t.teacher,k,'lost');put(act,t.teacher,k,'due');}}
     if(t.tab==='rn'){const k=mi(t.date);put(act,t.prevTeacher!=null&&t.prevTeacher!==''?t.prevTeacher:t.teacher,k,'ren');}
   });
   // When did each teacher last have an admission or renewal? (current = in the last 3 months)
   const lastEntry={};T.forEach(t=>{if(t.teacher)lastEntry[t.teacher]=Math.max(lastEntry[t.teacher]||-Infinity,mi(t.date));});
   return{coh,act,lastEntry};
 }
-const band=p=>p>=90?'hi':p>=70?'mid':'lo';
+const band=p=>{const r=Math.round(p);return r>90?'top':r>70?'hi':r>50?'mid':'lo';};   // up to 50% red · 51–70% amber · 71–90% green · above 90% blue
 function rrCell(x,k){
   const c=yb(k);
   if(!x||(!x.due&&!x.ren))return`<td class="zero${c}">—</td>`;
-  if(!x.due)return`<td class="${c}"><span class="util top">+${x.ren}</span><small>none due</small></td>`;
+  if(!x.due)return`<td class="${c}"><span class="util xtra">+${x.ren}</span><small>none due</small></td>`;
   const p=x.ren/x.due*100;
   return`<td class="${c}"><span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren} of ${x.due}</small></td>`;
 }
-function rrTable(id,o,lastEntry){
-  const all={};Object.values(o).forEach(a=>Object.keys(a).forEach(k=>{const s=all[k]=all[k]||{due:0,ren:0};s.due+=a[k].due;s.ren+=a[k].ren;}));
+/* Summary columns before the months, in groups that fold away sideways with one click (remembered per table):
+   Over time — Last 3, 6, 12 months and Lifetime, all completed months only (the current month is left out); renewed and due are added up first, then the %.
+   This year so far (Cohort Renewals only) — memberships ending from January to this month: due, renewed, still to renew. */
+const GROUPS={
+  perf:{title:'Over time',cols:[['m3','Last 3M',3],['m6','Last 6M',6],['m12','Last 12M',12],['life','Lifetime',Infinity]]},
+  year:{title:()=>Math.floor(LAST/12)+' so far',cols:[['ydue','Due'],['yren','Renewed'],['yleft','To renew']]}
+};
+const FOLD=(()=>{try{return JSON.parse(localStorage.getItem('artium_tp_fold')||'{}');}catch(e){return{};}})();
+const SORT={};
+function fold(id,g){FOLD[id+'.'+g]=!FOLD[id+'.'+g];try{localStorage.setItem('artium_tp_fold',JSON.stringify(FOLD));}catch(e){}
+  document.getElementById(id).classList.toggle('fold-'+g,!!FOLD[id+'.'+g]);}
+function sortBy(id,key){SORT[id]=SORT[id]===key?null:key;render();}
+function sumWin(m,a,b){const s={due:0,ren:0,lost:0};if(!m)return s;for(const k in m){const n=+k;if(n>=a&&n<=b){s.due+=m[k].due;s.ren+=m[k].ren;s.lost+=m[k].lost||0;}}return s;}
+function stats(m){
+  const r={};GROUPS.perf.cols.forEach(([key,,n])=>r[key]=sumWin(m,n===Infinity?-Infinity:LAST-n,LAST-1));
+  const y=sumWin(m,Math.floor(LAST/12)*12,LAST);r.ydue=y.due;r.yren=y.ren;r.yleft=y.due-y.ren;r.ylost=y.lost;
+  return r;
+}
+const pctOf=x=>x&&x.due?x.ren/x.due*100:null;
+function sumCells(g,s){
+  if(g==='perf')return GROUPS.perf.cols.map(([key],i)=>{const x=s[key],p=pctOf(x);
+    return`<td class="sg sg-perf${i===0?' g0':''}"><div class="sw">${p==null?'<span class="na">—</span>':`<span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren.toLocaleString('en-IN')} of ${x.due.toLocaleString('en-IN')}</small>`}</div></td>`;}).join('')+'<td class="gh"></td>';
+  const n=v=>v?v.toLocaleString('en-IN'):'<span class="na">0</span>';
+  return`<td class="sg sg-year g0"><div class="sw"><b class="num">${n(s.ydue)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num">${n(s.yren)}</b></div></td>
+    <td class="sg sg-year"><div class="sw"><b class="num left">${n(s.yleft)}</b>${s.ylost?`<small>${s.ylost} won't renew</small>`:''}</div></td><td class="gh"></td>`;
+}
+function rrTable(id,o,lastEntry,groups){
+  const all={};Object.values(o).forEach(a=>Object.keys(a).forEach(k=>{const s=all[k]=all[k]||{due:0,ren:0,lost:0};s.due+=a[k].due;s.ren+=a[k].ren;s.lost+=a[k].lost||0;}));
   const inView=t=>MONTHS.some(k=>o[t][k]&&(o[t][k].due||o[t][k].ren));
   const names=Object.keys(o).filter(t=>t&&inView(t));
+  const ST={};names.concat(['']).forEach(t=>ST[t]=stats(o[t]));const STall=stats(all);
   const cur=names.filter(t=>lastEntry[t]>=LAST-2),past=names.filter(t=>!(lastEntry[t]>=LAST-2));
   const dueNow=t=>((o[t][LAST]||{}).due||0)+((o[t][LAST-1]||{}).due||0);
-  cur.sort((a,b)=>dueNow(b)-dueNow(a)||a.localeCompare(b));past.sort((a,b)=>(lastEntry[b]||0)-(lastEntry[a]||0)||a.localeCompare(b));
-  const row=(t,cls,label)=>`<tr class="${cls}"><td class="metric">${label}</td>${MONTHS.map(k=>rrCell(o[t][k],k)).join('')}</tr>`;
+  const sk=SORT[id],val=t=>{const v=ST[t][sk];return v==null?-1:typeof v==='number'?v:pctOf(v)==null?-1:pctOf(v);};
+  const order=(a,b)=>sk?val(b)-val(a)||a.localeCompare(b):dueNow(b)-dueNow(a)||a.localeCompare(b);
+  cur.sort(order);past.sort((a,b)=>sk?order(a,b):(lastEntry[b]||0)-(lastEntry[a]||0)||a.localeCompare(b));
+  const sums=s=>groups.map(g=>sumCells(g,s)).join('');
+  const row=(t,cls,label)=>`<tr class="${cls}"><td class="metric">${label}</td>${sums(ST[t])}${MONTHS.map(k=>rrCell(o[t][k],k)).join('')}</tr>`;
   let body=cur.map(t=>row(t,'',esc(t))).join('');
   if(o['']&&inView(''))body+=row('','nm','Teacher not mentioned');
-  if(past.length)body+=`<tr class="sep"><td class="metric">Past teachers</td><td colspan="${MONTHS.length}"></td></tr>`+past.map(t=>row(t,'past',esc(t)+(isFinite(lastEntry[t])?`<small> · last entry ${MON[lastEntry[t]%12]} ${String(Math.floor(lastEntry[t]/12)).slice(2)}</small>`:''))).join('');
-  body+=`<tr class="tot"><td class="metric">Total</td>${MONTHS.map(k=>rrCell(all[k],k)).join('')}</tr>`;
-  document.getElementById(id).innerHTML=head('Teacher')+'<tbody>'+body+'</tbody>';
+  const span=1+groups.reduce((s,g)=>s+GROUPS[g].cols.length+1,0);
+  if(past.length)body+=`<tr class="sep"><td class="metric">Past teachers</td><td colspan="${span-1+MONTHS.length}"></td></tr>`+past.map(t=>row(t,'past',esc(t)+(isFinite(lastEntry[t])?`<small> · last entry ${MON[lastEntry[t]%12]} ${String(Math.floor(lastEntry[t]/12)).slice(2)}</small>`:''))).join('');
+  body+=`<tr class="tot"><td class="metric">Total</td>${sums(STall)}${MONTHS.map(k=>rrCell(all[k],k)).join('')}</tr>`;
+  // Header: the group's title spans its columns; a slim handle at the end folds the group away and stays as a vertical tab
+  const CHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
+  const gTop=groups.map(g=>{const G=GROUPS[g],t=typeof G.title==='function'?G.title():G.title;
+    return`<th class="sg sg-${g} g0 gt" colspan="${G.cols.length}"><div class="sw">${t}</div></th><th class="gh" rowspan="2"><button type="button" class="gbtn" onclick="fold('${id}','${g}')" aria-label="Show or hide ${t}">${CHEV}<span>${t}</span></button></th>`;}).join('');
+  const gMo=groups.map(g=>GROUPS[g].cols.map(([key,l],i)=>`<th class="sg sg-${g}${i===0?' g0':''}${sk===key?' on':''}"><div class="sw"><button type="button" class="sbtn" onclick="sortBy('${id}','${key}')">${l}${sk===key?' ↓':''}</button></div></th>`).join('')).join('');
+  const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
+  const hd=`<thead><tr class="yr"><th class="metric" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">Teacher</th>${gTop}${years.map(y=>`<th class="yb" colspan="${y.n}">${y.y}</th>`).join('')}</tr>
+    <tr class="mo">${gMo}${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+  const el=document.getElementById(id);el.innerHTML=hd+'<tbody>'+body+'</tbody>';
+  groups.forEach(g=>el.classList.toggle('fold-'+g,!!FOLD[id+'.'+g]));
   return{all,cur};
 }
-const LGD='<span class="util hi">90%+</span><span class="util mid">70–89%</span><span class="util lo">below 70%</span><span>Each cell: renewal % and renewed of due</span>';
+const LGD='<span class="util lo">Up to 50%</span><span class="util mid">51–70%</span><span class="util hi">71–90%</span><span class="util top">Above 90%</span><span>Each cell: renewal % and renewed of due</span>';
 
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_tp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
@@ -361,7 +435,7 @@ function render(){
   const from=firstMonth(names);MONTHS=[];for(let k=LAST;k>=from;k--)MONTHS.push(k);
   renderMAL(names);
   const rn=renewals(names);
-  const a=rrTable('coh',rn.coh,rn.lastEntry),b=rrTable('act',rn.act,rn.lastEntry);
+  const a=rrTable('coh',rn.coh,rn.lastEntry,['perf','year']),b=rrTable('act',rn.act,rn.lastEntry,['perf']);
   const pc=x=>x&&x.due?Math.round(x.ren/x.due*100)+'%':'—',lbl=MON[LAST%12]+' '+Math.floor(LAST/12);
   document.getElementById('coh-badge').textContent=lbl+' cohort: '+pc(a.all[LAST])+' renewed so far';
   document.getElementById('act-badge').textContent=lbl+': '+pc(b.all[LAST])+' till date';
