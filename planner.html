@@ -98,7 +98,7 @@
   .lbl{display:block;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
   .lbl em{font-style:normal;color:var(--bad)}
   .hint{font-size:12px;color:var(--faint);margin-top:6px;line-height:1.5}
-  input[type=text],input[type=email],input[type=number],select,textarea{font:400 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 12px;background:#fff}
+  input[type=text],input[type=email],input[type=number],input[type=date],select,textarea{font:400 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 12px;background:#fff}
   input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
   .w100{width:100%}textarea{resize:vertical;line-height:1.45}
   .sseg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px;margin-bottom:10px}
@@ -187,7 +187,7 @@
     <div>
       <div class="eyebrow">Planner</div>
       <h1>Recurring Events</h1>
-      <div class="subtitle">Everything that must happen on a schedule. Each PoC gets email reminders for their event or subtask, with you in copy, until it's marked done.</div>
+      <div class="subtitle">Everything that must happen on a schedule. Each PoC gets email reminders for their subtasks, with you in copy, until they're marked done.</div>
     </div>
     <button class="btn primary" id="add" type="button" hidden><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New recurring event</button>
   </header>
@@ -201,7 +201,7 @@
 </div>
 
 <div class="dlg-bg" id="dlg" hidden><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlg-t" style="width:min(820px,100%)">
-  <div class="dlg-head"><div><h2 id="dlg-t">New recurring event</h2><p>Reminders go out at 9 am. Anything not marked done by its date is reminded every morning until it is.</p></div>
+  <div class="dlg-head"><div><h2 id="dlg-t">New recurring event</h2><p>Reminders go out at 9 am. A subtask not marked done by its due date is reminded every morning until it is.</p></div>
     <button class="x" type="button" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="dlg-body" id="fbody"></div>
   <div class="dlg-foot"><span class="msg" id="f-msg"></span><div class="r"><button class="btn" type="button" id="f-pause" hidden>Pause event</button><button class="btn" type="button" data-close>Cancel</button><button class="btn primary" type="button" id="f-save">Save event</button></div></div>
@@ -281,7 +281,7 @@ function occurrences(ev,a,b){
       const base=monthBase(rp,y,m);if(base)push(adjust(ev,base));
     }
   }
-  return out.sort((p,q)=>p.d-q.d).map(x=>({...x,end:addD(x.d,(+ev.length||1)-1),key:ev.id+'|'+ymd(x.orig)}));
+  return out.sort((p,q)=>p.d-q.d).map(x=>({...x,key:ev.id+'|'+ymd(x.orig)}));
 }
 function ruleText(ev){
   const rp=ev.repeat,r=ev.rules||{},n=+rp.every||1;
@@ -295,35 +295,40 @@ function ruleText(ev){
   const x=[];
   if(r.early&&r.early.on&&rp.freq==='month'&&rp.mode==='weekday')x.push('a week later if it falls on or before the '+ORD(+r.early.day));
   if(r.months&&r.months.length&&r.months.length<12)x.push('only in '+r.months.map(m=>MON[m].slice(0,3)).join(', '));
-  if(+ev.length>1)x.push('lasts '+ev.length+' days');
   return t+(x.length?' · '+x.join(' · '):'');
 }
-const remLabel=r=>(+r.days===0?'On the ':r.days+' day'+(+r.days===1?'':'s')+' before the ')+(r.anchor==='end'?'last day':r.anchor==='due'?'due date':'start');
 const pocText=list=>list.map(p=>`<span>${esc(p.name||p.email)}</span>`).join('');
 
-/* ══ Status ══  done log key: event|date|task ('' for the event itself) */
-// A subtask is due on day N of the window; one that lands on a Monday (weekly off) is due the Sunday before, so it stays inside the window
-function taskDue(o,t){const d=addD(o.d,(Math.min(+t.dueDay||+o.ev.length||1,+o.ev.length||1))-1);return d.getDay()===1&&+d!==+o.d&&(o.ev.rules||{}).monday!=='keep'?addD(d,-1):d;}
-function stOf(done,from,to){
-  if(done)return{c:'done',t:'Done'};
-  if(to<TODAY)return{c:'missed',t:'Overdue',w:days(to,TODAY)===1?'1 day overdue':days(to,TODAY)+' days overdue'};
-  if(+to===+TODAY)return{c:'today',t:'Due today'};
-  if(from<=TODAY)return{c:'prog',t:'In progress',w:'Due '+fmtDW(to)};
-  return{c:'up',t:'Upcoming',w:'Starts in '+days(TODAY,from)+' day'+(days(TODAY,from)===1?'':'s')};
-}
+/* ══ Subtasks and the event window ══
+   Each subtask is due a number of days before (−) or after (+) the event date D. A due date that lands on a Monday (weekly off)
+   moves to the Sunday before (Tuesday after, for subtasks after D). The event runs from its earliest to its latest subtask due date.
+   Done log key: event|date|subtask. The data service uses the same rules for the emails. */
+const tOff=t=>t.offset!=null?+t.offset:t.dueDay?+t.dueDay-1:0;
+function dueOf(ev,d,t){const o=tOff(t);let x=addD(d,o);if(x.getDay()===1&&(ev.rules||{}).monday!=='keep')x=addD(x,o>0?1:-1);return x;}
+function windowOf(ev,d){const ds=(ev.tasks||[]).map(t=>dueOf(ev,d,t));if(!ds.length)return{from:d,to:d};return{from:new Date(Math.min(d,...ds)),to:new Date(Math.max(...ds))};}
+const offText=o=>o===0?'D':o<0?'D − '+(-o):'D + '+o;
+const remText=t=>{const r=t.remind||{mode:'due'};return r.mode==='before'?r.days+' day'+(+r.days===1?'':'s')+' before, and on the due date':'On the due date';};
 function evStatus(o){
-  const ts=o.ev.tasks||[];
-  if(!ts.length){const l=LOG[o.key+'|'];return{...stOf(l&&l.done,o.d,o.end),by:l};}
-  const done=ts.filter(t=>(LOG[o.key+'|'+t.id]||{}).done).length;
-  return{...stOf(done===ts.length,o.d,o.end),done,total:ts.length};
+  const ts=o.ev.tasks||[],items=ts.map(t=>({t,due:dueOf(o.ev,o.d,t),l:LOG[o.key+'|'+t.id]}));
+  const done=items.filter(x=>x.l&&x.l.done).length,open=items.filter(x=>!(x.l&&x.l.done));
+  const base={done,total:ts.length,items};
+  if(!open.length)return{...base,c:'done',t:'Done'};
+  const late=open.filter(x=>x.due<TODAY);
+  if(late.length){const n=days(late.reduce((m,x)=>x.due<m?x.due:m,late[0].due),TODAY);return{...base,c:'missed',t:'Overdue',w:late.length+' subtask'+(late.length===1?'':'s')+' overdue · '+n+' day'+(n===1?'':'s')};}
+  if(open.some(x=>+x.due===+TODAY))return{...base,c:'today',t:'Due today'};
+  const next=open.reduce((m,x)=>x.due<m?x.due:m,open[0].due);
+  if(o.from<=TODAY)return{...base,c:'prog',t:'In progress',w:(ts.length===1?'Due ':'Next due ')+fmtDW(next)};
+  return{...base,c:'up',t:'Upcoming',w:(ts.length===1?'Due ':'First due ')+fmtDW(next)};
+}
+function subSt(due,l){
+  if(l&&l.done)return{c:'done',t:'Done'};
+  if(due<TODAY)return{c:'missed',t:'Overdue',w:days(due,TODAY)+' day'+(days(due,TODAY)===1?'':'s')+' overdue'};
+  if(+due===+TODAY)return{c:'today',t:'Due today'};
+  return{c:'up',t:'Due '+fmtDW(due)};
 }
 
 /* ══ Page ══ */
-function dayBadge(o){
-  if(+o.ev.length>1){const same=o.d.getMonth()===o.end.getMonth();
-    return`<div class="day win"><b>${o.d.getDate()}–${o.end.getDate()}</b><small class="to">${same?MON[o.d.getMonth()].slice(0,3):MON[o.d.getMonth()].slice(0,3)+' – '+MON[o.end.getMonth()].slice(0,3)}</small></div>`;}
-  return`<div class="day"><b>${o.d.getDate()}</b><small>${WD[o.d.getDay()].slice(0,3)}</small></div>`;
-}
+const winText=o=>+o.from===+o.to?'':fmtD(o.from)+' – '+fmtD(o.to);
 function render(){
   document.querySelectorAll('#views button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===view));
   document.getElementById('mnav').style.visibility=view==='month'?'visible':'hidden';
@@ -332,42 +337,45 @@ function render(){
   document.getElementById('add').hidden=!CAN;
   const list=document.getElementById('list'),sum=document.getElementById('sum');
   if(view==='month'){
+    // An event shows in every month its window touches
     const a=new Date(vy,vm,1),b=new Date(vy,vm+1,0);
-    const occ=EVENTS.filter(e=>e.active).flatMap(e=>occurrences(e,a,b).filter(o=>!e.created||ymd(o.end)>=e.created).map(o=>({...o,ev:e}))).sort((p,q)=>p.d-q.d||p.ev.title.localeCompare(q.ev.title));
+    const occ=EVENTS.filter(e=>e.active&&(e.tasks||[]).length).flatMap(e=>occurrences(e,addD(a,-70),addD(b,70)).map(o=>({...o,ev:e,...windowOf(e,o.d)})))
+      .filter(o=>o.from<=b&&o.to>=a&&(!o.ev.created||ymd(o.to)>=o.ev.created)).sort((p,q)=>p.d-q.d||p.ev.title.localeCompare(q.ev.title));
     occ.forEach(o=>o.s=evStatus(o));
     const cnt=c=>occ.filter(o=>o.s.c===c).length;
     sum.innerHTML=[['Events',occ.length,'#5B2A86'],['Done',cnt('done'),'#1F7A4D'],['In progress',cnt('prog'),'#9B7BC4'],['Due today',cnt('today'),'#C98A1B'],['Upcoming',cnt('up'),'#D3C2E6'],['Overdue',cnt('missed'),'#B42318']]
       .filter((x,i)=>i===0||x[1]).map(([l,n,c])=>`<span class="chip"><i style="background:${c}"></i><b>${n}</b>${l}</span>`).join('');
     if(!occ.length){list.innerHTML=`<div class="empty">${EVENTS.length?'Nothing scheduled this month.':'No recurring events yet.'+(CAN?' Add the first one with "New recurring event".':'')}</div>`;return;}
-    list.innerHTML=`<table><thead><tr><th style="width:96px">Date</th><th>Event</th><th>PoC</th><th>Status</th><th></th></tr></thead><tbody>${occ.map(o=>{
-      const e=o.ev,s=o.s,ts=e.tasks||[],open=OPEN[o.key]!==false&&ts.length;
-      const prog=ts.length?`<div class="bar2"><span><i style="width:${Math.round(s.done/s.total*100)}%"></i></span>${s.done} of ${s.total} subtasks done</div>`:'';
-      const by=s.by&&s.by.done?`<span class="when">Marked done ${fmtD(new Date(s.by.at))}${s.by.by?' by '+esc(s.by.by):''}</span>`:s.w?`<span class="when">${s.w}</span>`:'';
-      let h=`<tr class="${s.c}"><td>${dayBadge(o)}</td>
-        <td class="ev"><b>${esc(e.title)}</b>${e.details?`<p>${esc(e.details)}</p>`:''}<span class="rule">${esc(ruleText(e))}${o.why?' · moved from '+fmtD(o.orig)+' ('+esc(o.why)+')':''}</span>${prog}</td>
-        <td><div class="pocs">${pocText(e.pocs)}</div></td>
-        <td><span class="st ${s.c}"><i></i>${s.t}</span>${by}</td>
-        <td><div class="act">${ts.length?`<button class="exp" data-x="${o.key}" aria-expanded="${!!open}" aria-label="Subtasks"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>`:CANDONE?(s.c==='done'?`<button class="mini" data-undo="${o.key}|">Undo</button>`:`<button class="mini go" data-done="${o.key}|">Mark done</button>`):''}</div></td></tr>`;
-      if(open)h+=ts.map(t=>{const due=taskDue(o,t),l=LOG[o.key+'|'+t.id],ss=stOf(l&&l.done,o.d,due),pp=t.pocs&&t.pocs.length?t.pocs:e.pocs;
-        return`<tr class="sub"><td></td><td><div class="tk"><div><b>${esc(t.title)}</b><small>${(t.reminders||[]).map(r=>remLabel({...r,anchor:'due'})).join(' · ')||'No reminders before the due date'}</small></div></div></td>
+    list.innerHTML=`<table><thead><tr><th style="width:84px">Event date</th><th>Event</th><th>PoC</th><th>Status</th><th></th></tr></thead><tbody>${occ.map(o=>{
+      const e=o.ev,s=o.s,ts=e.tasks,single=ts.length===1,open=!single&&OPEN[o.key]!==false;
+      const prog=single?'':`<div class="bar2"><span><i style="width:${Math.round(s.done/s.total*100)}%"></i></span>${s.done} of ${s.total} subtasks done</div>`;
+      const wt=winText(o);
+      let h=`<tr class="${s.c}"><td><div class="day"><b>${o.d.getDate()}</b><small>${WD[o.d.getDay()].slice(0,3)}${o.d.getMonth()!==vm?' '+MON[o.d.getMonth()].slice(0,3):''}</small></div></td>
+        <td class="ev"><b>${esc(e.title)}</b>${e.details?`<p>${esc(e.details)}</p>`:''}<span class="rule">${esc(ruleText(e))}${o.why?' · moved from '+fmtD(o.orig)+' ('+esc(o.why)+')':''}${wt?' · runs '+wt:''}</span>${prog}</td>
+        <td><div class="pocs">${pocText(single&&ts[0].pocs.length?ts[0].pocs:e.pocs)}</div></td>
+        <td><span class="st ${s.c}"><i></i>${s.t}</span>${s.w?`<span class="when">${s.w}</span>`:single&&s.items[0].l?`<span class="when">Marked done ${fmtD(new Date(s.items[0].l.at))}${s.items[0].l.by?' by '+esc(s.items[0].l.by):''}</span>`:''}</td>
+        <td><div class="act">${single?doneBtn(o.key+'|'+ts[0].id,s.items[0].l):`<button class="exp" data-x="${o.key}" aria-expanded="${!!open}" aria-label="Subtasks"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>`}</div></td></tr>`;
+      if(open)h+=s.items.slice().sort((p,q)=>p.due-q.due).map(({t,due,l})=>{const ss=subSt(due,l),pp=t.pocs&&t.pocs.length?t.pocs:e.pocs;
+        return`<tr class="sub"><td></td><td><div class="tk"><div><b>${esc(t.title)}</b><small>${offText(tOff(t))} · ${remText(t)}</small></div></div></td>
           <td><div class="pocs">${pocText(pp)}</div></td>
-          <td><span class="st ${ss.c}"><i></i>${ss.c==='prog'||ss.c==='up'?'Due '+fmtDW(due):ss.t}</span>${l&&l.done?`<span class="when">${fmtD(new Date(l.at))}${l.by?' by '+esc(l.by):''}</span>`:ss.c==='missed'?`<span class="when">${ss.w}</span>`:''}</td>
-          <td><div class="act">${CANDONE?(l&&l.done?`<button class="mini" data-undo="${o.key}|${t.id}">Undo</button>`:`<button class="mini go" data-done="${o.key}|${t.id}">Mark done</button>`):''}</div></td></tr>`;}).join('');
+          <td><span class="st ${ss.c}"><i></i>${ss.t}</span>${l&&l.done?`<span class="when">${fmtD(new Date(l.at))}${l.by?' by '+esc(l.by):''}</span>`:ss.w?`<span class="when">${ss.w}</span>`:''}</td>
+          <td><div class="act">${doneBtn(o.key+'|'+t.id,l)}</div></td></tr>`;}).join('');
       return h;}).join('')}</tbody></table>`;
   }else{
     sum.innerHTML='';
     if(!EVENTS.length){list.innerHTML=`<div class="empty">No recurring events yet.${CAN?' Add the first one with "New recurring event".':''}</div>`;return;}
-    const nextOf=e=>occurrences(e,TODAY,addD(TODAY,400))[0];
+    const nextOf=e=>{const o=occurrences(e,addD(TODAY,-70),addD(TODAY,430)).map(x=>({...x,...windowOf(e,x.d)})).find(x=>x.to>=TODAY);return o;};
     const ev=[...EVENTS].sort((p,q)=>(q.active-p.active)||((nextOf(p)||{d:9e15}).d-(nextOf(q)||{d:9e15}).d));
     list.innerHTML=`<table><thead><tr><th>Event</th><th>When</th><th>PoC</th><th>Subtasks</th><th>Active</th><th></th></tr></thead><tbody>${ev.map(e=>{const nx=nextOf(e);return`
       <tr class="${e.active?'':'paused'}"><td class="ev"><b>${esc(e.title)}</b>${e.details?`<p>${esc(e.details)}</p>`:''}</td>
-      <td style="font-size:13.5px;color:var(--ink);max-width:300px">${esc(ruleText(e))}<span class="when">${nx?'Next: '+fmtDW(nx.d)+(+e.length>1?' – '+fmtDW(nx.end):''):'No upcoming date'}</span></td>
+      <td style="font-size:13.5px;color:var(--ink);max-width:300px">${esc(ruleText(e))}<span class="when">${nx?'Next: '+fmtDW(nx.d)+(winText(nx)?' · runs '+winText(nx):''):'No upcoming date'}</span></td>
       <td><div class="pocs">${pocText(e.pocs)}</div></td><td style="font-size:13px">${(e.tasks||[]).length||'—'}</td>
       <td>${CAN?`<button class="toggle" data-act="${e.id}" aria-pressed="${e.active}" aria-label="Active"></button>`:e.active?'Yes':'Paused'}</td>
       <td><div class="act">${CAN?`<button class="mini" data-edit="${e.id}">Edit</button>`:''}</div></td></tr>`;}).join('')}</tbody></table>`;
   }
-  document.getElementById('note').textContent=view==='month'?'Reminders go out at 9 am. Anything not marked done by its date gets a reminder every morning until it is, here or from the button in the email.':'Paused events send no reminders and don\'t appear in the month view.';
+  document.getElementById('note').textContent=view==='month'?'Reminders go out at 9 am. A subtask not marked done by its due date gets a reminder every morning until it is, here or from the button in the email.':'Paused events send no reminders and don\'t appear in the month view.';
 }
+const doneBtn=(k,l)=>CANDONE?(l&&l.done?`<button class="mini" data-undo="${k}">Undo</button>`:`<button class="mini go" data-done="${k}">Mark done</button>`):'';
 
 document.getElementById('views').onclick=e=>{const b=e.target.closest('button');if(b){view=b.dataset.v;render();}};
 document.getElementById('prev').onclick=()=>{vm--;if(vm<0){vm=11;vy--;}render();};
@@ -389,21 +397,20 @@ async function save(ev){const j=await ArtiumAuth.call('savePlannerEvent',{event:
 /* ══ New / edit form ══ */
 let F=null;const $=id=>document.getElementById(id);
 const uid=()=>Math.random().toString(36).slice(2,8);
-function blank(){return{id:'',title:'',details:'',active:true,start:ymd(TODAY),end:'',length:1,
-  repeat:{freq:'month',every:1,mode:'date',day:5,nth:1,weekday:4,n:1,days:[6],month:0},
-  rules:{early:{on:false,day:4},monday:'next',holiday:'keep',months:[]},pocs:[],tasks:[],reminders:[]};}
-function openDlg(ev){F=ev?JSON.parse(JSON.stringify(ev)):blank();F.rules=F.rules||{};F.tasks=F.tasks||[];F.reminders=F.reminders||[];
+const newTask=()=>({id:uid(),title:'',pocs:[],offset:0,remind:{mode:'due',days:1}});
+function blank(){return{id:'',title:'',details:'',active:true,start:ymd(TODAY),end:'',
+  repeat:{freq:'month',every:1,mode:'date',day:5,nth:1,weekday:4,n:2,days:[6],month:0},
+  rules:{early:{on:false,day:4},monday:'next',holiday:'keep',months:[]},pocs:[],tasks:[newTask()]};}
+function openDlg(ev){F=ev?JSON.parse(JSON.stringify(ev)):blank();F.rules=F.rules||{};F.tasks=(F.tasks||[]).map(t=>({...t,offset:tOff(t),remind:t.remind||{mode:'due',days:1}}));if(!F.tasks.length)F.tasks=[newTask()];
   $('dlg-t').textContent=ev?'Edit recurring event':'New recurring event';$('f-pause').hidden=!ev;$('f-pause').textContent=F.active?'Pause event':'Resume event';$('f-msg').textContent='';
   form();$('dlg').hidden=false;$('fbody').scrollTop=0;}
 const opt=(v,l,cur)=>`<option value="${v}"${String(v)===String(cur)?' selected':''}>${l}</option>`;
 const people=(list,path)=>`<div class="people">${list.map((p,i)=>`<span class="person">${esc(p.name||p.email)}<button type="button" data-rmp="${path}|${i}" aria-label="Remove">✕</button></span>`).join('')}
   <select data-addp="${path}" style="padding:5px 8px;border-radius:999px;font-size:12.5px"><option value="">+ Add person</option>${STAFF.filter(s=>!list.some(p=>p.email===s.email)).map(s=>`<option value="${esc(s.email)}">${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}<option value="@">Someone else (type an email)…</option></select></div>`;
-const rems=(list,path,anchors)=>`<div class="rchips">${list.map((r,i)=>`<span class="rchip"><input type="number" min="0" max="60" value="${r.days}" data-rd="${path}|${i}"> day${+r.days===1?'':'s'} before the ${anchors?`<select data-ra="${path}|${i}">${opt('start','start',r.anchor)}${opt('end','last day',r.anchor)}</select>`:'due date'}<button type="button" data-rr="${path}|${i}" aria-label="Remove">✕</button></span>`).join('')}<button type="button" class="addr" data-ar="${path}">+ Reminder</button></div>`;
 function form(){
-  const rp=F.repeat,r=F.rules,L=+F.length||1;
+  const rp=F.repeat,r=F.rules;
   const ev=`<div class="fld"><span class="lbl">Event <em>*</em></span><input type="text" class="w100" data-f="title" value="${esc(F.title)}" placeholder="e.g. Monthly Teachers' R&R"></div>
     <div class="fld"><span class="lbl">What it's about</span><textarea class="w100" rows="2" data-f="details" placeholder="Shown in every reminder email">${esc(F.details)}</textarea></div>`;
-  // Repeats
   let how='';
   if(rp.freq==='week')how=`<div class="row" style="margin-bottom:10px">Every <input type="number" min="1" max="8" value="${rp.every}" data-r="every" style="width:64px;text-align:center"> week(s) on</div>
     <div class="wds">${[2,3,4,5,6,0,1].map(d=>`<button type="button" data-wd="${d}" aria-pressed="${(rp.days||[]).includes(d)}">${WD[d].slice(0,3)}</button>`).join('')}</div>`;
@@ -416,36 +423,36 @@ function form(){
       ${rp.mode==='fromEnd'?`the <select data-r="n">${[2,3,4,5,6,7,10].map(n=>opt(n,ORD(n)+' last day',rp.n)).join('')}</select>`:''}</div>`;
   const ruleRow=(key,on,inner)=>`<div class="rrow ${on?'':'off'}"><button type="button" class="toggle" data-rt="${key}" aria-pressed="${on}" aria-label="Rule"></button>${inner}</div>`;
   let rules='';
-  if(rp.freq==='month'&&rp.mode==='weekday')rules+=ruleRow('early',!!r.early.on,`If it falls on or before the <select data-rule="early.day">${[3,4,5,6,7].map(n=>opt(n,ORD(n),r.early.day)).join('')}</select> of the month, push it a week later (to the ${NTH(Math.min(+rp.nth+1,5))==='last'?'next':ORD(+rp.nth+1)} ${WD[+rp.weekday]})`);
+  if(rp.freq==='month'&&rp.mode==='weekday')rules+=ruleRow('early',!!r.early.on,`If it falls on or before the <select data-rule="early.day">${[3,4,5,6,7].map(n=>opt(n,ORD(n),r.early.day)).join('')}</select> of the month, push it a week later (to the ${+rp.nth>=4?'next':ORD(+rp.nth+1)} ${WD[+rp.weekday]})`);
   if(rp.mode!=='workday'){
     rules+=ruleRow('monday',r.monday!=='keep',`If it falls on a Monday (weekly off), move it to <select data-rule="monday">${opt('next','the Tuesday after',r.monday==='keep'?'next':r.monday)}${opt('prev','the Sunday before',r.monday)}</select>`);
     rules+=ruleRow('holiday',r.holiday!=='keep',`If it falls on a public holiday at any centre, move it to <select data-rule="holiday">${opt('next','the next working day',r.holiday==='keep'?'next':r.holiday)}${opt('prev','the working day before',r.holiday)}</select>`);
   }
-  if(rp.freq!=='year'){const mo=r.months&&r.months.length?r.months:[];const mon=mo.length>0&&mo.length<12;rules+=ruleRow('months',mon,`Only in these months${mon?'':' (off: every month)'}<div class="wds" ${mon?'':'hidden'} style="width:100%;margin-top:6px">${MON.map((m,i)=>`<button type="button" data-mo="${i}" aria-pressed="${!mo.length||mo.includes(i)}" style="width:46px">${m.slice(0,3)}</button>`).join('')}</div>`);}
-  // Preview
-  const nx=occurrences({...F,id:'x'},TODAY,addD(TODAY,800)).slice(0,6);
-  const prev=`<div class="sched"><b>Next dates</b><ol>${nx.length?nx.map(o=>`<li>${o.why?`<s>${fmtD(o.orig)}</s>`:''}${fmtDW(o.d)}${L>1?' – '+fmtDW(o.end):''}${o.why?`<em>moved</em>`:''}</li>`).join(''):'<li>No dates. Check the settings.</li>'}</ol></div>`;
-  const rep=`<div class="sec"><span class="lbl">Repeats <em>*</em></span>
-      <div class="sseg" data-freq>${[['week','Weekly'],['month','Monthly'],['year','Yearly']].map(([k,l])=>`<button type="button" data-fq="${k}" aria-pressed="${rp.freq===k}">${l}</button>`).join('')}</div>
+  if(rp.freq!=='year'){const mo=r.months&&r.months.length?r.months:[],mon=mo.length>0&&mo.length<12;
+    rules+=ruleRow('months',mon,`Only in these months${mon?'':' (off: every month)'}<div class="wds" ${mon?'':'hidden'} style="width:100%;margin-top:6px">${MON.map((m,i)=>`<button type="button" data-mo="${i}" aria-pressed="${!mo.length||mo.includes(i)}" style="width:46px">${m.slice(0,3)}</button>`).join('')}</div>`);}
+  const nx=occurrences({...F,id:'x'},TODAY,addD(TODAY,800)).slice(0,6).map(o=>({...o,...windowOf(F,o.d)}));
+  const prev=`<div class="sched"><b>Next event dates (D)</b><ol>${nx.length?nx.map(o=>`<li>${o.why?`<s>${fmtD(o.orig)}</s>`:''}${fmtDW(o.d)}${o.why?`<em>moved</em>`:''}${winText(o)?` <span style="color:var(--muted)">· runs ${winText(o)}</span>`:''}</li>`).join(''):'<li>No dates. Check the settings.</li>'}</ol></div>`;
+  const rep=`<div class="sec"><span class="lbl">Event date (D) <em>*</em></span>
+      <div class="sseg">${[['week','Weekly'],['month','Monthly'],['year','Yearly']].map(([k,l])=>`<button type="button" data-fq="${k}" aria-pressed="${rp.freq===k}">${l}</button>`).join('')}</div>
       ${how}<div style="height:12px"></div>${rules}
-      <div class="row" style="margin:6px 0 10px">Starts <input type="text" data-f="start" value="${esc(F.start)}" style="width:120px" placeholder="YYYY-MM-DD"> · Ends <input type="text" data-f="end" value="${esc(F.end)}" style="width:120px" placeholder="never"></div>${prev}</div>`;
-  const win=`<div class="sec"><span class="lbl">Duration and PoC <em>*</em></span>
-      <div class="row" style="margin-bottom:12px">The event lasts <select data-f="length">${[1,2,3,4,5,6,7,10,14,21].map(n=>opt(n,n+(n===1?' day':' days'),L)).join('')}</select> ${L>1?'<span class="hint" style="margin:0">— a window for the subtasks to be completed in.</span>':''}</div>
-      ${people(F.pocs,'ev')}</div>`;
-  const tasks=`<div class="sec"><span class="lbl">Subtasks</span>
-      ${F.tasks.map((t,i)=>`<div class="task"><div class="task-top"><span class="n">${i+1}</span><input type="text" data-t="${i}|title" value="${esc(t.title)}" placeholder="e.g. Identify winners"><button type="button" class="rmv" data-rt2="${i}" aria-label="Remove subtask" style="width:28px;height:28px;border-radius:50%;border:0;background:none;color:var(--faint);cursor:pointer">✕</button></div>
-        <div class="task-row"><span class="k">PoC</span>${t.pocs.length?'':'<span style="color:var(--faint)">Same as the event, unless you add someone</span>'}${people(t.pocs,'t'+i)}</div>
-        <div class="task-row"><span class="k">Due</span>${L>1?`by day <select data-t="${i}|dueDay">${[...Array(L)].map((_,d)=>opt(d+1,d+1,t.dueDay||L)).join('')}</select> of ${L} <span style="color:var(--faint)">${nx[0]?'(next: '+fmtDW(taskDue({...nx[0],ev:F},t))+')':''}</span>`:'on the event date'}</div>
-        <div class="task-row"><span class="k">Reminders</span>${rems(t.reminders,'t'+i,false)}</div></div>`).join('')}
-      <button type="button" class="mini ghost" id="addtask" style="margin-bottom:10px">+ Add a subtask</button></div>`;
-  const rem=`<div class="sec"><span class="lbl">Event reminders <em>*</em></span>
-      <div style="margin-bottom:10px">${rems(F.reminders,'ev',L>1)}</div>
-      <div class="daily"><svg viewBox="0 0 24 24"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg><div>Event reminders go to the event's PoCs; subtask reminders go to that subtask's PoCs. Anything not marked done by its due date is reminded <b>every morning until it's marked done</b>. You're copied on every email, and each has a "Mark as done" button.</div></div></div>`;
-  $('fbody').innerHTML=ev+rep+win+tasks+rem;
+      <div class="row" style="margin:6px 0 10px">Starts <input type="date" data-f="start" value="${esc(F.start)}"> Ends <input type="date" data-f="end" value="${esc(F.end)}"><span class="hint" style="margin:0">Leave the end empty to keep it going.</span></div>${prev}</div>`;
+  const own=`<div class="sec"><span class="lbl">Event PoC</span>
+      <div class="hint" style="margin:-4px 0 10px">The person or people responsible for the whole event. A subtask without its own PoC goes to them.</div>${people(F.pocs,'ev')}</div>`;
+  const n0=nx[0];
+  const ows=F.tasks.map(t=>tOff(t)),lo=Math.min(...ows),hi=Math.max(...ows);
+  const tasks=`<div class="sec"><span class="lbl">Subtasks <em>*</em></span>
+      ${F.tasks.map((t,i)=>{const o=tOff(t),dir=o<0?'before':o>0?'after':'on',rm=t.remind||{mode:'due',days:1};return`<div class="task"><div class="task-top"><span class="n">${i+1}</span><input type="text" data-t="${i}|title" value="${esc(t.title)}" placeholder="e.g. Identify winners">${F.tasks.length>1?`<button type="button" data-rt2="${i}" aria-label="Remove subtask" style="width:28px;height:28px;border-radius:50%;border:0;background:none;color:var(--faint);cursor:pointer">✕</button>`:''}</div>
+        <div class="task-row"><span class="k">Due</span>${dir==='on'?'':`<input type="number" min="1" max="60" value="${Math.abs(o)}" data-t="${i}|n" style="width:64px;text-align:center"> days`}
+          <select data-t="${i}|dir">${opt('before',dir==='on'?'Before the event date':'before the event date',dir)}${opt('on','On the event date',dir)}${opt('after',dir==='on'?'After the event date':'after the event date',dir)}</select>
+          <b style="color:var(--accent);margin-left:4px">${offText(o)}</b>${n0?`<span style="color:var(--faint)">next: ${fmtDW(dueOf(F,n0.d,t))}</span>`:''}</div>
+        <div class="task-row"><span class="k">PoC</span>${t.pocs.length?'':'<span style="color:var(--faint)">Event PoC, unless you add someone</span>'}${people(t.pocs,'t'+i)}</div>
+        <div class="task-row"><span class="k">Reminder</span><div class="sseg" style="margin:0">${[['due','Only on the due date'],['before','Days before the due date']].map(([k,l])=>`<button type="button" data-rm="${i}|${k}" aria-pressed="${rm.mode===k}">${l}</button>`).join('')}</div>
+          ${rm.mode==='before'?`<input type="number" min="1" max="60" value="${rm.days}" data-t="${i}|rdays" style="width:64px;text-align:center"> day(s) before, and again on the due date`:''}</div></div>`;}).join('')}
+      <button type="button" class="mini ghost" id="addtask" style="margin-bottom:10px">+ Add a subtask</button>
+      <div class="daily"><svg viewBox="0 0 24 24"><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="9"/></svg><div>The event runs from its earliest to its latest subtask: <b>${lo===hi?offText(lo):offText(lo)+' to '+offText(hi)}</b>${n0&&lo!==hi?` (next: ${winText(n0)})`:''}. A subtask not marked done by its due date is reminded <b>every morning until it's marked done</b>. You're copied on every email, and each has a "Mark as done" button.</div></div></div>`;
+  $('fbody').innerHTML=ev+rep+tasks+own;
 }
-// Form events (one delegated handler for everything in the form)
 const target=p=>p==='ev'?F.pocs:F.tasks[+p.slice(1)].pocs;
-const remTarget=p=>p==='ev'?F.reminders:F.tasks[+p.slice(1)].reminders;
 $('fbody').addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;const d=b.dataset;
   if(d.fq){F.repeat.freq=d.fq;if(d.fq==='week'&&!F.repeat.days.length)F.repeat.days=[6];}
@@ -453,26 +460,26 @@ $('fbody').addEventListener('click',e=>{
   else if(d.mo!=null){const n=+d.mo;let a=F.rules.months&&F.rules.months.length?F.rules.months:[...Array(12).keys()];a=a.includes(n)?a.filter(x=>x!==n):a.concat(n).sort((x,y)=>x-y);F.rules.months=a.length===12?[]:a;}
   else if(d.rt){const k=d.rt;if(k==='early')F.rules.early.on=!F.rules.early.on;else if(k==='months')F.rules.months=F.rules.months&&F.rules.months.length?[]:[...Array(12).keys()].filter(m=>m!==NOW.getMonth());else F.rules[k]=F.rules[k]==='keep'?'next':'keep';}
   else if(d.rmp){const [p,i]=d.rmp.split('|');target(p).splice(+i,1);}
-  else if(d.ar){remTarget(d.ar).push({days:d.ar==='ev'?1:1,anchor:d.ar==='ev'?'start':'due'});}
-  else if(d.rr){const [p,i]=d.rr.split('|');remTarget(p).splice(+i,1);}
+  else if(d.rm){const [i,k]=d.rm.split('|');F.tasks[+i].remind={mode:k,days:(F.tasks[+i].remind||{}).days||1};}
   else if(d.rt2!=null){F.tasks.splice(+d.rt2,1);}
-  else if(b.id==='addtask'){F.tasks.push({id:uid(),title:'',pocs:[],dueDay:+F.length||1,reminders:[]});}
+  else if(b.id==='addtask'){F.tasks.push(newTask());}
   else return;
   form();
 });
 $('fbody').addEventListener('change',e=>{
   const x=e.target,d=x.dataset;
-  if(d.f){F[d.f]=d.f==='length'?+x.value:x.value;if(d.f==='length')F.tasks.forEach(t=>t.dueDay=Math.min(+t.dueDay||F.length,F.length));}
+  if(d.f){F[d.f]=x.value;if(d.f==='title'||d.f==='details')return;}
   else if(d.r){F.repeat[d.r]=x.value==='date'||isNaN(+x.value)?x.value:+x.value;}
   else if(d.rule){const [a,b]=d.rule.split('.');if(b)F.rules[a][b]=+x.value;else F.rules[a]=x.value;}
-  else if(d.t){const [i,k]=d.t.split('|');F.tasks[+i][k]=k==='dueDay'?+x.value:x.value;if(k==='title')return;}
-  else if(d.rd){const [p,i]=d.rd.split('|');remTarget(p)[+i].days=Math.max(0,Math.min(60,Math.round(+x.value||0)));}
-  else if(d.ra){const [p,i]=d.ra.split('|');remTarget(p)[+i].anchor=x.value;}
+  else if(d.t){const [i,k]=d.t.split('|'),t=F.tasks[+i],o=tOff(t),n=Math.max(1,Math.min(60,Math.round(+x.value||1)));
+    if(k==='title'){t.title=x.value;return;}
+    if(k==='dir')t.offset=x.value==='on'?0:(x.value==='before'?-1:1)*(Math.abs(o)||1);
+    if(k==='n')t.offset=(o<0?-1:1)*n;
+    if(k==='rdays')t.remind={mode:'before',days:n};}
   else if(d.addp!=null){let v=x.value;if(!v)return;
     if(v==='@'){v=(prompt('Email address')||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){x.value='';return;}target(d.addp).push({name:'',email:v});}
     else{const s=STAFF.find(z=>z.email===v);target(d.addp).push({name:s.name,email:s.email});}}
   else return;
-  if(d.f==='title'||d.f==='details')return;
   form();
 });
 document.querySelectorAll('#dlg [data-close]').forEach(b=>b.onclick=()=>$('dlg').hidden=true);
@@ -481,14 +488,17 @@ $('f-pause').onclick=()=>{F.active=!F.active;doSave();};
 $('f-save').onclick=()=>doSave();
 async function doSave(){
   const rp=F.repeat;
-  const miss=!F.title.trim()?'Give the event a name.':rp.freq==='week'&&!rp.days.length?'Choose at least one weekday.':!fromYmd(F.start)?'Start date should look like 2026-11-01.':F.end&&!fromYmd(F.end)?'End date should look like 2026-12-31, or be left empty.':
-    !F.pocs.length?'Add at least one PoC for the event.':!F.reminders.length?'Add at least one event reminder.':F.tasks.some(t=>!t.title.trim())?'Every subtask needs a name.':'';
+  F.tasks.forEach(t=>{t.offset=tOff(t);delete t.dueDay;delete t.reminders;});delete F.length;delete F.reminders;
+  const miss=!F.title.trim()?'Give the event a name.':rp.freq==='week'&&!rp.days.length?'Choose at least one weekday.':!fromYmd(F.start)?'Pick a start date.':
+    !F.tasks.length?'Add at least one subtask.':F.tasks.some(t=>!t.title.trim())?'Every subtask needs a name.':
+    F.tasks.some(t=>!t.pocs.length)&&!F.pocs.length?'Add a PoC to every subtask, or an event PoC for the ones without.':'';
   if(miss){$('f-msg').textContent=miss;return;}
   $('f-save').disabled=true;$('f-msg').textContent='';
   try{await save(F);$('dlg').hidden=true;}catch(err){$('f-msg').textContent='Couldn\'t save: '+(err.message||err);}
   $('f-save').disabled=false;
 }
 $('add').onclick=()=>openDlg(null);
+
 
 async function load(){
   try{
