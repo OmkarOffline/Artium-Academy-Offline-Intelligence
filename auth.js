@@ -35,14 +35,21 @@
   /* ── Landing page: sign-in ── */
   let session=null, tokenClient=null, pending=null;
   const listeners=[];
-  try{ const s=JSON.parse(sessionStorage.getItem(KEY)||'null'); if(s&&s.exp>Date.now()+60000) session=s; }catch(e){}
+  // Signed in for 8 hours since the last use of the site (the data service renews the pass on every request).
+  // Kept in this browser (localStorage), so new tabs and restarts stay signed in.
+  const stored=()=>{ try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); return s&&s.exp>Date.now()+60000?s:null; }catch(e){ return null; } };
+  session=stored();
+  // Another tab may have renewed the pass: use the newest one
+  function fresh(){ const s=stored(); if(s&&(!session||s.exp>session.exp)) session=s; return session&&session.exp>Date.now()+30000; }
 
   async function service(body){
     const r=await fetch(SERVICE_URL,{method:'POST',body:JSON.stringify(Object.assign({token:session&&session.token},body))});
     if(!r.ok) throw new Error('Could not reach the data service ('+r.status+')');
-    return r.json();
+    const j=await r.json();
+    if(j&&j.session&&j.session.token&&session){ session=Object.assign({},session,{token:j.session.token,exp:+j.session.exp}); if(session.email) save(session); }
+    return j;
   }
-  function save(s){ session=s; try{ s?sessionStorage.setItem(KEY,JSON.stringify(s)):sessionStorage.removeItem(KEY); }catch(e){} }
+  function save(s){ session=s; try{ s?localStorage.setItem(KEY,JSON.stringify(s)):localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); }catch(e){} }
 
   function loadGis(){
     return new Promise((res,rej)=>{
@@ -69,7 +76,8 @@
             session=null; google.accounts.oauth2.revoke(resp.access_token,()=>{});
             throw Object.assign(new Error(me.error&&me.error!=='not-allowed'?me.error:'not-allowed'),{email:me.email||info.email});
           }
-          save({token:resp.access_token, exp, email:me.email, pages:me.pages, name:info.name||'', picture:info.picture||''});
+          save({token:session.token, exp:session.exp, email:me.email, pages:me.pages, name:info.name||'', picture:info.picture||''});   // session now holds the 8-hour pass from the data service
+          google.accounts.oauth2.revoke(resp.access_token,()=>{});   // Google's token isn't needed any more
           p&&p.resolve(session);
         }catch(e){ p&&p.reject(e); }
       },
@@ -84,13 +92,12 @@
     });
   }
   function signOut(){
-    if(session&&window.google&&google.accounts) google.accounts.oauth2.revoke(session.token,()=>{});
     save(null); location.reload();
   }
 
   /* Read a whole tab of a centre's receipts sheet as rows of text, the same way it looks in the sheet */
   async function fetchRows(centre,tab){
-    if(!session||session.exp<Date.now()+30000){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
+    if(!fresh()){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
     const j=await service({action:'rows',centre,tab});
     if(j.error==='expired'){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
     if(j.error==='not-allowed') throw new Error("You don't have access to this data");
@@ -104,7 +111,7 @@
     fetchRows, signOut,
     // Any other request to the data service, e.g. call('initiatives') or call('saveInitiative',{item})
     async call(action,body){
-      if(!session||session.exp<Date.now()+30000){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
+      if(!fresh()){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
       const j=await service(Object.assign({action},body||{}));
       if(j.error==='expired'){ save(null); showGate('expired'); throw new Error('Your session has expired — sign in again'); }
       if(j.error==='not-allowed') throw new Error("You don't have access to this");
