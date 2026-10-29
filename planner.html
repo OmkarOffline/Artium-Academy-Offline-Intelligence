@@ -179,6 +179,7 @@
   .addr{border:1px dashed #CDBFE0;background:#fff;color:var(--accent);border-radius:999px;padding:4px 10px;font:600 12px var(--body);cursor:pointer}
   .daily{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:#F8F4FC;font-size:13px;color:var(--ink2);line-height:1.5;margin:4px 0 12px}
   .daily svg{flex:none;width:16px;height:16px;margin-top:2px;fill:none;stroke:var(--accent);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .act .mini+.mini{margin-left:0}
   .mini.ghost{border-style:dashed;color:var(--accent);border-color:#CDBFE0}
 </style>
 </head>
@@ -374,7 +375,7 @@ function render(){
       <td style="font-size:13.5px;color:var(--ink);max-width:300px">${esc(ruleText(e))}<span class="when">${nx?'Next: '+fmtDW(nx.d)+atTime(e)+(winText(nx)?' · runs '+winText(nx):''):'No upcoming date'}</span></td>
       <td><div class="pocs">${pocText(e.pocs)}</div></td><td style="font-size:13px">${(e.tasks||[]).length||'—'}</td>
       <td>${CAN?`<button class="toggle" data-act="${e.id}" aria-pressed="${e.active}" aria-label="Active"></button>`:e.active?'Yes':'Paused'}</td>
-      <td><div class="act">${CAN?`<button class="mini" data-edit="${e.id}">Edit</button>`:''}</div></td></tr>`;}).join('')}</tbody></table>`;
+      <td><div class="act">${CAN?`<button class="mini" data-dup="${e.id}" title="Make a copy to change and save as a new event">Duplicate</button><button class="mini" data-edit="${e.id}">Edit</button>`:''}</div></td></tr>`;}).join('')}</tbody></table>`;
   }
   document.getElementById('note').textContent=view==='month'?'Reminders go out at 9 am. A subtask not marked done by its due date gets a reminder every morning until it is, here or from the button in the email.':'Paused events send no reminders and don\'t appear in the month view.';
 }
@@ -387,6 +388,7 @@ document.getElementById('list').onclick=async e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.x){OPEN[b.dataset.x]=b.getAttribute('aria-expanded')!=='true';render();return;}
   if(b.dataset.edit)return openDlg(EVENTS.find(x=>x.id===b.dataset.edit));
+  if(b.dataset.dup)return openDlg(EVENTS.find(x=>x.id===b.dataset.dup),true);
   if(b.dataset.act){const ev=EVENTS.find(x=>x.id===b.dataset.act);b.disabled=true;try{await save({...ev,active:!ev.active});}catch(err){alertMsg(err);}return;}
   const k=b.dataset.done||b.dataset.undo;if(!k)return;b.disabled=true;
   const [id,date,task]=k.split('|');
@@ -404,8 +406,9 @@ const newTask=()=>({id:uid(),title:'',pocs:[],offset:0,remind:{mode:'due',days:1
 function blank(){return{id:'',title:'',details:'',active:true,start:ymd(TODAY),end:'',time:'',
   repeat:{freq:'month',every:1,mode:'date',day:5,nth:1,weekday:4,n:2,days:[6],month:0},
   rules:{early:{on:false,day:4},monday:'next',holiday:'keep',months:[]},pocs:[],tasks:[newTask()]};}
-function openDlg(ev){F=ev?JSON.parse(JSON.stringify(ev)):blank();F.rules=F.rules||{};F.tasks=(F.tasks||[]).map(t=>({...t,offset:tOff(t),remind:t.remind||{mode:'due',days:1}}));if(!F.tasks.length)F.tasks=[newTask()];
-  $('dlg-t').textContent=ev?'Edit recurring event':'New recurring event';$('f-pause').hidden=!ev;$('f-pause').textContent=F.active?'Pause event':'Resume event';$('f-msg').textContent='';
+// copy: a duplicate of ev, saved as a new event (new ID, its own done history and reminders)
+function openDlg(ev,copy){F=ev?JSON.parse(JSON.stringify(ev)):blank();if(copy){F.id='';delete F.created;F.title=F.title+' (copy)';F.active=true;(F.tasks||[]).forEach(t=>t.id=uid());}F.rules=F.rules||{};F.tasks=(F.tasks||[]).map(t=>({...t,offset:tOff(t),remind:t.remind||{mode:'due',days:1}}));if(!F.tasks.length)F.tasks=[newTask()];
+  $('dlg-t').textContent=copy?'Duplicate event':ev?'Edit recurring event':'New recurring event';$('f-pause').hidden=!ev||copy;$('f-pause').textContent=F.active?'Pause event':'Resume event';$('f-msg').textContent='';
   form();$('dlg').hidden=false;$('fbody').scrollTop=0;}
 const opt=(v,l,cur)=>`<option value="${v}"${String(v)===String(cur)?' selected':''}>${l}</option>`;
 const people=(list,path)=>`<div class="people">${list.map((p,i)=>`<span class="person">${esc(p.name||p.email)}<button type="button" data-rmp="${path}|${i}" aria-label="Remove">✕</button></span>`).join('')}
