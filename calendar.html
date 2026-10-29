@@ -119,6 +119,31 @@
   .li .t .tag{margin-left:6px;font:600 11px var(--body);border-radius:999px;padding:2px 8px;vertical-align:1px}
   .tag.ph{background:#FDECEB;color:#9B2C1F}.tag.ob{background:var(--accent-soft);color:var(--accent)}.tag.lw{background:#FBF4E8;color:#7A5A2A}
   .k-our{background:#1F7A6B}
+  .k-re{background:#3B5BDB}
+  /* Recurring events from the planner: the event on its date, its subtasks on their due dates */
+  .ev.re{background:#E8EDFB;color:#2F4AA8;font-weight:600;cursor:pointer}
+  .ev.re small{display:block;font-weight:500;color:#5A72C0;font-size:10.5px}
+  .ev.ret{background:#fff;border:1px dashed #B9C6EE;color:#3F4F7E;cursor:pointer}
+  .ev.ret b{font-weight:700;color:#5A72C0;margin-right:3px}
+  .ev.re.dn,.ev.ret.dn{opacity:.6}.ev.ret.dn span{text-decoration:line-through}
+  .ev .ck{color:#1F7A4D;font-weight:700;margin-left:4px}
+  .tag.re{background:#E8EDFB;color:#2F4AA8}
+  /* Recurring events as bands: a line runs through every day from the earliest to the latest subtask; the event itself is a box on its date */
+  .lane{position:relative;height:22px;margin:0 -11px 0 -10px;flex:none}
+  .band{position:absolute;inset:0;cursor:pointer}
+  .band::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1.5px;background:#9DB0EC}
+  .band.s::before{left:12px;border-radius:3px 0 0 3px}.band.e::before{right:13px;border-radius:0 3px 3px 0}
+  .band.dn::before{background:#C9D2EE}
+  .band.one::before{display:none}
+  .rebox{position:absolute;left:10px;right:11px;top:0;height:22px;display:flex;align-items:center;gap:5px;padding:0 7px;border-radius:7px;background:#E8EDFB;border:1px solid #C3CFF4;color:#2F4AA8;font:600 11.5px/1 var(--body);white-space:nowrap;overflow:hidden}
+  .rebox span{overflow:hidden;text-overflow:ellipsis}.rebox small{flex:none;font-weight:500;color:#5A72C0}
+  .band.dn .rebox{opacity:.65}
+  .rsub{position:absolute;left:12px;right:11px;top:3px;height:16px;display:flex;align-items:center;gap:5px;max-width:calc(100% - 23px)}
+  .rsub i{flex:none;width:11px;height:11px;border-radius:50%;background:#fff;border:2.5px solid #3B5BDB}
+  .rsub i.ok{background:#1F7A4D;border-color:#1F7A4D}
+  .rsub em{font:500 11px/16px var(--body);font-style:normal;color:#2F4AA8;background:#fff;padding:0 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rsub em.ok{color:#8C97B8;text-decoration:line-through}
+  .lane.gap{height:22px}
   .add{display:inline-flex;align-items:center;gap:7px;border:0;background:var(--accent);color:#fff;border-radius:999px;padding:8px 16px 8px 13px;font:600 13px var(--body);cursor:pointer;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
   .add:hover{background:#4A2270}
   .ev.our{background:#E6F4F1;color:#1F6B5E;font-weight:600;cursor:pointer}
@@ -198,6 +223,7 @@
         <button type="button" class="chip" data-k="lw" aria-pressed="true"><i class="k-lw"></i>Long weekends</button>
         <button type="button" class="chip" data-k="ob" aria-pressed="true"><i class="k-ob"></i>Festivals &amp; special days</button>
         <button type="button" class="chip" data-k="our" aria-pressed="true"><i class="k-our"></i>Our entries</button>
+        <button type="button" class="chip" data-k="re" aria-pressed="true"><i class="k-re"></i>Recurring events</button>
         <button type="button" class="add" id="add" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add entry</button>
       </div>
     </div>
@@ -215,6 +241,7 @@
         <div class="def"><div class="dt">Long weekend with 1 day's leave:</div><p>A holiday on a Tuesday or Thursday leaves one working day between it and the weekend. Many people take that day off, turning it into a four-day break. The day to take off is marked with a dashed box.</p></div>
         <div class="def"><div class="dt">Moved holidays:</div><p>If an academy observes a holiday on a different day, the Head of Offline Operations or a Centre Manager can click the holiday and move it — or mark it not observed — for their city. Only that city changes; the other cities keep the original date. A moved holiday shows ↪ on its new date, and the original date shows it crossed out. Long weekends update to match.</p></div>
         <div class="def"><div class="dt">Our entries:</div><p>Birthdays, school holidays, school exams and other events added by the offline staff. Everyone who can open the calendar sees them; only staff (not teachers) can add, edit or delete them. Click an entry to edit it.</p></div>
+        <div class="def"><div class="dt">Recurring events:</div><p>Events from the Recurring Events page. The box sits on the event date, with its time and how many subtasks are done. A blue line runs through every day from the first subtask to the last, with a dot on each subtask's due date (green once it's done). Hover to see all the subtasks; click to open the Recurring Events page.</p></div>
         <div class="def"><div class="dt">Mondays:</div><p>Shaded, since the academy is closed on Mondays.</p></div>
         <div class="def"><div class="dt">Refresh:</div><p>The calendar checks Google every few hours by itself. Refresh checks again straight away, in case a holiday has been added or moved.</p></div>
       </div>
@@ -263,7 +290,8 @@ const fromKey=k=>new Date(Math.floor(k/10000),Math.floor(k/100)%100-1,k%100);
 const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
 const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 let view={y:TODAY.getFullYear(),m:TODAY.getMonth()};
-const show={ph:true,lw:true,ob:true,our:true};
+const show={ph:true,lw:true,ob:true,our:true,re:true};
+let PLAN=[];   // recurring events from the planner: {id,title,date,time,from,to,done,tasks:[{title,due,done}]}
 let OURS=[],CAN_EDIT=false,ME='';
 let EVENTS=[],BYDAY=new Map(),LONG=[],SPECIAL=[];
 
@@ -334,6 +362,8 @@ function findLongWeekends(){
     if(!m.has(id))m.set(id,Object.assign(l,{cities:[]}));m.get(id).cities.push(c);}));
   return[...m.values()].sort((x,y)=>x.from-y.from||y.days-x.days);
 }
+const hr=h=>+h===12?'12 PM':(+h-12)+' PM';
+const reWhen=p=>[p.time!==''?hr(p.time):'',p.from!==p.to?'runs '+fmtD(p.from)+' – '+fmtD(p.to):'',p.tasks.filter(t=>t.done).length+' of '+p.tasks.length+' subtask'+(p.tasks.length===1?'':'s')+' done'].filter(Boolean).join(' · ');
 const fmtD=k=>{const d=fromKey(k);return d.getDate()+' '+MON[d.getMonth()];};
 const badges=cs=>cs.length&&!(cs.length===1&&cityF!=='all')?`<span class="cb">${CITIES.filter(c=>cs.includes(c)).map(c=>`<i title="${c}">${LETTER[c]}</i>`).join('')}</span>`:'';
 
@@ -341,6 +371,20 @@ function render(){
   const first=new Date(view.y,view.m,1),start=addDays(first,-((first.getDay()+6)%7));   // weeks start on Monday
   document.getElementById('mtitle').textContent=MONTHS[view.m]+' '+view.y;
   const lwDay=new Map();LONG.forEach(l=>{for(let d=l.from;d<=l.to;d=addDays(d,1))lwDay.set(key(d),l);});
+  // Recurring events: each gets a lane (a row near the top of the day) so its band lines up across the days it runs
+  const RE=show.re?PLAN.filter(p=>p.to>=key(start)&&p.from<=key(addDays(start,41))).map(p=>Object.assign({},p)).sort((a,b)=>a.from-b.from||b.to-a.to):[];
+  const laneEnd=[];RE.forEach(p=>{let l=0;while(laneEnd[l]!=null&&laneEnd[l]>=p.from)l++;p.lane=l;laneEnd[l]=p.to;});
+  const lanesFor=(d,k)=>{const w0=addDays(d,-((d.getDay()+6)%7)),a=key(w0),b=key(addDays(w0,6));
+    const n=RE.filter(p=>p.from<=b&&p.to>=a).reduce((m,p)=>Math.max(m,p.lane+1),0);let h='';
+    for(let l=0;l<n;l++){const p=RE.find(x=>x.lane===l&&x.from<=k&&k<=x.to);
+      if(!p){h+='<div class="lane gap"></div>';continue;}
+      const ts=p.tasks.filter(t=>t.due===k&&!(k===p.date)),single=p.from===p.to;
+      let inner='';
+      if(k===p.date){const dn=p.tasks.filter(t=>t.done).length;inner=`<span class="rebox"><span>${esc(p.title)}</span><small>${p.time!==''?hr(p.time)+' · ':''}${dn}/${p.tasks.length}${p.done?' ✓':''}</small></span>`;}
+      else if(ts.length){const ok=ts.every(t=>t.done);inner=`<span class="rsub"><i class="${ok?'ok':''}"></i><em class="${ok?'ok':''}">${ts.length===1?esc(ts[0].title):ts.length+' subtasks'}</em></span>`;}
+      const tip=p.title+(p.time!==''?' · '+hr(p.time):'')+(single?'':' · runs '+fmtD(p.from)+' – '+fmtD(p.to))+'\n'+p.tasks.map(t=>(t.done?'✓ ':'• ')+t.title+' — '+fmtD(t.due)).join('\n');
+      h+=`<div class="lane"><div class="band${single?'':(k===p.from?' s':'')+(k===p.to?' e':'')}${single?' one':''}${p.done?' dn':''}" title="${esc(tip)}">${inner}</div></div>`;}
+    return h;};
   let html=DOW.map((d,i)=>`<div class="dow">${d}${i===0?'<small>Academy closed</small>':''}</div>`).join('');
   for(let i=0;i<42;i++){
     const d=addDays(start,i),k=key(d),inM=d.getMonth()===view.m;
@@ -350,7 +394,7 @@ function render(){
     const ours=show.our?OURS.filter(o=>o.from<=k&&k<=(o.to||o.from)):[];
     const l=show.lw?lwDay.get(k):null,isBridge=l&&l.bridge&&key(l.bridge)===k;
     const cls=['day',inM?'':'out',d.getDay()===1?'mon':'',d.getDay()%6===0?'wkend':'',+d===+TODAY?'today':'',l?'lw':'',isBridge?'bridge':''].join(' ');
-    html+=`<div class="${cls}"><span class="dn">${d.getDate()}</span>`+
+    html+=`<div class="${cls}"><span class="dn">${d.getDate()}</span>`+lanesFor(d,k)+
       (show.lw?LONG.filter(x=>+x.from===+d).map(x=>`<span class="lwtag">${x.bridge?x.days+'-day break · 1 day leave':'Long weekend · '+x.days+' days'}${badges(x.cities)}</span>`).join(''):'')+
       (isBridge?`<span class="bridgetag">Take 1 day off${badges(l.cities)}</span>`:'')+
       (ph?phPills(k,ph,phc):'')+
@@ -369,8 +413,9 @@ function render(){
   const mk=view.y*100+view.m+1,inMonth=k=>Math.floor(k/100)===mk;
   const mev=(show.ph?[...PH.keys()].filter(k=>inMonth(k)&&phOn(k).length).flatMap(k=>phSplit(k,PH.get(k),phOn(k)).map(p=>({date:k,name:p.name,type:'Public holiday',cs:p.cs,national:p.plain,from:p.from}))):[])
     .concat(show.ob?[...BYDAY.keys()].filter(inMonth).flatMap(k=>BYDAY.get(k)):[])
+    .concat(show.re?PLAN.filter(p=>inMonth(p.date)).map(p=>({date:p.date,name:p.title,type:'re',p})):[])
     .concat(show.our?OURS.filter(o=>Math.floor(o.from/100)<=mk&&mk<=Math.floor((o.to||o.from)/100)).map(o=>({date:Math.max(o.from,mk*100+1),name:o.title,type:'our',o})):[]).sort((a,b)=>a.date-b.date);
-  document.getElementById('m-list').innerHTML=mev.length?mev.map(e=>{const d=fromKey(e.date);return`<div class="li">${fmt(d)}<div><div class="t">${esc(e.name)}${e.type==='Public holiday'&&!e.national?badges(e.cs):''}<span class="tag ${e.type==='Public holiday'?'ph':e.type==='our'?'our':'ob'}">${e.type==='Public holiday'?'Public holiday':e.type==='our'?esc(e.o.type):e.elsewhere?'Holiday in other states':e.special?'Special day':'Festival / special day'}</span></div><div class="s">${e.type==='our'?ourWhen(e.o):['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+(d.getDay()===1?' · academy closed anyway':'')+(e.from?' · moved here from '+fmtD(e.from):'')}</div></div></div>`;}).join(''):'<div class="empty">Nothing this month.</div>';
+  document.getElementById('m-list').innerHTML=mev.length?mev.map(e=>{const d=fromKey(e.date);return`<div class="li">${fmt(d)}<div><div class="t">${esc(e.name)}${e.type==='Public holiday'&&!e.national?badges(e.cs):''}<span class="tag ${e.type==='Public holiday'?'ph':e.type==='our'?'our':e.type==='re'?'re':'ob'}">${e.type==='Public holiday'?'Public holiday':e.type==='re'?'Recurring event':e.type==='our'?esc(e.o.type):e.elsewhere?'Holiday in other states':e.special?'Special day':'Festival / special day'}</span></div><div class="s">${e.type==='re'?reWhen(e.p):e.type==='our'?ourWhen(e.o):['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]+(d.getDay()===1?' · academy closed anyway':'')+(e.from?' · moved here from '+fmtD(e.from):'')}</div></div></div>`;}).join(''):'<div class="empty">Nothing this month.</div>';
 }
 
 async function load(refresh){
@@ -385,6 +430,7 @@ async function load(refresh){
     STATE=(j.state||[]).map(h=>({date:+h.date,name:h.name,city:h.city})).filter(h=>CITIES.includes(h.city));
     CHANGES=(j.changes||[]).map(c=>Object.assign({},c,{from:+c.from,to:+c.to||0}));
     MOVE=j.moveCities||[];
+    PLAN=(j.planner||[]).map(p=>Object.assign({},p,{date:+p.date,from:+p.from,to:+p.to,tasks:(p.tasks||[]).map(t=>Object.assign({},t,{due:+t.due}))}));
     buildHolidays();LONG=findLongWeekends();
     const t=j.checked?new Date(j.checked):new Date();
     document.getElementById('updated').textContent='Checked with Google '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
@@ -423,7 +469,7 @@ document.getElementById('add').onclick=()=>openForm();
 document.getElementById('f-cancel').onclick=closeForm;
 document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')closeForm();};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm();});
-document.getElementById('grid').onclick=e=>{const hp=e.target.closest('.ev.ph.can');if(hp){openHoliday(+hp.dataset.k);return;}const el=e.target.closest('.ev.our');if(!el||!CAN_EDIT)return;const o=OURS.find(x=>x.id===el.dataset.id);if(o)openForm(o);};
+document.getElementById('grid').onclick=e=>{if(e.target.closest('.band')){try{window.top.location.hash='planner';}catch(err){}return;}const hp=e.target.closest('.ev.ph.can');if(hp){openHoliday(+hp.dataset.k);return;}const el=e.target.closest('.ev.our');if(!el||!CAN_EDIT)return;const o=OURS.find(x=>x.id===el.dataset.id);if(o)openForm(o);};
 document.getElementById('form').onsubmit=async e=>{e.preventDefault();
   const from=unIso(document.getElementById('f-from').value),to=unIso(document.getElementById('f-to').value)||from;
   const msg=document.getElementById('f-msg');
