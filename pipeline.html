@@ -173,6 +173,19 @@
   .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--faint)}
   @media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}}
   @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.panel{padding:12px;border-radius:22px}.kpis{grid-template-columns:1fr}}
+  /* List switch (Pipeline / renewals due) and filters */
+  .lvrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 16px;padding-bottom:16px;border-bottom:1px dashed #E4DEEB}
+  .seg.lv{background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;box-shadow:var(--shadow)}
+  .seg.lv button{padding:8px 14px;font-size:13px}
+  .seg.lv button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:0 6px 14px -8px rgba(91,42,134,.7)}
+  .fsel{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .fsel select{height:36px;border:1px solid var(--border);border-radius:11px;background:#fff;padding:0 10px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;max-width:200px}
+  .fsel select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .fsel .clr{border:0;background:none;color:var(--accent);font:600 12.5px var(--body);cursor:pointer}
+  .st.due{background:var(--accent-soft);color:var(--accent)}
+  .ty{display:inline-block;margin-top:4px;font:700 10px var(--body);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 6px;background:#F1ECF8;color:var(--accent)}
+  .ty.rp{background:#EEF1F8;color:#3F5592}
+  td.ds{max-width:260px;white-space:normal;line-height:1.45}
 </style>
 </head>
 <body>
@@ -200,6 +213,9 @@
     <div class="sumbody" id="sumbody"><div class="ren" id="ren"></div><div id="kpis"></div><div class="gaps" id="gaps"></div></div>
   </section>
   <section class="panel">
+    <div class="lvrow"><div class="seg lv" id="lv" role="group" aria-label="List">
+        <button type="button" data-v="pipe" aria-pressed="true">Pipeline</button><button type="button" data-v="all" aria-pressed="false">All renewals due</button><button type="button" data-v="first" aria-pressed="false">First-time renewals</button><button type="button" data-v="repeat" aria-pressed="false">Repeated renewals</button></div>
+      <div class="fsel" id="fbar"></div></div>
     <div class="ptop"><div class="ptitle" id="ptitle">Promised payments</div><div class="flt" id="flt" role="group" aria-label="Show"></div></div>
     <div class="tbl-wrap"><table id="t"></table></div>
     <div class="foot"><span id="foot-l"></span><span>Promised date and amount come from the Next Call Date and Expected columns of Fresh Sales and Renewals.</span></div>
@@ -260,7 +276,7 @@ function build(){
     else if(/will not renew|discontinu|refund/i.test(t.status))state='lost';
     if(state==='wait'&&t.ncd<TODAY)state='late';
     const phone=String(t.r[7]||'').replace(/\D/g,'').slice(-10);
-    return {...t,state,paidOn,paidAmt,phone,name:String(t.r[4]||'').trim(),course:String(t.r[8]||'').trim(),teacher:String(t.r[29]||'').trim()};
+    return {...t,state,paidOn,paidAmt,phone,name:String(t.r[4]||'').trim(),course:String(t.r[8]||'').trim(),teacher:String(t.r[29]||'').trim(),age:String(t.r[6]||'').trim(),pack:t.m?Math.round(t.m)+'M':''};
   });
 }
 
@@ -297,7 +313,63 @@ function period(){
   const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);
   return{a,b,label:fmtD(a)+' to '+fmtD(b)};
 }
+
+/* ── Renewals due (the other list views): every membership whose end date falls in the period ──
+   First-time = a Fresh Sales membership, repeated = a Renewals one. Renewed when the same Learner ID has a later Renewals entry
+   (or the status says Renewed); won't renew when the status says so; overdue once the end date has passed. */
+let DUE=null,lv='pipe',dshow='all';
+const FV={age:'',teacher:'',course:'',pack:''};
+const FL=[['age','All ages'],['teacher','All teachers'],['course','All courses'],['pack','All packages']];
+const AGE_ORDER=['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'];
+const passF=x=>(!FV.age||x.age===FV.age)&&(!FV.teacher||x.teacher===FV.teacher)&&(!FV.course||x.course===FV.course)&&(!FV.pack||x.pack===FV.pack);
+function buildDue(){
+  const byId=new Map();ALL.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
+  return ALL.filter(t=>t.end).map(t=>{const r=t.r,later=(byId.get(t.id)||[]).filter(x=>x!==t&&x.tab==='rn'&&x.date>t.date).sort((a,b)=>a.date-b.date)[0];
+    let st='due';if(later||/^renewed$/i.test(t.status))st='paid';else if(/will not renew|won'?t renew|discontinu|refund/i.test(t.status))st='lost';else if(t.end<TODAY)st='late';
+    return{...t,st,paidOn:later?later.date:null,name:String(r[4]||'').trim(),phone:String(r[7]||'').replace(/\D/g,'').slice(-10),age:String(r[6]||'').trim(),course:String(r[8]||'').trim(),
+      level:String(r[9]||'').trim(),pack:t.m?Math.round(t.m)+'M':'',start:valid(parseDate(r[22])),teacher:String(r[29]||'').trim()};});
+}
+function renderFilters(base){
+  const opts=k=>{const v=[...new Set(base.map(x=>x[k]).filter(Boolean))];
+    return k==='age'?v.sort((a,b)=>((AGE_ORDER.indexOf(a)+1)||99)-((AGE_ORDER.indexOf(b)+1)||99)):k==='pack'?v.sort((a,b)=>parseInt(a)-parseInt(b)):v.sort((a,b)=>a.localeCompare(b));};
+  document.getElementById('fbar').innerHTML=FL.map(([k,all])=>{const o=opts(k);if(FV[k]&&!o.includes(FV[k]))o.unshift(FV[k]);
+    return`<select data-f="${k}" class="${FV[k]?'set':''}" aria-label="${all}"><option value="">${all}</option>${o.map(v=>`<option${FV[k]===v?' selected':''}>${esc(v)}</option>`).join('')}</select>`;}).join('')+
+    (FL.some(([k])=>FV[k])?'<button type="button" class="clr" id="clr">Clear</button>':'');
+}
+const DSTATES=[['all','All'],['due','Yet to renew','#5B2A86'],['late','Overdue','#D9534F'],['paid','Renewed','#2DA06A'],['lost',"Won't renew",'#9A96A3']];
+function renderDue(P,sel){
+  const t=document.getElementById('t');
+  const base=(DUE||[]).filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(lv==='all'||(lv==='first'?x.tab==='fs':x.tab==='rn')));
+  renderFilters(base);
+  const list=base.filter(passF),cnt=s=>list.filter(x=>x.st===s).length;
+  document.getElementById('flt').innerHTML=DSTATES.map(([k,l,c])=>`<button type="button" data-s="${k}" aria-pressed="${dshow===k}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${k==='all'?list.length:cnt(k)}</span></button>`).join('');
+  document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{dshow=b.dataset.s;render();});
+  const shown=list.filter(x=>dshow==='all'||x.st===dshow).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
+  const nm={all:'Renewals due',first:'First-time renewals due',repeat:'Repeated renewals due'}[lv];
+  document.getElementById('ptitle').innerHTML=`${nm} <small>${shown.length} learner${shown.length===1?'':'s'} · ${cnt('paid')} of ${list.length} renewed${list.length?' ('+Math.round(cnt('paid')/list.length*100)+'%)':''}</small>`;
+  const stPill=x=>{const m={paid:['paid','Renewed'],late:['late','Overdue'],lost:['lost',"Won't renew"],due:['due','Yet to renew']}[x.st];
+    return`<span class="st ${m[0]}"><i></i>${m[1]}</span>${x.st==='paid'&&x.paidOn?`<span class="sub">Paid ${fmtD(x.paidOn)}</span>`:x.st==='late'?`<span class="sub">${days(x.end,TODAY)} days since end</span>`:x.status&&x.st==='due'?`<span class="sub">${esc(x.status)}</span>`:''}`;};
+  const head=['Learner',...(sel?[]:['Centre']),'Phone','Course','Level','Class start','Membership end','Renewal status','Description','Next call / expected payment',{t:'Expected amount',n:1}];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!shown.length)h+=`<tr><td colspan="${head.length}" class="empty">No memberships ${dshow==='all'?'':'with this status '}ending between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
+  shown.forEach(x=>{
+    h+=`<tr class="${x.st==='paid'||x.st==='lost'?'done':''}"><td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}${x.teacher?' · '+esc(x.teacher):''}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${x.phone.length===10?x.phone.slice(0,5)+' '+x.phone.slice(5):'—'}</td>
+      <td>${esc(x.course)||'—'}<br><span class="ty ${x.tab==='rn'?'rp':''}">${x.tab==='rn'?'Repeated':'First-time'}${x.pack?' · '+x.pack:''}</span></td>
+      <td>${esc(x.level)||'—'}</td><td>${fmtD(x.start)}</td><td><b>${fmtD(x.end)}</b></td><td>${stPill(x)}</td>
+      <td class="ds">${esc(x.desc)||'<span style="color:var(--faint)">—</span>'}</td>
+      <td>${x.ncd?fmtD(x.ncd)+(x.ncd<TODAY&&x.st!=='paid'&&x.st!=='lost'?'<span class="sub" style="color:var(--bad)">date passed</span>':''):'<span style="color:var(--faint)">—</span>'}</td>
+      <td class="n amt">${x.exp>0?inr(x.exp):'<span style="color:var(--faint);font-weight:400">—</span>'}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`Membership end dates ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+document.getElementById('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;lv=b.dataset.v;try{localStorage.setItem('artium_rp_list',lv);}catch(err){}render();};
+document.getElementById('fbar').addEventListener('change',e=>{const k=e.target.dataset.f;if(k){FV[k]=e.target.value;render();}});
+document.getElementById('fbar').addEventListener('click',e=>{if(e.target.id==='clr'){Object.keys(FV).forEach(k=>FV[k]='');render();}});
+try{const v=localStorage.getItem('artium_rp_list');if(['pipe','all','first','repeat'].includes(v))lv=v;}catch(e){}
 function render(){
+  document.querySelectorAll('#lv button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===lv));
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
@@ -355,11 +427,14 @@ function render(){
     <div class="gtiles">${GAP.map(([g,l,d])=>`<button type="button" class="gtile${show===g?' on':''}${gc[g].length?'':' zero'}" data-g="${g}"><span class="gn">${gc[g].length}</span><span class="gl"><b>${l}</b><small>${d}</small></span><span class="ga">${gc[g].length?'Paid last time: '+inr(sum(gc[g],x=>x.paid)):''}</span></button>`).join('')}</div>`;
   document.querySelectorAll('.gtile').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
   if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
+  // The other list views: renewals due (all / first-time / repeated)
+  if(lv!=='pipe')return renderDue(P,sel);
   // Filter
-  const cnt={all:all.length,wait:wait.length,late:late.length,paid:paid.length,lost:lost.length};
+  renderFilters(all);const allP=all.filter(passF);
+  const pc=s=>allP.filter(x=>x.state===s).length,cnt={all:allP.length,wait:pc('wait'),late:pc('late'),paid:pc('paid'),lost:pc('lost')};
   document.getElementById('flt').innerHTML=STATES.filter(([s])=>s!=='lost'||cnt.lost).map(([s,l,c])=>`<button type="button" data-s="${s}" aria-pressed="${show===s}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${cnt[s]}</span></button>`).join('');
   document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{show=b.dataset.s;render();});
-  const list=(show==='all'?all:all.filter(x=>x.state===show)).slice().sort((a,b)=>a.ncd-b.ncd||b.exp-a.exp);
+  const list=(show==='all'?allP:allP.filter(x=>x.state===show)).slice().sort((a,b)=>a.ncd-b.ncd||b.exp-a.exp);
   document.getElementById('ptitle').innerHTML=`Promised payments <small>${list.length} learner${list.length===1?'':'s'} · ${inr(sum(list,x=>x.exp))}</small>`;
   // Table, grouped by week (Monday to Sunday)
   const head=['Promised date','Learner',...(sel?[]:['Centre']),'Phone','Course','Package','Membership ended',{t:'Expected',n:1},'Probability','Note','Status'];
@@ -405,7 +480,7 @@ async function load(){
   try{
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
     CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
-    ITEMS=build();
+    ITEMS=build();DUE=buildDue();
     ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets){TARGETS=j.targets;render();}}).catch(()=>{});   // monthly targets (Targets page)
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
