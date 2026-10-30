@@ -195,7 +195,7 @@
   .modal-body label{display:flex;flex-direction:column;gap:6px;font:600 12px var(--body);color:var(--ink2);flex:1}
   .modal-body label.narrow{flex:0 0 120px}
   .row2{display:flex;gap:14px}
-  .row2[hidden]{display:none}
+  .row2[hidden],label[hidden]{display:none!important}
   .modal-body input,.modal-body select,.modal-body textarea{border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:10px 12px;font:400 14px/1.5 var(--body);color:var(--ink);width:100%}
   .modal-body input,.modal-body select{height:42px;padding-top:0;padding-bottom:0}
   .modal-body textarea{resize:vertical}
@@ -244,8 +244,8 @@
       <label>Initiative<input id="ed-name" placeholder="Short name, e.g. Lamp Posts"></label>
       <label>Desired state<textarea id="ed-ds" rows="4" placeholder="Where we want to be. One point per line." oninput="renderPick()"></textarea></label>
       <div class="cpick" id="ed-pick"></div>
-      <label>Current state<textarea id="ed-cs" rows="4" placeholder="Where things stand today."></textarea></label>
-      <label>Plan ahead<textarea id="ed-pa" rows="4" placeholder="Next steps, one per line."></textarea></label>
+      <label id="ed-cs-l">Current state<textarea id="ed-cs" rows="4" placeholder="Where things stand today."></textarea></label>
+      <label id="ed-pa-l">Plan ahead<textarea id="ed-pa" rows="4" placeholder="Next steps, one per line."></textarea></label>
       <div class="ed-msg" id="ed-msg"></div>
     </div>
     <!-- Step 2: recommended completion % -->
@@ -447,6 +447,8 @@ function openEditor(id){
   $('ed-nf-name').value='';$('ed-nf-emoji').value='';
   $('ed-name').value=x.n;
   $('ed-ds').value=x.ds.join('\n');$('ed-cs').value=x.cs.join('\n');$('ed-pa').value=x.pa.join('\n');
+  // Current state and Plan ahead are being retired: they only show for an initiative that still has text in them
+  $('ed-cs-l').hidden=!x.cs.length;$('ed-pa-l').hidden=!x.pa.length;
   PICK={};if(editing)linesOf(editing).forEach(l=>PICK[l.t]={c:{...l.c},g:(editing.dsx||[]).find(z=>z.t===l.t)?.g||''});renderPick();
   backToEdit();msg('');$('editor').hidden=false;$('ed-name').focus();
 }
