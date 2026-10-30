@@ -25,6 +25,13 @@
   .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
   @keyframes pulse{50%{opacity:.35}}
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:18px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}.ct-btn[aria-pressed="true"] span{color:#fff}.ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .hr{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
   .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
   .period{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:6px;box-shadow:var(--shadow);flex-wrap:wrap}
   .seg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px}
@@ -91,9 +98,11 @@
 <body>
 <div class="page">
   <header class="page-header">
-    <div><div class="eyebrow">Planner</div><h1>Goals</h1><div class="subtitle">Goals set from the Offline Centres page, centre by centre, with their subtasks and updates</div></div>
-    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+    <div><div class="eyebrow">Planner</div><h1>Goals</h1><div class="subtitle" id="subtitle">Goals centre by centre, with their subtasks and updates</div></div>
+    <div class="hr"><div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <button class="btn pri" type="button" id="newgoal" hidden style="height:42px;padding:0 18px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New goal</button></div>
   </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
   <div class="bar">
     <div class="period">
       <div class="seg" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
@@ -119,12 +128,15 @@ const fmtD=d=>d?d.getDate()+' '+MON[d.getMonth()]+(d.getFullYear()!==NOW.getFull
 const days=(a,b)=>Math.round((day(b)-day(a))/864e5);
 const ago=s=>{const d=new Date(s),m=Math.round((Date.now()-d)/6e4);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':m<2880?'Yesterday':fmtD(d);};
 let G=[],ACT=[],INITS={},STAFF=[],CAN=false,ME='',CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'],SEL=null;
+let CEN=(()=>{try{return localStorage.getItem('artium_goals_centre')||'All';}catch(e){return'All';}})();
 let mode='month',basis='active',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,FILES=[];
 
 function period(){if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
   const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);return{a,b,label:fmtD(a)+' – '+fmtD(b)};}
-const created=g=>day(new Date(g.created)),completed=g=>g.completed?day(new Date(g.completed)):null,target=g=>fromIso(g.target);
-const pairs=g=>{let t=0,d=0;const cs=Object.keys(g.centres||{});(g.tasks||[]).forEach(k=>cs.forEach(c=>{t++;if((k.s||{})[c]==='cmp')d++;}));if(!(g.tasks||[]).length)cs.forEach(c=>{t++;if(g.centres[c].s==='cmp')d++;});return{t,d};};
+// With one centre chosen, a goal's status, completion and progress are that centre's
+const cv=g=>CEN==='All'||!g.centres[CEN]?{status:g.status,completed:g.completed}:{status:g.centres[CEN].s||'tbp',completed:g.centres[CEN].done||null};
+const created=g=>day(new Date(g.created)),completed=g=>{const c=cv(g).completed;return c?day(new Date(c)):null;},target=g=>fromIso(g.target);
+const pairs=g=>{let t=0,d=0;const cs=Object.keys(g.centres||{}).filter(c=>CEN==='All'||c===CEN);(g.tasks||[]).forEach(k=>cs.forEach(c=>{t++;if((k.s||{})[c]==='cmp')d++;}));if(!(g.tasks||[]).length)cs.forEach(c=>{t++;if(g.centres[c].s==='cmp')d++;});return{t,d};};
 const canSet=(g,c)=>CAN||(g.centres[c]&&(g.centres[c].owners||[]).some(p=>p.email===ME));
 const canPost=g=>CAN||Object.values(g.centres||{}).some(C=>(C.owners||[]).some(p=>p.email===ME));
 const whereOf=g=>{const i=INITS[g.init];return i?i.path+' › '+i.n:'';};
@@ -136,9 +148,12 @@ function render(){
   const P=period();document.getElementById('mlabel').textContent=P.label;
   if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
   const inP=d=>d&&d>=P.a&&d<=P.b;
-  const list=G.filter(g=>basis==='created'?inP(created(g)):basis==='completed'?inP(completed(g)):(created(g)<=P.b&&(!completed(g)||completed(g)>=P.a)))
-    .sort((a,b)=>(a.draft-b.draft)||({inp:0,tbp:1,cmp:2}[a.status]-{inp:0,tbp:1,cmp:2}[b.status])||(target(a)||9e15)-(target(b)||9e15));
-  const live=list.filter(g=>!g.draft),cnt=s=>live.filter(g=>g.status===s).length,done=live.filter(g=>g.completed);
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===CEN));
+  document.getElementById('subtitle').textContent=CEN==='All'?'Goals across all centres, with their subtasks and updates':'Goals for '+CEN+' — status, completion and progress are '+CEN+'\'s';
+  document.getElementById('newgoal').hidden=!CAN;
+  const list=G.filter(g=>CEN==='All'||g.centres[CEN]).filter(g=>basis==='created'?inP(created(g)):basis==='completed'?inP(completed(g)):(created(g)<=P.b&&(!completed(g)||completed(g)>=P.a)))
+    .sort((a,b)=>(a.draft-b.draft)||({inp:0,tbp:1,cmp:2}[cv(a).status]-{inp:0,tbp:1,cmp:2}[cv(b).status])||(target(a)||9e15)-(target(b)||9e15));
+  const live=list.filter(g=>!g.draft),cnt=s=>live.filter(g=>cv(g).status===s).length,done=live.filter(g=>completed(g));
   const avg=done.length?Math.round(done.reduce((s,g)=>s+days(created(g),completed(g)),0)/done.length):null;
   const onTime=done.filter(g=>target(g)&&completed(g)<=target(g)).length,withT=done.filter(g=>target(g)).length;
   document.getElementById('chips').innerHTML=[['Goals',live.length],['To be picked',cnt('tbp')],['In progress',cnt('inp')],['Completed',cnt('cmp')],
@@ -147,14 +162,14 @@ function render(){
   const t=document.getElementById('t');
   if(!list.length){t.innerHTML=`<tbody><tr><td class="empty">No goals ${basis==='created'?'created':basis==='completed'?'completed':'open'} in ${esc(P.label)}.${CAN?' Make a goal from any Desired state line on the Offline Centres page.':''}</td></tr></tbody>`;}
   else t.innerHTML=`<thead><tr><th>Goal</th><th>Centres &amp; owners</th><th>Created</th><th>Target</th><th>Completed</th><th>Progress</th><th>Status</th></tr></thead><tbody>${list.map(g=>{
-    const c=completed(g),tg=target(g),p=pairs(g),cs=Object.keys(g.centres||{});
+    const c=completed(g),tg=target(g),p=pairs(g),cs=Object.keys(g.centres||{}).filter(k=>CEN==='All'||k===CEN);
     const comp=c?`${fmtD(c)}<small class="${tg?(c<=tg?'ontime':'late'):''}">${days(created(g),c)} day${days(created(g),c)===1?'':'s'}${tg?' · '+(c<=tg?(days(c,tg)?days(c,tg)+' days early':'on the day'):days(tg,c)+' days late'):''}</small>`
       :g.draft?'<span style="color:var(--faint)">—</span>':`<span style="color:var(--faint)">—</span><small>${days(created(g),TODAY)} days so far${tg&&tg<TODAY?' · <span class="late">'+days(tg,TODAY)+' days past target</span>':''}</small>`;
-    return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td style="min-width:240px"><b>${esc(g.title)}</b><small>${esc(whereOf(g))}</small></td>
+    return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td style="min-width:240px"><b>${esc(g.title)}</b><small>${esc(whereOf(g)||'Standalone goal')}</small></td>
       <td>${cs.map(k=>`<div style="white-space:nowrap">${esc(k)} <small style="display:inline">· ${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', ')||'—')}</small></div>`).join('')}</td>
       <td class="nw">${fmtD(created(g))}</td><td class="nw">${tg?fmtD(tg):'—'}</td><td class="nw">${comp}</td>
       <td><div class="pb"><span><i style="width:${p.t?Math.round(p.d/p.t*100):0}%"></i></span>${p.d} of ${p.t}</div><small>${(g.tasks||[]).length?'subtasks × centres':'centres'}</small></td>
-      <td>${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${g.status}"><i></i>${ST[g.status]}</span>`}</td></tr>`;}).join('')}</tbody>`;
+      <td>${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}</td></tr>`;}).join('')}</tbody>`;
   renderDet();
 }
 function stSel(g,task,c,s){
@@ -163,7 +178,7 @@ function stSel(g,task,c,s){
 function renderDet(){
   const el=document.getElementById('det'),g=G.find(x=>x.id===SEL);
   if(!g){el.hidden=true;return;}el.hidden=false;
-  const cs=Object.keys(g.centres||{}),c=completed(g),tg=target(g),tasks=g.tasks||[];
+  const cs=Object.keys(g.centres||{}).filter(k=>CEN==='All'||k===CEN),c=completed(g),tg=target(g),tasks=g.tasks||[];
   let mx=`<table class="mx"><thead><tr><th>${tasks.length?'Subtask':'Centre'}</th>${cs.map(k=>`<th>${esc(k)}<span class="own" style="text-transform:none;letter-spacing:0">${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', '))}</span></th>`).join('')}</tr></thead><tbody>`;
   if(tasks.length){mx+=tasks.map(t=>`<tr><td class="t">${esc(t.title)}${t.due?`<small>Due ${fmtD(fromIso(t.due))}</small>`:''}</td>${cs.map(k=>`<td>${g.draft?'—':stSel(g,t.id,k,(t.s||{})[k]||'tbp')}</td>`).join('')}</tr>`).join('');
     mx+=`<tr class="cen"><td class="t">Centre status</td>${cs.map(k=>`<td><span class="gl ${g.centres[k].s}"><i></i>${ST[g.centres[k].s]}</span></td>`).join('')}</tr>`;}
@@ -175,8 +190,8 @@ function renderDet(){
     if(a.kind==='update')return`<div class="upd"><span class="av">${esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;
     if(a.kind==='status'){let x={};try{x=JSON.parse(a.text);}catch(e){}return`<div class="sys"><b>${who}</b> set ${x.task?'<b>'+esc(x.what)+'</b>':'the status'} for ${esc(x.centre)} to <b>${ST[x.s]||''}</b> · ${ago(a.at)}</div>`;}
     return`<div class="sys"><b>${who}</b> ${esc(a.text.charAt(0).toLowerCase()+a.text.slice(1))} · ${ago(a.at)}</div>`;}).join('');
-  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Draft — not sent yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
-      <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${g.status}"><i></i>${ST[g.status]}</span>`}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
+  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CEN!=='All'?'at '+esc(CEN)+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Draft — not sent yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
+      <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
     ${g.desc?`<div class="desc">${esc(g.desc)}</div>`:''}
     <div class="grid2"><div><div class="lab">${tasks.length?'Subtasks by centre':'Centres'}</div>${mx}</div>
       <div><div class="lab">Updates</div><div class="feed">${feed||'<div class="sys" style="padding-left:0">No updates yet.</div>'}</div>
@@ -209,14 +224,19 @@ document.getElementById('det').addEventListener('click',async e=>{
     catch(err){m.textContent='Couldn\'t post: '+err.message;b.disabled=false;}}
 });
 document.getElementById('t').addEventListener('click',e=>{const r=e.target.closest('tr[data-g]');if(!r)return;SEL=SEL===r.dataset.g?null:r.dataset.g;render();if(SEL)setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),50);});
+document.getElementById('centre-toggle').innerHTML=[{n:'All',l:'All centres',c:'3 centres'},{n:'Alwarpet',l:'Alwarpet',c:'Chennai'},{n:'Thoraipakkam',l:'Thoraipakkam',c:'Chennai'},{n:'Borewell Road',l:'Borewell Road',c:'Bangalore'}]
+  .map(o=>`<button class="ct-btn" type="button" data-c="${o.n}" aria-pressed="false"><small>${o.c}</small><span>${o.l}</span></button>`).join('');
+document.getElementById('centre-toggle').onclick=e=>{const b=e.target.closest('.ct-btn');if(!b)return;CEN=b.dataset.c;try{localStorage.setItem('artium_goals_centre',CEN);}catch(err){}if(SEL&&CEN!=='All'&&!(G.find(x=>x.id===SEL)||{centres:{}}).centres[CEN])SEL=null;render();};
+// A goal that doesn't come from a Desired state line
+document.getElementById('newgoal').onclick=()=>GoalForm.open({staff:STAFF,lineCentres:CEN==='All'?null:[CEN],onSaved:j=>{load(true).then(()=>j&&j.id&&openGoal(j.id));}});
 document.getElementById('mode').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;render();}};
 document.getElementById('basis').onclick=e=>{const b=e.target.closest('button');if(b){basis=b.dataset.b;render();}};
 document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
 document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
 ['from','to'].forEach(id=>document.getElementById(id).onchange=e=>{const d=fromIso(e.target.value);if(!d)return;if(id==='from')rFrom=d;else rTo=d;if(rFrom&&rTo&&rFrom>rTo)[rFrom,rTo]=[rTo,rFrom];render();});
 // Open a goal (from the Offline Centres page, the bell, or an email link)
-window.openGoal=id=>{const g=G.find(x=>x.id===id);if(!g){try{sessionStorage.setItem('artium_open_goal',id);}catch(e){}return;}
-  SEL=id;basis='active';mode='range';rFrom=created(g);rTo=new Date(Math.max(TODAY,completed(g)||0));render();setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),80);};
+window.openGoal=id=>{const g=G.find(x=>x.id===id);if(g&&CEN!=='All'&&!g.centres[CEN])CEN='All';if(!g){try{sessionStorage.setItem('artium_open_goal',id);}catch(e){}return;}
+  SEL=id;const P=period(),c=completed(g);if(!(created(g)<=P.b&&(!c||c>=P.a))){basis='active';mode='month';const d=c||TODAY;viewY=d.getFullYear();viewM=d.getMonth();}render();setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),80);};
 async function load(keep){
   try{
     const j=await ArtiumAuth.call('goals',{});

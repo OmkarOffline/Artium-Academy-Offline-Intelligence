@@ -33,7 +33,7 @@
   }
 
   /* ── Landing page: sign-in ── */
-  let session=null, tokenClient=null, pending=null;
+  let session=null, tokenClient=null, pending=null, ready=false;
   const listeners=[];
   // Signed in for 8 hours since the last use of the site (the data service renews the pass on every request).
   // Kept in this browser (localStorage), so new tabs and restarts stay signed in.
@@ -120,7 +120,8 @@
     },
     // Teachers per centre and course (counts only), from the Basic Information sheet
     async teachers(){ const j=await service({action:'teachers'}); if(j.error) throw new Error(j.error==='expired'?'Your session has expired — sign in again':j.error); return j.teachers||{}; },
-    onReady(fn){ session?fn(session):listeners.push(fn); }
+    // Runs once sign-in is confirmed and the page list is fresh from the access sheet (not the copy saved at the last sign-in)
+    onReady(fn){ ready?fn(session):listeners.push(fn); }
   };
 
   /* ── Sign-in screen ── */
@@ -197,6 +198,7 @@
     const pages=session.pages||[];
     document.querySelectorAll('.tab[data-tab]').forEach(t=>{ t.hidden=!pages.includes(t.dataset.tab); });
     showUser();
+    ready=true;
     listeners.splice(0).forEach(fn=>fn(session));
   }
   function showUser(){

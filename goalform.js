@@ -52,7 +52,7 @@
   function open(opts){
     mount();O=opts;const g=opts.goal;
     F=g?JSON.parse(JSON.stringify(g)):{id:'',init:opts.init&&opts.init.id||'',line:opts.line||'',title:opts.line||'',desc:'',target:'',draft:true,centres:{},tasks:[]};
-    if(!g)(opts.lineCentres||CENTRES).forEach(c=>F.centres[c]={owners:[],s:'tbp'});
+    if(!g)((opts.lineCentres&&opts.lineCentres.length)?opts.lineCentres:CENTRES).forEach(c=>F.centres[c]={owners:[],s:'tbp'});
     F.tasks=(F.tasks||[]).map(t=>({...t}));render();el.hidden=false;
     setTimeout(()=>{const t=el.querySelector('[data-f=title]');t&&t.focus();},50);
   }
@@ -61,7 +61,7 @@
     <select data-addp="${esc(c)}"><option value="">+ ${list.length?'Add':'Choose'} owner</option>${(O.staff||[]).filter(s=>!list.some(p=>p.email===s.email)).sort((a,b)=>(b.centre===c)-(a.centre===c)||a.name.localeCompare(b.name)).map(s=>`<option value="${esc(s.email)}">${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}<option value="@">Someone else (type an email)…</option></select></div>`;
   function render(){
     const live=O.goal&&!O.goal.draft,i=O.init;
-    el.innerHTML=`<div class="gf" role="dialog" aria-modal="true"><div class="gf-hd"><div><h2>${O.goal?'Edit goal':'Make it a goal'}</h2>${i?`<div class="gf-from">From <b>${esc(i.dept||'')}</b> › <b>${esc(i.path||'')}</b> › <b>${esc(i.n||'')}</b></div>`:''}</div><button class="gf-x" type="button" data-close aria-label="Close">×</button></div>
+    el.innerHTML=`<div class="gf" role="dialog" aria-modal="true"><div class="gf-hd"><div><h2>${O.goal?'Edit goal':i?'Make it a goal':'New goal'}</h2>${i?`<div class="gf-from">From <b>${esc(i.dept||'')}</b> › <b>${esc(i.path||'')}</b> › <b>${esc(i.n||'')}</b></div>`:''}</div><button class="gf-x" type="button" data-close aria-label="Close">×</button></div>
       <div class="gf-bd">
         <div><span class="gf-l">Goal</span><input class="gf-in" data-f="title" value="${esc(F.title)}" maxlength="200"></div>
         <div><span class="gf-l">Goal description</span><textarea class="gf-in" data-f="desc" placeholder="Why it matters, what to do, and what &quot;done&quot; looks like.">${esc(F.desc)}</textarea><div class="gf-hint">This is what the owners read in their email, so write it the way you'd brief them.</div></div>
