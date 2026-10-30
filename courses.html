@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+
+  /* Header */
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:30px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Filters (collapsible, like Lead to Purchase) */
+  .filters{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);margin-bottom:26px}
+  .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;cursor:pointer;user-select:none}
+  .filters-head .t{display:flex;align-items:center;gap:10px;font:600 16px var(--display);color:var(--ink)}
+  .filters-head .t svg{color:var(--accent)}
+  .f-badge{background:var(--accent-soft);color:var(--accent);font:600 12px var(--body);border-radius:999px;padding:3px 10px}
+  .f-badge.on{background:var(--accent);color:#fff}
+  .f-chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s}
+  .filters.closed .f-chev{transform:rotate(-90deg)}
+  .filters.closed .filters-body{display:none}
+  .filters-body{border-top:1px solid var(--line);padding:18px 22px 20px}
+  .f-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+  .f-group{display:flex;flex-direction:column;gap:6px}
+  .f-group label{font:600 12px var(--body);color:var(--ink2)}
+  .f-group select{height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer}
+  .f-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .f-group select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .f-clear{margin-top:14px;border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;padding:0}
+  .f-clear:disabled{color:var(--ghost);cursor:default}
+  @media (max-width:900px){.f-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+  /* Section tray */
+  .tray{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:600 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B 0%,var(--gold) 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  /* Month-by-month table: newest month first, scroll right for history */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow)}
+  table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:100%}   /* few months: columns stretch to fill */
+  th,td{padding:13px 16px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);min-width:92px}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);vertical-align:bottom}
+  thead tr.yr th{padding:14px 16px 4px;border-bottom:0;font:700 10px/1 var(--body);letter-spacing:.16em;color:var(--gold);text-align:left}
+  thead tr.mo th{padding-top:4px}
+  th.cur{color:var(--accent)}
+  th.cur small{display:block;font:500 10px/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--accent);opacity:.8}
+  .yb{border-left:1px solid var(--border)}
+  .metric{position:sticky;left:0;z-index:1;text-align:left;background:#fff;min-width:380px;max-width:380px;white-space:normal;padding-left:22px;border-right:1px solid var(--border)}
+  th.metric{background:#FAF9F7;z-index:2}
+  td{font:500 14px var(--display);color:var(--ink2)}
+  td.metric{font:500 14px var(--body);color:var(--ink)}
+  td.metric .k{display:inline-block;width:22px;font:700 11px var(--body);color:var(--gold);vertical-align:baseline}
+  td.metric .op{display:inline-block;width:46px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);vertical-align:baseline}   /* notional Add / Less column */
+  tr.add td.metric .op{color:var(--ok)}
+  tr.less td.metric .op{color:var(--bad)}
+  td.metric .lb{display:inline-block;width:calc(100% - 46px);vertical-align:top}
+  thead tr.yr th.metric{padding-left:68px}   /* 'Particulars' lines up with the row names */
+  td.zero{color:var(--ghost);font-weight:400}
+  tr.sum td{font-weight:600;color:var(--ink);background:#FCFBF9}
+  tr.sum td.metric{font-weight:600}
+  tr.less td:not(.metric){color:var(--bad)}
+  tr.less td.zero{color:var(--ghost)}
+  tr.add td:not(.metric):not(.zero){color:var(--ok)}
+  tr.mal td{background:var(--accent-soft);font-weight:700;color:var(--accent)}
+  tr.signed td{font-weight:600}
+  tr.signed td.pos{color:var(--ok)}
+  tr.signed td.neg{color:var(--bad)}
+  tbody tr:last-child td{border-bottom:0}
+  tr.mal td.metric{font:700 15px var(--display);color:var(--accent)}
+  tr.spacer td{height:12px;padding:0;background:#FAF9F7;border-bottom:1px solid var(--line)}
+  tbody tr:not(.mal):not(.spacer):hover td{background:#FCFBFE}
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs-list{margin:12px 0 0;padding:18px 22px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:16px}
+  .defs-list[hidden]{display:none}
+  .def .dt{font:600 13.5px/1.3 var(--display);color:var(--ink);margin-bottom:3px}
+  .def p{font-size:13.5px;line-height:1.6;color:var(--muted);max-width:980px}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+  table.ar{width:100%;table-layout:fixed}
+  table.ar th,table.ar td{min-width:0}
+  table.ar th{white-space:normal}
+  table.ar td.metric,table.ar th.metric{min-width:0;max-width:none;width:26%;padding-left:22px}
+  table.ar td.metric small{display:block;font:400 11.5px var(--body);color:var(--faint);margin-top:2px}
+  table.ar tr.pair td{border-bottom-color:transparent}
+  table.ar tr.total td{background:#FCFBF9;font-weight:700;color:var(--ink);border-top:1px solid var(--border)}
+  table.ar td.need,table.ar tr.total td.need{color:var(--bad);font-weight:700}
+  table.ar td.ok,table.ar tr.total td.ok{color:var(--ok);font-weight:700}
+  table.ar td.na{color:var(--ghost);font-weight:400}
+  .util{display:inline-block;min-width:58px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+  .util.hi{color:var(--ok);background:#E5F4EC}
+  .util.mid{color:#9A6200;background:#FBF1DC}
+  .util.lo{color:var(--bad);background:#FDECEB}
+  .util.top{color:#1D4ED8;background:#E6EEFB}
+  /* Monthly Active Learners split by course & teacher, and by age group */
+  tr.grp td{font-weight:600;color:var(--ink);background:#FCFBF9;cursor:pointer}
+  tr.grp td.metric{font:600 14px var(--display);color:var(--ink)}
+  tr.grp td.metric .ar{display:inline-block;width:16px;color:var(--muted);transition:transform .15s}
+  tr.grp.shut td.metric .ar{transform:rotate(-90deg)}
+  tr.sub td.metric{padding-left:46px;color:var(--ink2);font-weight:400}
+  tr.sub td{font-weight:400}
+  tr.nm td.metric{color:var(--faint);font-style:italic}
+  tr.tot td{background:var(--accent-soft);font-weight:700;color:var(--accent);border-bottom:0}
+  tr.tot td.metric{font:700 15px var(--display);color:var(--accent)}
+  td.neg{color:var(--bad)}
+  tr.sep td{background:#FAF9F7;font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding-top:14px;padding-bottom:10px}
+  tr.past td{color:var(--faint)}
+  tr.past td.metric{color:var(--muted)}
+  tr.past td.metric small{color:var(--faint);font-size:11.5px}
+  /* Capacity utilisation: second most important row, a lighter version of the Monthly Active Learners row */
+  tr.cu td{background:#FBF8FD;border-top:1px solid #EFE7F6}
+  tr.cu td.metric{font:600 14.5px var(--display);color:var(--accent)}
+  .sample{display:inline-flex;align-items:center;gap:6px;background:#FFF6E5;border:1px solid #F0DDB5;color:#8A5A00;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:14px}
+
+  @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
+    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.metric{min-width:200px;max-width:200px}}
+
+  /* Renewal tables: one cell per teacher per month — renewal % with renewed of due underneath */
+  table.rr td{padding-top:10px;padding-bottom:10px}
+  table.rr td .util{min-width:54px}
+  table.rr td small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
+  table.rr tr.tot td small{color:var(--accent);opacity:.75}
+  table.rr tr.past td .util{opacity:.75}
+
+  /* Summary groups before the months: fold away sideways with one click */
+  table.rr{min-width:0;width:max-content}   /* no stretching, so folded columns close right up */
+  table.rr .sg{min-width:0;padding:0;background:#FCFAFE}
+  table.rr thead .sg{background:#F6F1FB}
+  table.rr .sg .sw{max-width:140px;overflow:hidden;padding:10px 14px;white-space:nowrap;transition:max-width .32s cubic-bezier(.3,.7,.2,1),padding .32s,opacity .2s}
+  table.rr thead tr.mo .sg .sw{padding:4px 10px 12px}
+  table.rr .sg.g0{border-left:1px solid #E6DCF1}
+  table.rr th.gt .sw{padding:14px 14px 4px;font:700 10px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);text-align:left}
+  table.rr .gh{min-width:30px;width:30px;max-width:30px;padding:0;background:#F6F1FB;border-right:1px solid #E6DCF1}
+  table.rr tbody .gh{background:#F9F5FC}
+  .gbtn{display:flex;flex-direction:column;align-items:center;gap:8px;width:30px;height:100%;min-height:74px;padding:10px 0;border:0;background:none;color:var(--accent);cursor:pointer}
+  .gbtn:hover{background:#EDE3F7}
+  .gbtn svg{transition:transform .32s}
+  .gbtn span{writing-mode:vertical-rl;transform:rotate(180deg);font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s}
+  .sbtn{border:0;background:none;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);cursor:pointer;padding:2px 4px;border-radius:6px}
+  .sbtn:hover{background:#EDE3F7;color:var(--accent)}
+  th.on .sbtn{color:var(--accent)}
+  table.rr.fold-perf .sg-perf .sw,table.rr.fold-year .sg-year .sw{max-width:0;padding-left:0!important;padding-right:0!important;opacity:0}
+  table.rr.fold-perf .sg-perf.g0,table.rr.fold-year .sg-year.g0{border-left-color:transparent}
+  table.rr.fold-perf th.gh:has([onclick*="'perf'"]) svg,table.rr.fold-year th.gh:has([onclick*="'year'"]) svg{transform:rotate(180deg)}
+  table.rr.fold-perf th.gh:has([onclick*="'perf'"]) span,table.rr.fold-year th.gh:has([onclick*="'year'"]) span{opacity:1;max-height:200px}
+  table.rr .num{font:600 14px var(--display);color:var(--ink)}
+  table.rr .num.left{color:var(--accent);font-weight:700}
+  table.rr .num.lost{color:var(--muted);font-weight:500}
+  table.rr .na{color:var(--ghost);font-weight:400}
+  table.rr .sg small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
+  table.rr tr.tot .sg{background:var(--accent-soft)}
+  table.rr tr.subt td{background:#F8F4FC;border-top:1px solid #E6DCF1;border-bottom:1px solid #E6DCF1}
+  table.rr tr.subt td.metric{font:600 14px var(--display);color:var(--accent)}
+  table.rr tr.subt td small{color:var(--accent);opacity:.75}
+  table.rr .metric{min-width:240px;max-width:240px}
+  .util.xtra{color:var(--accent);background:var(--accent-soft)}   /* renewals with nothing due: not a score, so no score colour */
+  .lgd{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
+  .lgd .util{min-width:0;padding:2px 9px;font-size:11.5px}
+
+  /* Admissions by course: count with its share of the month, shaded by share */
+  table.ad td{padding-top:9px;padding-bottom:9px}
+  table.ad td .c{display:block;font:600 14px var(--display);color:var(--ink)}
+  table.ad td small{display:block;margin-top:2px;font:500 11px var(--body);color:var(--muted)}
+  table.ad td.zero small{display:none}
+  table.ad td.lt{background:#F6F1FB;border-left:1px solid #E6DCF1;border-right:1px solid #E6DCF1}
+  table.ad th.lt{background:#F1EAF8;color:var(--accent)}
+  table.ad tr.tot td small{color:var(--accent);opacity:.8}
+  table.ad .metric{min-width:240px;max-width:240px}
+  /* Multi-select fields inside the Filters card (same look as the dropdowns on the other pages) */
+  .f-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ms{position:relative;display:flex;flex-direction:column;gap:6px}
+  .ms>label{font:600 12px var(--body);color:var(--ink2)}
+  .ms>button{display:flex;align-items:center;justify-content:space-between;gap:8px;height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer;text-align:left;width:100%}
+  .ms>button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ms>button svg{flex:none;color:var(--muted)}
+  .ms>button:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .ms.set>button{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .ms .pop{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 40px -18px rgba(31,16,41,.35);padding:6px}
+  .ms .pop label{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:13.5px;color:var(--ink2);cursor:pointer}
+  .ms .pop label:hover{background:var(--accent-soft)}
+  .ms .pop input{width:16px;height:16px;accent-color:#5B2A86}
+  .ms .pop .pf{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:4px;padding:6px 6px 2px}
+  .ms .pop .pf button{border:0;background:none;color:var(--accent);font:600 12.5px var(--body);cursor:pointer}
+  .filters:not(.closed){position:relative;z-index:5}
+  .filters-body{overflow:visible}
+  .lgd2{display:flex;align-items:center;gap:8px;margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
+  .lgd2 i{display:inline-block;width:18px;height:12px;border-radius:3px}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Course Performance</h1>
+      <div class="subtitle" id="subtitle">Admissions by course, month by month</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <section class="filters closed" id="fbox">
+    <div class="filters-head" id="fhead">
+      <div class="t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="f-badge" id="f-badge">All optional</span></div>
+      <span class="f-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+    </div>
+    <div class="filters-body">
+      <div class="f-grid" id="fsel"></div>
+      <button class="f-clear" id="fclr" type="button" disabled>Clear filters</button>
+    </div>
+  </section>
+
+  <section class="tray" id="sec-adm">
+    <div class="tray-head"><div class="tray-title">Admissions by Course</div><span class="badge" id="adm-badge">—</span></div>
+    <div class="lgd2">Share of the month's admissions: <i style="background:#FBF8FE;border:1px solid #EEE7F6"></i>low <i style="background:#E4D5F3"></i><i style="background:#CDB3EA"></i>high · each cell shows admissions and their share of that month</div>
+    <div class="tbl-wrap"><table class="ad" id="adm"></table></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="adm-defs" onclick="toggleDefs(this,'adm-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list" id="adm-defs" hidden>
+        <div class="def"><div class="dt">Admissions:</div><p>New learners who joined in the month, from the Fresh Sales sheet, counted under the course they joined. A learner who joins two courses counts once in each.</p></div>
+        <div class="def"><div class="dt">Filters:</div><p>Course level, age group and gender each take as many choices as you like. Shares are worked out within what the filters leave in, so each month still adds up to 100%.</p></div>
+        <div class="def"><div class="dt">Share of the month:</div><p>A course's admissions as a part of all admissions that month. The courses in a month add up to 100%.</p></div>
+        <div class="def"><div class="dt">Lifetime:</div><p>All admissions since the centre opened, and each course's share of them.</p></div>
+        <div class="def"><div class="dt">Course not mentioned:</div><p>Admissions with no course filled in. They still count in the totals.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
+const START={y:2024,m:4};   // May 2024: Alwarpet, the first centre, opened
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const COURSE_ORDER=['PFM - Tamil','Carnatic Classical','PFM - Hindi','Hindustani Classical','Western Vocals','Guitar','Keyboard','Karaoke'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const mi=d=>d.getFullYear()*12+d.getMonth();
+async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now=new Date(),FIRST=START.y*12+START.m,LAST=mi(now);
+let DATA={},MONTHS=[];
+
+/* ── Filters: course level (J), age group (G), gender (F); pick any number of each. Empty = everyone. ── */
+const FILTERS=[{id:'level',label:'Course level',col:9,all:'All levels',order:['Preparatory','Intermediate','Proficient','Advanced']},
+  {id:'age',label:'Age group',col:6,all:'All ages',order:['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+']},
+  {id:'gender',label:'Gender',col:5,all:'All',order:['Male','Female']}];
+const FSEL={level:[],age:[],gender:[]};let OPEN_F=null;
+const fv=(r,c)=>String(r[c]||'').trim();
+const passes=r=>FILTERS.every(f=>!FSEL[f.id].length||FSEL[f.id].some(v=>v.toLowerCase()===fv(r,f.col).toLowerCase()));
+function optionsFor(f,rows){const m=new Map();rows.forEach(r=>{const v=fv(r,f.col);if(v&&!m.has(v.toLowerCase()))m.set(v.toLowerCase(),v);});
+  return[...m.values()].sort((a,b)=>((f.order.indexOf(a)+1)||99)-((f.order.indexOf(b)+1)||99)||a.localeCompare(b));}
+const CHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
+function renderFilters(rows){
+  document.getElementById('fsel').innerHTML=FILTERS.map(f=>{const sel=FSEL[f.id],o=optionsFor(f,rows);sel.forEach(v=>{if(!o.includes(v))o.push(v);});
+    const txt=!sel.length?f.all:sel.length<=2?sel.join(', '):sel.length+' selected';
+    return`<div class="ms${sel.length?' set':''}" data-f="${f.id}"><label>${f.label}</label><button type="button" aria-haspopup="true" aria-expanded="${OPEN_F===f.id}"><span>${esc(txt)}</span>${CHEV}</button>
+      ${OPEN_F===f.id?`<div class="pop">${o.length?o.map(v=>`<label><input type="checkbox" value="${esc(v)}"${sel.includes(v)?' checked':''}>${esc(v)}</label>`).join(''):'<label style="color:var(--faint)">Nothing to choose</label>'}
+        <div class="pf"><button type="button" data-all>Select all</button><button type="button" data-none>Clear</button></div></div>`:''}</div>`;}).join('');
+  const n=FILTERS.filter(f=>FSEL[f.id].length).length,bd=document.getElementById('f-badge');
+  bd.textContent=n?n+' active':'All optional';bd.classList.toggle('on',!!n);
+  document.getElementById('fclr').disabled=!n;
+}
+document.getElementById('fhead').onclick=()=>{document.getElementById('fbox').classList.toggle('closed');};
+document.getElementById('fbox').addEventListener('click',e=>{
+  if(e.target.id==='fclr'){FILTERS.forEach(f=>FSEL[f.id]=[]);OPEN_F=null;render();return;}
+  const ms=e.target.closest('.ms');if(!ms)return;const id=ms.dataset.f;
+  if(e.target.closest('.ms>button')){OPEN_F=OPEN_F===id?null:id;render();return;}
+  if(e.target.closest('[data-all]')){FSEL[id]=[...ms.querySelectorAll('input')].map(i=>i.value);render();return;}
+  if(e.target.closest('[data-none]')){FSEL[id]=[];render();return;}
+});
+document.getElementById('fbox').addEventListener('change',e=>{const ms=e.target.closest('.ms');if(!ms)return;FSEL[ms.dataset.f]=[...ms.querySelectorAll('input:checked')].map(i=>i.value);render();});
+document.addEventListener('click',e=>{if(OPEN_F&&!e.target.closest('.ms')){OPEN_F=null;render();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN_F){OPEN_F=null;render();}});
+
+const yb=k=>(k===MONTHS[0]||Math.floor(k/12)!==Math.floor((k+1)/12))?' yb':'';
+const shade=p=>p<=0?'':p<10?'#FBF8FE':p<20?'#F3ECFA':p<30?'#E4D5F3':'#CDB3EA';
+function head(){
+  const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
+  return`<thead><tr class="yr"><th class="metric" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">Course</th><th class="lt" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">Lifetime</th>${years.map(y=>`<th class="yb" colspan="${y.n}">${y.y}</th>`).join('')}</tr>
+    <tr class="mo">${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+}
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  document.getElementById('subtitle').textContent='Admissions by course, month by month — '+(sel?sel.name+', '+sel.city:'all centres combined');
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const el=document.getElementById('adm');
+  if(!CENTRES.every(c=>DATA[c.name])){renderFilters([]);el.innerHTML='<tbody><tr><td class="metric">Loading…</td></tr></tbody>';return;}
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name);
+  renderFilters(names.flatMap(n=>DATA[n]));
+  const nf=FILTERS.filter(f=>FSEL[f.id].length).length;
+  // Admissions per course per month
+  const by={},tot={},seen=new Map();let first=LAST;
+  names.forEach(n=>DATA[n].filter(passes).forEach(r=>{const d=parseDate(r[0]);if(!d||d.getFullYear()<2020)return;const k=mi(d);if(k>LAST)return;first=Math.min(first,k);
+    let c=String(r[8]||'').trim();const lc=c.toLowerCase();if(c){if(seen.has(lc))c=seen.get(lc);else seen.set(lc,c);}
+    (by[c]=by[c]||{})[k]=(by[c][k]||0)+1;tot[k]=(tot[k]||0)+1;}));
+  first=Math.max(first,FIRST);MONTHS=[];for(let k=LAST;k>=first;k--)MONTHS.push(k);
+  const life=c=>Object.values(by[c]||{}).reduce((a,b)=>a+b,0),all=Object.values(tot).reduce((a,b)=>a+b,0);
+  const ord=c=>{const j=COURSE_ORDER.findIndex(z=>z.toLowerCase()===c.toLowerCase());return j<0?99:j;};
+  const courses=Object.keys(by).filter(c=>c).sort((a,b)=>life(b)-life(a)||ord(a)-ord(b));
+  const cellF=(n,d,k,cls)=>{if(!n)return`<td class="zero${k!=null?yb(k):''}${cls||''}">0</td>`;const p=d?n/d*100:0;
+    return`<td class="${k!=null?yb(k).trim():''}${cls||''}" style="${cls?'':'background:'+shade(p)}"><span class="c">${n.toLocaleString('en-IN')}</span><small>${p<1&&p>0?'<1':Math.round(p)}%</small></td>`;};
+  const row=(c,label,cls)=>`<tr class="${cls||''}"><td class="metric">${label}</td>${cellF(life(c),all,null,' lt')}${MONTHS.map(k=>cellF((by[c]||{})[k]||0,tot[k]||0,k)).join('')}</tr>`;
+  let body=courses.map(c=>row(c,esc(c))).join('');
+  if(by[''])body+=row('','Course not mentioned','nm');
+  body+=`<tr class="tot"><td class="metric">Total admissions</td><td class="lt"><span class="c">${all.toLocaleString('en-IN')}</span><small>100%</small></td>${MONTHS.map(k=>tot[k]?`<td class="${yb(k).trim()}"><span class="c">${tot[k].toLocaleString('en-IN')}</span><small>100%</small></td>`:`<td class="zero${yb(k)}">0</td>`).join('')}</tr>`;
+  el.innerHTML=head()+'<tbody>'+body+'</tbody>';
+  document.getElementById('adm-badge').textContent=all.toLocaleString('en-IN')+(nf?' filtered':'')+' admissions since '+MON[first%12]+' '+Math.floor(first/12)+' · '+MON[LAST%12]+' so far: '+(tot[LAST]||0);
+}
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_cp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_cp_centre',selCentre);}catch(e){}render();});
+function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>fetchTab(c.name,'Fresh Sales')));
+    CENTRES.forEach((c,i)=>{DATA[c.name]=res[i].filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);});
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';render();
+  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+}
+load();
+</script>
+</body>
+</html>
