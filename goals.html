@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<script src="goalform.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  :root{--display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;--ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--ok-soft:#E5F4EC;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28)}
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1500px;margin:0 auto;padding:36px 48px 64px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .period{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:6px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .seg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px}
+  .seg button{border:0;background:none;border-radius:9px;padding:7px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(31,26,36,.15)}
+  .mbtn{width:32px;height:34px;border:0;border-radius:10px;background:var(--bg);color:var(--ink2);font-size:16px;cursor:pointer}.mbtn:hover{background:var(--accent-soft);color:var(--accent)}
+  .mlabel{min-width:130px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+  .range{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .range input{font:500 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:6px 9px}
+  .by{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .k{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 16px;box-shadow:var(--shadow);min-width:110px}
+  .k small{display:block;font:700 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .k b{font:600 22px/1.3 var(--display);color:var(--ink)}.k em{font:500 12px var(--body);font-style:normal;color:var(--muted);margin-left:4px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:980px}
+  th{text-align:left;padding:11px 14px;background:#FAF9F7;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  tbody tr{cursor:pointer}tbody tr:hover td{background:#FCFBFE}tr.sel td{background:#F6F0FC}
+  tbody tr:last-child td{border-bottom:0}
+  td b{display:block;font:600 14px var(--display);color:var(--ink)}td small{display:block;font-size:11.5px;color:var(--faint);margin-top:2px}
+  td.nw{white-space:nowrap}
+  .ontime{color:var(--ok)!important;font-weight:600}.late{color:var(--bad)!important;font-weight:600}
+  .pb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap}.pb span{width:70px;height:6px;border-radius:6px;background:var(--line);overflow:hidden}.pb i{display:block;height:100%;background:var(--ok)}
+  .gl{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px 4px 9px;font:600 12px var(--body);white-space:nowrap}
+  .gl i{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .gl.tbp{background:#EEEDF0;color:#5E5A66}.gl.inp{background:#E8EDFB;color:#2F4AA8}.gl.cmp{background:var(--ok-soft);color:var(--ok)}.gl.draft{background:#FBF4E8;color:#7A5A2A}
+  .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
+  /* Goal details */
+  .det{margin-top:18px;padding:20px 22px}
+  .det-top{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .det h2{font:600 21px/1.3 var(--display);color:var(--ink)}
+  .det .from{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6}.det .from b{color:var(--accent);font-weight:600}
+  .btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--ink2);font:600 13px var(--display);cursor:pointer;white-space:nowrap}
+  .btn:hover{background:var(--accent-soft);color:var(--accent)}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}.btn:disabled{opacity:.55;cursor:default}
+  .desc{margin-top:14px;padding:14px 16px;border-radius:12px;background:#FAF8FC;border-left:3px solid #C9B6DE;font-size:14px;line-height:1.65;white-space:pre-wrap;color:var(--ink2)}
+  .lab{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:20px 0 10px}
+  .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}
+  .mx{width:100%;border-collapse:separate;border-spacing:0;min-width:0;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .mx th{background:#FAF9F7;font-size:10.5px}.mx td{padding:9px 12px;cursor:default;vertical-align:middle}
+  .mx tbody tr:hover td{background:none}.mx td.t{font-size:13.5px;color:var(--ink)}.mx td.t small{font-size:11.5px}
+  .mx tr.cen td{background:#FCFBFD;font-weight:600}
+  select.ss{border:1px solid var(--border);border-radius:999px;padding:4px 8px;font:600 12px var(--body);cursor:pointer;background:#fff}
+  select.ss.tbp{background:#EEEDF0;color:#5E5A66;border-color:#E1DFE5}select.ss.inp{background:#E8EDFB;color:#2F4AA8;border-color:#D3DCF6}select.ss.cmp{background:var(--ok-soft);color:var(--ok);border-color:#BFE3CF}
+  .own{font-size:11.5px;color:var(--faint);font-weight:400;display:block;margin-top:2px}
+  .feed{display:flex;flex-direction:column;gap:2px}
+  .upd{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .av{flex:none;width:30px;height:30px;border-radius:50%;background:#8D6BB5;color:#fff;font:600 12px/30px var(--display);text-align:center}
+  .upd .tx{font-size:13.5px;line-height:1.55;color:var(--ink2);white-space:pre-wrap;min-width:0}.upd .tx small{display:block;color:var(--faint);font-size:11.5px;white-space:normal}
+  .sys{font-size:12.5px;color:var(--muted);padding:6px 0 6px 40px}.sys b{color:var(--ink2);font-weight:600}
+  .files{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .files a{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:9px;padding:5px 9px;font-size:12.5px;color:var(--accent);text-decoration:none;background:#fff}
+  .post{margin-top:12px;border:1px solid var(--border);border-radius:14px;background:var(--bg);padding:10px}
+  .post textarea{width:100%;border:0;background:none;resize:vertical;min-height:60px;font:400 14px/1.5 var(--body);color:var(--ink);outline:none}
+  .post .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.post .row .sp{flex:1}
+  .post .att{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px 5px 3px 10px;font-size:12px}
+  .chip button{width:18px;height:18px;border-radius:50%;border:0;background:#F1EDF5;cursor:pointer;font-size:10px}
+  .msg{font-size:12.5px;color:var(--bad)}
+  @media (max-width:1000px){.grid2{grid-template-columns:1fr}.page{padding:24px 16px 48px}h1{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div><div class="eyebrow">Planner</div><h1>Goals</h1><div class="subtitle">Goals set from the Offline Centres page, centre by centre, with their subtasks and updates</div></div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <div class="bar">
+    <div class="period">
+      <div class="seg" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
+      <span id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="mbtn" id="prev" aria-label="Previous month">‹</button><span class="mlabel" id="mlabel">—</span><button class="mbtn" id="next" aria-label="Next month">›</button></span>
+      <span id="prange" class="range" hidden><input type="date" id="from" aria-label="From"> to <input type="date" id="to" aria-label="To"></span>
+    </div>
+    <div class="by">Show goals <div class="seg" id="basis"><button type="button" data-b="active" aria-pressed="true">Active</button><button type="button" data-b="created" aria-pressed="false">Created</button><button type="button" data-b="completed" aria-pressed="false">Completed</button></div> in this period</div>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="card"><div class="tw"><table id="t"><tbody><tr><td class="empty">Loading…</td></tr></tbody></table></div></div>
+  <div class="card det" id="det" hidden></div>
+</div>
+
+<script>
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const ST={tbp:'To be picked',inp:'In progress',cmp:'Completed'};
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const day=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const fromIso=s=>{if(!s)return null;const m=String(s).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):new Date(s);};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fmtD=d=>d?d.getDate()+' '+MON[d.getMonth()]+(d.getFullYear()!==NOW.getFullYear()?' '+d.getFullYear():''):'—';
+const days=(a,b)=>Math.round((day(b)-day(a))/864e5);
+const ago=s=>{const d=new Date(s),m=Math.round((Date.now()-d)/6e4);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':m<2880?'Yesterday':fmtD(d);};
+let G=[],ACT=[],INITS={},STAFF=[],CAN=false,ME='',CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'],SEL=null;
+let mode='month',basis='active',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,FILES=[];
+
+function period(){if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
+  const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);return{a,b,label:fmtD(a)+' – '+fmtD(b)};}
+const created=g=>day(new Date(g.created)),completed=g=>g.completed?day(new Date(g.completed)):null,target=g=>fromIso(g.target);
+const pairs=g=>{let t=0,d=0;const cs=Object.keys(g.centres||{});(g.tasks||[]).forEach(k=>cs.forEach(c=>{t++;if((k.s||{})[c]==='cmp')d++;}));if(!(g.tasks||[]).length)cs.forEach(c=>{t++;if(g.centres[c].s==='cmp')d++;});return{t,d};};
+const canSet=(g,c)=>CAN||(g.centres[c]&&(g.centres[c].owners||[]).some(p=>p.email===ME));
+const canPost=g=>CAN||Object.values(g.centres||{}).some(C=>(C.owners||[]).some(p=>p.email===ME));
+const whereOf=g=>{const i=INITS[g.init];return i?i.path+' › '+i.n:'';};
+
+function render(){
+  document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+  document.querySelectorAll('#basis button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.b===basis));
+  document.getElementById('pmonth').style.display=mode==='month'?'flex':'none';document.getElementById('prange').hidden=mode!=='range';
+  const P=period();document.getElementById('mlabel').textContent=P.label;
+  if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
+  const inP=d=>d&&d>=P.a&&d<=P.b;
+  const list=G.filter(g=>basis==='created'?inP(created(g)):basis==='completed'?inP(completed(g)):(created(g)<=P.b&&(!completed(g)||completed(g)>=P.a)))
+    .sort((a,b)=>(a.draft-b.draft)||({inp:0,tbp:1,cmp:2}[a.status]-{inp:0,tbp:1,cmp:2}[b.status])||(target(a)||9e15)-(target(b)||9e15));
+  const live=list.filter(g=>!g.draft),cnt=s=>live.filter(g=>g.status===s).length,done=live.filter(g=>g.completed);
+  const avg=done.length?Math.round(done.reduce((s,g)=>s+days(created(g),completed(g)),0)/done.length):null;
+  const onTime=done.filter(g=>target(g)&&completed(g)<=target(g)).length,withT=done.filter(g=>target(g)).length;
+  document.getElementById('chips').innerHTML=[['Goals',live.length],['To be picked',cnt('tbp')],['In progress',cnt('inp')],['Completed',cnt('cmp')],
+    ['Average time to complete',avg==null?'—':avg+(avg===1?' day':' days')],['Completed on time',withT?onTime+' of '+withT:'—']]
+    .map(([l,v])=>`<div class="k"><small>${l}</small><b>${v}</b></div>`).join('');
+  const t=document.getElementById('t');
+  if(!list.length){t.innerHTML=`<tbody><tr><td class="empty">No goals ${basis==='created'?'created':basis==='completed'?'completed':'open'} in ${esc(P.label)}.${CAN?' Make a goal from any Desired state line on the Offline Centres page.':''}</td></tr></tbody>`;}
+  else t.innerHTML=`<thead><tr><th>Goal</th><th>Centres &amp; owners</th><th>Created</th><th>Target</th><th>Completed</th><th>Progress</th><th>Status</th></tr></thead><tbody>${list.map(g=>{
+    const c=completed(g),tg=target(g),p=pairs(g),cs=Object.keys(g.centres||{});
+    const comp=c?`${fmtD(c)}<small class="${tg?(c<=tg?'ontime':'late'):''}">${days(created(g),c)} day${days(created(g),c)===1?'':'s'}${tg?' · '+(c<=tg?(days(c,tg)?days(c,tg)+' days early':'on the day'):days(tg,c)+' days late'):''}</small>`
+      :g.draft?'<span style="color:var(--faint)">—</span>':`<span style="color:var(--faint)">—</span><small>${days(created(g),TODAY)} days so far${tg&&tg<TODAY?' · <span class="late">'+days(tg,TODAY)+' days past target</span>':''}</small>`;
+    return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td style="min-width:240px"><b>${esc(g.title)}</b><small>${esc(whereOf(g))}</small></td>
+      <td>${cs.map(k=>`<div style="white-space:nowrap">${esc(k)} <small style="display:inline">· ${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', ')||'—')}</small></div>`).join('')}</td>
+      <td class="nw">${fmtD(created(g))}</td><td class="nw">${tg?fmtD(tg):'—'}</td><td class="nw">${comp}</td>
+      <td><div class="pb"><span><i style="width:${p.t?Math.round(p.d/p.t*100):0}%"></i></span>${p.d} of ${p.t}</div><small>${(g.tasks||[]).length?'subtasks × centres':'centres'}</small></td>
+      <td>${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${g.status}"><i></i>${ST[g.status]}</span>`}</td></tr>`;}).join('')}</tbody>`;
+  renderDet();
+}
+function stSel(g,task,c,s){
+  return canSet(g,c)?`<select class="ss ${s}" data-st="${g.id}|${task||''}|${esc(c)}">${Object.keys(ST).map(k=>`<option value="${k}"${k===s?' selected':''}>${ST[k]}</option>`).join('')}</select>`:`<span class="gl ${s}"><i></i>${ST[s]}</span>`;
+}
+function renderDet(){
+  const el=document.getElementById('det'),g=G.find(x=>x.id===SEL);
+  if(!g){el.hidden=true;return;}el.hidden=false;
+  const cs=Object.keys(g.centres||{}),c=completed(g),tg=target(g),tasks=g.tasks||[];
+  let mx=`<table class="mx"><thead><tr><th>${tasks.length?'Subtask':'Centre'}</th>${cs.map(k=>`<th>${esc(k)}<span class="own" style="text-transform:none;letter-spacing:0">${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', '))}</span></th>`).join('')}</tr></thead><tbody>`;
+  if(tasks.length){mx+=tasks.map(t=>`<tr><td class="t">${esc(t.title)}${t.due?`<small>Due ${fmtD(fromIso(t.due))}</small>`:''}</td>${cs.map(k=>`<td>${g.draft?'—':stSel(g,t.id,k,(t.s||{})[k]||'tbp')}</td>`).join('')}</tr>`).join('');
+    mx+=`<tr class="cen"><td class="t">Centre status</td>${cs.map(k=>`<td><span class="gl ${g.centres[k].s}"><i></i>${ST[g.centres[k].s]}</span></td>`).join('')}</tr>`;}
+  else mx+=`<tr><td class="t">Status</td>${cs.map(k=>`<td>${g.draft?'—':stSel(g,'',k,g.centres[k].s)}</td>`).join('')}</tr>`;
+  mx+='</tbody></table>';
+  const acts=ACT.filter(a=>a.goal===g.id).slice().reverse();
+  const feed=acts.map(a=>{
+    const who=esc(a.name||a.by.split('@')[0]);
+    if(a.kind==='update')return`<div class="upd"><span class="av">${esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;
+    if(a.kind==='status'){let x={};try{x=JSON.parse(a.text);}catch(e){}return`<div class="sys"><b>${who}</b> set ${x.task?'<b>'+esc(x.what)+'</b>':'the status'} for ${esc(x.centre)} to <b>${ST[x.s]||''}</b> · ${ago(a.at)}</div>`;}
+    return`<div class="sys"><b>${who}</b> ${esc(a.text.charAt(0).toLowerCase()+a.text.slice(1))} · ${ago(a.at)}</div>`;}).join('');
+  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Draft — not sent yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
+      <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${g.status}"><i></i>${ST[g.status]}</span>`}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
+    ${g.desc?`<div class="desc">${esc(g.desc)}</div>`:''}
+    <div class="grid2"><div><div class="lab">${tasks.length?'Subtasks by centre':'Centres'}</div>${mx}</div>
+      <div><div class="lab">Updates</div><div class="feed">${feed||'<div class="sys" style="padding-left:0">No updates yet.</div>'}</div>
+      ${canPost(g)&&!g.draft?`<div class="post"><textarea id="ptext" placeholder="Write an update…"></textarea><div class="att" id="patt"></div>
+        <div class="row"><label class="btn" style="height:32px">📎 Add photos or files<input type="file" id="pfile" multiple hidden></label><span class="msg" id="pmsg"></span><span class="sp"></span><button class="btn pri" type="button" id="post" style="height:32px">Post update</button></div></div>`:''}</div></div>`;
+  FILES=[];
+}
+/* Files: photos are shrunk to 1600px before upload */
+function readFile(f){return new Promise((res,rej)=>{
+  const r=new FileReader();r.onerror=()=>rej(new Error('Couldn\'t read '+f.name));
+  if(/^image\/(jpeg|png|webp)$/.test(f.type)){r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({name:f.name.replace(/\.\w+$/,'')+'.jpg',type:'image/jpeg',data:c.toDataURL('image/jpeg',.85)});};im.onerror=()=>res({name:f.name,type:f.type,data:r.result});im.src=r.result;};}
+  else r.onload=()=>res({name:f.name,type:f.type||'application/octet-stream',data:r.result});
+  r.readAsDataURL(f);});}
+document.getElementById('det').addEventListener('change',async e=>{
+  const x=e.target;
+  if(x.id==='pfile'){for(const f of x.files){if(f.size>8*1024*1024){document.getElementById('pmsg').textContent=f.name+' is over 8 MB.';continue;}if(FILES.length<6)FILES.push(f);}x.value='';
+    document.getElementById('patt').innerHTML=FILES.map((f,i)=>`<span class="chip">${esc(f.name)}<button type="button" data-rf="${i}">✕</button></span>`).join('');return;}
+  if(x.dataset.st){const[id,task,centre]=x.dataset.st.split('|');x.disabled=true;
+    try{await ArtiumAuth.call('goalStatus',{id,task,centre,s:x.value});await load(true);}catch(err){alert('Couldn\'t save: '+err.message);x.disabled=false;}}
+});
+document.getElementById('det').addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.id==='closeDet'){SEL=null;render();return;}
+  if(b.dataset.rf!=null){FILES.splice(+b.dataset.rf,1);document.getElementById('patt').innerHTML=FILES.map((f,i)=>`<span class="chip">${esc(f.name)}<button type="button" data-rf="${i}">✕</button></span>`).join('');return;}
+  if(b.id==='edit'){const g=G.find(x=>x.id===SEL),i=INITS[g.init];GoalForm.open({goal:g,init:i?{id:g.init,n:i.n,path:i.path,dept:''}:null,staff:STAFF,onSaved:()=>load(true)});return;}
+  if(b.id==='post'){const text=document.getElementById('ptext').value.trim(),m=document.getElementById('pmsg');
+    if(!text&&!FILES.length){m.textContent='Write an update or add a file.';return;}
+    b.disabled=true;m.textContent=FILES.length?'Uploading…':'';
+    try{const files=await Promise.all(FILES.map(readFile));await ArtiumAuth.call('goalUpdate',{id:SEL,text,files});await load(true);}
+    catch(err){m.textContent='Couldn\'t post: '+err.message;b.disabled=false;}}
+});
+document.getElementById('t').addEventListener('click',e=>{const r=e.target.closest('tr[data-g]');if(!r)return;SEL=SEL===r.dataset.g?null:r.dataset.g;render();if(SEL)setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),50);});
+document.getElementById('mode').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;render();}};
+document.getElementById('basis').onclick=e=>{const b=e.target.closest('button');if(b){basis=b.dataset.b;render();}};
+document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
+document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
+['from','to'].forEach(id=>document.getElementById(id).onchange=e=>{const d=fromIso(e.target.value);if(!d)return;if(id==='from')rFrom=d;else rTo=d;if(rFrom&&rTo&&rFrom>rTo)[rFrom,rTo]=[rTo,rFrom];render();});
+// Open a goal (from the Offline Centres page, the bell, or an email link)
+window.openGoal=id=>{const g=G.find(x=>x.id===id);if(!g){try{sessionStorage.setItem('artium_open_goal',id);}catch(e){}return;}
+  SEL=id;basis='active';mode='range';rFrom=created(g);rTo=new Date(Math.max(TODAY,completed(g)||0));render();setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),80);};
+async function load(keep){
+  try{
+    const j=await ArtiumAuth.call('goals',{});
+    G=j.goals||[];ACT=j.activity||[];INITS=j.inits||{};STAFF=j.staff||[];CAN=!!j.canEdit;ME=j.me||'';CENTRES=j.centres||CENTRES;
+    const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';
+    render();
+    if(!keep){let id=null;try{id=sessionStorage.getItem('artium_open_goal');sessionStorage.removeItem('artium_open_goal');}catch(e){}
+      try{const m=window.top.location.hash.match(/[&?]g=(\w+)/);if(m)id=m[1];}catch(e){}
+      if(id)openGoal(id);}
+  }catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';document.getElementById('t').innerHTML='<tbody><tr><td class="empty">Couldn\'t load the goals.</td></tr></tbody>';}
+}
+load();
+</script>
+</body>
+</html>

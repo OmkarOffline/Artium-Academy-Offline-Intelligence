@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="goalform.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -113,6 +114,50 @@
   .block.ds h4{color:#5B2A86}.block.cs h4{color:#9A6200}.block.pa h4{color:#1F7A4D}
   .block ul{padding-left:18px;font-size:13.5px;line-height:1.55;color:var(--ink2)}
   .block li{margin:3px 0}
+  /* Desired state: one row per line, with a tick for done and a link to its goal */
+  .dsl{list-style:none;padding:0!important;display:flex;flex-direction:column;gap:2px}
+  .dsl li{display:flex;align-items:flex-start;gap:10px;padding:7px 8px;margin:0!important;border-radius:10px}
+  .dsl li:hover{background:#FBF9FD}
+  .tick{flex:none;width:20px;height:20px;margin-top:1px;border-radius:50%;border:2px solid #CFC6DA;background:#fff;display:grid;place-items:center;cursor:pointer;padding:0}
+  .tick svg{width:12px;height:12px;stroke:#fff;stroke-width:3.2;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+  .tick:hover{border-color:var(--ok)}
+  .tick.on{background:var(--ok);border-color:var(--ok)}.tick.on svg{opacity:1}
+  .tick.auto{cursor:default}
+  .dsl .tx{flex:1;font-size:13.5px;line-height:1.5;color:var(--ink2)}
+  .dsl li.done .tx{color:var(--muted)}
+  .gl{flex:none;display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px 3px 8px;font:600 11.5px var(--body);white-space:nowrap;cursor:pointer;border:0}
+  .gl i{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .gl.tbp{background:#EEEDF0;color:#5E5A66}.gl.inp{background:#E8EDFB;color:#2F4AA8}.gl.cmp{background:var(--ok-soft);color:var(--ok)}
+  .gl small{font-weight:500;opacity:.8}
+  .mk{flex:none;border:1px dashed #CDBFE0;background:#fff;color:var(--accent);border-radius:999px;padding:3px 10px;font:600 11.5px var(--body);cursor:pointer;white-space:nowrap;opacity:0;transition:opacity .15s}
+  .dsl li:hover .mk,.mk:focus{opacity:1}
+  .dsl-sum{margin-left:auto;font:600 11px var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+  /* Centre compliance: each Desired state line applies to chosen centres, each ticked separately */
+  .cc{flex:none;display:flex;gap:4px}
+  .cb{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 9px 3px 4px;font:600 11px var(--body);border:1px solid #E1DBE9;background:#fff;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .cb i{width:14px;height:14px;border-radius:50%;border:2px solid #CFC6DA;display:grid;place-items:center}
+  .cb.on{background:var(--ok-soft);border-color:#BFE3CF;color:var(--ok)}.cb.on i{background:var(--ok);border-color:var(--ok)}
+  .cb.on i::after{content:"";width:5px;height:3px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+  .cb.na{opacity:.35;border-style:dashed;cursor:default}
+  .ccomp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 22px}
+  .ccard{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow)}
+  .ccard small{display:block;font:700 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+  .ccard b{font:600 15px var(--display);color:var(--ink)}
+  .ccard .r{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .ccard .r .bar{flex:1;height:6px;border-radius:6px;background:var(--line);overflow:hidden}.ccard .r .bar i{display:block;height:100%;background:var(--accent);border-radius:6px}
+  .ccard .r em{font:600 14px var(--display);font-style:normal;color:var(--ink)}
+  .ccard .s{font-size:12px;color:var(--muted);margin-top:4px}
+  .cchip{display:inline-flex;gap:3px;margin-left:8px}.cchip span{font:700 10px var(--body);border-radius:5px;padding:1px 5px;background:#F1ECF8;color:var(--accent)}
+  .cb:not(.na):not(.auto):hover{border-color:var(--ok)}
+  .cb.auto{cursor:default}
+  .gl[data-goal]{cursor:pointer}
+  .cpick{display:flex;flex-direction:column;gap:6px;margin-top:-4px}
+  .cpick .cl{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px;color:var(--ink2);background:#fff}
+  .cpick .cl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cpick .cl div{display:flex;gap:4px}
+  .cpick label{flex:none!important;flex-direction:row!important;align-items:center;gap:5px!important;font:600 11.5px var(--body)!important;border:1px solid var(--border);border-radius:999px;padding:3px 9px 3px 6px;cursor:pointer}
+  .cpick label input{width:14px!important;height:14px!important;accent-color:#5B2A86}
+  .cpick .hint{font:400 12px var(--body);color:var(--faint)}
   .empty-note{padding:26px 4px;color:var(--faint);font-size:14px}
   .empty-dept{background:#fff;border:1px dashed var(--border);border-radius:18px;padding:40px;text-align:center;color:var(--muted);font-size:15px}
 
@@ -197,7 +242,8 @@
         <label class="narrow">Emoji<input id="ed-nf-emoji" placeholder="📁" maxlength="4"></label>
       </div>
       <label>Initiative<input id="ed-name" placeholder="Short name, e.g. Lamp Posts"></label>
-      <label>Desired state<textarea id="ed-ds" rows="4" placeholder="Where we want to be. Rough notes are fine — one point per line."></textarea></label>
+      <label>Desired state<textarea id="ed-ds" rows="4" placeholder="Where we want to be. One point per line." oninput="renderPick()"></textarea></label>
+      <div class="cpick" id="ed-pick"></div>
       <label>Current state<textarea id="ed-cs" rows="4" placeholder="Where things stand today."></textarea></label>
       <label>Plan ahead<textarea id="ed-pa" rows="4" placeholder="Next steps, one per line."></textarea></label>
       <div class="ed-msg" id="ed-msg"></div>
@@ -237,8 +283,19 @@ let DATA=null,D=[],DEPS={},CAN_EDIT=false;
 
 const chevron='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* Desired state lines with their centres: c = {centre: 0/1} for the centres the line applies to (all centres when not set yet).
+   A centre is done when ticked, or when the line's goal is Completed for that centre. */
+let CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'],GOALS={},STAFF=[];
+function linesOf(x){
+  const src=x.dsx||(x.ds||[]).map(t=>({t,c:null,g:''}));
+  return src.map(l=>{const c=l.c||Object.fromEntries(CENTRES.map(k=>[k,0])),goal=l.g&&GOALS[l.g]||null,st={};
+    Object.keys(c).forEach(k=>{const auto=!!(goal&&goal.centres&&goal.centres[k]&&goal.centres[k].s==='cmp');st[k]={on:c[k]===1||auto,auto};});
+    const ks=Object.keys(st);return{t:l.t,c,goal,st,all:ks.length>0&&ks.every(k=>st[k].on),auto:ks.length>0&&ks.every(k=>st[k].auto)};});
+}
+// An initiative's %: (line, centre) pairs done out of all pairs. Until a line's centres are set, the earlier estimate is kept.
+function pctOf(x){if(!x.dsx)return x.pct||0;let t=0,d=0;linesOf(x).forEach(l=>Object.values(l.st).forEach(v=>{t++;if(v.on)d++;}));return t?Math.round(d/t*100):0;}
 function allInits(node){return (node.i||[]).concat(...(node.kids||node.s||[]).map(allInits));}
-const avg=arr=>arr.length?Math.round(arr.reduce((s,x)=>s+(x.pct||0),0)/arr.length):0;
+const avg=arr=>arr.length?Math.round(arr.reduce((s,x)=>s+pctOf(x),0)/arr.length):0;
 /* Progress labels */
 const STAGES=[
   {max:20, k:'s1',label:'Getting Started',      c:'#8A8594',bg:'#EEEDF0'},
@@ -272,9 +329,15 @@ function buildTree(){
 }
 
 function card(x){
-  const p=x.pct||0,[sc,st]=status(p);
+  const p=pctOf(x),[sc,st]=status(p);
   const links=(x.rb||[]).concat(x.do||[]).map(id=>`<span class="link">${esc(DEPS[id]||id)}</span>`).join('');
   const block=(k,label)=>x[k]&&x[k].length?`<div class="block ${k}"><h4>${label}</h4><ul>${x[k].map(t=>`<li>${esc(t)}</li>`).join('')}</ul></div>`:'';
+  // Desired state: each line applies to chosen centres, ticked centre by centre (or by its goal, once that centre's part is Completed)
+  const dsBlock=()=>{const L=linesOf(x);if(!L.length)return'';const n=L.filter(l=>l.all).length;
+    return`<div class="block ds"><h4>Desired state<span class="dsl-sum">${n} of ${L.length} accomplished</span></h4><ul class="dsl">${L.map((l,i)=>{
+      const g=l.goal?`<button type="button" class="gl ${l.goal.status}" data-goal="${l.goal.id}" title="Open the goal"><i></i>${{tbp:'To be picked',inp:'In progress',cmp:'Completed'}[l.goal.status]}<small>· goal</small></button>`:(CAN_EDIT&&!l.all?`<button type="button" class="mk" data-mk="${x.id}|${i}">+ Make it a goal</button>`:'');
+      const C=CENTRES.map(c=>{const v=l.st[c];return`<button type="button" class="cb ${v==null?'na':v.on?'on':''}${v&&v.auto?' auto':''}" ${v&&!v.auto&&CAN_EDIT?`data-tick="${x.id}|${i}|${esc(c)}|${v.on?0:1}"`:'disabled'} title="${esc(c)}${v==null?' — not for this centre':v.auto?' — done (goal completed)':v.on?' — done':' — not done yet'}"><i></i>${esc(c)}</button>`;}).join('');
+      return`<li class="${l.all?'done':''}"><button type="button" class="tick${l.all?' on':''}${l.auto||!CAN_EDIT?' auto':''}" ${CAN_EDIT&&!l.auto?`data-tickall="${x.id}|${i}|${l.all?0:1}"`:''} title="${l.all?'Done at every chosen centre':'Tick every chosen centre'}"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button><span class="tx">${esc(l.t)}<span style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${C}</span></span>${g}</li>`;}).join('')}</ul></div>`;};
   const isOpen=openCards.has(x.id);
   return`<article class="card${isOpen?' open':''}" data-id="${x.id}">
     <div class="card-top"><h3>${esc(x.n)}</h3><div class="r"><span class="status" style="color:${stageOf(p).c};background:${stageOf(p).bg}">${st}</span>${CAN_EDIT?`<button class="edit-btn" type="button" onclick="openEditor('${x.id}')">Edit</button>`:''}
@@ -282,7 +345,7 @@ function card(x){
     <div class="prog"><div class="bar"><i style="width:${p}%;background:${colour(p)}"></i></div><b>${p}%</b></div>
     <div class="card-body">
       ${links?`<div class="links">${links}</div>`:''}
-      ${block('ds','Desired state')}${block('cs','Current state')}${block('pa','Plan ahead')}
+      ${dsBlock()}${block('cs','Current state')}${block('pa','Plan ahead')}
       ${x.at?`<div class="by">Updated ${esc(x.at)}</div>`:''}
     </div>
   </article>`;
@@ -310,14 +373,18 @@ function render(){
   const d=D.find(x=>x.k===sel)||D[0];
   document.querySelectorAll('.dt-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===d.k));
   document.getElementById('eyebrow').textContent=d.n;
-  const all=allInits(d),done=all.filter(x=>x.pct>=100).length,none=all.filter(x=>!x.pct).length;
+  const all=allInits(d);
   if(!all.length&&!(d.s||[]).length){document.getElementById('content').innerHTML='<div class="empty-dept">No initiatives have been added for '+esc(d.n)+' yet.</div>';return;}
-  const counts=STAGES.map(st=>({st,n:all.filter(x=>stageOf(x.pct||0)===st).length}));
+  const counts=STAGES.map(st=>({st,n:all.filter(x=>stageOf(pctOf(x))===st).length}));
   let h=`<div class="strip">
     <div class="s-prog"><span class="s-l">Overall progress</span><b>${avg(all)}%</b><div class="bar"><i style="width:${avg(all)}%"></i></div></div>
     <div class="s-item"><b>${all.length}</b><span class="s-l">Initiatives</span></div>
     <div class="s-stages">${counts.map(c=>`<span class="s-chip${c.n?'':' zero'}" style="color:${c.st.c};background:${c.st.bg}"><b>${c.n}</b>${c.st.label}</span>`).join('')}</div>
   </div>`;
+  // Each centre's compliance in this department: its Desired state lines done out of the lines that apply to it
+  const cc=CENTRES.map(c=>{let t=0,dn=0;all.forEach(x=>linesOf(x).forEach(l=>{if(l.st[c]){t++;if(l.st[c].on)dn++;}}));return{c,t,dn,p:t?Math.round(dn/t*100):0};});
+  const CITY={Alwarpet:'Chennai',Thoraipakkam:'Chennai','Borewell Road':'Bangalore'};
+  if(cc.some(x=>x.t))h+=`<div class="ccomp">${cc.map(x=>`<div class="ccard"><small>${CITY[x.c]||''}</small><b>${esc(x.c)}</b><div class="r"><div class="bar"><i style="width:${x.p}%"></i></div><em>${x.p}%</em></div><div class="s">${x.dn} of ${x.t} desired states in place</div></div>`).join('')}</div>`;
   h+=(d.s||[]).map(f=>{const a=allInits(f);return`<section class="tray${open[f.path]===false?' closed':''}" data-path="${esc(f.path)}">
     <div class="tray-head" onclick="toggleFolder(this)"><div class="tray-title"><span class="emoji">${f.e||''}</span>${esc(f.n)}</div>
       <div class="meta"><span class="badge">${a.length} initiative${a.length===1?'':'s'} · ${avg(a)}%</span><span class="chev">${chevron}</span></div></div>
@@ -329,7 +396,7 @@ let sel=(()=>{try{return localStorage.getItem('artium_dept')||'';}catch(e){retur
 async function load(){
   try{
     DATA=await ArtiumAuth.call('initiatives');
-    CAN_EDIT=!!DATA.canEdit;
+    CAN_EDIT=!!DATA.canEdit;setGoals(DATA);
     buildTree();
     if(!D.some(d=>d.k===sel))sel=(D.find(d=>allInits(d).length)||D[0]||{}).k;
     buildToggle();render();
@@ -342,6 +409,23 @@ async function load(){
     document.getElementById('dot').className='dot error';
   }
 }
+
+function setGoals(j){if(j.centres)CENTRES=j.centres;GOALS={};(j.goals||[]).forEach(g=>GOALS[g.id]=g);STAFF=j.staff||STAFF;}
+/* ── Ticks, goals ── */
+document.getElementById('content').addEventListener('click',async e=>{
+  const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+  if(d.goal){try{sessionStorage.setItem('artium_open_goal',d.goal);}catch(err){}
+    try{const f=window.top.document.getElementById('frame-goals');if(f&&f.contentWindow&&f.contentWindow.openGoal)f.contentWindow.openGoal(d.goal);window.top.location.hash='goals';}catch(err){}return;}
+  if(d.mk){const[id,i]=d.mk.split('|'),x=DATA.initiatives.find(z=>z.id===id),l=linesOf(x)[+i],dep=D.find(z=>z.k===x.k);
+    GoalForm.open({init:{id:x.id,n:x.n,path:x.path,dept:dep?dep.n:''},line:l.t,lineCentres:Object.keys(l.c),staff:STAFF,onSaved:()=>load()});return;}
+  const t=d.tick||d.tickall;if(!t)return;
+  const[id,i,c,on]=d.tick?d.tick.split('|'):(()=>{const p=d.tickall.split('|');return[p[0],p[1],null,p[2]];})();
+  const x=DATA.initiatives.find(z=>z.id===id),l=linesOf(x)[+i];
+  const cs=c?[c]:Object.keys(l.st).filter(k=>!l.st[k].auto);
+  b.disabled=true;
+  try{let j;for(const k of cs)j=await ArtiumAuth.call('tickDesired',{id,i:+i,centre:k,on:on==='1'});if(j){DATA=Object.assign(DATA,j);setGoals(j);buildTree();buildToggle();render();}}
+  catch(err){alert('Couldn\'t save: '+err.message);b.disabled=false;}
+});
 
 /* ── Add / Edit ── */
 let editing=null;
@@ -363,8 +447,19 @@ function openEditor(id){
   $('ed-nf-name').value='';$('ed-nf-emoji').value='';
   $('ed-name').value=x.n;
   $('ed-ds').value=x.ds.join('\n');$('ed-cs').value=x.cs.join('\n');$('ed-pa').value=x.pa.join('\n');
+  PICK={};if(editing)linesOf(editing).forEach(l=>PICK[l.t]={c:{...l.c},g:(editing.dsx||[]).find(z=>z.t===l.t)?.g||''});renderPick();
   backToEdit();msg('');$('editor').hidden=false;$('ed-name').focus();
 }
+// Centres for each Desired state line (all by default); ticks and goal links are kept for lines that don't change
+let PICK={};
+const dsLines=()=>$('ed-ds').value.split('\n').map(s=>s.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
+function renderPick(){
+  const L=dsLines();
+  $('ed-pick').innerHTML=L.length?'<span class="hint">Which centres is each point for?</span>'+L.map((t,i)=>{const p=PICK[t]||{c:Object.fromEntries(CENTRES.map(k=>[k,0]))};PICK[t]=p;
+    return`<div class="cl"><span title="${esc(t)}">${esc(t)}</span><div>${CENTRES.map(c=>`<label><input type="checkbox" data-pt="${i}" data-pc="${esc(c)}"${c in p.c?' checked':''}>${esc(c)}</label>`).join('')}</div></div>`;}).join(''):'';
+}
+document.getElementById('ed-pick').addEventListener('change',e=>{const x=e.target;if(!x.dataset.pc)return;const t=dsLines()[+x.dataset.pt],p=PICK[t];
+  if(x.checked)p.c[x.dataset.pc]=p.c[x.dataset.pc]||0;else{delete p.c[x.dataset.pc];if(!Object.keys(p.c).length){x.checked=true;p.c[x.dataset.pc]=0;}}});
 function closeEditor(){$('editor').hidden=true;editing=null;draft=null;}
 function msg(t,cls){$('ed-msg').textContent=t;$('ed-msg').className='ed-msg'+(cls?' '+cls:'');}
 function folderPath(){
@@ -429,27 +524,19 @@ function reviewDraft(){
   if(!path)return msg('Choose a folder or type a new folder name.','err');
   const split=t=>t.split('\n').map(s=>s.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
   draft={id:editing&&editing.id,k:$('ed-dept').value,path,emoji:$('ed-nf-emoji').value.trim(),n:name,ds:split($('ed-ds').value),cs:split($('ed-cs').value),pa:split($('ed-pa').value)};
-  rec=recommendPct(draft);
-  $('rec-pct').textContent=rec.pct;$('rec-bar').style.width=rec.pct+'%';$('rec-why').textContent=rec.reason;
-  $('own').hidden=true;$('own-pct').value='';$('rv-msg').textContent='';
-  $('own-note').textContent=editing?'Currently '+editing.pct+'% on the page.':'';
-  $('rv-reject').hidden=false;$('rv-approve').textContent='Approve & publish';$('rv-approve').onclick=()=>publish(true);
-  show('review');
+  draft.dsx=draft.ds.map(t=>({t,c:(PICK[t]||{c:Object.fromEntries(CENTRES.map(k=>[k,0]))}).c,g:(PICK[t]||{}).g||''}));
+  draft.pct=pctOf({dsx:draft.dsx});
+  publish();
 }
-function rejectRec(){
-  $('own').hidden=false;$('own-pct').value=editing?editing.pct:rec.pct;$('own-pct').focus();
-  $('rv-reject').hidden=true;$('rv-approve').textContent='Publish with my %';$('rv-approve').onclick=()=>publish(false);
-}
-async function publish(useRec){
-  let pct=rec.pct;
-  if(!useRec){pct=Number($('own-pct').value);if($('own-pct').value===''||isNaN(pct)||pct<0||pct>100){$('rv-msg').textContent='Enter a percentage between 0 and 100.';$('rv-msg').className='ed-msg err';return;}}
-  const b=$('rv-approve');b.disabled=true;$('rv-msg').className='ed-msg';$('rv-msg').textContent='Publishing…';
+async function publish(){
+  const pct=draft.pct;
+  const b=$('ed-save');b.disabled=true;msg('Saving…');
   try{
     await ArtiumAuth.call('saveInitiative',{item:{...draft,pct:Math.round(pct)}});
     sel=draft.k;closeEditor();
     document.getElementById('dot').className='dot loading';document.getElementById('updated').textContent='Published · refreshing…';
     await load();
-  }catch(err){$('rv-msg').textContent=err.message;$('rv-msg').className='ed-msg err';}
+  }catch(err){msg(err.message,'err');}
   b.disabled=false;
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('editor').hidden)closeEditor();});
