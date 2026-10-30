@@ -27,7 +27,7 @@
   .gf-ppl select{border:1px solid #E4E1EA;border-radius:999px;padding:4px 8px;font-size:12.5px;background:#fff;max-width:220px}
   .gf-st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px 4px 8px;font:600 12px inherit;font-family:inherit;justify-self:start}
   .gf-st i{width:7px;height:7px;border-radius:50%;background:currentColor}
-  .gf-st.tbp{background:#EEEDF0;color:#5E5A66}.gf-st.inp{background:#E8EDFB;color:#2F4AA8}.gf-st.cmp{background:#E5F4EC;color:#1F7A4D}
+  .gf-st.tbp{background:#FDECEB;color:#B42318}.gf-st.inp{background:#FBF1DC;color:#9A6200}.gf-st.cmp{background:#E5F4EC;color:#1F7A4D}
   .gf-task{display:grid;grid-template-columns:24px 1fr 160px 28px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid #EFEDF2}
   .gf-task .n{width:22px;height:22px;border-radius:50%;background:#F2ECF8;color:#5B2A86;font:700 11px inherit;font-family:inherit;display:grid;place-items:center}
   .gf-task .gf-in{padding:7px 10px}
