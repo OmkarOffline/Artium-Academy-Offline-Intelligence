@@ -28,6 +28,7 @@
   .pick{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .uplbl{display:flex;align-items:center;gap:8px;font:600 13px var(--body);color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:14px;padding:5px 6px 5px 12px;box-shadow:var(--shadow)}
   .uplbl input{font:600 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:5px 8px;background:var(--bg)}
+  .seg.in{box-shadow:none;border:0;padding:0;background:none}.seg.in button{padding:5px 11px}
   .lnk{border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer}
   .mlabel{min-width:140px;text-align:center;font:600 15px var(--display);color:var(--ink)}
   .seg{display:inline-flex;gap:2px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px;box-shadow:var(--shadow)}
@@ -67,8 +68,8 @@
   table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
   th,td{padding:0 12px;height:26.5px;text-align:right;font-size:14px;white-space:nowrap}
   td:first-child,th:first-child{text-align:left;padding-left:14px}
-  thead tr.c th{height:36px;font:600 16px var(--display);color:var(--ink);text-align:center;vertical-align:bottom;padding-bottom:2px}
-  thead tr.c th span{display:block;border-bottom:2px solid var(--accent);padding-bottom:5px;margin:0 6px}
+  thead tr.c th{height:36px;font:600 16px var(--display);color:var(--ink);text-align:right;vertical-align:bottom;padding-bottom:2px}
+  thead tr.c th span{display:block;border-bottom:2px solid var(--accent);padding:0 0 5px;margin:0 0 0 10px}
   thead tr.c th.tot span{border-color:var(--gold)}
   thead tr.s th{height:30px;font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
   thead tr.s th.t{color:var(--accent)}thead tr.s th.a{color:var(--ink2)}
@@ -92,7 +93,7 @@
 
   /* Edit view: the figures you type in */
   td.in{padding:0 4px}
-  td.in input{width:100%;height:22px;border:1px solid #D9CDE8;border-radius:7px;background:#FBF9FE;text-align:right;padding:0 7px;font:600 13.5px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+  td.in input{display:block;margin-left:auto;max-width:118px;width:100%;height:22px;border:1px solid #D9CDE8;border-radius:7px;background:#FBF9FE;text-align:right;padding:0 7px;font:600 13.5px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
   td.in.t input{color:var(--accent)}
   td.in input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(91,42,134,.18);background:#fff}
   td.in input.ch{background:#FFF7E6;border-color:#E9C98A}
@@ -117,7 +118,8 @@
     <div class="bl">
       <div class="plabel" id="plabel">—</div>
       <div class="pick" id="pick" hidden><div class="mnav"><button class="mbtn" id="prev" aria-label="Previous month">‹</button><span class="mlabel" id="mlabel">—</span><button class="mbtn" id="next" aria-label="Next month">›</button></div>
-        <label class="uplbl">Data up to <input type="date" id="upto"></label><button class="lnk" id="full" type="button">Latest</button></div>
+        <label class="uplbl">Data up to <input type="date" id="upto"></label><button class="lnk" id="full" type="button">Latest</button>
+        <div class="uplbl rrsw">Run-rate <div class="seg in" id="rrsw"><button type="button" data-r="1" aria-pressed="true">Show</button><button type="button" data-r="0" aria-pressed="false">Hide</button></div></div></div>
       <div class="seg" id="mode" hidden><button type="button" data-v="show" aria-pressed="true">Slideshow</button><button type="button" data-v="edit" aria-pressed="false">Edit</button></div>
     </div>
     <div class="br">
@@ -155,6 +157,7 @@ const dim=(y,m)=>new Date(y,m+1,0).getDate();
 const lastDay=(y,m)=>y===YDAY.getFullYear()&&m===YDAY.getMonth()?YDAY.getDate():dim(y,m);   // the latest day that can be shown
 try{const p=JSON.parse(localStorage.getItem('artium_execs_period')||'null');
   if(p&&p.y*12+p.m<=YDAY.getFullYear()*12+YDAY.getMonth()){viewY=p.y;viewM=p.m;UPTO=Math.min(p.d,lastDay(p.y,p.m));}}catch(e){}
+let SHOWRR=true;try{SHOWRR=localStorage.getItem('artium_execs_rr')!=='0';}catch(e){}   // run-rate column on the slide
 const keepPeriod=()=>{try{localStorage.setItem('artium_execs_period',JSON.stringify({y:viewY,m:viewM,d:UPTO}));}catch(e){}};
 
 /* Figures typed in on the page: target (T) and actual (A) for each */
@@ -208,6 +211,7 @@ function render(){
   const up=document.getElementById('upto');up.min=key(viewY,viewM)+'-01';up.max=key(viewY,viewM)+'-'+String(lastDay(viewY,viewM)).padStart(2,'0');up.value=key(viewY,viewM)+'-'+String(UPTO).padStart(2,'0');
   document.getElementById('pday').textContent=D.full?'Full month':'Up to '+UPTO+' '+MONTH_FULL[viewM].slice(0,3)+' · '+UPTO+' of '+D.n+' days';
   document.getElementById('plabel').textContent=MONTH_FULL[viewM]+' '+viewY+(D.full?'':' · up to '+UPTO+' '+MONTH_FULL[viewM].slice(0,3));
+  document.querySelectorAll('#rrsw button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.r==='1')===SHOWRR));
   document.getElementById('pick').hidden=VIEW!=='edit';document.getElementById('plabel').hidden=VIEW==='edit';
   document.getElementById('pbar').style.width=(D.gone/D.n*100)+'%';
   document.getElementById('mode').hidden=!CAN;
@@ -216,22 +220,22 @@ function render(){
   const tb=document.getElementById('tb');
   if(!cur){tb.innerHTML='<tbody><tr><td class="p" style="height:60px">Loading…</td></tr></tbody>';document.getElementById('cards').innerHTML='';renderSave();fit();return;}
   const F=allFigures(),G=[...CENTRES,'Total'],rr=v=>v==null?null:D.gone?v/D.gone*D.n:null,edit=VIEW==='edit';
-  let h='<thead><tr class="c"><th></th>'+G.map(g=>`<th class="gap"></th><th colspan="3" class="${g==='Total'?'tot':''}"><span>${g}</span></th>`).join('')+
-    '</tr><tr class="s"><th>Particulars</th>'+G.map(()=>'<th class="gap"></th><th class="t">Target</th><th class="a">Actuals</th><th>Run-rate</th>').join('')+'</tr></thead><tbody>';
+  let h='<thead><tr class="c"><th></th>'+G.map(g=>`<th class="gap"></th><th colspan="${SHOWRR?3:2}" class="${g==='Total'?'tot':''}"><span>${g}</span></th>`).join('')+
+    '</tr><tr class="s"><th>Particulars</th>'+G.map(()=>'<th class="gap"></th><th class="t">Target</th><th class="a">Actuals</th>'+(SHOWRR?'<th>Run-rate</th>':'')).join('')+'</tr></thead><tbody>';
   ROWS.forEach(r=>{
-    if(!r){h+='<tr class="sec"><td colspan="17"></td></tr>';return;}
+    if(!r){h+=`<tr class="sec"><td colspan="${SHOWRR?17:13}"></td></tr>`;return;}
     h+=`<tr class="${r.cls||'row'}"><td class="p">${r.l}</td>`+G.map((g,i)=>{
       const v=F[g][r.k],tt=g==='Total'?' tt':'',last=i===G.length-1?' last':'';
       const box=(j,cls)=>{const k=r.k+(j?'A':'T'),val=typed(g,k),ch=EDIT[g+'|'+k]!==undefined;
         return`<td class="in ${cls}${tt}"><input inputmode="numeric" data-c="${esc(g)}" data-k="${k}" value="${val==null?'':val}" class="${ch?'ch':''}" aria-label="${esc(g)} · ${r.l} · ${j?'actual':'target'}"></td>`;};
       const t=edit&&r.typed&&g!=='Total'?box(0,'t'):`<td class="t${tt}">${fmt(v[0])}</td>`;
-      const a=edit&&r.typed&&g!=='Total'?box(1,'a'):`<td class="a${tt}">${fmt(v[1])}</td>`;
-      return`<td class="gap"></td>${t}${a}<td class="r${tt}${last}">${r.atv?'<span class="na">NA</span>':fmt(rr(v[1]))}</td>`;}).join('')+'</tr>';});
+      const a=edit&&r.typed&&g!=='Total'?box(1,'a'):`<td class="a${tt}${SHOWRR?'':last}">${fmt(v[1])}</td>`;
+      return`<td class="gap"></td>${t}${a}`+(SHOWRR?`<td class="r${tt}${last}">${r.atv?'<span class="na">NA</span>':fmt(rr(v[1]))}</td>`:'');}).join('')+'</tr>';});
   tb.innerHTML=h+'</tbody>';
   const T=F.Total,band=p=>p<70?'lo':p<90?'mid':'hi';
-  const K=[['Collections – Total',T.net,1],['Coaching',T.coach],['Other',T.other],['Fresh Sales',T.fs],['Renewals',T.rc],['Admissions',T.adm],['Renewals (count)',T.rn]];
+  const K=[['Collections – Total',T.net,1],['Coaching',T.coach],['Other',T.other],['Fresh Sales',T.fs],['Renewals',T.rc],['No. of Admissions',T.adm],['No. of Renewals',T.rn]];
   document.getElementById('cards').innerHTML=K.map(([l,v,hero])=>{const r=rr(v[1]),p=v[0]&&r!=null?Math.round(r/v[0]*100):null;
-    return`<div class="k${hero?' hero':''}"><small>${l}</small><b>${fmt(v[1]||0)}</b><div class="vs">${v[0]?'of '+fmt(v[0])+' target':'No target set'}</div><div class="rr">${p==null?'&nbsp;':`<em class="${band(p)}">${p}%</em> of target`}</div></div>`;}).join('');
+    return`<div class="k${hero?' hero':''}"><small>${l}</small><b>${fmt(v[1]||0)}</b><div class="vs">${v[0]?'of '+fmt(v[0])+' target':'No target set'}</div><div class="rr">${p==null||!SHOWRR?'&nbsp;':`<em class="${band(p)}">${p}%</em> of target`}</div></div>`;}).join('');
   renderSave();fit();
 }
 
@@ -280,6 +284,7 @@ document.getElementById('go').onclick=async()=>{
   busy=false;b.disabled=false;b.textContent='Save';render();
 };
 
+document.getElementById('rrsw').onclick=e=>{const b=e.target.closest('button');if(!b)return;SHOWRR=b.dataset.r==='1';try{localStorage.setItem('artium_execs_rr',SHOWRR?'1':'0');}catch(err){}render();};
 document.getElementById('mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;VIEW=b.dataset.v;render();};
 const move=d=>{if(changes().length&&!confirm('You have changes that aren\'t saved. Leave this month without saving them?'))return;EDIT={};
   viewM+=d;if(viewM<0){viewM=11;viewY--;}if(viewM>11){viewM=0;viewY++;}UPTO=lastDay(viewY,viewM);keepPeriod();load();};
