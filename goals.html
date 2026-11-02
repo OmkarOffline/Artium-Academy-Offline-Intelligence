@@ -59,7 +59,7 @@
   .pb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);white-space:nowrap}.pb span{width:70px;height:6px;border-radius:6px;background:var(--line);overflow:hidden}.pb i{display:block;height:100%;background:var(--ok)}
   .gl{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px 4px 9px;font:600 12px var(--body);white-space:nowrap}
   .gl i{width:7px;height:7px;border-radius:50%;background:currentColor}
-  .gl.tbp{background:#FDECEB;color:#B42318}.gl.inp{background:#FBF1DC;color:#9A6200}.gl.cmp{background:var(--ok-soft);color:var(--ok)}.gl.draft{background:#FBF4E8;color:#7A5A2A}
+  .gl.tbp{background:#FDECEB;color:#B42318}.gl.inp{background:#FBF1DC;color:#9A6200}.gl.cmp{background:var(--ok-soft);color:var(--ok)}.gl.draft{background:#EFE7F8;color:#5B2A86}
   .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
   /* Goal details */
   .det{margin-top:18px;padding:20px 22px}
@@ -169,7 +169,7 @@ function render(){
       <td>${cs.map(k=>`<div style="white-space:nowrap">${esc(k)} <small style="display:inline">· ${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', ')||'—')}</small></div>`).join('')}</td>
       <td class="nw">${fmtD(created(g))}</td><td class="nw">${tg?fmtD(tg):'—'}</td><td class="nw">${comp}</td>
       <td><div class="pb"><span><i style="width:${p.t?Math.round(p.d/p.t*100):0}%"></i></span>${p.d} of ${p.t}</div><small>${(g.tasks||[]).length?'subtasks × centres':'centres'}</small></td>
-      <td>${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}</td></tr>`;}).join('')}</tbody>`;
+      <td>${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}</td></tr>`;}).join('')}</tbody>`;
   renderDet();
 }
 function stSel(g,task,c,s){
@@ -190,8 +190,8 @@ function renderDet(){
     if(a.kind==='update')return`<div class="upd"><span class="av">${esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;
     if(a.kind==='status'){let x={};try{x=JSON.parse(a.text);}catch(e){}return`<div class="sys"><b>${who}</b> set ${x.task?'<b>'+esc(x.what)+'</b>':'the status'} for ${esc(x.centre)} to <b>${ST[x.s]||''}</b> · ${ago(a.at)}</div>`;}
     return`<div class="sys"><b>${who}</b> ${esc(a.text.charAt(0).toLowerCase()+a.text.slice(1))} · ${ago(a.at)}</div>`;}).join('');
-  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CEN!=='All'?'at '+esc(CEN)+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Draft — not sent yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
-      <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Draft</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
+  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CEN!=='All'?'at '+esc(CEN)+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Saved, not emailed to the stakeholders yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
+      <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}${CAN&&g.draft?'<button class="btn pri" type="button" id="sendmail">✉ Email stakeholders</button>':''}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
     ${g.desc?`<div class="desc">${esc(g.desc)}</div>`:''}
     <div class="grid2"><div><div class="lab">${tasks.length?'Subtasks by centre':'Centres'}</div>${mx}</div>
       <div><div class="lab">Updates</div><div class="feed">${feed||'<div class="sys" style="padding-left:0">No updates yet.</div>'}</div>
@@ -216,6 +216,11 @@ document.getElementById('det').addEventListener('click',async e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.id==='closeDet'){SEL=null;render();return;}
   if(b.dataset.rf!=null){FILES.splice(+b.dataset.rf,1);document.getElementById('patt').innerHTML=FILES.map((f,i)=>`<span class="chip">${esc(f.name)}<button type="button" data-rf="${i}">✕</button></span>`).join('');return;}
+  if(b.id==='sendmail'){const g=G.find(x=>x.id===SEL),cs=Object.keys(g.centres||{});
+    const miss=!g.desc.trim()?'Add a goal description first — it goes into the email.':cs.some(c=>!(g.centres[c].owners||[]).length)?'Every centre needs an owner before emailing.':'';
+    if(miss){alert(miss);return;}
+    if(!confirm('Email '+cs.map(c=>(g.centres[c].owners||[]).map(o=>o.name||o.email).join(', ')).join(', ')+' about this goal now?'))return;
+    b.disabled=true;try{await ArtiumAuth.call('saveGoal',{goal:{...g,draft:false}});await load(true);}catch(err){alert('Couldn\'t send: '+err.message);b.disabled=false;}return;}
   if(b.id==='edit'){const g=G.find(x=>x.id===SEL),i=INITS[g.init];GoalForm.open({goal:g,init:i?{id:g.init,n:i.n,path:i.path,dept:''}:null,staff:STAFF,onSaved:()=>load(true)});return;}
   if(b.id==='post'){const text=document.getElementById('ptext').value.trim(),m=document.getElementById('pmsg');
     if(!text&&!FILES.length){m.textContent='Write an update or add a file.';return;}

@@ -22,17 +22,17 @@
   .gf-row b{font:600 14px 'Poppins',sans-serif;color:#1D1B22}
   .gf-row input[type=checkbox]{width:17px;height:17px;accent-color:#5B2A86}
   .gf-ppl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .gf-p{display:inline-flex;align-items:center;gap:5px;background:#F2ECF8;color:#5B2A86;border-radius:999px;padding:4px 5px 4px 11px;font:600 12.5px inherit;font-family:inherit}
+  .gf-p{display:inline-flex;align-items:center;gap:5px;background:#F2ECF8;color:#5B2A86;border-radius:999px;padding:4px 5px 4px 11px;font:600 12.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
   .gf-p button{width:18px;height:18px;border-radius:50%;border:0;background:rgba(91,42,134,.12);color:#5B2A86;cursor:pointer;font-size:10px}
   .gf-ppl select{border:1px solid #E4E1EA;border-radius:999px;padding:4px 8px;font-size:12.5px;background:#fff;max-width:220px}
-  .gf-st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px 4px 8px;font:600 12px inherit;font-family:inherit;justify-self:start}
+  .gf-st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px 4px 8px;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;white-space:nowrap;justify-self:start}
   .gf-st i{width:7px;height:7px;border-radius:50%;background:currentColor}
   .gf-st.tbp{background:#FDECEB;color:#B42318}.gf-st.inp{background:#FBF1DC;color:#9A6200}.gf-st.cmp{background:#E5F4EC;color:#1F7A4D}
   .gf-task{display:grid;grid-template-columns:24px 1fr 160px 28px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid #EFEDF2}
-  .gf-task .n{width:22px;height:22px;border-radius:50%;background:#F2ECF8;color:#5B2A86;font:700 11px inherit;font-family:inherit;display:grid;place-items:center}
+  .gf-task .n{width:22px;height:22px;border-radius:50%;background:#F2ECF8;color:#5B2A86;font:700 11px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;display:grid;place-items:center}
   .gf-task .gf-in{padding:7px 10px}
   .gf-rm{width:28px;height:28px;border-radius:50%;border:0;background:none;color:#9A96A3;cursor:pointer;font-size:14px}.gf-rm:hover{background:#FDECEB;color:#B42318}
-  .gf-add{display:block;width:100%;text-align:left;border:0;background:#FCFBFD;padding:10px 12px;color:#5B2A86;font:600 13px inherit;font-family:inherit;cursor:pointer}
+  .gf-add{display:block;width:100%;text-align:left;border:0;background:#FCFBFD;padding:10px 12px;color:#5B2A86;font:600 13px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;cursor:pointer}
   .gf-note{background:#F8F4FC;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55}.gf-note b{color:#5B2A86}
   .gf-ft{display:flex;align-items:center;gap:10px;padding:14px 24px 18px;border-top:1px solid #EFEDF2}
   .gf-ft .sp{flex:1}.gf-msg{font-size:13px;color:#B42318}
@@ -70,10 +70,10 @@
         <div style="max-width:260px"><span class="gf-l">Target date</span><input class="gf-in" type="date" data-f="target" value="${esc(F.target)}"></div>
         <div><span class="gf-l">Subtasks</span><div class="gf-box">${F.tasks.map((t,k)=>`<div class="gf-task"><span class="n">${k+1}</span><input class="gf-in" data-t="${k}|title" value="${esc(t.title)}" placeholder="e.g. Shortlist 3 vendors and get quotes"><input class="gf-in" type="date" data-t="${k}|due" value="${esc(t.due)}" aria-label="Due date"><button type="button" class="gf-rm" data-rt="${k}" aria-label="Remove subtask">✕</button></div>`).join('')}
           <button type="button" class="gf-add" data-addt>+ Add a subtask</button></div><div class="gf-hint">Every chosen centre works through the same subtasks; each centre's owner updates their own.</div></div>
-        ${live?'':'<div class="gf-note"><b>Email to the owners</b> goes out when you create the goal. It contains the goal, your description, the target date and the subtasks, plus a link to the goal. You\'re copied.</div>'}
+        ${live?'':'<div class="gf-note"><b>Email to the stakeholders</b> goes out when you choose to send it — now, or later with <b>Email stakeholders</b> on the Goals page. Until then the goal is tagged <b>Yet to email</b> and only you can see it. The email has the goal, your description, the target date and the subtasks, plus a link to the goal. You\'re copied.</div>'}
       </div>
       <div class="gf-ft"><span class="gf-msg" id="gf-msg"></span><span class="sp"></span><button class="gf-btn" type="button" data-close>Cancel</button>
-        ${live?'<button class="gf-btn pri" type="button" data-save="live">Save changes</button>':'<button class="gf-btn" type="button" data-save="draft">Save as draft</button><button class="gf-btn pri" type="button" data-save="live">Create goal &amp; email owners</button>'}</div></div>`;
+        ${live?'<button class="gf-btn pri" type="button" data-save="live">Save changes</button>':`<button class="gf-btn" type="button" data-save="draft">${O.goal?'Save':'Save goal'} — email later</button><button class="gf-btn pri" type="button" data-save="live">${O.goal?'Save &amp; email stakeholders':'Create &amp; email stakeholders'}</button>`}</div></div>`;
   }
   function onInput(e){const d=e.target.dataset;if(d.f==='title'||d.f==='desc')F[d.f]=e.target.value;else if(d.t){const[k,f]=d.t.split('|');if(f==='title')F.tasks[+k].title=e.target.value;}}
   function onChange(e){
