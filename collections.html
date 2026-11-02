@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collections Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  :root{--display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;--ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;--warn:#9A6200;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28)}
+  html,body{background:var(--bg)}
+  body{font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1700px;margin:0 auto;padding:22px 32px 40px}
+
+  /* Toolbar above the slide */
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+  .bl,.br{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .mnav{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:5px;box-shadow:var(--shadow)}
+  .mbtn{width:32px;height:32px;border:0;border-radius:9px;background:var(--bg);color:var(--ink2);font-size:16px;cursor:pointer}.mbtn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}.mbtn:disabled{opacity:.35;cursor:default}
+  .plabel{font:600 16px var(--display);color:var(--ink);padding:0 4px}
+  .pick{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .uplbl{display:flex;align-items:center;gap:8px;font:600 13px var(--body);color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:14px;padding:5px 6px 5px 12px;box-shadow:var(--shadow)}
+  .uplbl input{font:600 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:9px;padding:5px 8px;background:var(--bg)}
+  .lnk{border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer}
+  .mlabel{min-width:140px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+  .seg{display:inline-flex;gap:2px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px;box-shadow:var(--shadow)}
+  .seg button{border:0;background:none;border-radius:9px;padding:7px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--ink2);font:600 13px var(--display);cursor:pointer;white-space:nowrap;box-shadow:var(--shadow)}
+  .btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}.btn.pri:hover:not(:disabled){background:#4A2170;color:#fff}.btn:disabled{opacity:.5;cursor:default}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .hint{font-size:13px;color:var(--muted);margin:-4px 0 14px}
+  .hint b{color:var(--accent)}
+
+  /* The slide: laid out at 1600 × 900 and scaled to fit */
+  .stage{position:relative;width:100%}
+  .slide{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;background:var(--bg);overflow:hidden;display:flex;flex-direction:column;padding:34px 48px 30px;
+    border-radius:18px;box-shadow:0 1px 2px rgba(31,26,36,.06),0 30px 60px -36px rgba(31,16,41,.45);border:1px solid var(--border)}
+  .top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px}
+  .eb{font:700 12px var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  .slide h1{font:700 40px/1.05 var(--display);color:var(--ink);letter-spacing:-.01em}
+  .sub{font:500 16px var(--body);color:var(--muted);margin-top:6px}
+  .prog{text-align:right}
+  .prog b{display:block;font:600 15px var(--display);color:var(--ink2)}
+  .prog .pb{width:220px;height:6px;border-radius:6px;background:#E6E2EC;margin-top:8px;overflow:hidden;margin-left:auto}.prog .pb i{display:block;height:100%;background:var(--accent)}
+  .cards{display:grid;grid-template-columns:1.35fr 1fr 1fr 1fr 1fr .85fr .85fr;gap:12px;margin-bottom:16px}
+  .k{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px 16px 13px;box-shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -20px rgba(75,31,111,.3)}
+  .k.hero{background:var(--accent);border-color:var(--accent)}
+  .k small{display:block;font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .k b{display:block;font:600 27px/1.25 var(--display);color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+  .k .vs{font-size:12px;color:var(--faint);margin-top:2px}
+  .k .rr{font-size:12px;margin-top:6px;color:var(--muted)}
+  .k .rr em{font-style:normal;font-weight:700}
+  .k.hero small{color:#D9C7EC}.k.hero b{color:#fff;font-size:31px}.k.hero .vs{color:#CDB8E3}.k.hero .rr{color:#E9DDF5}
+  .lo{color:var(--bad)}.mid{color:var(--warn)}.hi{color:var(--ok)}
+  .k.hero .lo{color:#FFB4AB}.k.hero .mid{color:#FFD58A}.k.hero .hi{color:#A6E3C2}
+  .tw{flex:1;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:0 1px 2px rgba(31,26,36,.04),0 18px 40px -30px rgba(75,31,111,.35);padding:6px 10px 8px;overflow:hidden}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  th,td{padding:0 12px;height:26.5px;text-align:right;font-size:14px;white-space:nowrap}
+  td:first-child,th:first-child{text-align:left;padding-left:14px}
+  thead tr.c th{height:36px;font:600 16px var(--display);color:var(--ink);text-align:center;vertical-align:bottom;padding-bottom:2px}
+  thead tr.c th span{display:block;border-bottom:2px solid var(--accent);padding-bottom:5px;margin:0 6px}
+  thead tr.c th.tot span{border-color:var(--gold)}
+  thead tr.s th{height:30px;font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  thead tr.s th.t{color:var(--accent)}thead tr.s th.a{color:var(--ink2)}
+  td.p{font-size:14px;color:var(--ink2)}
+  td.t{color:var(--accent)}td.a{color:var(--ink);font-weight:600}td.r{color:var(--faint)}
+  td.gap,th.gap{width:14px;padding:0}
+  tr.sec td{height:5px}
+  tr.sum td{background:var(--accent-soft);font-weight:700;height:30px}
+  tr.sum td.p{font:600 14.5px var(--display);color:var(--ink);border-radius:10px 0 0 10px}
+  tr.sum td.gap{background:#fff}
+  tr.sum td.r{color:var(--muted)}
+  tr.net td{background:var(--accent);color:#fff;height:32px}
+  tr.net td.p{font:600 15px var(--display);color:#fff;border-radius:10px 0 0 10px}
+  tr.net td.gap{background:#fff}
+  tr.net td.t{color:#E3D3F3}tr.net td.r{color:#CDB8E3}
+  td.tt{background:#FBF8F3}tr.sum td.tt{background:#F1E8DA}
+  td.last{border-radius:0 10px 10px 0}
+  tr.row+tr.row td:not(.gap){border-top:1px solid var(--line)}
+  .na{color:var(--ghost);font-size:12.5px}
+  .foot{display:flex;justify-content:flex-end;font-size:12px;color:var(--faint);margin-top:12px}
+
+  /* Edit view: the figures you type in */
+  td.in{padding:0 4px}
+  td.in input{width:100%;height:22px;border:1px solid #D9CDE8;border-radius:7px;background:#FBF9FE;text-align:right;padding:0 7px;font:600 13.5px var(--body);color:var(--ink);font-variant-numeric:tabular-nums}
+  td.in.t input{color:var(--accent)}
+  td.in input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(91,42,134,.18);background:#fff}
+  td.in input.ch{background:#FFF7E6;border-color:#E9C98A}
+
+  .save{position:sticky;bottom:16px;margin-top:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px 16px;box-shadow:0 18px 40px -20px rgba(31,16,41,.4);z-index:5}
+  .save span{font:600 14px var(--display);color:var(--ink)}
+  .msg{font-size:13px;color:var(--bad)}
+
+  /* Full screen: just the slide, centred */
+  body.fs,html.fs{background:#16141B}
+  body.fs .page{max-width:none;padding:0}
+  body.fs .bar,body.fs .hint,body.fs .save{display:none!important}
+  body.fs .stage{position:fixed;inset:0}
+  body.fs .slide{border-radius:0;border:0;box-shadow:none}
+  .exit{position:fixed;right:18px;bottom:16px;z-index:20;border:0;border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.12);color:#fff;font:600 12.5px var(--body);cursor:pointer;opacity:0;transition:opacity .2s}
+  body.fs:hover .exit{opacity:1}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bar">
+    <div class="bl">
+      <div class="plabel" id="plabel">—</div>
+      <div class="pick" id="pick" hidden><div class="mnav"><button class="mbtn" id="prev" aria-label="Previous month">‹</button><span class="mlabel" id="mlabel">—</span><button class="mbtn" id="next" aria-label="Next month">›</button></div>
+        <label class="uplbl">Data up to <input type="date" id="upto"></label><button class="lnk" id="full" type="button">Latest</button></div>
+      <div class="seg" id="mode" hidden><button type="button" data-v="show" aria-pressed="true">Slideshow</button><button type="button" data-v="edit" aria-pressed="false">Edit</button></div>
+    </div>
+    <div class="br">
+      <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <button class="btn pri" type="button" id="present"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Present full screen</button>
+    </div>
+  </div>
+  <div class="hint" id="hint" hidden>Pick the month and the day the figures run up to. The slideshow shows that period. Type into the <b>boxes</b> for exam registrations, instruments and refunds. Everything else comes from the receipts sheets and the Targets page.</div>
+  <div class="stage" id="stage">
+    <div class="slide" id="slide">
+      <div class="top">
+        <div><div class="eb">Execs Call · Offline Centres</div><h1>Collections Overview</h1><div class="sub" id="smonth">—</div></div>
+        <div class="prog"><b id="pday">—</b><div class="pb"><i id="pbar" style="width:0"></i></div></div>
+      </div>
+      <div class="cards" id="cards"></div>
+      <div class="tw"><table id="tb"><tbody><tr><td class="p">Loading…</td></tr></tbody></table></div>
+      <div class="foot">Artium Academy · Offline.</div>
+    </div>
+  </div>
+  <div class="save" id="save" hidden><span id="save-n"></span><div style="display:flex;gap:8px;align-items:center"><span class="msg" id="msg"></span><button class="btn" id="discard" type="button">Discard</button><button class="btn pri" id="go" type="button">Save</button></div></div>
+</div>
+<button class="exit" id="exit" type="button" hidden>Exit full screen (Esc)</button>
+
+<script>
+const CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=v=>v==null||!isFinite(v)?'—':(v<0?'−':'')+Math.round(Math.abs(v)).toLocaleString('en-IN');
+const now=new Date();
+/* Period: a month, with figures from the 1st up to a chosen day. It starts at yesterday, so a day that isn't over yet is left out. */
+const YDAY=new Date(now.getFullYear(),now.getMonth(),now.getDate()-1);
+let viewY=YDAY.getFullYear(),viewM=YDAY.getMonth(),UPTO=YDAY.getDate(),VIEW='show',CAN=false,DATA={},EDIT={},busy=false;
+const key=(y,m)=>y+'-'+String(m+1).padStart(2,'0'),dk=()=>key(viewY,viewM)+'|'+UPTO;
+const dim=(y,m)=>new Date(y,m+1,0).getDate();
+const lastDay=(y,m)=>y===YDAY.getFullYear()&&m===YDAY.getMonth()?YDAY.getDate():dim(y,m);   // the latest day that can be shown
+try{const p=JSON.parse(localStorage.getItem('artium_execs_period')||'null');
+  if(p&&p.y*12+p.m<=YDAY.getFullYear()*12+YDAY.getMonth()){viewY=p.y;viewM=p.m;UPTO=Math.min(p.d,lastDay(p.y,p.m));}}catch(e){}
+const keepPeriod=()=>{try{localStorage.setItem('artium_execs_period',JSON.stringify({y:viewY,m:viewM,d:UPTO}));}catch(e){}};
+
+/* Figures typed in on the page: target (T) and actual (A) for each */
+const TYPED=['exN','exAmt','insN','insAmt','rfN','rfAmt'];
+const typed=(c,k)=>{const e=EDIT[c+'|'+k];if(e!==undefined)return e===''?null:e;const t=((DATA[dk()]||{}).typed||{})[c]||{};return t[k]!=null?t[k]:null;};
+
+/* Each centre's [target, actual] pairs; a target that hasn't been set is null */
+function centreFigures(c){
+  const d=DATA[dk()]||{},a=(d.actuals||{})[c]||{adm:0,fs:0,rn:0,rc:0},t=(d.targets||{})[c]||{};
+  const tv=k=>t[k]!=null?t[k]:null,V={adm:[tv('conv'),a.adm],fs:[tv('fscol'),a.fs],rn:[tv('renewed'),a.rn],rc:[tv('rncol'),a.rc]};
+  TYPED.forEach(k=>V[k]=[typed(c,k+'T')||0,typed(c,k+'A')||0]);   // left blank = 0, as on the slide
+  return V;
+}
+const add=(...xs)=>xs.some(x=>x!=null)?xs.reduce((s,x)=>s+(x||0),0):null;
+const pair=(f,...ks)=>[0,1].map(i=>f(...ks.map(k=>k[i])));
+function derived(V){
+  V.coach=pair(add,V.fs,V.rc);
+  V.other=pair(add,V.exAmt,V.insAmt);
+  V.gross=pair(add,V.coach,V.other);
+  V.net=pair((g,r)=>g==null&&r==null?null:(g||0)-(r||0),V.gross,V.rfAmt);
+  V.atvF=[V.fs[0]!=null&&V.adm[0]?V.fs[0]/V.adm[0]:null,V.adm[1]?V.fs[1]/V.adm[1]:0];
+  V.atvR=[V.rc[0]!=null&&V.rn[0]?V.rc[0]/V.rn[0]:null,V.rn[1]?V.rc[1]/V.rn[1]:0];
+  return V;
+}
+function allFigures(){
+  const F={};CENTRES.forEach(c=>F[c]=derived(centreFigures(c)));
+  const T={};['adm','fs','rn','rc',...TYPED].forEach(k=>T[k]=[0,1].map(i=>add(...CENTRES.map(c=>F[c][k][i]))));
+  F.Total=derived(T);return F;
+}
+
+/* Days gone: today in the current month, the whole month once it's over, none before it starts */
+function days(){
+  const n=dim(viewY,viewM);return{n,gone:UPTO,full:UPTO>=n};
+}
+
+const ROWS=[
+  {l:'No. of Admissions',k:'adm'},{l:'Collections – Fresh Sales',k:'fs'},{l:'ATV – Fresh Sales',k:'atvF',atv:1},0,
+  {l:'No. of Renewals',k:'rn'},{l:'Collections – Renewals',k:'rc'},{l:'ATV – Renewals',k:'atvR',atv:1},0,
+  {l:'Gross Collections – Coaching',k:'coach',cls:'sum'},0,
+  {l:'No. of Exam Registrations',k:'exN',typed:1},{l:'Collections – Exam Fees',k:'exAmt',typed:1},
+  {l:'No. of Instruments Sold',k:'insN',typed:1},{l:'Collections – Instrument Sales',k:'insAmt',typed:1},0,
+  {l:'Gross Collections – Total',k:'gross',cls:'sum'},0,
+  {l:'No. of Refunds',k:'rfN',typed:1},{l:'Outflow from Refunds',k:'rfAmt',typed:1},0,
+  {l:'Net Collections – Total',k:'net',cls:'net'}];
+
+function render(){
+  const D=days(),cur=DATA[dk()];
+  document.getElementById('mlabel').textContent=MONTH_FULL[viewM]+' '+viewY;
+  document.getElementById('smonth').textContent=MONTH_FULL[viewM]+' '+viewY;
+  document.getElementById('next').disabled=viewY*12+viewM>=YDAY.getFullYear()*12+YDAY.getMonth();
+  const up=document.getElementById('upto');up.min=key(viewY,viewM)+'-01';up.max=key(viewY,viewM)+'-'+String(lastDay(viewY,viewM)).padStart(2,'0');up.value=key(viewY,viewM)+'-'+String(UPTO).padStart(2,'0');
+  document.getElementById('pday').textContent=D.full?'Full month':'Up to '+UPTO+' '+MONTH_FULL[viewM].slice(0,3)+' · '+UPTO+' of '+D.n+' days';
+  document.getElementById('plabel').textContent=MONTH_FULL[viewM]+' '+viewY+(D.full?'':' · up to '+UPTO+' '+MONTH_FULL[viewM].slice(0,3));
+  document.getElementById('pick').hidden=VIEW!=='edit';document.getElementById('plabel').hidden=VIEW==='edit';
+  document.getElementById('pbar').style.width=(D.gone/D.n*100)+'%';
+  document.getElementById('mode').hidden=!CAN;
+  document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===VIEW));
+  document.getElementById('hint').hidden=VIEW!=='edit';
+  const tb=document.getElementById('tb');
+  if(!cur){tb.innerHTML='<tbody><tr><td class="p" style="height:60px">Loading…</td></tr></tbody>';document.getElementById('cards').innerHTML='';renderSave();fit();return;}
+  const F=allFigures(),G=[...CENTRES,'Total'],rr=v=>v==null?null:D.gone?v/D.gone*D.n:null,edit=VIEW==='edit';
+  let h='<thead><tr class="c"><th></th>'+G.map(g=>`<th class="gap"></th><th colspan="3" class="${g==='Total'?'tot':''}"><span>${g}</span></th>`).join('')+
+    '</tr><tr class="s"><th>Particulars</th>'+G.map(()=>'<th class="gap"></th><th class="t">Target</th><th class="a">Actuals</th><th>Run-rate</th>').join('')+'</tr></thead><tbody>';
+  ROWS.forEach(r=>{
+    if(!r){h+='<tr class="sec"><td colspan="17"></td></tr>';return;}
+    h+=`<tr class="${r.cls||'row'}"><td class="p">${r.l}</td>`+G.map((g,i)=>{
+      const v=F[g][r.k],tt=g==='Total'?' tt':'',last=i===G.length-1?' last':'';
+      const box=(j,cls)=>{const k=r.k+(j?'A':'T'),val=typed(g,k),ch=EDIT[g+'|'+k]!==undefined;
+        return`<td class="in ${cls}${tt}"><input inputmode="numeric" data-c="${esc(g)}" data-k="${k}" value="${val==null?'':val}" class="${ch?'ch':''}" aria-label="${esc(g)} · ${r.l} · ${j?'actual':'target'}"></td>`;};
+      const t=edit&&r.typed&&g!=='Total'?box(0,'t'):`<td class="t${tt}">${fmt(v[0])}</td>`;
+      const a=edit&&r.typed&&g!=='Total'?box(1,'a'):`<td class="a${tt}">${fmt(v[1])}</td>`;
+      return`<td class="gap"></td>${t}${a}<td class="r${tt}${last}">${r.atv?'<span class="na">NA</span>':fmt(rr(v[1]))}</td>`;}).join('')+'</tr>';});
+  tb.innerHTML=h+'</tbody>';
+  const T=F.Total,band=p=>p<70?'lo':p<90?'mid':'hi';
+  const K=[['Collections – Total',T.net,1],['Coaching',T.coach],['Other',T.other],['Fresh Sales',T.fs],['Renewals',T.rc],['Admissions',T.adm],['Renewals (count)',T.rn]];
+  document.getElementById('cards').innerHTML=K.map(([l,v,hero])=>{const r=rr(v[1]),p=v[0]&&r!=null?Math.round(r/v[0]*100):null;
+    return`<div class="k${hero?' hero':''}"><small>${l}</small><b>${fmt(v[1]||0)}</b><div class="vs">${v[0]?'of '+fmt(v[0])+' target':'No target set'}</div><div class="rr">${p==null?'&nbsp;':`<em class="${band(p)}">${p}%</em> of target`}</div></div>`;}).join('');
+  renderSave();fit();
+}
+
+/* Scale the 1600 × 900 slide to the space it has */
+function fit(){
+  const st=document.getElementById('stage'),sl=document.getElementById('slide'),fs=document.body.classList.contains('fs');
+  let s,ox=0,oy=0;
+  if(fs){s=Math.min(innerWidth/1600,innerHeight/900);ox=(innerWidth-1600*s)/2;oy=(innerHeight-900*s)/2;st.style.height='';}
+  else{const w=st.clientWidth,top=st.getBoundingClientRect().top+scrollY;
+    s=w/1600;
+    if(VIEW==='show'){const room=innerHeight-top-24;if(900*s>room&&room>300){s=room/900;ox=(w-1600*s)/2;}}
+    st.style.height=(900*s)+'px';}
+  sl.style.transform=`translate(${ox}px,${oy}px) scale(${s})`;
+}
+addEventListener('resize',fit);
+
+/* Edit view: changes are kept until you press Save */
+const changes=()=>Object.keys(EDIT);
+function renderSave(){
+  const n=changes().length,sv=document.getElementById('save');
+  sv.hidden=VIEW!=='edit'||!n;
+  document.getElementById('save-n').textContent=n===1?'1 change not saved yet.':n+' changes not saved yet.';
+}
+document.getElementById('tb').addEventListener('input',e=>{
+  const i=e.target.closest('input');if(!i)return;
+  const c=i.dataset.c,k=i.dataset.k,raw=i.value.replace(/[^0-9]/g,'');
+  if(raw!==i.value)i.value=raw;
+  const t=((DATA[dk()]||{}).typed||{})[c]||{},was=t[k]!=null?String(t[k]):'';
+  if(raw===was)delete EDIT[c+'|'+k];else EDIT[c+'|'+k]=raw===''?'':+raw;
+  i.classList.toggle('ch',EDIT[c+'|'+k]!==undefined);
+  // refresh the worked-out figures without losing the box you're typing in
+  const pos=i.selectionStart;render();
+  const again=document.querySelector(`#tb input[data-c="${CSS.escape(c)}"][data-k="${k}"]`);if(again){again.focus();try{again.setSelectionRange(pos,pos);}catch(err){}}
+});
+document.getElementById('tb').addEventListener('keydown',e=>{
+  const i=e.target.closest('input');if(!i||(e.key!=='Enter'&&e.key!=='ArrowDown'&&e.key!=='ArrowUp'))return;
+  const all=[...document.querySelectorAll('#tb input')],col=all.filter(x=>x.dataset.c===i.dataset.c&&x.dataset.k.slice(-1)===i.dataset.k.slice(-1)),at=col.indexOf(i);
+  const to=col[at+(e.key==='ArrowUp'?-1:1)];if(to){e.preventDefault();to.focus();to.select();}
+});
+document.getElementById('discard').onclick=()=>{EDIT={};document.getElementById('msg').textContent='';render();};
+document.getElementById('go').onclick=async()=>{
+  if(busy)return;busy=true;const b=document.getElementById('go');b.disabled=true;b.textContent='Saving…';document.getElementById('msg').textContent='';
+  const values={};changes().forEach(x=>{const [c,k]=x.split('|');(values[c]=values[c]||{})[k]=EDIT[x];});
+  try{const j=await ArtiumAuth.call('saveCollections',{month:key(viewY,viewM),upto:UPTO,values});DATA[dk()]=j;EDIT={};stamp();}
+  catch(err){document.getElementById('msg').textContent='Couldn\'t save: '+err.message+'.';}
+  busy=false;b.disabled=false;b.textContent='Save';render();
+};
+
+document.getElementById('mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;VIEW=b.dataset.v;render();};
+const move=d=>{if(changes().length&&!confirm('You have changes that aren\'t saved. Leave this month without saving them?'))return;EDIT={};
+  viewM+=d;if(viewM<0){viewM=11;viewY--;}if(viewM>11){viewM=0;viewY++;}UPTO=lastDay(viewY,viewM);keepPeriod();load();};
+document.getElementById('upto').onchange=e=>{const m=String(e.target.value).match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return;
+  if(changes().length&&!confirm('You have changes that aren\'t saved. Change the period without saving them?')){render();return;}EDIT={};
+  viewY=+m[1];viewM=+m[2]-1;UPTO=Math.min(+m[3],lastDay(viewY,viewM));keepPeriod();load();};
+document.getElementById('full').onclick=()=>{UPTO=lastDay(viewY,viewM);keepPeriod();load();};
+document.getElementById('prev').onclick=()=>move(-1);
+document.getElementById('next').onclick=()=>move(1);
+
+/* Full screen */
+document.getElementById('present').onclick=async()=>{
+  try{await document.documentElement.requestFullscreen();}catch(e){}
+  document.body.classList.add('fs');document.documentElement.classList.add('fs');document.getElementById('exit').hidden=false;
+  if(VIEW==='edit'){VIEW='show';render();}fit();
+};
+function leaveFs(){document.body.classList.remove('fs');document.documentElement.classList.remove('fs');document.getElementById('exit').hidden=true;fit();}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)leaveFs();});
+document.getElementById('exit').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else leaveFs();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('fs')&&!document.fullscreenElement)leaveFs();});
+
+function stamp(){const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
+async function load(){
+  const k=dk();render();
+  document.getElementById('dot').className='dot loading';document.getElementById('updated').textContent='Loading…';
+  try{const j=await ArtiumAuth.call('collections',{month:key(viewY,viewM),upto:UPTO});DATA[k]=j;CAN=!!j.canEdit;if(!CAN)VIEW='show';stamp();}
+  catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';}
+  if(k===dk())render();
+}
+document.fonts&&document.fonts.ready.then(fit);
+load();
+</script>
+</body>
+</html>
