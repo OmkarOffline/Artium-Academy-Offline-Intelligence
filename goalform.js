@@ -2,6 +2,7 @@
    GoalForm.open({goal, init:{id,n,path,dept}, line, centres, staff, lineCentres, onSaved}) */
 (function(){
   const CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'];
+  const TAGS=['Academics','Learner Experience','Finance','Hiring','Marketing','Operations','People Management','Product / Tech','Social Media','Design & Content','Teacher Experience'];
   const css=`
   .gf-bg{position:fixed;inset:0;z-index:60;background:rgba(29,27,34,.42);display:grid;place-items:center;padding:20px}
   .gf-bg[hidden]{display:none}
@@ -15,6 +16,9 @@
   .gf-in{border:1px solid #E4E1EA;border-radius:11px;background:#F6F5F2;padding:10px 12px;font:400 14px/1.55 inherit;font-family:inherit;color:#1D1B22;width:100%}
   .gf-in:focus{outline:none;border-color:#5B2A86;box-shadow:0 0 0 3px rgba(91,42,134,.12);background:#fff}
   textarea.gf-in{resize:vertical;min-height:130px}
+  .gf-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .gf-tag{border:1px solid #E4E1EA;background:#fff;border-radius:999px;padding:5px 12px;font:600 12.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#3B3742;cursor:pointer}
+  .gf-tag:hover{border-color:#CDBFE0}.gf-tag[aria-pressed="true"]{background:#5B2A86;border-color:#5B2A86;color:#fff}
   .gf-hint{font-size:12px;color:#9A96A3;margin-top:6px}
   .gf-box{border:1px solid #E4E1EA;border-radius:14px;overflow:hidden}
   .gf-row{display:grid;grid-template-columns:22px 150px 1fr 120px;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #EFEDF2}
@@ -51,7 +55,7 @@
   }
   function open(opts){
     mount();O=opts;const g=opts.goal;
-    F=g?JSON.parse(JSON.stringify(g)):{id:'',init:opts.init&&opts.init.id||'',line:opts.line||'',title:opts.line||'',desc:'',target:'',draft:true,centres:{},tasks:[]};
+    F=g?JSON.parse(JSON.stringify(g)):{tags:[],id:'',init:opts.init&&opts.init.id||'',line:opts.line||'',title:opts.line||'',desc:'',target:'',draft:true,centres:{},tasks:[]};
     if(!g)((opts.lineCentres&&opts.lineCentres.length)?opts.lineCentres:CENTRES).forEach(c=>F.centres[c]={owners:[],s:'tbp'});
     F.tasks=(F.tasks||[]).map(t=>({...t}));render();el.hidden=false;
     setTimeout(()=>{const t=el.querySelector('[data-f=title]');t&&t.focus();},50);
@@ -67,6 +71,7 @@
         <div><span class="gf-l">Goal description</span><textarea class="gf-in" data-f="desc" placeholder="Why it matters, what to do, and what &quot;done&quot; looks like.">${esc(F.desc)}</textarea><div class="gf-hint">This is what the owners read in their email, so write it the way you'd brief them.</div></div>
         <div><span class="gf-l">Centres and owners</span><div class="gf-box">${CENTRES.map(c=>{const C=F.centres[c];return`<div class="gf-row${C?'':' off'}"><input type="checkbox" data-c="${esc(c)}"${C?' checked':''} aria-label="${esc(c)}"><b>${esc(c)}</b>${C?people(C.owners,c):'<span style="font-size:12.5px;color:#9A96A3">Not part of this goal</span>'}${C?`<span class="gf-st ${C.s||'tbp'}"><i></i>${ST[C.s||'tbp']}</span>`:'<span></span>'}</div>`;}).join('')}</div>
           <div class="gf-hint">Untick a centre this goal doesn't apply to. Each centre has its own status, and the goal is Completed when every chosen centre is.</div></div>
+        <div><span class="gf-l">Tags</span><div class="gf-tags">${TAGS.map(t=>`<button type="button" class="gf-tag" data-tag="${esc(t)}" aria-pressed="${(F.tags||[]).includes(t)}">${esc(t)}</button>`).join('')}</div></div>
         <div style="max-width:260px"><span class="gf-l">Target date</span><input class="gf-in" type="date" data-f="target" value="${esc(F.target)}"></div>
         <div><span class="gf-l">Subtasks</span><div class="gf-box">${F.tasks.map((t,k)=>`<div class="gf-task"><span class="n">${k+1}</span><input class="gf-in" data-t="${k}|title" value="${esc(t.title)}" placeholder="e.g. Shortlist 3 vendors and get quotes"><input class="gf-in" type="date" data-t="${k}|due" value="${esc(t.due)}" aria-label="Due date"><button type="button" class="gf-rm" data-rt="${k}" aria-label="Remove subtask">✕</button></div>`).join('')}
           <button type="button" class="gf-add" data-addt>+ Add a subtask</button></div><div class="gf-hint">Every chosen centre works through the same subtasks; each centre's owner updates their own.</div></div>
@@ -92,6 +97,7 @@
     if(d.rmp){const[c,i]=d.rmp.split('|');F.centres[c].owners.splice(+i,1);return render();}
     if('addt' in d){F.tasks.push({id:uid(),title:'',due:''});render();const ins=el.querySelectorAll('[data-t$="|title"]');ins[ins.length-1].focus();return;}
     if(d.rt){F.tasks.splice(+d.rt,1);return render();}
+    if(d.tag){F.tags=F.tags||[];F.tags=F.tags.includes(d.tag)?F.tags.filter(x=>x!==d.tag):F.tags.concat(d.tag);b.setAttribute('aria-pressed',F.tags.includes(d.tag));return;}
     if(d.save){
       const draft=d.save==='draft',cs=Object.keys(F.centres),m=el.querySelector('#gf-msg');
       const miss=!F.title.trim()?'Give the goal a name.':!cs.length?'Choose at least one centre.':!draft&&!F.desc.trim()?'Write the goal description — it goes into the email.':

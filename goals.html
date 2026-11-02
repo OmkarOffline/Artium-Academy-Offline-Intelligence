@@ -60,6 +60,101 @@
   .gl{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 11px 4px 9px;font:600 12px var(--body);white-space:nowrap}
   .gl i{width:7px;height:7px;border-radius:50%;background:currentColor}
   .gl.tbp{background:#FDECEB;color:#B42318}.gl.inp{background:#FBF1DC;color:#9A6200}.gl.cmp{background:var(--ok-soft);color:var(--ok)}.gl.draft{background:#EFE7F8;color:#5B2A86}
+  .vbar{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin:4px 0 10px}
+  .vgrp{display:flex;align-items:center;gap:8px}
+  .vl{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  /* Filters card and dropdowns (same as Course Performance) */
+  .filters{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);margin-bottom:26px}
+  .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;cursor:pointer;user-select:none}
+  .filters-head .t{display:flex;align-items:center;gap:10px;font:600 16px var(--display);color:var(--ink)}
+  .filters-head .t svg{color:var(--accent)}
+  .f-badge{background:var(--accent-soft);color:var(--accent);font:600 12px var(--body);border-radius:999px;padding:3px 10px}
+  .f-badge.on{background:var(--accent);color:#fff}
+  .f-chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s}
+  .filters.closed .f-chev{transform:rotate(-90deg)}
+  .filters.closed .filters-body{display:none}
+  .filters-body{border-top:1px solid var(--line);padding:18px 22px 20px}
+  .f-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+  .f-group{display:flex;flex-direction:column;gap:6px}
+  .f-group label{font:600 12px var(--body);color:var(--ink2)}
+  .f-group select{height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer}
+  .f-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .f-group select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .f-clear{margin-top:14px;border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;padding:0}
+  .f-clear:disabled{color:var(--ghost);cursor:default}
+  .ms{position:relative;display:flex;flex-direction:column;gap:6px}
+  .ms>label{font:600 12px var(--body);color:var(--ink2)}
+  .ms>button{display:flex;align-items:center;justify-content:space-between;gap:8px;height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer;text-align:left;width:100%}
+  .ms>button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ms>button svg{flex:none;color:var(--muted)}
+  .ms>button:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .ms.set>button{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .ms .pop{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 18px 40px -18px rgba(31,16,41,.35);padding:6px}
+  .ms .pop label{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:13.5px;color:var(--ink2);cursor:pointer}
+  .ms .pop label:hover{background:var(--accent-soft)}
+  .ms .pop input{width:16px;height:16px;accent-color:#5B2A86}
+  .ms .pop .pf{display:flex;justify-content:space-between;border-top:1px solid var(--line);margin-top:4px;padding:6px 6px 2px}
+  .ms .pop .pf button{border:0;background:none;color:var(--accent);font:600 12.5px var(--body);cursor:pointer}
+  .filters:not(.closed){position:relative;z-index:5}
+  .filters-body{overflow:visible}
+  .f-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  @media (max-width:900px){.f-grid{grid-template-columns:1fr}}
+  .ms .pop{max-height:340px;overflow:auto}
+  .ms .pop .n{margin-left:auto;font-size:11.5px;color:var(--faint)}
+  .tagbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:18px}
+  .tagbar .vl{margin-right:4px}
+  .tg{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 6px 5px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer}
+  .tg span{font-size:11px;color:var(--muted);background:#F3F1F6;border-radius:999px;padding:1px 7px}
+  .tg:hover{border-color:#CDBFE0}.tg[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.tg[aria-pressed="true"] span{background:rgba(255,255,255,.2);color:#fff}
+  .tgc{border:0;background:none;color:var(--accent);font:600 12.5px var(--body);cursor:pointer;margin-left:4px}
+  .tchip{display:inline-block;font:600 11px var(--body);color:#7A5A22;background:#F6EEDF;border-radius:6px;padding:2px 7px;margin-right:6px}
+  /* List view */
+  table.gt{min-width:900px}
+  table.gt td{padding:14px 16px;vertical-align:middle}
+  table.gt th{padding:12px 16px}
+  .gt-g{min-width:300px;max-width:460px}
+  .gt-g b{display:block;font:600 14.5px/1.4 var(--display);color:var(--ink)}
+  .gt-m{display:flex;flex-wrap:wrap;align-items:center;gap:0;margin-top:5px;font-size:12px;color:var(--faint)}
+  .gt-c{display:flex;flex-direction:column;gap:5px}
+  .cd{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2);white-space:nowrap}
+  .cd i{width:8px;height:8px;border-radius:50%;background:#B3AFBB;flex:none}
+  .cd.tbp i{background:#B42318}.cd.inp i{background:#C98A1B}.cd.cmp i{background:#1F7A4D}
+  .cd em{font-style:normal;font-size:12px;color:var(--faint)}
+  tr.gh td{background:#FAF8FC;padding:10px 16px;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);cursor:default}
+  tr.gh td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}
+  tr.gh td span{margin-left:8px;font:600 11px var(--body);letter-spacing:0;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:999px;padding:1px 7px}
+  tbody tr.gh:hover td{background:#FAF8FC}
+  .ring.sm{width:38px;height:38px}.ring.sm span{width:30px;height:30px;font-size:10.5px}
+  /* Goal cards, grouped by what needs attention */
+  .gsec{margin-bottom:22px}
+  .gsec h3{display:flex;align-items:center;gap:9px;font:700 11px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);margin:0 4px 10px}
+  .gsec h3 i{width:9px;height:9px;border-radius:50%}
+  .gsec h3 span{font:600 11.5px var(--body);letter-spacing:0;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:999px;padding:1px 8px}
+  .glist{display:grid;grid-template-columns:repeat(auto-fill,minmax(520px,1fr));gap:12px}
+  .gc{position:relative;display:flex;gap:16px;align-items:stretch;width:100%;text-align:left;background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px 18px 16px 22px;box-shadow:var(--shadow);cursor:pointer;font:inherit;color:inherit;transition:transform .15s,box-shadow .15s,border-color .15s;overflow:hidden}
+  .gc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:#B42318}
+  .gc.inp::before{background:#C98A1B}.gc.cmp::before{background:#1F7A4D}.gc.draft::before{background:#8D6BB5}
+  .gc:hover{transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(75,31,111,.45);border-color:#DCCFEA}
+  .gc.sel{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.14),var(--shadow)}
+  .gc-main{flex:1;min-width:0}
+  .gc-t{font:600 15.5px/1.35 var(--display);color:var(--ink)}
+  .gc-src{font-size:12px;color:var(--faint);margin-top:3px}
+  .gc-cen{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .cp{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:3px 4px 3px 9px;font:600 12px var(--body);background:#F4F2F7;color:var(--ink2)}
+  .cp>i{width:8px;height:8px;border-radius:50%;background:#B3AFBB}
+  .cp.tbp>i{background:#B42318}.cp.inp>i{background:#C98A1B}.cp.cmp>i{background:#1F7A4D}
+  .cp.cmp{background:var(--ok-soft);color:var(--ok)}
+  .avs{display:inline-flex}
+  .avs b{width:22px;height:22px;border-radius:50%;background:#8D6BB5;color:#fff;font:700 9.5px/22px var(--body);text-align:center;border:2px solid #fff;margin-left:-6px}
+  .avs b:first-child{margin-left:0}.avs b:nth-child(2){background:#5B7BC4}.avs b:nth-child(3){background:#C9A66B}
+  .avs b.none{background:#E4E1EA;color:var(--muted)}
+  .gc-side{flex:none;width:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:8px;text-align:right}
+  .due{font:600 12px/1.35 var(--body);color:var(--muted)}
+  .due.bad{color:#B42318}.due.warn{color:#9A6200}.due.ok{color:var(--ok)}.due.mut{color:var(--faint);font-weight:500}
+  .ring{--p:0;width:46px;height:46px;border-radius:50%;background:conic-gradient(#1F7A4D calc(var(--p)*1%),#EEEAF2 0);display:grid;place-items:center}
+  .ring span{width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center;font:600 11.5px var(--display);color:var(--ink)}
+  .rl{font-size:11px;color:var(--faint);margin-top:-4px}
+  @media (max-width:640px){.glist{grid-template-columns:1fr}.gc-side{width:110px}}
   .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
   /* Goal details */
   .det{margin-top:18px;padding:20px 22px}
@@ -102,7 +197,16 @@
     <div class="hr"><div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
       <button class="btn pri" type="button" id="newgoal" hidden style="height:42px;padding:0 18px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New goal</button></div>
   </header>
-  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <section class="filters closed" id="fbox">
+    <div class="filters-head" id="fhead">
+      <div class="t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="f-badge" id="f-badge">All optional</span></div>
+      <span class="f-chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+    </div>
+    <div class="filters-body">
+      <div class="f-grid" id="fsel"></div>
+      <button class="f-clear" id="fclr" type="button" disabled>Clear filters</button>
+    </div>
+  </section>
   <div class="bar">
     <div class="period">
       <div class="seg" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
@@ -112,7 +216,9 @@
     <div class="by">Show goals <div class="seg" id="basis"><button type="button" data-b="active" aria-pressed="true">Active</button><button type="button" data-b="created" aria-pressed="false">Created</button><button type="button" data-b="completed" aria-pressed="false">Completed</button></div> in this period</div>
   </div>
   <div class="chips" id="chips"></div>
-  <div class="card"><div class="tw"><table id="t"><tbody><tr><td class="empty">Loading…</td></tr></tbody></table></div></div>
+  <div class="vbar"><div class="vgrp"><span class="vl">View</span><div class="seg" id="view"><button type="button" data-v="list" aria-pressed="true">☰ List</button><button type="button" data-v="cards" aria-pressed="false">▦ Cards</button></div></div>
+    <div class="vgrp"><span class="vl">Group by</span><div class="seg" id="groupby"><button type="button" data-g="status" aria-pressed="true">Status</button><button type="button" data-g="tag" aria-pressed="false">Tag</button><button type="button" data-g="none" aria-pressed="false">None</button></div></div></div>
+  <div id="t"><div class="card empty">Loading…</div></div>
   <div class="card det" id="det" hidden></div>
 </div>
 
@@ -128,15 +234,24 @@ const fmtD=d=>d?d.getDate()+' '+MON[d.getMonth()]+(d.getFullYear()!==NOW.getFull
 const days=(a,b)=>Math.round((day(b)-day(a))/864e5);
 const ago=s=>{const d=new Date(s),m=Math.round((Date.now()-d)/6e4);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':m<2880?'Yesterday':fmtD(d);};
 let G=[],ACT=[],INITS={},STAFF=[],CAN=false,ME='',CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'],SEL=null;
-let CEN=(()=>{try{return localStorage.getItem('artium_goals_centre')||'All';}catch(e){return'All';}})();
+const TAGS=['Academics','Learner Experience','Finance','Hiring','Marketing','Operations','People Management','Product / Tech','Social Media','Design & Content','Teacher Experience'];
+let VIEW='list',GROUP='status',TAGF=[];
+try{const v=JSON.parse(localStorage.getItem('artium_goals_view')||'{}');if(v.view)VIEW=v.view;if(v.group)GROUP=v.group;}catch(e){}
+const saveView=()=>{try{localStorage.setItem('artium_goals_view',JSON.stringify({view:VIEW,group:GROUP}));}catch(e){}};
+let CSEL=[],PSEL=[],OPEN_F=null;
+const inC=c=>!CSEL.length||CSEL.includes(c);
+const csOf=g=>Object.keys(g.centres||{}).filter(inC);
 let mode='month',basis='active',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,FILES=[];
 
 function period(){if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
   const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);return{a,b,label:fmtD(a)+' – '+fmtD(b)};}
 // With one centre chosen, a goal's status, completion and progress are that centre's
-const cv=g=>CEN==='All'||!g.centres[CEN]?{status:g.status,completed:g.completed}:{status:g.centres[CEN].s||'tbp',completed:g.centres[CEN].done||null};
+const cv=g=>{if(!CSEL.length)return{status:g.status,completed:g.completed};const C=csOf(g).map(c=>g.centres[c]);if(!C.length)return{status:g.status,completed:g.completed};
+  if(C.every(x=>x.s==='cmp')){const d=C.map(x=>x.done).filter(Boolean).sort();return{status:'cmp',completed:d.length?d[d.length-1]:null};}
+  return{status:C.some(x=>x.s==='inp'||x.s==='cmp')?'inp':'tbp',completed:null};};
+const ownerOf=g=>csOf(g).some(c=>(g.centres[c].owners||[]).some(o=>PSEL.includes(o.email)));
 const created=g=>day(new Date(g.created)),completed=g=>{const c=cv(g).completed;return c?day(new Date(c)):null;},target=g=>fromIso(g.target);
-const pairs=g=>{let t=0,d=0;const cs=Object.keys(g.centres||{}).filter(c=>CEN==='All'||c===CEN);(g.tasks||[]).forEach(k=>cs.forEach(c=>{t++;if((k.s||{})[c]==='cmp')d++;}));if(!(g.tasks||[]).length)cs.forEach(c=>{t++;if(g.centres[c].s==='cmp')d++;});return{t,d};};
+const pairs=g=>{let t=0,d=0;const cs=Object.keys(g.centres||{}).filter(inC);(g.tasks||[]).forEach(k=>cs.forEach(c=>{t++;if((k.s||{})[c]==='cmp')d++;}));if(!(g.tasks||[]).length)cs.forEach(c=>{t++;if(g.centres[c].s==='cmp')d++;});return{t,d};};
 const canSet=(g,c)=>CAN||(g.centres[c]&&(g.centres[c].owners||[]).some(p=>p.email===ME));
 const canPost=g=>CAN||Object.values(g.centres||{}).some(C=>(C.owners||[]).some(p=>p.email===ME));
 const whereOf=g=>{const i=INITS[g.init];return i?i.path+' › '+i.n:'';};
@@ -148,10 +263,9 @@ function render(){
   const P=period();document.getElementById('mlabel').textContent=P.label;
   if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
   const inP=d=>d&&d>=P.a&&d<=P.b;
-  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===CEN));
-  document.getElementById('subtitle').textContent=CEN==='All'?'Goals across all centres, with their subtasks and updates':'Goals for '+CEN+' — status, completion and progress are '+CEN+'\'s';
+  document.getElementById('subtitle').textContent=!CSEL.length?'Goals across all centres, with their subtasks and updates':'Goals for '+CSEL.join(', ')+' — status, completion and progress are worked out for '+(CSEL.length===1?'this centre':'these centres');
   document.getElementById('newgoal').hidden=!CAN;
-  const list=G.filter(g=>CEN==='All'||g.centres[CEN]).filter(g=>basis==='created'?inP(created(g)):basis==='completed'?inP(completed(g)):(created(g)<=P.b&&(!completed(g)||completed(g)>=P.a)))
+  const list=G.filter(g=>csOf(g).length).filter(g=>!TAGF.length||(g.tags||[]).some(t=>TAGF.includes(t))).filter(g=>!PSEL.length||ownerOf(g)).filter(g=>basis==='created'?inP(created(g)):basis==='completed'?inP(completed(g)):(created(g)<=P.b&&(!completed(g)||completed(g)>=P.a)))
     .sort((a,b)=>(a.draft-b.draft)||({inp:0,tbp:1,cmp:2}[cv(a).status]-{inp:0,tbp:1,cmp:2}[cv(b).status])||(target(a)||9e15)-(target(b)||9e15));
   const live=list.filter(g=>!g.draft),cnt=s=>live.filter(g=>cv(g).status===s).length,done=live.filter(g=>completed(g));
   const avg=done.length?Math.round(done.reduce((s,g)=>s+days(created(g),completed(g)),0)/done.length):null;
@@ -159,18 +273,48 @@ function render(){
   document.getElementById('chips').innerHTML=[['Goals',live.length],['To be picked',cnt('tbp')],['In progress',cnt('inp')],['Completed',cnt('cmp')],
     ['Average time to complete',avg==null?'—':avg+(avg===1?' day':' days')],['Completed on time',withT?onTime+' of '+withT:'—']]
     .map(([l,v])=>`<div class="k"><small>${l}</small><b>${v}</b></div>`).join('');
+  document.querySelectorAll('#view button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===VIEW));
+  document.querySelectorAll('#groupby button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===GROUP));
+  renderFilters();
   const t=document.getElementById('t');
-  if(!list.length){t.innerHTML=`<tbody><tr><td class="empty">No goals ${basis==='created'?'created':basis==='completed'?'completed':'open'} in ${esc(P.label)}.${CAN?' Make a goal from any Desired state line on the Offline Centres page.':''}</td></tr></tbody>`;}
-  else t.innerHTML=`<thead><tr><th>Goal</th><th>Centres &amp; owners</th><th>Created</th><th>Target</th><th>Completed</th><th>Progress</th><th>Status</th></tr></thead><tbody>${list.map(g=>{
-    const c=completed(g),tg=target(g),p=pairs(g),cs=Object.keys(g.centres||{}).filter(k=>CEN==='All'||k===CEN);
-    const comp=c?`${fmtD(c)}<small class="${tg?(c<=tg?'ontime':'late'):''}">${days(created(g),c)} day${days(created(g),c)===1?'':'s'}${tg?' · '+(c<=tg?(days(c,tg)?days(c,tg)+' days early':'on the day'):days(tg,c)+' days late'):''}</small>`
-      :g.draft?'<span style="color:var(--faint)">—</span>':`<span style="color:var(--faint)">—</span><small>${days(created(g),TODAY)} days so far${tg&&tg<TODAY?' · <span class="late">'+days(tg,TODAY)+' days past target</span>':''}</small>`;
-    return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td style="min-width:240px"><b>${esc(g.title)}</b><small>${esc(whereOf(g)||'Standalone goal')}</small></td>
-      <td>${cs.map(k=>`<div style="white-space:nowrap">${esc(k)} <small style="display:inline">· ${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', ')||'—')}</small></div>`).join('')}</td>
-      <td class="nw">${fmtD(created(g))}</td><td class="nw">${tg?fmtD(tg):'—'}</td><td class="nw">${comp}</td>
-      <td><div class="pb"><span><i style="width:${p.t?Math.round(p.d/p.t*100):0}%"></i></span>${p.d} of ${p.t}</div><small>${(g.tasks||[]).length?'subtasks × centres':'centres'}</small></td>
-      <td>${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}</td></tr>`;}).join('')}</tbody>`;
+  if(!list.length){t.innerHTML=`<div class="card empty">No goals ${basis==='created'?'created':basis==='completed'?'completed':'open'} in ${esc(P.label)}${TAGF.length||CSEL.length||PSEL.length?' with these filters':''}.${CAN?' Use <b>New goal</b>, or make one from a Desired state line on the Offline Centres page.':''}</div>`;}
+  else{
+    const grp=g=>{const s=cv(g).status,tg=target(g);if(g.draft)return'draft';if(s==='cmp')return'cmp';if(tg&&tg<TODAY)return'late';return s;};
+    let groups;
+    if(GROUP==='status')groups=[['late','Past target','#B42318'],['inp','In progress','#C98A1B'],['tbp','To be picked','#B42318'],['draft','Yet to email','#8D6BB5'],['cmp','Completed','#1F7A4D']].map(([k,l,c])=>[l,c,list.filter(g=>grp(g)===k)]);
+    else if(GROUP==='tag')groups=(TAGF.length?TAGS.filter(x=>TAGF.includes(x)):TAGS).map(tg=>[tg,'#A8844F',list.filter(g=>(g.tags||[]).includes(tg))]).concat([['No tag','#B3AFBB',list.filter(g=>!(g.tags||[]).length)]]);
+    else groups=[[null,null,list]];
+    groups=groups.filter(x=>x[2].length);
+    if(VIEW==='cards')t.innerHTML=groups.map(([l,c,L])=>`<section class="gsec">${l?`<h3><i style="background:${c}"></i>${esc(l)}<span>${L.length}</span></h3>`:''}<div class="glist">${L.map(gcard).join('')}</div></section>`).join('');
+    else t.innerHTML=`<div class="card"><div class="tw"><table class="gt"><thead><tr><th>Goal</th><th>Centres</th><th>Due</th><th>Progress</th><th>Status</th></tr></thead><tbody>${groups.map(([l,c,L])=>(l?`<tr class="gh"><td colspan="5"><i style="background:${c}"></i>${esc(l)}<span>${L.length}</span></td></tr>`:'')+L.map(grow).join('')).join('')}</tbody></table></div></div>`;
+  }
   renderDet();
+}
+const ini=n=>String(n||'?').split(/[\s.@]+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+function dueOf(g){const c=completed(g),tg=target(g);
+  if(g.draft)return[tg?'Target '+fmtD(tg):'No target yet','mut'];
+  if(c){const d=tg?days(c,tg):null;return['Done '+fmtD(c)+(d==null?'':d>0?' · '+d+(d===1?' day':' days')+' early':d===0?' · on the day':' · '+(-d)+(-d===1?' day':' days')+' late'),d!=null&&d<0?'bad':'ok'];}
+  if(tg){const d=days(TODAY,tg);return[d<0?(-d)+(-d===1?' day':' days')+' past target':d===0?'Due today':'Due '+fmtD(tg)+' · in '+d+(d===1?' day':' days'),d<0?'bad':d<=3?'warn':''];}
+  return['No target date','mut'];}
+const tagChips=g=>(g.tags||[]).map(t=>`<span class="tchip">${esc(t)}</span>`).join('');
+function grow(g){
+  const p=pairs(g),cs=Object.keys(g.centres||{}).filter(inC),[due,dc]=dueOf(g),pc=p.t?Math.round(p.d/p.t*100):0,s=cv(g).status;
+  return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td class="gt-g"><b>${esc(g.title)}</b><div class="gt-m">${tagChips(g)}<span>${whereOf(g)?esc(whereOf(g)):'Standalone goal'}</span></div></td>
+    <td><div class="gt-c">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s||'tbp',ow=C.owners||[];return`<span class="cd ${st}" title="${esc(k)}${st?' — '+ST[st]:''} · ${esc(ow.map(o=>o.name||o.email).join(', ')||'no owner yet')}"><i></i>${esc(k)}<em>${esc(ow.map(o=>(o.name||o.email).split(' ')[0]).join(', ')||'—')}</em></span>`;}).join('')}</div></td>
+    <td class="nw"><span class="due ${dc}">${due}</span></td>
+    <td>${g.draft?'<span class="due mut">—</span>':`<span class="ring sm" style="--p:${pc}"><span>${p.d}/${p.t}</span></span>`}</td>
+    <td>${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${s}"><i></i>${ST[s]}</span>`}</td></tr>`;
+}
+function gcard(g){
+  const c=completed(g),tg=target(g),p=pairs(g),cs=Object.keys(g.centres||{}).filter(inC),s=cv(g).status;
+  const[due,dc]=dueOf(g);
+  const pc=p.t?Math.round(p.d/p.t*100):0;
+  return`<button type="button" class="gc ${g.draft?'draft':s}${SEL===g.id?' sel':''}" data-g="${g.id}">
+    <div class="gc-main"><div class="gc-t">${esc(g.title)}</div><div class="gc-src">${tagChips(g)}${whereOf(g)?esc(whereOf(g)):'Standalone goal'} · created ${fmtD(created(g))}</div>
+      <div class="gc-cen">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s||'tbp',ow=C.owners||[];
+        return`<span class="cp ${st}" title="${esc(k)}${st?' — '+ST[st]:''}${ow.length?' · '+esc(ow.map(o=>o.name||o.email).join(', ')):' · no owner yet'}"><i></i>${esc(k)}<span class="avs">${ow.length?ow.slice(0,3).map(o=>`<b>${esc(ini(o.name||o.email))}</b>`).join(''):'<b class="none">?</b>'}</span></span>`;}).join('')}</div></div>
+    <div class="gc-side"><span class="due ${dc}">${due}</span>
+      ${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="ring" style="--p:${pc}"><span>${p.d}/${p.t}</span></span><span class="rl">${(g.tasks||[]).length?'steps done':'centres done'}</span>`}</div></button>`;
 }
 function stSel(g,task,c,s){
   return canSet(g,c)?`<select class="ss ${s}" data-st="${g.id}|${task||''}|${esc(c)}">${Object.keys(ST).map(k=>`<option value="${k}"${k===s?' selected':''}>${ST[k]}</option>`).join('')}</select>`:`<span class="gl ${s}"><i></i>${ST[s]}</span>`;
@@ -178,7 +322,7 @@ function stSel(g,task,c,s){
 function renderDet(){
   const el=document.getElementById('det'),g=G.find(x=>x.id===SEL);
   if(!g){el.hidden=true;return;}el.hidden=false;
-  const cs=Object.keys(g.centres||{}).filter(k=>CEN==='All'||k===CEN),c=completed(g),tg=target(g),tasks=g.tasks||[];
+  const cs=Object.keys(g.centres||{}).filter(inC),c=completed(g),tg=target(g),tasks=g.tasks||[];
   let mx=`<table class="mx"><thead><tr><th>${tasks.length?'Subtask':'Centre'}</th>${cs.map(k=>`<th>${esc(k)}<span class="own" style="text-transform:none;letter-spacing:0">${esc((g.centres[k].owners||[]).map(o=>o.name||o.email).join(', '))}</span></th>`).join('')}</tr></thead><tbody>`;
   if(tasks.length){mx+=tasks.map(t=>`<tr><td class="t">${esc(t.title)}${t.due?`<small>Due ${fmtD(fromIso(t.due))}</small>`:''}</td>${cs.map(k=>`<td>${g.draft?'—':stSel(g,t.id,k,(t.s||{})[k]||'tbp')}</td>`).join('')}</tr>`).join('');
     mx+=`<tr class="cen"><td class="t">Centre status</td>${cs.map(k=>`<td><span class="gl ${g.centres[k].s}"><i></i>${ST[g.centres[k].s]}</span></td>`).join('')}</tr>`;}
@@ -190,8 +334,9 @@ function renderDet(){
     if(a.kind==='update')return`<div class="upd"><span class="av">${esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;
     if(a.kind==='status'){let x={};try{x=JSON.parse(a.text);}catch(e){}return`<div class="sys"><b>${who}</b> set ${x.task?'<b>'+esc(x.what)+'</b>':'the status'} for ${esc(x.centre)} to <b>${ST[x.s]||''}</b> · ${ago(a.at)}</div>`;}
     return`<div class="sys"><b>${who}</b> ${esc(a.text.charAt(0).toLowerCase()+a.text.slice(1))} · ${ago(a.at)}</div>`;}).join('');
-  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CEN!=='All'?'at '+esc(CEN)+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Saved, not emailed to the stakeholders yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
+  el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CSEL.length===1?'at '+esc(CSEL[0])+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Saved, not emailed to the stakeholders yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
       <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}${CAN&&g.draft?'<button class="btn pri" type="button" id="sendmail">✉ Email stakeholders</button>':''}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
+    ${(g.tags||[]).length?`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${tagChips(g)}</div>`:''}
     ${g.desc?`<div class="desc">${esc(g.desc)}</div>`:''}
     <div class="grid2"><div><div class="lab">${tasks.length?'Subtasks by centre':'Centres'}</div>${mx}</div>
       <div><div class="lab">Updates</div><div class="feed">${feed||'<div class="sys" style="padding-left:0">No updates yet.</div>'}</div>
@@ -228,19 +373,49 @@ document.getElementById('det').addEventListener('click',async e=>{
     try{const files=await Promise.all(FILES.map(readFile));await ArtiumAuth.call('goalUpdate',{id:SEL,text,files});await load(true);}
     catch(err){m.textContent='Couldn\'t post: '+err.message;b.disabled=false;}}
 });
-document.getElementById('t').addEventListener('click',e=>{const r=e.target.closest('tr[data-g]');if(!r)return;SEL=SEL===r.dataset.g?null:r.dataset.g;render();if(SEL)setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),50);});
-document.getElementById('centre-toggle').innerHTML=[{n:'All',l:'All centres',c:'3 centres'},{n:'Alwarpet',l:'Alwarpet',c:'Chennai'},{n:'Thoraipakkam',l:'Thoraipakkam',c:'Chennai'},{n:'Borewell Road',l:'Borewell Road',c:'Bangalore'}]
-  .map(o=>`<button class="ct-btn" type="button" data-c="${o.n}" aria-pressed="false"><small>${o.c}</small><span>${o.l}</span></button>`).join('');
-document.getElementById('centre-toggle').onclick=e=>{const b=e.target.closest('.ct-btn');if(!b)return;CEN=b.dataset.c;try{localStorage.setItem('artium_goals_centre',CEN);}catch(err){}if(SEL&&CEN!=='All'&&!(G.find(x=>x.id===SEL)||{centres:{}}).centres[CEN])SEL=null;render();};
+document.getElementById('t').addEventListener('click',e=>{const r=e.target.closest('[data-g]');if(!r)return;SEL=SEL===r.dataset.g?null:r.dataset.g;render();if(SEL)setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),50);});
+document.getElementById('view').onclick=e=>{const b=e.target.closest('button');if(b){VIEW=b.dataset.v;saveView();render();}};
+document.getElementById('groupby').onclick=e=>{const b=e.target.closest('button');if(b){GROUP=b.dataset.g;saveView();render();}};
+/* ── Filters: tags, centre and POC; pick any number of each. Empty = everything. ── */
+const CHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
+function fdefs(){
+  const pocs=new Map();G.forEach(g=>Object.values(g.centres||{}).forEach(C=>(C.owners||[]).forEach(o=>{if(o.email&&!pocs.has(o.email))pocs.set(o.email,o.name||o.email);})));
+  const n=(f)=>v=>G.filter(f(v)).length;
+  return[{id:'tag',label:'Tags',all:'All tags',sel:TAGF,set:v=>TAGF=v,opts:TAGS.map(t=>[t,t,n(t=>g=>(g.tags||[]).includes(t))(t)])},
+    {id:'centre',label:'Centre',all:'All centres',sel:CSEL,set:v=>CSEL=v,opts:CENTRES.map(c=>[c,c,n(c=>g=>!!(g.centres||{})[c])(c)])},
+    {id:'poc',label:'POC',all:'Everyone',sel:PSEL,set:v=>PSEL=v,opts:[...pocs].sort((a,b)=>a[1].localeCompare(b[1])).map(([e,nm])=>[e,nm,n(e=>g=>Object.values(g.centres||{}).some(C=>(C.owners||[]).some(o=>o.email===e)))(e)])}];}
+function renderFilters(){
+  const F=fdefs();
+  document.getElementById('fsel').innerHTML=F.map(f=>{const names=f.sel.map(v=>(f.opts.find(o=>o[0]===v)||[v,v])[1]);
+    const txt=!f.sel.length?f.all:f.sel.length<=2?names.join(', '):f.sel.length+' selected';
+    return`<div class="ms${f.sel.length?' set':''}" data-f="${f.id}"><label>${f.label}</label><button type="button" aria-haspopup="true" aria-expanded="${OPEN_F===f.id}"><span>${esc(txt)}</span>${CHEV}</button>
+      ${OPEN_F===f.id?`<div class="pop">${f.opts.length?f.opts.map(([v,l,c])=>`<label><input type="checkbox" value="${esc(v)}"${f.sel.includes(v)?' checked':''}>${esc(l)}<span class="n">${c}</span></label>`).join(''):'<label style="color:var(--faint)">Nothing to choose</label>'}
+        <div class="pf"><button type="button" data-all>Select all</button><button type="button" data-none>Clear</button></div></div>`:''}</div>`;}).join('');
+  const k=F.filter(f=>f.sel.length).length,bd=document.getElementById('f-badge');
+  bd.textContent=k?k+' active':'All optional';bd.classList.toggle('on',!!k);
+  document.getElementById('fclr').disabled=!k;
+}
+const fixSel=()=>{if(SEL){const g=G.find(x=>x.id===SEL);if(!g||!csOf(g).length)SEL=null;}};
+document.getElementById('fhead').onclick=()=>{document.getElementById('fbox').classList.toggle('closed');};
+document.getElementById('fbox').addEventListener('click',e=>{
+  if(e.target.id==='fclr'){TAGF=[];CSEL=[];PSEL=[];OPEN_F=null;render();return;}
+  const ms=e.target.closest('.ms');if(!ms)return;const f=fdefs().find(x=>x.id===ms.dataset.f);
+  if(e.target.closest('.ms>button')){OPEN_F=OPEN_F===f.id?null:f.id;render();return;}
+  if(e.target.closest('[data-all]')){f.set(f.opts.map(o=>o[0]));fixSel();render();return;}
+  if(e.target.closest('[data-none]')){f.set([]);render();return;}
+});
+document.getElementById('fbox').addEventListener('change',e=>{const ms=e.target.closest('.ms');if(!ms)return;fdefs().find(x=>x.id===ms.dataset.f).set([...ms.querySelectorAll('input:checked')].map(i=>i.value));fixSel();render();});
+document.addEventListener('click',e=>{if(OPEN_F&&!e.target.closest('.ms')){OPEN_F=null;render();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN_F){OPEN_F=null;render();}});
 // A goal that doesn't come from a Desired state line
-document.getElementById('newgoal').onclick=()=>GoalForm.open({staff:STAFF,lineCentres:CEN==='All'?null:[CEN],onSaved:j=>{load(true).then(()=>j&&j.id&&openGoal(j.id));}});
+document.getElementById('newgoal').onclick=()=>GoalForm.open({staff:STAFF,lineCentres:CSEL.length?CSEL.slice():null,onSaved:j=>{load(true).then(()=>j&&j.id&&openGoal(j.id));}});
 document.getElementById('mode').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;render();}};
 document.getElementById('basis').onclick=e=>{const b=e.target.closest('button');if(b){basis=b.dataset.b;render();}};
 document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
 document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
 ['from','to'].forEach(id=>document.getElementById(id).onchange=e=>{const d=fromIso(e.target.value);if(!d)return;if(id==='from')rFrom=d;else rTo=d;if(rFrom&&rTo&&rFrom>rTo)[rFrom,rTo]=[rTo,rFrom];render();});
 // Open a goal (from the Offline Centres page, the bell, or an email link)
-window.openGoal=id=>{const g=G.find(x=>x.id===id);if(g&&CEN!=='All'&&!g.centres[CEN])CEN='All';if(!g){try{sessionStorage.setItem('artium_open_goal',id);}catch(e){}return;}
+window.openGoal=id=>{const g=G.find(x=>x.id===id);if(g&&!csOf(g).length)CSEL=[];if(g&&PSEL.length&&!ownerOf(g))PSEL=[];if(g&&TAGF.length&&!(g.tags||[]).some(t=>TAGF.includes(t)))TAGF=[];if(!g){try{sessionStorage.setItem('artium_open_goal',id);}catch(e){}return;}
   SEL=id;const P=period(),c=completed(g);if(!(created(g)<=P.b&&(!c||c>=P.a))){basis='active';mode='month';const d=c||TODAY;viewY=d.getFullYear();viewM=d.getMonth();}render();setTimeout(()=>document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'}),80);};
 async function load(keep){
   try{
