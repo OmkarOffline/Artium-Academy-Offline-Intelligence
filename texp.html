@@ -58,7 +58,7 @@
   .lbl{display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
   .lbl em{font:500 12px var(--body);font-style:normal;letter-spacing:0;text-transform:none;color:var(--faint)}
   .lbl .lnk{font:600 12px var(--body);letter-spacing:0;text-transform:none;color:var(--accent);background:none;border:0;cursor:pointer}
-  .kt{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .kt{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
   .k{border:1px solid var(--line);border-radius:16px;padding:16px;border-top:4px solid var(--c);display:flex;flex-direction:column;gap:10px}
   .k h3{font:600 16px/1.4 var(--display);color:var(--ink)}
   .k.many{background:#FBF8FE;border-color:#E2D3F2}
@@ -126,6 +126,44 @@
   .pp .p{display:inline-flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px 4px 3px 10px;font:600 13px var(--body);color:var(--ink)}
   .pp .p small{font-weight:500;color:var(--faint);font-size:12px}.pp .p button{border:0;background:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 5px}
   .pp select{border:0;background:none;font:500 13px var(--body);color:var(--accent);padding:5px;cursor:pointer;max-width:100%}
+  /* Raised by more than one teacher */
+  .sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:4px 0 12px}
+  .sec-h h2{font:600 20px var(--display);color:var(--ink)}.sec-h p{font-size:13.5px;color:var(--muted);margin-top:3px}
+  .rp{background:#fff;border:1px solid #E2D3F2;border-radius:20px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+  .rp .top{display:flex;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#FBF8FE,#fff)}
+  .rp .cnt2{flex:none;width:74px;height:74px;border-radius:18px;background:var(--accent);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .rp .cnt2 b{font:700 30px/1 var(--display)}.rp .cnt2 small{font:600 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;opacity:.85;margin-top:4px}
+  .rp h3{font:600 19px/1.35 var(--display);color:var(--ink);margin:8px 0 10px}
+  .why{display:flex;gap:8px;flex-wrap:wrap}
+  .why span{display:inline-flex;align-items:center;gap:5px;font:600 12.5px var(--body);color:var(--ink2);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:5px 11px}
+  .why span b{color:var(--accent)}.why span.req{background:#FDECEB;border-color:#F6CFCB;color:#B42318}.why span.req b{color:#B42318}
+  .rp .cols{display:grid;grid-template-columns:1.25fr 1fr}
+  .rp .col{padding:16px 22px}.rp .col+.col{border-left:1px solid var(--line)}
+  .rp .lb{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .tl{position:relative;padding-left:22px}
+  .tl::before{content:"";position:absolute;left:6px;top:6px;bottom:6px;width:2px;background:#E6DAF3}
+  .ev{position:relative;margin-bottom:12px}
+  .ev::before{content:"";position:absolute;left:-21px;top:4px;width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid var(--accent)}
+  .ev .m{font:600 13px var(--body);color:var(--ink)}.ev .m small{font-weight:500;color:var(--faint);margin-left:6px}
+  .ev p{font-size:14px;line-height:1.5;color:var(--ink2);margin-top:3px}
+  .gapl{font:600 12px var(--body);color:var(--accent);margin:-4px 0 10px}
+  .rp .rq2{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}.rp .rq2:first-of-type{border-top:0}
+  .rp .rq2 p{flex:1;font-size:13.5px;line-height:1.45}.rp .rq2 p small{display:block;font-size:12px;color:var(--faint)}
+  .rnote{margin-top:12px;background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;color:var(--ink2);white-space:pre-wrap}
+  .rnote b{display:block;font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:3px}
+  .rnote textarea{width:100%;min-height:70px;border:1px solid #D9CDE8;border-radius:9px;padding:8px;font:500 13.5px var(--body);resize:vertical}
+  .looked{background:#fff;border:1px solid var(--border);border-radius:16px;padding:6px 18px;margin-bottom:14px}
+  .looked .row p small{display:block}
+  .maybe{background:#fff;border:1px dashed #CDBDE2;border-radius:16px;padding:14px 18px;display:flex;gap:14px;align-items:center;margin-bottom:10px}
+  .maybe .ic{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:700 16px var(--display);flex:none}
+  .maybe p{flex:1;font-size:14px;line-height:1.5}.maybe p small{display:block;color:var(--faint);font-size:12.5px;margin-top:2px}
+  .hint{display:flex;gap:10px;align-items:center;background:var(--accent-soft);border-radius:10px;padding:8px 10px;font-size:13px;color:var(--ink2)}
+  .hint p{flex:1}
+  @media (max-width:1000px){.rp .cols{grid-template-columns:1fr}.rp .col+.col{border-left:0;border-top:1px solid var(--line)}}
+  .tkr{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:14px;padding:10px}
+  .tkr textarea.in{min-height:58px}
+  .tkc{display:flex;gap:10px;align-items:center}.tkc select{width:190px;flex:none}.tkc select[data-kk=same]{flex:1;width:auto;min-width:0}.tkc .del{flex:none}
+  .tkc .del,.rq .del{width:34px;height:34px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--muted);cursor:pointer}
   .rq{display:grid;grid-template-columns:1fr 190px 170px 34px;gap:10px;align-items:center}
   .rq .del{width:34px;height:34px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--muted);cursor:pointer}
   .addr{align-self:flex-start;font:600 13px var(--body);color:var(--accent);background:none;border:0;cursor:pointer}
@@ -144,6 +182,7 @@
   </header>
   <div class="note" id="note" hidden></div>
   <div class="att" id="att"></div>
+  <section id="rep"></section>
   <div class="seg" id="tabs"><button type="button" data-v="t" aria-pressed="true">Teachers</button><button type="button" data-v="f" aria-pressed="false">By function</button><button type="button" data-v="r" aria-pressed="false">Requests</button></div>
   <div id="main"><div class="card empty">Loading…</div></div>
 </div>
@@ -161,7 +200,7 @@ const days=s=>{const d=ymd(s);return d?Math.round((TODAY-d)/864e5):0;};
 const TC={'Academics':['#8A4A1F','#F8EEE6'],'Learner Experience':['#5B2A86','#F2ECF8'],'Finance':['#1F4E79','#E6EEF6'],'Hiring':['#3E4C9A','#E9EBF7'],'Marketing':['#A0306E','#F8E8F1'],
   'Operations':['#3D5A6C','#E7EEF2'],'People Management':['#2F6F8F','#E3F0F5'],'Product / Tech':['#2557C7','#E7EEFB'],'Social Media':['#8E3FB5','#F3E9F9'],'Design & Content':['#4A5568','#ECEEF1'],'Teacher Experience':['#9C4A5E','#F7E9ED'],'':['#6B6774','#F0EEF3']};
 const chip=f=>{const [c,cs]=TC[f||'']||TC[''];return`<span class="chip" style="--c:${c};--cs:${cs}"><i></i>${esc(f||'No function')}</span>`;};
-let D=null,CAN=false,VIEW='t',SEL=null,OPEN={},FN_OPEN={},REQF='open',EDIT_TK=null,busy=false;
+let D=null,CAN=false,VIEW='t',SEL=null,OPEN={},FN_OPEN={},REQF='open',busy=false;
 try{VIEW=localStorage.getItem('artium_texp_view')||'t';}catch(e){}
 
 /* ── Derived data ── */
@@ -171,6 +210,96 @@ function reqStatus(q){const t=q.task&&D.tasks[q.task];
   if(!t)return{k:'open',l:'Open'};if(t.draft)return{k:'draft',l:'Task · Yet to email',t};
   return{k:t.status,l:{tbp:'Task · To be picked',inp:'Task · In progress',cmp:'Task · Completed'}[t.status],t};}
 const allReqs=()=>{const out=[];D.conversations.forEach(c=>(c.requests||[]).forEach(q=>out.push({q,c,s:reqStatus(q)})));return out.sort((a,b)=>a.c.date<b.c.date?1:-1);};
+/* Key takeaways are written by hand with each conversation. A takeaway can be marked as the same point as one from another
+   conversation; linked takeaways form one group, and a group raised by 2+ teachers is highlighted. */
+function tkGroups(){
+  const all=[],byId={};D.conversations.forEach(c=>(c.takeaways||[]).forEach(k=>{const x={k,c};all.push(x);byId[k.id]=x;}));
+  const root=id=>{let x=byId[id],seen=0;while(x&&x.k.same&&byId[x.k.same]&&seen++<20)x=byId[x.k.same];return x?x.k.id:id;};
+  const G={};all.forEach(x=>{const r=root(x.k.id);(G[r]=G[r]||{id:r,items:[]}).items.push(x);});
+  return Object.values(G).map(g=>{g.items.sort((a,b)=>a.c.date<b.c.date?1:-1);const first=byId[g.id]||g.items[g.items.length-1];
+    g.teachers=[...new Set(g.items.flatMap(x=>x.k.teachers&&x.k.teachers.length?x.k.teachers:x.c.teachers))];
+    g.fn=first.k.fn||g.items.map(x=>x.k.fn).find(Boolean)||'';g.text=first.k.text;g.latest=g.items[0].c.date;return g;})
+    .sort((a,b)=>b.teachers.length-a.teachers.length||(a.latest<b.latest?1:-1));
+}
+/* ── Raised by more than one teacher ── */
+const SEEN=s=>{const d=ymd(s);return d;};
+function repeats(){
+  const RP=(D.repeats||{groups:{}}).groups;
+  return tkGroups().filter(g=>g.teachers.length>1).map(g=>{const r=RP[g.id]||{};g.note=r.note||'';g.looked=!!(r.looked&&g.teachers.length<=(r.lookedN||0));g.lookedAt=r.looked;return g;});
+}
+const nameOf=e=>(T()[e]||{}).name||'';
+function whyChips(g,tm){
+  const convs=new Set(g.items.map(x=>x.c.id)),centres=[...new Set(g.teachers.map(e=>(tm[e]||{}).centre).filter(Boolean))],courses=[...new Set(g.teachers.map(e=>(tm[e]||{}).course).filter(Boolean))];
+  const dates=g.items.map(x=>ymd(x.c.date)).sort((a,b)=>a-b),span=Math.round((dates[dates.length-1]-dates[0])/864e5);
+  const rel=relatedReqs(g),out=[];
+  out.push(`<span><b>${g.teachers.length}</b> teachers${convs.size>1?`, in <b>${convs.size}</b> separate conversations`:', in one group conversation'}</span>`);
+  if(centres.length)out.push(`<span><b>${centres.length}</b> centre${centres.length===1?'':'s'}: ${esc(centres.join(', '))}</span>`);
+  if(courses.length>1)out.push(`<span><b>${courses.length}</b> courses: ${esc(courses.join(', '))}</span>`);
+  if(convs.size>1)out.push(span===0?`<span>All on <b>one day</b></span>`:`<span>Raised again within <b>${span} day${span===1?'':'s'}</b></span>`);
+  const latest=days(g.latest);out.push(`<span>Last raised <b>${latest===0?'today':latest===1?'yesterday':latest+' days ago'}</b></span>`);
+  if(rel.length)out.push(`<span class="req"><b>${rel.length}</b> related request${rel.length===1?'':'s'} still open</span>`);
+  return out.join('');
+}
+// open requests from these teachers with the same function
+function relatedReqs(g){return allReqs().filter(r=>g.teachers.includes(r.q.teacher)&&(r.q.fn||'')===(g.fn||'')&&g.fn&&isOpen(r));}
+function repCard(g,tm){
+  const ev=g.items.slice().sort((a,b)=>a.c.date<b.c.date?-1:a.c.date>b.c.date?1:0);let prev=null;
+  const tl=ev.map(x=>{const who=(x.k.teachers&&x.k.teachers.length?x.k.teachers:x.c.teachers),t=tm[who[0]]||{};let gap='';
+    if(prev){const d=Math.round((ymd(x.c.date)-ymd(prev.c.date))/864e5),pc=(tm[(prev.k.teachers&&prev.k.teachers[0])||prev.c.teachers[0]]||{}).centre;
+      gap=`<div class="gapl">${d===0?'The same day':d+' day'+(d===1?'':'s')+' later'}${t.centre&&pc&&t.centre!==pc?', at another centre':''}</div>`;}
+    prev=x;
+    return gap+`<div class="ev"><div class="m">${fmtD(x.c.date)} · ${esc(who.map(nameOf).join(', '))}<small>${esc([t.centre,t.course].filter(Boolean).join(' · '))} · ${x.c.type==='group'?'group':'one-on-one'}</small></div><p>“${esc(x.k.text)}”</p></div>`;}).join('');
+  const rel=relatedReqs(g),editing=NOTE_EDIT===g.id;
+  return`<div class="rp" id="rp-${esc(g.id)}"><div class="top"><div class="cnt2"><b>${g.teachers.length}</b><small>teachers</small></div>
+    <div style="flex:1;min-width:0">${chip(g.fn)}<h3>${esc(g.text)}</h3><div class="why">${whyChips(g,tm)}</div></div></div>
+    <div class="cols"><div class="col"><div class="lb">What happened</div><div class="tl">${tl}</div></div>
+    <div class="col"><div class="lb">Related requests from these teachers</div>
+      ${rel.length?rel.map(r=>`<div class="rq2"><p>${esc(r.q.text)}<small>${esc(nameOf(r.q.teacher))} · ${fmtD(r.c.date)}</small></p><span class="st ${r.s.k}"><i></i>${r.s.l}</span>${CAN&&r.s.k==='open'?`<button class="btn sm" data-ract="mktask" data-c="${r.c.id}" data-r="${r.q.id}">Make it a task</button>`:''}</div>`).join('')
+        :`<p style="font-size:13.5px;color:var(--faint)">No open ${esc(g.fn||'')} requests from these teachers.</p>`}
+      ${editing?`<div class="rnote"><b>Your note</b><textarea id="ntext" placeholder="Why this needs attention, and what you plan to do.">${esc(g.note)}</textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" data-ract="ncancel">Cancel</button><button class="btn sm pri" data-ract="nsave" data-g="${esc(g.id)}">Save the note</button></div></div>`
+        :g.note?`<div class="rnote"><b>Your note</b>${esc(g.note)}</div>`:''}
+      ${CAN&&!editing?`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" data-ract="nedit" data-g="${esc(g.id)}">${g.note?'Edit the note':'Add a note'}</button>
+        <button class="btn sm" data-ract="look" data-g="${esc(g.id)}" data-n="${g.teachers.length}">${g.looked?'Bring it back':'Mark as looked into'}</button></div>`:''}
+    </div></div></div>`;
+}
+/* Takeaways that may be the same point: different teachers, same function, sharing several key words */
+const STOP=new Set('that this with they them their there have from when will would about which into more than also very some most such what were been being because these those then just only over after before while where much many other each does doing done your ours ourselves teacher teachers learner learners class classes'.split(' '));
+const words=t=>new Set(String(t).toLowerCase().replace(/[^a-z\s]/g,' ').split(/\s+/).filter(w=>w.length>=4&&!STOP.has(w)).map(w=>w.replace(/(ing|ed|es|s)$/,'')).filter(w=>w.length>=3));
+function similar(a,b){const A=words(a),B=words(b);if(!A.size||!B.size)return 0;let n=0;A.forEach(w=>{if(B.has(w))n++;});return n>=2?n/Math.min(A.size,B.size):0;}
+function maybeSame(){
+  const G=tkGroups(),gid={};G.forEach(g=>g.items.forEach(x=>gid[x.k.id]=g.id));
+  const all=[];D.conversations.forEach(c=>(c.takeaways||[]).forEach(k=>all.push({k,c,who:(k.teachers&&k.teachers.length?k.teachers:c.teachers)})));
+  const no=new Set((D.repeats||{}).notsame||[]),out=[];
+  for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++){const a=all[i],b=all[j];
+    if(gid[a.k.id]===gid[b.k.id]||a.c.id===b.c.id||a.who.some(e=>b.who.includes(e)))continue;
+    if(a.k.fn&&b.k.fn&&a.k.fn!==b.k.fn)continue;
+    if(no.has([a.k.id,b.k.id].sort().join('|')))continue;
+    const sc=similar(a.k.text,b.k.text);if(sc>=0.4)out.push({a,b,sc});}
+  return out.sort((x,y)=>y.sc-x.sc).slice(0,5);
+}
+let NOTE_EDIT=null,SHOW_LOOKED=false;
+function renderRepeats(tm){
+  const el=document.getElementById('rep'),R=repeats(),open=R.filter(g=>!g.looked),done=R.filter(g=>g.looked),M=CAN?maybeSame():[];
+  if(!R.length&&!M.length){el.innerHTML='';return;}
+  el.innerHTML=(R.length?`<div class="sec-h"><div><h2>Raised by more than one teacher</h2><p>The same point coming up with different teachers. Most teachers first, then the most recent.</p></div></div>
+    ${open.map(g=>repCard(g,tm)).join('')||'<div class="card empty" style="margin-bottom:14px">Everything raised by more than one teacher has been looked into.</div>'}
+    ${done.length?`<div class="looked"><div class="row"><p><b style="color:var(--ink)">Looked into · ${done.length}</b><small>They come back here if another teacher raises the same point.</small></p><button class="btn sm" data-ract="showlooked">${SHOW_LOOKED?'Hide':'Show'}</button></div>
+      ${SHOW_LOOKED?done.map(g=>repCard(g,tm)).join(''):''}</div>`:''}`:'')+
+    (M.length?`<div class="sec-h"><div><h2>Possibly the same point</h2><p>Takeaways from different teachers that share several key words. Confirm to count them together.</p></div></div>
+    ${M.map(({a,b})=>`<div class="maybe"><span class="ic">?</span><p>${esc(a.who.map(nameOf).join(', '))}: “${esc(a.k.text)}”<br>${esc(b.who.map(nameOf).join(', '))}: “${esc(b.k.text)}”<small>${esc(a.k.fn||b.k.fn||'No function')} · ${fmtD(a.c.date)} and ${fmtD(b.c.date)}.</small></p>
+      <button class="btn sm pri" data-ract="same" data-a="${esc(a.k.id)}" data-b="${esc(b.k.id)}">Same point</button><button class="btn sm" data-ract="notsame" data-a="${esc(a.k.id)}" data-b="${esc(b.k.id)}">Not the same</button></div>`).join('')}`:'');
+}
+document.getElementById('rep').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-ract]');if(!b)return;const a=b.dataset.ract;
+  if(a==='showlooked'){SHOW_LOOKED=!SHOW_LOOKED;render();}
+  else if(a==='nedit'){NOTE_EDIT=b.dataset.g;render();setTimeout(()=>{const t=document.getElementById('ntext');if(t)t.focus();},30);}
+  else if(a==='ncancel'){NOTE_EDIT=null;render();}
+  else if(a==='nsave'){const note=document.getElementById('ntext').value;NOTE_EDIT=null;await call('texpRepeat',{id:b.dataset.g,note},'Saving…');}
+  else if(a==='look'){const g=repeats().find(x=>x.id===b.dataset.g);await call('texpRepeat',{id:b.dataset.g,looked:!g.looked,n:+b.dataset.n},'Saving…');}
+  else if(a==='same'){await call('texpLink',{a:b.dataset.a,b:b.dataset.b},'Linking…');}
+  else if(a==='notsame'){await call('texpNotSame',{a:b.dataset.a,b:b.dataset.b},'Saving…');}
+  else if(a==='mktask'){const c=D.conversations.find(x=>x.id===b.dataset.c);taskWindow(c,c.requests.find(q=>q.id===b.dataset.r));}
+});
 const isOpen=r=>r.s.k==='open'||r.s.k==='draft'||r.s.k==='tbp'||r.s.k==='inp';
 
 function render(){
@@ -178,7 +307,7 @@ function render(){
   document.getElementById('log').hidden=!CAN;
   if(!D)return;
   const tm=T(),R=allReqs(),open=R.filter(r=>r.s.k==='open'),draft=R.filter(r=>r.s.k==='draft');
-  const many=Object.keys(D.takeaways.function||{}).flatMap(f=>(D.takeaways.function[f].items||[]).filter(x=>(x.teachers||[]).length>1));
+  const many=repeats().filter(g=>!g.looked);
   const thisMonth=D.conversations.filter(c=>{const d=ymd(c.date);return d&&d.getFullYear()===NOW.getFullYear()&&d.getMonth()===NOW.getMonth();});
   const met={};D.conversations.forEach(c=>c.teachers.forEach(e=>{if(!met[e]||met[e]<c.date)met[e]=c.date;}));
   const stale=Object.keys(met).filter(e=>days(met[e])>60);
@@ -186,11 +315,12 @@ function render(){
   document.getElementById('att').innerHTML=[
     ['r',open.length?'hot':'','Open requests',open.length,open.length?'Oldest raised '+(oldest===0?'today':oldest===1?'yesterday':oldest+' days ago')+'.':'Nothing waiting.'],
     ['r','','Tasks yet to email',draft.length,'Made from requests, not sent to the Centre Manager yet.'],
-    ['f',many.length?'hot':'','Raised by 2+ teachers',many.length,many.length?'The same point from more than one teacher.':'Shows when teachers repeat each other.'],
+    ['rep',many.length?'hot':'','Raised by 2+ teachers',many.length,many.length?'Points more than one teacher has raised, not looked into yet.':'Shows when teachers repeat each other.'],
     ['t','','Conversations this month',thisMonth.length,'With '+new Set(thisMonth.flatMap(c=>c.teachers)).size+' teachers.'],
     ['t','','Not met in 60 days',Object.keys(met).length?stale.length:'—',Object.keys(met).length?'Of the teachers you\'ve spoken with.':'Shows once conversations are logged.']]
     .map(([v,h,l,n,p])=>`<button type="button" class="a ${h}" data-go="${v}"><small>${l}</small><b>${n}</b><p>${esc(p)}</p></button>`).join('');
   document.querySelector('#tabs [data-v=r]').innerHTML='Requests'+(open.length?`<span>${open.length}</span>`:'');
+  renderRepeats(tm);
   if(VIEW==='t')renderTeachers(tm);else if(VIEW==='f')renderFunctions(tm);else renderRequests(tm);
 }
 
@@ -203,14 +333,15 @@ function renderTeachers(tm){
   const R=allReqs();
   const list=met.map(e=>{const t=tm[e],n=R.filter(r=>r.q.teacher===e&&r.s.k==='open').length;
     return`<button type="button" class="ti${e===SEL?' on':''}" data-t="${esc(e)}"><span class="av">${esc(t.name.charAt(0))}</span><div><b>${esc(t.name)}</b><small>${esc([t.centre,t.course].filter(Boolean).join(' · '))}</small></div>${n?`<span class="n" title="Open requests">${n}</span>`:''}</button>`;}).join('');
-  const t=tm[SEL],cv=convsOf(SEL),tk=(D.takeaways.teacher[SEL]||{items:[]}),mine=R.filter(r=>r.q.teacher===SEL);
-  const takeHtml=EDIT_TK&&EDIT_TK.kind==='teacher'&&EDIT_TK.key===SEL?editTakeaways():
-    tk.items.length?`<div class="kt">${tk.items.map(x=>{const [c]=TC[x.fn||'']||TC[''],also=(x.also||[]).filter(Boolean);
-      return`<div class="k${also.length?' many':''}" style="--c:${c}">${chip(x.fn)}<h3>${esc(x.text)}</h3>${also.length?`<span class="many-tag"><i>${also.length+1}</i>Also said by ${esc(also.join(', '))}</span>`:''}</div>`;}).join('')}</div>`
-    :`<div class="ac"><div class="row"><p style="color:var(--faint)">The key takeaways appear here after the conversation is saved.</p></div></div>`;
+  const t=tm[SEL],cv=convsOf(SEL),mine=R.filter(r=>r.q.teacher===SEL);
+  const tks=[];tkGroups().forEach(g=>g.items.forEach(x=>{if((x.k.teachers&&x.k.teachers.length?x.k.teachers:x.c.teachers).includes(SEL))tks.push({x,g});}));
+  tks.sort((a,b)=>b.g.teachers.length-a.g.teachers.length||(a.x.c.date<b.x.c.date?1:-1));
+  const takeHtml=tks.length?`<div class="kt">${tks.map(({x,g})=>{const [c]=TC[x.k.fn||g.fn||'']||TC[''],also=g.teachers.filter(e=>e!==SEL).map(e=>(tm[e]||{}).name).filter(Boolean);
+      return`<div class="k${also.length?' many':''}" style="--c:${c}">${chip(x.k.fn||g.fn)}<h3>${esc(x.k.text)}</h3>${also.length?`<span class="many-tag"><i>${also.length+1}</i>Also raised by ${esc(also.join(', '))}</span>`:''}<small style="font-size:12px;color:var(--faint)">${fmtD(x.c.date)}</small></div>`;}).join('')}</div>`
+    :`<div class="ac"><div class="row"><p style="color:var(--faint)">No key takeaways yet.${CAN?' Open a conversation below and use <b>Edit</b> to add them.':''}</p></div></div>`;
   document.getElementById('main').innerHTML=`<div class="wrap"><div class="card list">${list}</div><div class="card">
     <div class="who"><div><h2>${esc(t.name)}</h2><p>${esc([t.centre,t.course].filter(Boolean).join(' · '))} · ${cv.length} conversation${cv.length===1?'':'s'} · last met ${fmtD(cv[0].date)}</p></div>${CAN?`<button class="btn sm" data-act="log1">+ Log a conversation</button>`:''}</div>
-    <div class="blk"><div class="lbl">Key takeaways<span><em>Drafted by Claude from every conversation${tk.edited?', edited by you':''}</em>${CAN&&!EDIT_TK&&tk.items.length?` · <button class="lnk" data-act="edtk" data-kind="teacher" data-key="${esc(SEL)}">Edit</button>`:''}</span></div>${takeHtml}</div>
+    <div class="blk"><div class="lbl">Key takeaways<em>From every conversation, most-raised first</em></div>${takeHtml}</div>
     <div class="blk"><div class="lbl">Requests from ${esc(t.name.split(' ')[0])}<em>Recorded with each conversation</em></div>
       <div class="ac">${mine.length?mine.map(r=>reqRow(r,false)).join(''):'<div class="row"><p style="color:var(--faint)">No requests yet.</p></div>'}</div></div>
     <div class="blk" style="padding-bottom:22px"><div class="lbl">Conversations<em>The full notes, by date</em></div>${cv.map(convHtml).join('')}</div>
@@ -231,25 +362,27 @@ function convHtml(c){
   if(open){let cur=null;
     notes=`<div class="notes">${c.points.map((p,i)=>{let h='';if(p.h!==cur){cur=p.h;if(p.h)h=`<div class="th">${esc(p.h)}</div>`;}
       return h+`<div class="ins"><p>${esc(p.t)}</p>${CAN?fnSelect(p.fn,`data-c="${c.id}" data-i="${i}"`):chip(p.fn)}</div>`;}).join('')}
+      ${(c.takeaways||[]).length?`<div class="th">Key takeaways</div>${c.takeaways.map(k=>`<div class="ins"><p><b style="color:var(--ink)">${esc(k.text)}</b>${c.type==='group'&&k.teachers&&k.teachers.length<c.teachers.length?` <span style="color:var(--faint)">· ${esc(k.teachers.map(e=>(tm[e]||{}).name).join(', '))}</span>`:''}</p>${chip(k.fn)}</div>`).join('')}`:''}
       ${(c.requests||[]).length?`<div class="th">Requests</div>${c.requests.map(q=>`<div class="ins"><p>${esc(q.text)}${c.type==='group'?` <span style="color:var(--faint)">· ${esc((tm[q.teacher]||{}).name||'')}</span>`:''}</p>${chip(q.fn)}</div>`).join('')}`:''}
       ${CAN?`<div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" data-act="editc" data-c="${c.id}">Edit</button><button class="btn sm danger" data-act="delc" data-c="${c.id}">Delete</button></div>`:''}</div>`;}
-  return`<div class="conv"><div class="ch"><b>${fmtD(c.date)}</b><p>${esc(with_)}${heads.length?' · '+esc(heads.join(', ')):''}</p><span class="cnt">${c.points.length} insight${c.points.length===1?'':'s'}${(c.requests||[]).length?' · '+c.requests.length+' request'+(c.requests.length===1?'':'s'):''}</span><button class="btn sm" data-act="notes" data-c="${c.id}">${open?'Hide notes':'Read notes'}</button></div>${notes}</div>`;
+  return`<div class="conv"><div class="ch"><b>${fmtD(c.date)}</b><p>${esc(with_)}${heads.length?' · '+esc(heads.join(', ')):''}</p><span class="cnt">${(c.takeaways||[]).length?(c.takeaways.length+' takeaway'+(c.takeaways.length===1?'':'s')+' · '):''}${c.points.length} insight${c.points.length===1?'':'s'}${(c.requests||[]).length?' · '+c.requests.length+' request'+(c.requests.length===1?'':'s'):''}</span><button class="btn sm" data-act="notes" data-c="${c.id}">${open?'Hide notes':'Read notes'}</button></div>${notes}</div>`;
 }
 const fnSelect=(f,attrs)=>{const [c,cs]=TC[f||'']||TC[''];return`<select class="chip" style="--c:${c};--cs:${cs}" ${attrs} aria-label="Function"><option value="">No function</option>${D.tags.map(t=>`<option${t===f?' selected':''}>${esc(t)}</option>`).join('')}</select>`;};
 
 /* ── By function ── */
 function renderFunctions(tm){
   const pts={};D.conversations.forEach(c=>c.points.forEach(p=>{if(!p.fn)return;(pts[p.fn]=pts[p.fn]||[]).push({p,c});}));
-  const fns=Object.keys(pts).map(f=>{const tk=(D.takeaways.function[f]||{items:[]});return{f,tk,top:Math.max(0,...tk.items.map(x=>(x.teachers||[]).length)),n:pts[f].length};})
-    .sort((a,b)=>b.top-a.top||b.n-a.n);
-  if(!fns.length){document.getElementById('main').innerHTML='<div class="card empty">Functions appear here once conversations are logged.</div>';return;}
-  document.getElementById('main').innerHTML=`<div class="fg">${fns.map(({f,tk})=>{
-    const ps=pts[f],teachers=new Set(ps.flatMap(x=>x.c.teachers)),centres=new Set([...teachers].map(e=>(tm[e]||{}).centre).filter(Boolean)),[c]=TC[f]||TC[''];
-    const editing=EDIT_TK&&EDIT_TK.kind==='function'&&EDIT_TK.key===f;
-    const items=editing?editTakeaways():tk.items.length?tk.items.map(x=>{const who=(x.teachers||[]).map(e=>(tm[e]||{}).name).filter(Boolean),m=who.length>1;
-      return`<div class="ft${m?' many':''}"><p>${esc(x.text)}</p><small>${m?'Raised by '+who.length+' teachers: ':''}${esc(who.join(', '))}</small></div>`;}).join(''):'<div class="ft"><small>The key takeaways appear after the next conversation that touches this function.</small></div>';
-    return`<div class="card fc" style="--c:${c}"><div class="h">${chip(f)}<span>${ps.length} insight${ps.length===1?'':'s'} · ${teachers.size} teacher${teachers.size===1?'':'s'} · ${esc([...centres].join(', '))}</span></div>
-      ${items}<div style="display:flex;gap:14px;align-items:center"><button class="more" data-act="fnmore" data-f="${esc(f)}">${FN_OPEN[f]?'Hide':'See'} the ${ps.length} insight${ps.length===1?'':'s'}</button>${CAN&&!editing&&tk.items.length?`<button class="more" data-act="edtk" data-kind="function" data-key="${esc(f)}">Edit the takeaways</button>`:''}</div>
+  const byFn={};tkGroups().forEach(g=>(byFn[g.fn||'']=byFn[g.fn||'']||[]).push(g));
+  const fns=[...new Set(Object.keys(byFn).concat(Object.keys(pts)))].map(f=>({f,gs:byFn[f]||[],ps:pts[f]||[]}))
+    .sort((a,b)=>Math.max(0,...b.gs.map(g=>g.teachers.length))-Math.max(0,...a.gs.map(g=>g.teachers.length))||b.gs.length-a.gs.length||b.ps.length-a.ps.length);
+  if(!fns.length){document.getElementById('main').innerHTML='<div class="card empty">Functions appear here once key takeaways are written.</div>';return;}
+  document.getElementById('main').innerHTML=`<div class="fg">${fns.map(({f,gs,ps})=>{
+    const teachers=new Set(gs.flatMap(g=>g.teachers).concat(ps.flatMap(x=>x.c.teachers))),centres=new Set([...teachers].map(e=>(tm[e]||{}).centre).filter(Boolean)),[c]=TC[f]||TC[''];
+    const items=gs.length?gs.map(g=>{const who=g.teachers.map(e=>(tm[e]||{}).name).filter(Boolean),m=who.length>1;
+      return`<div class="ft${m?' many':''}"><p>${esc(g.text)}</p><small>${m?'Raised by '+who.length+' teachers: ':''}${esc(who.join(', '))} · ${g.items.length>1?fmtD(g.items[g.items.length-1].c.date)+' to '+fmtD(g.latest):fmtD(g.latest)}</small></div>`;}).join('')
+      :'<div class="ft"><small>No key takeaways for this function yet.</small></div>';
+    return`<div class="card fc" style="--c:${c}"><div class="h">${chip(f)}<span>${gs.length} takeaway${gs.length===1?'':'s'} · ${teachers.size} teacher${teachers.size===1?'':'s'} · ${esc([...centres].join(', '))}</span></div>
+      ${items}${ps.length?`<button class="more" data-act="fnmore" data-f="${esc(f)}">${FN_OPEN[f]?'Hide':'See'} the ${ps.length} insight${ps.length===1?'':'s'} labelled ${esc(f||'with no function')}</button>`:''}
       ${FN_OPEN[f]?`<div class="src">${ps.map(({p,c})=>`<div class="ins"><p>${esc(p.t)}<small>${esc(c.teachers.map(e=>(tm[e]||{}).name).join(', '))} · ${fmtD(c.date)}${p.h?' · '+esc(p.h):''}</small></p></div>`).join('')}</div>`:''}</div>`;}).join('')}</div>`;
 }
 
@@ -261,20 +394,13 @@ function renderRequests(tm){
 }
 
 /* ── Editing key takeaways ── */
-function editTakeaways(){
-  const k=EDIT_TK;
-  return`<div class="kt" style="grid-template-columns:1fr">${k.items.map((x,i)=>`<div class="k" style="--c:${(TC[x.fn||'']||TC[''])[0]}">
-    ${k.kind==='teacher'?fnSelect(x.fn,`data-tki="${i}"`):''}<textarea class="te" data-tkt="${i}">${esc(x.text)}</textarea>
-    <div><button class="btn sm ghost" data-act="tkdel" data-i="${i}">Remove</button></div></div>`).join('')}</div>
-    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" data-act="tkadd">+ Add a takeaway</button><span style="flex:1"></span><button class="btn sm" data-act="tkcancel">Cancel</button><button class="btn sm pri" data-act="tksave">Save takeaways</button></div>`;
-}
 
 /* ── Clicks ── */
-document.getElementById('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;VIEW=b.dataset.v;EDIT_TK=null;try{localStorage.setItem('artium_texp_view',VIEW);}catch(err){}render();};
-document.getElementById('att').onclick=e=>{const b=e.target.closest('[data-go]');if(!b)return;VIEW=b.dataset.go;if(VIEW==='r')REQF='open';render();};
+document.getElementById('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;VIEW=b.dataset.v;try{localStorage.setItem('artium_texp_view',VIEW);}catch(err){}render();};
+document.getElementById('att').onclick=e=>{const b=e.target.closest('[data-go]');if(!b)return;if(b.dataset.go==='rep'){document.getElementById('rep').scrollIntoView({behavior:'smooth',block:'start'});return;}VIEW=b.dataset.go;if(VIEW==='r')REQF='open';render();};
 document.getElementById('log').onclick=()=>logWindow(null,[]);
 document.getElementById('main').addEventListener('click',async e=>{
-  const t=e.target.closest('[data-t]');if(t){SEL=t.dataset.t;EDIT_TK=null;render();return;}
+  const t=e.target.closest('[data-t]');if(t){SEL=t.dataset.t;render();return;}
   const f=e.target.closest('#reqf button');if(f){REQF=f.dataset.f;render();return;}
   const b=e.target.closest('[data-act]');if(!b)return;e.preventDefault();
   const a=b.dataset.act,conv=id=>D.conversations.find(c=>c.id===id);
@@ -286,19 +412,12 @@ document.getElementById('main').addEventListener('click',async e=>{
   else if(a==='mktask'){const c=conv(b.dataset.c);taskWindow(c,c.requests.find(q=>q.id===b.dataset.r));}
   else if(a==='email'){if(confirm('Email this task to the Centre Manager now? You\'ll be copied.'))call('texpEmailTask',{id:b.dataset.id},'Sending…');}
   else if(a==='opentask'){try{window.top.location.hash='goals&t='+b.dataset.id;}catch(err){}}
-  else if(a==='edtk'){const src=b.dataset.kind==='teacher'?D.takeaways.teacher[b.dataset.key]:D.takeaways.function[b.dataset.key];EDIT_TK={kind:b.dataset.kind,key:b.dataset.key,items:JSON.parse(JSON.stringify((src||{items:[]}).items))};render();}
-  else if(a==='tkadd'){syncTk();EDIT_TK.items.push({text:'',fn:'',teachers:[],also:[]});render();}
-  else if(a==='tkdel'){syncTk();EDIT_TK.items.splice(+b.dataset.i,1);render();}
-  else if(a==='tkcancel'){EDIT_TK=null;render();}
-  else if(a==='tksave'){syncTk();const k=EDIT_TK;EDIT_TK=null;await call('saveTakeaways',{kind:k.kind,key:k.key,items:k.items},'Saving…');}
 });
-function syncTk(){document.querySelectorAll('[data-tkt]').forEach(el=>EDIT_TK.items[+el.dataset.tkt].text=el.value);}
 document.getElementById('main').addEventListener('change',e=>{
   const s=e.target.closest('select.chip');if(!s)return;
-  if(s.dataset.tki!==undefined){syncTk();EDIT_TK.items[+s.dataset.tki].fn=s.value;render();return;}
-  // changing a point's function: the conversation is saved again, and the takeaways are redrafted
+  // changing a point's function saves the conversation again
   const c=JSON.parse(JSON.stringify(D.conversations.find(x=>x.id===s.dataset.c)));c.points[+s.dataset.i].fn=s.value;
-  call('saveTexpConversation',{conversation:c},'Saving and updating the takeaways…');
+  call('saveTexpConversation',{conversation:c},'Saving…');
 });
 
 /* ── Log a conversation ── */
@@ -315,9 +434,17 @@ function parseNotes(txt,old){
 }
 function logWindow(c,preset){
   const tm=T(),st={id:c?c.id:'',date:c?c.date:iso(TODAY),type:c?c.type:'one',teachers:c?c.teachers.slice():(preset||[]).slice(),notes:c?c.notes:'',
-    requests:c?JSON.parse(JSON.stringify(c.requests||[])):[],old:c?c.points:[]};
+    requests:c?JSON.parse(JSON.stringify(c.requests||[])):[],takeaways:c?JSON.parse(JSON.stringify(c.takeaways||[])):[],old:c?c.points:[]};
+  if(!st.takeaways.length)st.takeaways.push({id:'',text:'',fn:'',teachers:[],same:''});
+  // takeaways from other conversations, to mark a new one as the same point
+  const others=[];D.conversations.filter(x=>!c||x.id!==c.id).forEach(x=>(x.takeaways||[]).forEach(k=>others.push({k,c:x})));
   if(!st.requests.length)st.requests.push({id:'',text:'',fn:'',teacher:''});
   const byCentre={};(D.teachers||[]).forEach(t=>(byCentre[t.centre||'Other']=byCentre[t.centre||'Other']||[]).push(t));
+  // while typing a takeaway: offer to link it to a similar one another teacher made
+  const hintFor=i=>{const k=st.takeaways[i];if(!k||k.same||!k.text||k.text.length<12)return'';
+    let best=null,bs=0;others.forEach(o=>{if(o.k.fn&&k.fn&&o.k.fn!==k.fn)return;if((o.k.teachers&&o.k.teachers.length?o.k.teachers:o.c.teachers).some(e=>st.teachers.includes(e)))return;const sc=similar(k.text,o.k.text);if(sc>bs){bs=sc;best=o;}});
+    if(!best||bs<0.4)return'';
+    return`<div class="hint"><p>This looks like what ${esc((best.k.teachers&&best.k.teachers.length?best.k.teachers:best.c.teachers).map(e=>(tm[e]||{}).name).join(', '))} said on ${fmtD(best.c.date)}: “${esc(best.k.text)}”</p><button type="button" class="btn sm" data-link="${i}" data-to="${esc(best.k.id)}">Same point</button></div>`;};
   const draw=()=>{
     const w=document.getElementById('win');
     w.innerHTML=`<div class="scrim"><div class="dlg" role="dialog" aria-label="Log a conversation"><div class="dh"><h2>${c?'Edit the conversation':'Log a conversation'}</h2><button class="x" data-x>×</button></div>
@@ -326,8 +453,15 @@ function logWindow(c,preset){
           <div class="f"><span class="fl">Conversation</span><div class="sg" id="ctype"><button type="button" data-v="one" aria-pressed="${st.type==='one'}">One-on-one</button><button type="button" data-v="group" aria-pressed="${st.type==='group'}">Group</button></div></div>
           <div class="f"><span class="fl">Teacher${st.type==='group'?'s':''}</span><div class="pp">${st.teachers.map(e=>`<span class="p">${esc((tm[e]||{name:e}).name)} <small>${esc([(tm[e]||{}).centre,(tm[e]||{}).course].filter(Boolean).join(' · '))}</small><button type="button" data-rmt="${esc(e)}" aria-label="Remove">×</button></span>`).join('')}
             ${st.type==='group'||!st.teachers.length?`<select id="addt" aria-label="Add a teacher"><option value="">+ Add a teacher</option>${Object.keys(byCentre).sort().map(k=>`<optgroup label="${esc(k)}">${byCentre[k].filter(t=>!st.teachers.includes(t.email)).map(t=>`<option value="${esc(t.email)}">${esc(t.name)}${t.course?' · '+esc(t.course):''}</option>`).join('')}</optgroup>`).join('')}</select>`:''}</div></div></div>
-        <div class="f"><label for="cn">Insights</label><small>Paste or type your notes. Lines with a bullet are points; short lines without one become headings. When you save, Claude labels each point by function and updates the key takeaways. You can change both afterwards.</small>
+        <div class="f"><label for="cn">Insights</label><small>Paste or type your notes. Lines with a bullet are points; short lines without one become headings. You can give each point a function afterwards, in the notes.</small>
           <textarea class="in" id="cn" placeholder="Teaching Young Learners&#10;• Young learners typically have a shorter attention span…">${esc(st.notes)}</textarea></div>
+        <div class="f"><span class="fl">Key takeaways</span><small>What matters most from this conversation, as many as you like. If another teacher has already made the same point, choose it under "Same point as", and it's counted as raised by both.</small>
+          ${st.takeaways.map((k,i)=>`<div class="tkr"><textarea class="in" data-k2="${i}" data-kk="text" placeholder="The takeaway, in a sentence or two.">${esc(k.text)}</textarea>
+            <div class="tkc"><select class="in" data-k2="${i}" data-kk="fn"><option value="">Function</option>${D.tags.map(t=>`<option${t===k.fn?' selected':''}>${esc(t)}</option>`).join('')}</select>
+            ${st.type==='group'&&st.teachers.length>1?`<select class="in" data-k2="${i}" data-kk="teachers"><option value="">Everyone in the group</option>${st.teachers.map(e=>`<option value="${esc(e)}"${k.teachers&&k.teachers.length===1&&k.teachers[0]===e?' selected':''}>${esc((tm[e]||{name:e}).name)}</option>`).join('')}</select>`:''}
+            <select class="in" data-k2="${i}" data-kk="same"><option value="">Same point as… (optional)</option>${others.length?D.tags.concat(['']).map(f=>{const xs=others.filter(o=>(o.k.fn||'')===f);return xs.length?`<optgroup label="${esc(f||'No function')}">${xs.map(o=>`<option value="${esc(o.k.id)}"${k.same===o.k.id?' selected':''}>${esc(o.c.teachers.map(e=>(tm[e]||{}).name).join(', '))}: ${esc(o.k.text.length>70?o.k.text.slice(0,68)+'…':o.k.text)}</option>`).join('')}</optgroup>`:'';}).join(''):''}</select>
+            <button type="button" class="del" data-rmk="${i}" aria-label="Remove">×</button></div><div data-hint="${i}">${hintFor(i)}</div></div>`).join('')}
+          <button type="button" class="addr" data-addk>+ Add another takeaway</button></div>
         <div class="f"><span class="fl">Requests from the teacher${st.type==='group'?'s':''}</span><small>One per request. They're listed under Requests, where you can make each one a task for the Centre Manager.</small>
           ${st.requests.map((q,i)=>`<div class="rq"><input class="in" data-q="${i}" data-k="text" placeholder="What did they ask for?" value="${esc(q.text)}">
             <select class="in" data-q="${i}" data-k="fn"><option value="">Function</option>${D.tags.map(t=>`<option${t===q.fn?' selected':''}>${esc(t)}</option>`).join('')}</select>
@@ -338,26 +472,34 @@ function logWindow(c,preset){
       <div class="df"><span class="msg" id="cmsg"></span><div style="display:flex;gap:10px;align-items:center"><span class="wait" id="cwait"></span><button class="btn" data-x>Cancel</button><button class="btn pri" id="csave">Save conversation</button></div></div></div></div>`;
   };
   const pull=()=>{const w=document.getElementById('win');st.date=w.querySelector('#cd').value;st.notes=w.querySelector('#cn').value;
-    w.querySelectorAll('[data-q]').forEach(el=>{st.requests[+el.dataset.q][el.dataset.k]=el.value;});};
+    w.querySelectorAll('[data-q]').forEach(el=>{st.requests[+el.dataset.q][el.dataset.k]=el.value;});
+    w.querySelectorAll('[data-k2]').forEach(el=>{const k=st.takeaways[+el.dataset.k2];if(el.dataset.kk==='teachers')k.teachers=el.value?[el.value]:[];else k[el.dataset.kk]=el.value;
+      if(el.dataset.kk==='same'&&el.value&&!k.fn){const o=others.find(x=>x.k.id===el.value);if(o)k.fn=o.k.fn;}});};
   draw();
   const w=document.getElementById('win');
   w.onclick=async e=>{
     if(e.target.closest('[data-x]')){if(!busy)w.innerHTML='';return;}
     const ty=e.target.closest('#ctype button');if(ty){pull();st.type=ty.dataset.v;if(st.type==='one')st.teachers=st.teachers.slice(0,1);draw();return;}
     const rm=e.target.closest('[data-rmt]');if(rm){pull();st.teachers=st.teachers.filter(x=>x!==rm.dataset.rmt);draw();return;}
+    const lk=e.target.closest('[data-link]');if(lk){pull();const k=st.takeaways[+lk.dataset.link];k.same=lk.dataset.to;const o=others.find(x=>x.k.id===k.same);if(o&&!k.fn)k.fn=o.k.fn;draw();return;}
+    if(e.target.closest('[data-addk]')){pull();st.takeaways.push({id:'',text:'',fn:'',teachers:[],same:''});draw();return;}
+    const rk=e.target.closest('[data-rmk]');if(rk){pull();st.takeaways.splice(+rk.dataset.rmk,1);if(!st.takeaways.length)st.takeaways.push({id:'',text:'',fn:'',teachers:[],same:''});draw();return;}
     if(e.target.closest('[data-addq]')){pull();st.requests.push({id:'',text:'',fn:'',teacher:st.teachers[0]||''});draw();return;}
     const rq=e.target.closest('[data-rmq]');if(rq){pull();st.requests.splice(+rq.dataset.rmq,1);if(!st.requests.length)st.requests.push({id:'',text:'',fn:'',teacher:''});draw();return;}
     if(e.target.id==='csave'){
-      pull();const points=parseNotes(st.notes,st.old),reqs=st.requests.filter(q=>q.text.trim()).map(q=>({...q,teacher:q.teacher||st.teachers[0]}));
+      pull();const tks=st.takeaways.filter(k=>k.text.trim()).map(k=>({...k,teachers:k.teachers&&k.teachers.length?k.teachers:st.teachers.slice()}));
+      const points=parseNotes(st.notes,st.old),reqs=st.requests.filter(q=>q.text.trim()).map(q=>({...q,teacher:q.teacher||st.teachers[0]}));
       const msg=w.querySelector('#cmsg');
       if(!st.teachers.length){msg.textContent='Choose the teacher you spoke with.';return;}
-      if(!points.length&&!reqs.length){msg.textContent='Add the insights or a request.';return;}
-      busy=true;e.target.disabled=true;msg.textContent='';w.querySelector('#cwait').textContent='Saving, and asking Claude to label the insights and update the takeaways…';
-      const ok=await call('saveTexpConversation',{conversation:{id:st.id,date:st.date,type:st.type,teachers:st.teachers,notes:st.notes,points,requests:reqs}},null,msg);
+      if(!points.length&&!reqs.length&&!tks.length){msg.textContent='Add the insights, a key takeaway or a request.';return;}
+      busy=true;e.target.disabled=true;msg.textContent='';w.querySelector('#cwait').textContent='Saving…';
+      const ok=await call('saveTexpConversation',{conversation:{id:st.id,date:st.date,type:st.type,teachers:st.teachers,notes:st.notes,points,takeaways:tks,requests:reqs}},null,msg);
       busy=false;if(ok){w.innerHTML='';SEL=st.teachers[0];VIEW='t';render();}else{e.target.disabled=false;w.querySelector('#cwait').textContent='';}
     }
   };
-  w.onchange=e=>{if(e.target.id==='addt'&&e.target.value){pull();const v=e.target.value;if(st.type==='one')st.teachers=[v];else if(!st.teachers.includes(v))st.teachers.push(v);
+  w.oninput=e=>{const t=e.target.closest('[data-k2][data-kk=text]');if(!t)return;st.takeaways[+t.dataset.k2].text=t.value;const h=w.querySelector(`[data-hint="${t.dataset.k2}"]`);if(h)h.innerHTML=hintFor(+t.dataset.k2);};
+  w.onchange=e=>{if(e.target.dataset&&e.target.dataset.kk==='same'){pull();draw();return;}
+    if(e.target.id==='addt'&&e.target.value){pull();const v=e.target.value;if(st.type==='one')st.teachers=[v];else if(!st.teachers.includes(v))st.teachers.push(v);
     st.requests.forEach(q=>{if(!q.teacher||!st.teachers.includes(q.teacher))q.teacher=st.teachers[0];});draw();}};
 }
 
