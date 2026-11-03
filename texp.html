@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  :root{--display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;--ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#B3AFBB;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28)}
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1500px;margin:0 auto;padding:36px 48px 64px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:22px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .hr{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .btn{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--ink2);font:600 13px var(--display);cursor:pointer;white-space:nowrap}
+  .btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}.btn.pri:hover:not(:disabled){background:#4A2170;color:#fff}
+  .btn:disabled{opacity:.5;cursor:default}.btn.sm{height:30px;padding:0 11px;font-size:12px}.btn.ghost{border-color:transparent;background:none;color:var(--muted)}
+  .btn.danger:hover{background:#FDECEB;color:var(--bad)}
+  .note{background:#FFF7E6;border:1px solid #F0DDB5;color:#7A5200;border-radius:12px;padding:10px 14px;font-size:13.5px;margin-bottom:16px}
+
+  /* What needs attention */
+  .att{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+  .a{background:#fff;border:1px solid var(--border);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;text-align:left;font:inherit;color:inherit}
+  .a small{display:block;font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .a b{display:block;font:600 26px/1.25 var(--display);color:var(--ink);margin-top:4px}
+  .a p{font-size:12.5px;color:var(--faint);margin-top:2px;line-height:1.4}
+  .a.hot{background:var(--accent);border-color:var(--accent)}.a.hot small{color:#D9C7EC}.a.hot b{color:#fff}.a.hot p{color:#E3D3F3}
+  .seg{display:inline-flex;gap:2px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:4px;box-shadow:var(--shadow);margin-bottom:16px}
+  .seg button{border:0;background:none;border-radius:9px;padding:8px 16px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .seg button span{font-size:11px;opacity:.8;margin-left:4px}
+
+  .card{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow)}
+  .empty{padding:40px;text-align:center;color:var(--muted);font-size:14.5px}
+  .wrap{display:grid;grid-template-columns:290px 1fr;gap:18px;align-items:start}
+  .list{padding:8px;position:sticky;top:12px}
+  .ti{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;cursor:pointer;width:100%;border:0;background:none;text-align:left;font:inherit}
+  .ti:hover{background:#FAF8FC}.ti.on{background:var(--accent-soft)}
+  .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font:600 14px var(--display);color:#fff;background:#8D6BB5;flex:none}
+  .ti b{display:block;font:600 14.5px var(--display);color:var(--ink)}.ti small{display:block;font-size:12px;color:var(--faint);margin-top:2px}
+  .ti .n{margin-left:auto;font:700 11px var(--body);color:#fff;background:var(--accent);border-radius:999px;padding:2px 8px}
+  .who{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:22px 24px 4px}
+  .who h2{font:600 26px var(--display);color:var(--ink)}.who p{font-size:14px;color:var(--muted);margin-top:4px}
+  .blk{padding:16px 24px 8px}
+  .lbl{display:flex;justify-content:space-between;align-items:center;gap:10px;font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .lbl em{font:500 12px var(--body);font-style:normal;letter-spacing:0;text-transform:none;color:var(--faint)}
+  .lbl .lnk{font:600 12px var(--body);letter-spacing:0;text-transform:none;color:var(--accent);background:none;border:0;cursor:pointer}
+  .kt{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .k{border:1px solid var(--line);border-radius:16px;padding:16px;border-top:4px solid var(--c);display:flex;flex-direction:column;gap:10px}
+  .k h3{font:600 16px/1.4 var(--display);color:var(--ink)}
+  .k.many{background:#FBF8FE;border-color:#E2D3F2}
+  .many-tag{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;font:700 11px var(--body);color:#fff;background:var(--accent);border-radius:999px;padding:4px 10px}
+  .many-tag i{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-style:normal;font-size:10px}
+  .chip{display:inline-flex;align-items:center;gap:6px;font:700 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--c);background:var(--cs);border-radius:999px;padding:4px 10px;align-self:flex-start;white-space:nowrap}
+  .chip i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+  select.chip{border:0;cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:10px}
+  .ac{border:1px solid var(--line);border-radius:16px;padding:4px 16px}
+  .row{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+  .row:first-child{border-top:0}
+  .row p{flex:1;font-size:14px;line-height:1.45;color:var(--ink2)}
+  .row p small{display:block;font-size:12px;color:var(--faint);margin-top:3px}
+  .st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font:600 12px var(--body);white-space:nowrap}.st i{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .st.open,.st.tbp{background:#FDECEB;color:#B42318}.st.inp{background:#FBF1DC;color:#9A6200}.st.cmp{background:#E5F4EC;color:#1F7A4D}.st.draft{background:#EFE7F8;color:#5B2A86}
+  .conv{border:1px solid var(--line);border-radius:14px;margin-bottom:10px}
+  .ch{display:flex;align-items:center;gap:14px;padding:12px 16px}
+  .ch b{font:600 14px var(--display);color:var(--ink);white-space:nowrap}
+  .ch p{flex:1;font-size:13.5px;color:var(--muted);line-height:1.45}
+  .ch .cnt{font-size:12.5px;color:var(--faint);white-space:nowrap}
+  .notes{border-top:1px solid var(--line);padding:6px 16px 14px}
+  .notes .th{font:600 13.5px var(--display);color:var(--ink);margin:12px 0 4px}
+  .ins{display:flex;gap:12px;align-items:flex-start;padding:5px 0}
+  .ins p{flex:1;font-size:14px;line-height:1.55;color:var(--ink2)}
+  .ins .chip{flex:none;margin-top:2px}
+  .fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .fc{padding:18px 20px;border-left:5px solid var(--c)}
+  .fc .h{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+  .fc .h span{font-size:12.5px;color:var(--faint)}
+  .ft{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;margin-bottom:8px;background:var(--bg)}
+  .ft p{font-size:14.5px;line-height:1.55;color:var(--ink2)}
+  .ft small{font-size:12.5px;color:var(--faint)}
+  .ft.many{background:var(--accent-soft);border:1px solid #E2D3F2}
+  .ft.many p{color:var(--ink);font-weight:600}
+  .ft.many small{color:var(--accent);font-weight:600}
+  .fc .more{font:600 12.5px var(--body);color:var(--accent);background:none;border:0;cursor:pointer;margin-top:4px}
+  .src{border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+  .src .ins p small{display:block;font-size:12px;color:var(--faint);margin-top:2px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{text-align:left;padding:11px 14px;background:#FAF9F7;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+  td small{display:block;font-size:12px;color:var(--faint);margin-top:2px}
+  tr:last-child td{border-bottom:0}
+  .fsel{display:flex;gap:10px;align-items:center;margin-bottom:12px;font-size:13px;color:var(--muted)}
+  .te{width:100%;font:600 15px/1.45 var(--display);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:var(--bg);resize:vertical;min-height:70px}
+
+  /* Windows */
+  .scrim{position:fixed;inset:0;background:rgba(29,27,34,.45);display:flex;justify-content:center;align-items:flex-start;padding:28px 16px;z-index:30;overflow:auto}
+  .dlg{width:880px;max-width:100%;background:#fff;border-radius:22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
+  .dlg.sm{width:560px}
+  .dh{display:flex;justify-content:space-between;align-items:center;padding:20px 26px;border-bottom:1px solid var(--line)}
+  .dh h2{font:600 22px var(--display);color:var(--ink)}
+  .x{border:0;background:none;font-size:24px;color:var(--muted);cursor:pointer;line-height:1}
+  .db{padding:18px 26px;display:flex;flex-direction:column;gap:16px}
+  .f{display:flex;flex-direction:column;gap:6px}
+  .f>label,.f>.fl{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+  .f small{font-size:12.5px;color:var(--faint);line-height:1.45}
+  .in{border:1px solid var(--border);border-radius:11px;background:var(--bg);padding:9px 12px;font:500 14px var(--body);color:var(--ink);width:100%}
+  .in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12);background:#fff}
+  textarea.in{min-height:220px;resize:vertical;line-height:1.55}
+  .g3{display:grid;grid-template-columns:180px 220px 1fr;gap:14px}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px}.sg button{border:0;background:none;border-radius:9px;padding:8px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}.sg button[aria-pressed="true"]{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(31,26,36,.15)}
+  .pp{display:flex;gap:6px;flex-wrap:wrap;align-items:center;border:1px solid var(--border);border-radius:11px;background:var(--bg);padding:5px}
+  .pp .p{display:inline-flex;gap:6px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:999px;padding:3px 4px 3px 10px;font:600 13px var(--body);color:var(--ink)}
+  .pp .p small{font-weight:500;color:var(--faint);font-size:12px}.pp .p button{border:0;background:none;color:var(--faint);cursor:pointer;font-size:14px;padding:0 5px}
+  .pp select{border:0;background:none;font:500 13px var(--body);color:var(--accent);padding:5px;cursor:pointer;max-width:100%}
+  .rq{display:grid;grid-template-columns:1fr 190px 170px 34px;gap:10px;align-items:center}
+  .rq .del{width:34px;height:34px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--muted);cursor:pointer}
+  .addr{align-self:flex-start;font:600 13px var(--body);color:var(--accent);background:none;border:0;cursor:pointer}
+  .df{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 26px;border-top:1px solid var(--line)}
+  .df .msg{font-size:13px;color:var(--bad)}
+  .df .wait{font-size:13px;color:var(--muted)}
+  @media (max-width:1100px){.att{grid-template-columns:repeat(2,1fr)}.wrap{grid-template-columns:1fr}.kt,.fg{grid-template-columns:1fr}.list{position:static}.page{padding:24px 16px 48px}.g3,.rq{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div><div class="eyebrow">Experience</div><h1>Teacher Experience</h1><div class="subtitle">What teachers tell us, and what they've asked for.</div></div>
+    <div class="hr"><div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+      <button class="btn pri" type="button" id="log" hidden>+ Log a conversation</button></div>
+  </header>
+  <div class="note" id="note" hidden></div>
+  <div class="att" id="att"></div>
+  <div class="seg" id="tabs"><button type="button" data-v="t" aria-pressed="true">Teachers</button><button type="button" data-v="f" aria-pressed="false">By function</button><button type="button" data-v="r" aria-pressed="false">Requests</button></div>
+  <div id="main"><div class="card empty">Loading…</div></div>
+</div>
+<div id="win"></div>
+
+<script>
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const ymd=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const fmtD=s=>{const d=ymd(s);return d?d.getDate()+' '+MON[d.getMonth()]+(d.getFullYear()!==NOW.getFullYear()?' '+d.getFullYear():''):'—';};
+const days=s=>{const d=ymd(s);return d?Math.round((TODAY-d)/864e5):0;};
+// Function colours, the same as the tags on the Goals and Key Updates pages
+const TC={'Academics':['#8A4A1F','#F8EEE6'],'Learner Experience':['#5B2A86','#F2ECF8'],'Finance':['#1F4E79','#E6EEF6'],'Hiring':['#3E4C9A','#E9EBF7'],'Marketing':['#A0306E','#F8E8F1'],
+  'Operations':['#3D5A6C','#E7EEF2'],'People Management':['#2F6F8F','#E3F0F5'],'Product / Tech':['#2557C7','#E7EEFB'],'Social Media':['#8E3FB5','#F3E9F9'],'Design & Content':['#4A5568','#ECEEF1'],'Teacher Experience':['#9C4A5E','#F7E9ED'],'':['#6B6774','#F0EEF3']};
+const chip=f=>{const [c,cs]=TC[f||'']||TC[''];return`<span class="chip" style="--c:${c};--cs:${cs}"><i></i>${esc(f||'No function')}</span>`;};
+let D=null,CAN=false,VIEW='t',SEL=null,OPEN={},FN_OPEN={},REQF='open',EDIT_TK=null,busy=false;
+try{VIEW=localStorage.getItem('artium_texp_view')||'t';}catch(e){}
+
+/* ── Derived data ── */
+const T=()=>{const m={};(D.teachers||[]).forEach(t=>m[t.email]=t);return m;};
+const convsOf=e=>D.conversations.filter(c=>c.teachers.includes(e)).sort((a,b)=>a.date<b.date?1:-1);
+function reqStatus(q){const t=q.task&&D.tasks[q.task];
+  if(!t)return{k:'open',l:'Open'};if(t.draft)return{k:'draft',l:'Task · Yet to email',t};
+  return{k:t.status,l:{tbp:'Task · To be picked',inp:'Task · In progress',cmp:'Task · Completed'}[t.status],t};}
+const allReqs=()=>{const out=[];D.conversations.forEach(c=>(c.requests||[]).forEach(q=>out.push({q,c,s:reqStatus(q)})));return out.sort((a,b)=>a.c.date<b.c.date?1:-1);};
+const isOpen=r=>r.s.k==='open'||r.s.k==='draft'||r.s.k==='tbp'||r.s.k==='inp';
+
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===VIEW));
+  document.getElementById('log').hidden=!CAN;
+  if(!D)return;
+  const tm=T(),R=allReqs(),open=R.filter(r=>r.s.k==='open'),draft=R.filter(r=>r.s.k==='draft');
+  const many=Object.keys(D.takeaways.function||{}).flatMap(f=>(D.takeaways.function[f].items||[]).filter(x=>(x.teachers||[]).length>1));
+  const thisMonth=D.conversations.filter(c=>{const d=ymd(c.date);return d&&d.getFullYear()===NOW.getFullYear()&&d.getMonth()===NOW.getMonth();});
+  const met={};D.conversations.forEach(c=>c.teachers.forEach(e=>{if(!met[e]||met[e]<c.date)met[e]=c.date;}));
+  const stale=Object.keys(met).filter(e=>days(met[e])>60);
+  const oldest=open.length?Math.max(...open.map(r=>days(r.c.date))):0;
+  document.getElementById('att').innerHTML=[
+    ['r',open.length?'hot':'','Open requests',open.length,open.length?'Oldest raised '+(oldest===0?'today':oldest===1?'yesterday':oldest+' days ago')+'.':'Nothing waiting.'],
+    ['r','','Tasks yet to email',draft.length,'Made from requests, not sent to the Centre Manager yet.'],
+    ['f',many.length?'hot':'','Raised by 2+ teachers',many.length,many.length?'The same point from more than one teacher.':'Shows when teachers repeat each other.'],
+    ['t','','Conversations this month',thisMonth.length,'With '+new Set(thisMonth.flatMap(c=>c.teachers)).size+' teachers.'],
+    ['t','','Not met in 60 days',Object.keys(met).length?stale.length:'—',Object.keys(met).length?'Of the teachers you\'ve spoken with.':'Shows once conversations are logged.']]
+    .map(([v,h,l,n,p])=>`<button type="button" class="a ${h}" data-go="${v}"><small>${l}</small><b>${n}</b><p>${esc(p)}</p></button>`).join('');
+  document.querySelector('#tabs [data-v=r]').innerHTML='Requests'+(open.length?`<span>${open.length}</span>`:'');
+  if(VIEW==='t')renderTeachers(tm);else if(VIEW==='f')renderFunctions(tm);else renderRequests(tm);
+}
+
+/* ── Teachers ── */
+function renderTeachers(tm){
+  const met=[...new Set(D.conversations.flatMap(c=>c.teachers))].filter(e=>tm[e]).sort((a,b)=>{const la=convsOf(a)[0].date,lb=convsOf(b)[0].date;return la<lb?1:la>lb?-1:tm[a].name.localeCompare(tm[b].name);});
+  const main=document.getElementById('main');
+  if(!met.length){main.innerHTML=`<div class="card empty">No conversations yet.${CAN?' Use <b>Log a conversation</b> after you meet a teacher.':''}</div>`;return;}
+  if(!SEL||!met.includes(SEL))SEL=met[0];
+  const R=allReqs();
+  const list=met.map(e=>{const t=tm[e],n=R.filter(r=>r.q.teacher===e&&r.s.k==='open').length;
+    return`<button type="button" class="ti${e===SEL?' on':''}" data-t="${esc(e)}"><span class="av">${esc(t.name.charAt(0))}</span><div><b>${esc(t.name)}</b><small>${esc([t.centre,t.course].filter(Boolean).join(' · '))}</small></div>${n?`<span class="n" title="Open requests">${n}</span>`:''}</button>`;}).join('');
+  const t=tm[SEL],cv=convsOf(SEL),tk=(D.takeaways.teacher[SEL]||{items:[]}),mine=R.filter(r=>r.q.teacher===SEL);
+  const takeHtml=EDIT_TK&&EDIT_TK.kind==='teacher'&&EDIT_TK.key===SEL?editTakeaways():
+    tk.items.length?`<div class="kt">${tk.items.map(x=>{const [c]=TC[x.fn||'']||TC[''],also=(x.also||[]).filter(Boolean);
+      return`<div class="k${also.length?' many':''}" style="--c:${c}">${chip(x.fn)}<h3>${esc(x.text)}</h3>${also.length?`<span class="many-tag"><i>${also.length+1}</i>Also said by ${esc(also.join(', '))}</span>`:''}</div>`;}).join('')}</div>`
+    :`<div class="ac"><div class="row"><p style="color:var(--faint)">The key takeaways appear here after the conversation is saved.</p></div></div>`;
+  document.getElementById('main').innerHTML=`<div class="wrap"><div class="card list">${list}</div><div class="card">
+    <div class="who"><div><h2>${esc(t.name)}</h2><p>${esc([t.centre,t.course].filter(Boolean).join(' · '))} · ${cv.length} conversation${cv.length===1?'':'s'} · last met ${fmtD(cv[0].date)}</p></div>${CAN?`<button class="btn sm" data-act="log1">+ Log a conversation</button>`:''}</div>
+    <div class="blk"><div class="lbl">Key takeaways<span><em>Drafted by Claude from every conversation${tk.edited?', edited by you':''}</em>${CAN&&!EDIT_TK&&tk.items.length?` · <button class="lnk" data-act="edtk" data-kind="teacher" data-key="${esc(SEL)}">Edit</button>`:''}</span></div>${takeHtml}</div>
+    <div class="blk"><div class="lbl">Requests from ${esc(t.name.split(' ')[0])}<em>Recorded with each conversation</em></div>
+      <div class="ac">${mine.length?mine.map(r=>reqRow(r,false)).join(''):'<div class="row"><p style="color:var(--faint)">No requests yet.</p></div>'}</div></div>
+    <div class="blk" style="padding-bottom:22px"><div class="lbl">Conversations<em>The full notes, by date</em></div>${cv.map(convHtml).join('')}</div>
+  </div></div>`;
+}
+function reqRow(r,showWho){
+  const {q,c,s}=r,tm=T(),t=tm[q.teacher]||{name:'',centre:''};
+  const act=!CAN?'':s.k==='open'?`<button class="btn sm" data-act="mktask" data-c="${c.id}" data-r="${q.id}">Make it a task</button>`
+    :s.k==='draft'?`<button class="btn sm" data-act="email" data-id="${s.t.id}">Email ${esc((s.t.owner&&s.t.owner.name||'CM').split(' ')[0])}</button>`
+    :`<a class="btn sm" href="#" data-act="opentask" data-id="${s.t.id}">Open task</a>`;
+  const who=s.t&&s.t.owner?' · for '+esc(s.t.owner.name)+(s.t.due?' by '+fmtD(s.t.due):''):'';
+  return`<div class="row"><p>${esc(q.text)}<small>${showWho?esc(t.name)+' · ':''}${fmtD(c.date)} · ${esc(q.fn||'No function')} · ${esc(t.centre)}${who}</small></p><span class="st ${s.k}"><i></i>${s.l}</span>${act}</div>`;
+}
+function convHtml(c){
+  const tm=T(),heads=[...new Set(c.points.map(p=>p.h).filter(Boolean))],open=OPEN[c.id];
+  const with_=c.type==='group'?'Group with '+c.teachers.map(e=>(tm[e]||{name:'?'}).name).join(', '):'One-on-one';
+  let notes='';
+  if(open){let cur=null;
+    notes=`<div class="notes">${c.points.map((p,i)=>{let h='';if(p.h!==cur){cur=p.h;if(p.h)h=`<div class="th">${esc(p.h)}</div>`;}
+      return h+`<div class="ins"><p>${esc(p.t)}</p>${CAN?fnSelect(p.fn,`data-c="${c.id}" data-i="${i}"`):chip(p.fn)}</div>`;}).join('')}
+      ${(c.requests||[]).length?`<div class="th">Requests</div>${c.requests.map(q=>`<div class="ins"><p>${esc(q.text)}${c.type==='group'?` <span style="color:var(--faint)">· ${esc((tm[q.teacher]||{}).name||'')}</span>`:''}</p>${chip(q.fn)}</div>`).join('')}`:''}
+      ${CAN?`<div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" data-act="editc" data-c="${c.id}">Edit</button><button class="btn sm danger" data-act="delc" data-c="${c.id}">Delete</button></div>`:''}</div>`;}
+  return`<div class="conv"><div class="ch"><b>${fmtD(c.date)}</b><p>${esc(with_)}${heads.length?' · '+esc(heads.join(', ')):''}</p><span class="cnt">${c.points.length} insight${c.points.length===1?'':'s'}${(c.requests||[]).length?' · '+c.requests.length+' request'+(c.requests.length===1?'':'s'):''}</span><button class="btn sm" data-act="notes" data-c="${c.id}">${open?'Hide notes':'Read notes'}</button></div>${notes}</div>`;
+}
+const fnSelect=(f,attrs)=>{const [c,cs]=TC[f||'']||TC[''];return`<select class="chip" style="--c:${c};--cs:${cs}" ${attrs} aria-label="Function"><option value="">No function</option>${D.tags.map(t=>`<option${t===f?' selected':''}>${esc(t)}</option>`).join('')}</select>`;};
+
+/* ── By function ── */
+function renderFunctions(tm){
+  const pts={};D.conversations.forEach(c=>c.points.forEach(p=>{if(!p.fn)return;(pts[p.fn]=pts[p.fn]||[]).push({p,c});}));
+  const fns=Object.keys(pts).map(f=>{const tk=(D.takeaways.function[f]||{items:[]});return{f,tk,top:Math.max(0,...tk.items.map(x=>(x.teachers||[]).length)),n:pts[f].length};})
+    .sort((a,b)=>b.top-a.top||b.n-a.n);
+  if(!fns.length){document.getElementById('main').innerHTML='<div class="card empty">Functions appear here once conversations are logged.</div>';return;}
+  document.getElementById('main').innerHTML=`<div class="fg">${fns.map(({f,tk})=>{
+    const ps=pts[f],teachers=new Set(ps.flatMap(x=>x.c.teachers)),centres=new Set([...teachers].map(e=>(tm[e]||{}).centre).filter(Boolean)),[c]=TC[f]||TC[''];
+    const editing=EDIT_TK&&EDIT_TK.kind==='function'&&EDIT_TK.key===f;
+    const items=editing?editTakeaways():tk.items.length?tk.items.map(x=>{const who=(x.teachers||[]).map(e=>(tm[e]||{}).name).filter(Boolean),m=who.length>1;
+      return`<div class="ft${m?' many':''}"><p>${esc(x.text)}</p><small>${m?'Raised by '+who.length+' teachers: ':''}${esc(who.join(', '))}</small></div>`;}).join(''):'<div class="ft"><small>The key takeaways appear after the next conversation that touches this function.</small></div>';
+    return`<div class="card fc" style="--c:${c}"><div class="h">${chip(f)}<span>${ps.length} insight${ps.length===1?'':'s'} · ${teachers.size} teacher${teachers.size===1?'':'s'} · ${esc([...centres].join(', '))}</span></div>
+      ${items}<div style="display:flex;gap:14px;align-items:center"><button class="more" data-act="fnmore" data-f="${esc(f)}">${FN_OPEN[f]?'Hide':'See'} the ${ps.length} insight${ps.length===1?'':'s'}</button>${CAN&&!editing&&tk.items.length?`<button class="more" data-act="edtk" data-kind="function" data-key="${esc(f)}">Edit the takeaways</button>`:''}</div>
+      ${FN_OPEN[f]?`<div class="src">${ps.map(({p,c})=>`<div class="ins"><p>${esc(p.t)}<small>${esc(c.teachers.map(e=>(tm[e]||{}).name).join(', '))} · ${fmtD(c.date)}${p.h?' · '+esc(p.h):''}</small></p></div>`).join('')}</div>`:''}</div>`;}).join('')}</div>`;
+}
+
+/* ── Requests ── */
+function renderRequests(tm){
+  const R=allReqs().filter(r=>REQF==='all'||isOpen(r));
+  document.getElementById('main').innerHTML=`<div class="fsel">Show <div class="sg" id="reqf"><button type="button" data-f="open" aria-pressed="${REQF==='open'}">Not done yet</button><button type="button" data-f="all" aria-pressed="${REQF==='all'}">All</button></div></div>
+    <div class="card" style="padding:4px 18px">${R.length?R.map(r=>reqRow(r,true)).join(''):'<div class="empty">No requests here.</div>'}</div>`;
+}
+
+/* ── Editing key takeaways ── */
+function editTakeaways(){
+  const k=EDIT_TK;
+  return`<div class="kt" style="grid-template-columns:1fr">${k.items.map((x,i)=>`<div class="k" style="--c:${(TC[x.fn||'']||TC[''])[0]}">
+    ${k.kind==='teacher'?fnSelect(x.fn,`data-tki="${i}"`):''}<textarea class="te" data-tkt="${i}">${esc(x.text)}</textarea>
+    <div><button class="btn sm ghost" data-act="tkdel" data-i="${i}">Remove</button></div></div>`).join('')}</div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" data-act="tkadd">+ Add a takeaway</button><span style="flex:1"></span><button class="btn sm" data-act="tkcancel">Cancel</button><button class="btn sm pri" data-act="tksave">Save takeaways</button></div>`;
+}
+
+/* ── Clicks ── */
+document.getElementById('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;VIEW=b.dataset.v;EDIT_TK=null;try{localStorage.setItem('artium_texp_view',VIEW);}catch(err){}render();};
+document.getElementById('att').onclick=e=>{const b=e.target.closest('[data-go]');if(!b)return;VIEW=b.dataset.go;if(VIEW==='r')REQF='open';render();};
+document.getElementById('log').onclick=()=>logWindow(null,[]);
+document.getElementById('main').addEventListener('click',async e=>{
+  const t=e.target.closest('[data-t]');if(t){SEL=t.dataset.t;EDIT_TK=null;render();return;}
+  const f=e.target.closest('#reqf button');if(f){REQF=f.dataset.f;render();return;}
+  const b=e.target.closest('[data-act]');if(!b)return;e.preventDefault();
+  const a=b.dataset.act,conv=id=>D.conversations.find(c=>c.id===id);
+  if(a==='notes'){OPEN[b.dataset.c]=!OPEN[b.dataset.c];render();}
+  else if(a==='fnmore'){FN_OPEN[b.dataset.f]=!FN_OPEN[b.dataset.f];render();}
+  else if(a==='log1')logWindow(null,[SEL]);
+  else if(a==='editc')logWindow(conv(b.dataset.c));
+  else if(a==='delc'){if(confirm('Delete this conversation and its requests? Tasks already made from them stay on the Goals page.'))call('deleteTexpConversation',{id:b.dataset.c},'Deleting…');}
+  else if(a==='mktask'){const c=conv(b.dataset.c);taskWindow(c,c.requests.find(q=>q.id===b.dataset.r));}
+  else if(a==='email'){if(confirm('Email this task to the Centre Manager now? You\'ll be copied.'))call('texpEmailTask',{id:b.dataset.id},'Sending…');}
+  else if(a==='opentask'){try{window.top.location.hash='goals&t='+b.dataset.id;}catch(err){}}
+  else if(a==='edtk'){const src=b.dataset.kind==='teacher'?D.takeaways.teacher[b.dataset.key]:D.takeaways.function[b.dataset.key];EDIT_TK={kind:b.dataset.kind,key:b.dataset.key,items:JSON.parse(JSON.stringify((src||{items:[]}).items))};render();}
+  else if(a==='tkadd'){syncTk();EDIT_TK.items.push({text:'',fn:'',teachers:[],also:[]});render();}
+  else if(a==='tkdel'){syncTk();EDIT_TK.items.splice(+b.dataset.i,1);render();}
+  else if(a==='tkcancel'){EDIT_TK=null;render();}
+  else if(a==='tksave'){syncTk();const k=EDIT_TK;EDIT_TK=null;await call('saveTakeaways',{kind:k.kind,key:k.key,items:k.items},'Saving…');}
+});
+function syncTk(){document.querySelectorAll('[data-tkt]').forEach(el=>EDIT_TK.items[+el.dataset.tkt].text=el.value);}
+document.getElementById('main').addEventListener('change',e=>{
+  const s=e.target.closest('select.chip');if(!s)return;
+  if(s.dataset.tki!==undefined){syncTk();EDIT_TK.items[+s.dataset.tki].fn=s.value;render();return;}
+  // changing a point's function: the conversation is saved again, and the takeaways are redrafted
+  const c=JSON.parse(JSON.stringify(D.conversations.find(x=>x.id===s.dataset.c)));c.points[+s.dataset.i].fn=s.value;
+  call('saveTexpConversation',{conversation:c},'Saving and updating the takeaways…');
+});
+
+/* ── Log a conversation ── */
+// Notes as written: a line with a bullet is a point; a short line without one (and no full stop) is a heading
+function parseNotes(txt,old){
+  const keep={};(old||[]).forEach(p=>keep[p.t]=p.fn);
+  let h='';const out=[];
+  String(txt||'').split(/\r?\n/).forEach(raw=>{const l=raw.trim();if(!l)return;
+    const m=l.match(/^(?:[•\-\*–·▪●◦]|\d+[.)])\s+(.*)$/);
+    if(m){out.push({h,t:m[1].trim(),fn:keep[m[1].trim()]||''});return;}
+    if(l.length<=80&&!/[.!?:]$/.test(l)){h=l.replace(/:$/,'');return;}
+    out.push({h,t:l,fn:keep[l]||''});});
+  return out;
+}
+function logWindow(c,preset){
+  const tm=T(),st={id:c?c.id:'',date:c?c.date:iso(TODAY),type:c?c.type:'one',teachers:c?c.teachers.slice():(preset||[]).slice(),notes:c?c.notes:'',
+    requests:c?JSON.parse(JSON.stringify(c.requests||[])):[],old:c?c.points:[]};
+  if(!st.requests.length)st.requests.push({id:'',text:'',fn:'',teacher:''});
+  const byCentre={};(D.teachers||[]).forEach(t=>(byCentre[t.centre||'Other']=byCentre[t.centre||'Other']||[]).push(t));
+  const draw=()=>{
+    const w=document.getElementById('win');
+    w.innerHTML=`<div class="scrim"><div class="dlg" role="dialog" aria-label="Log a conversation"><div class="dh"><h2>${c?'Edit the conversation':'Log a conversation'}</h2><button class="x" data-x>×</button></div>
+      <div class="db">
+        <div class="g3"><div class="f"><label for="cd">Date</label><input class="in" type="date" id="cd" max="${iso(TODAY)}" value="${st.date}"></div>
+          <div class="f"><span class="fl">Conversation</span><div class="sg" id="ctype"><button type="button" data-v="one" aria-pressed="${st.type==='one'}">One-on-one</button><button type="button" data-v="group" aria-pressed="${st.type==='group'}">Group</button></div></div>
+          <div class="f"><span class="fl">Teacher${st.type==='group'?'s':''}</span><div class="pp">${st.teachers.map(e=>`<span class="p">${esc((tm[e]||{name:e}).name)} <small>${esc([(tm[e]||{}).centre,(tm[e]||{}).course].filter(Boolean).join(' · '))}</small><button type="button" data-rmt="${esc(e)}" aria-label="Remove">×</button></span>`).join('')}
+            ${st.type==='group'||!st.teachers.length?`<select id="addt" aria-label="Add a teacher"><option value="">+ Add a teacher</option>${Object.keys(byCentre).sort().map(k=>`<optgroup label="${esc(k)}">${byCentre[k].filter(t=>!st.teachers.includes(t.email)).map(t=>`<option value="${esc(t.email)}">${esc(t.name)}${t.course?' · '+esc(t.course):''}</option>`).join('')}</optgroup>`).join('')}</select>`:''}</div></div></div>
+        <div class="f"><label for="cn">Insights</label><small>Paste or type your notes. Lines with a bullet are points; short lines without one become headings. When you save, Claude labels each point by function and updates the key takeaways. You can change both afterwards.</small>
+          <textarea class="in" id="cn" placeholder="Teaching Young Learners&#10;• Young learners typically have a shorter attention span…">${esc(st.notes)}</textarea></div>
+        <div class="f"><span class="fl">Requests from the teacher${st.type==='group'?'s':''}</span><small>One per request. They're listed under Requests, where you can make each one a task for the Centre Manager.</small>
+          ${st.requests.map((q,i)=>`<div class="rq"><input class="in" data-q="${i}" data-k="text" placeholder="What did they ask for?" value="${esc(q.text)}">
+            <select class="in" data-q="${i}" data-k="fn"><option value="">Function</option>${D.tags.map(t=>`<option${t===q.fn?' selected':''}>${esc(t)}</option>`).join('')}</select>
+            <select class="in" data-q="${i}" data-k="teacher">${st.teachers.length?st.teachers.map(e=>`<option value="${esc(e)}"${e===q.teacher?' selected':''}>${esc((tm[e]||{name:e}).name)}</option>`).join(''):'<option value="">Teacher</option>'}</select>
+            <button type="button" class="del" data-rmq="${i}" aria-label="Remove">×</button></div>`).join('')}
+          <button type="button" class="addr" data-addq>+ Add another request</button></div>
+      </div>
+      <div class="df"><span class="msg" id="cmsg"></span><div style="display:flex;gap:10px;align-items:center"><span class="wait" id="cwait"></span><button class="btn" data-x>Cancel</button><button class="btn pri" id="csave">Save conversation</button></div></div></div></div>`;
+  };
+  const pull=()=>{const w=document.getElementById('win');st.date=w.querySelector('#cd').value;st.notes=w.querySelector('#cn').value;
+    w.querySelectorAll('[data-q]').forEach(el=>{st.requests[+el.dataset.q][el.dataset.k]=el.value;});};
+  draw();
+  const w=document.getElementById('win');
+  w.onclick=async e=>{
+    if(e.target.closest('[data-x]')){if(!busy)w.innerHTML='';return;}
+    const ty=e.target.closest('#ctype button');if(ty){pull();st.type=ty.dataset.v;if(st.type==='one')st.teachers=st.teachers.slice(0,1);draw();return;}
+    const rm=e.target.closest('[data-rmt]');if(rm){pull();st.teachers=st.teachers.filter(x=>x!==rm.dataset.rmt);draw();return;}
+    if(e.target.closest('[data-addq]')){pull();st.requests.push({id:'',text:'',fn:'',teacher:st.teachers[0]||''});draw();return;}
+    const rq=e.target.closest('[data-rmq]');if(rq){pull();st.requests.splice(+rq.dataset.rmq,1);if(!st.requests.length)st.requests.push({id:'',text:'',fn:'',teacher:''});draw();return;}
+    if(e.target.id==='csave'){
+      pull();const points=parseNotes(st.notes,st.old),reqs=st.requests.filter(q=>q.text.trim()).map(q=>({...q,teacher:q.teacher||st.teachers[0]}));
+      const msg=w.querySelector('#cmsg');
+      if(!st.teachers.length){msg.textContent='Choose the teacher you spoke with.';return;}
+      if(!points.length&&!reqs.length){msg.textContent='Add the insights or a request.';return;}
+      busy=true;e.target.disabled=true;msg.textContent='';w.querySelector('#cwait').textContent='Saving, and asking Claude to label the insights and update the takeaways…';
+      const ok=await call('saveTexpConversation',{conversation:{id:st.id,date:st.date,type:st.type,teachers:st.teachers,notes:st.notes,points,requests:reqs}},null,msg);
+      busy=false;if(ok){w.innerHTML='';SEL=st.teachers[0];VIEW='t';render();}else{e.target.disabled=false;w.querySelector('#cwait').textContent='';}
+    }
+  };
+  w.onchange=e=>{if(e.target.id==='addt'&&e.target.value){pull();const v=e.target.value;if(st.type==='one')st.teachers=[v];else if(!st.teachers.includes(v))st.teachers.push(v);
+    st.requests.forEach(q=>{if(!q.teacher||!st.teachers.includes(q.teacher))q.teacher=st.teachers[0];});draw();}};
+}
+
+/* ── Make a request into a task ── */
+function taskWindow(c,q){
+  const tm=T(),t=tm[q.teacher]||{name:'',centre:''},staff=(D.staff||[]).filter(s=>s.email);
+  const cm=staff.find(s=>s.centre===t.centre&&/centre manager|centre head/i.test(s.role))||staff.find(s=>s.centre===t.centre);
+  const w=document.getElementById('win');
+  w.innerHTML=`<div class="scrim"><div class="dlg sm" role="dialog" aria-label="Make it a task"><div class="dh"><h2>Make it a task</h2><button class="x" data-x>×</button></div>
+    <div class="db"><div class="f"><label for="tt">Task</label><input class="in" id="tt" value="${esc(q.text)}"></div>
+      <div class="f"><label for="tdsc">Details</label><textarea class="in" id="tdsc" style="min-height:110px">${esc(q.text+'\n\nRequested by '+t.name+' ('+t.centre+') on '+fmtD(c.date)+'.')}</textarea></div>
+      <div class="g2"><div class="f"><label for="tow">For</label><select class="in" id="tow">${staff.map(s=>`<option value="${esc(s.email)}"${cm&&cm.email===s.email?' selected':''}>${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}</select></div>
+        <div class="f"><label for="tdue">Due</label><input class="in" type="date" id="tdue" min="${iso(TODAY)}"></div></div>
+      <small style="color:var(--faint);font-size:12.5px">The task goes on the Goals page under Tasks. When it's marked done there, this request shows it too.</small></div>
+    <div class="df"><span class="msg" id="tmsg"></span><div style="display:flex;gap:10px"><button class="btn" data-x>Cancel</button><button class="btn" id="tnow">Save and email now</button><button class="btn pri" id="tlater">Save task — email later</button></div></div></div></div>`;
+  w.onchange=null;
+  w.onclick=async e=>{
+    if(e.target.closest('[data-x]')){if(!busy)w.innerHTML='';return;}
+    if(e.target.id!=='tnow'&&e.target.id!=='tlater')return;
+    const msg=w.querySelector('#tmsg'),title=w.querySelector('#tt').value.trim();if(!title){msg.textContent='Give the task a title.';return;}
+    if(e.target.id==='tnow'&&!confirm('Email this task now? You\'ll be copied.'))return;
+    busy=true;e.target.disabled=true;
+    const ow=staff.find(s=>s.email===w.querySelector('#tow').value)||{};
+    const ok=await call('texpMakeTask',{conv:c.id,req:q.id,task:{title,desc:w.querySelector('#tdsc').value,owner:{email:ow.email},centre:t.centre,due:w.querySelector('#tdue').value,emailNow:e.target.id==='tnow'}},null,msg);
+    busy=false;if(ok)w.innerHTML='';else e.target.disabled=false;
+  };
+}
+
+/* ── Talking to the data service ── */
+async function call(action,body,wait,msgEl){
+  if(wait){document.getElementById('dot').className='dot loading';document.getElementById('updated').textContent=wait;}
+  try{const j=await ArtiumAuth.call(action,body);take(j);render();return true;}
+  catch(err){if(msgEl)msgEl.textContent='Couldn\'t save: '+err.message+'.';else{document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';}return false;}
+}
+function take(j){D=j;CAN=!!j.canEdit;const n=document.getElementById('note');n.hidden=!j.note;n.textContent=j.note||'';
+  const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
+(async()=>{try{take(await ArtiumAuth.call('texp',{}));}catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';document.getElementById('main').innerHTML='<div class="card empty">Couldn\'t load the conversations.</div>';return;}render();})();
+</script>
+</body>
+</html>

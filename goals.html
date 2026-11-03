@@ -155,6 +155,31 @@
   .ring span{width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center;font:600 11.5px var(--display);color:var(--ink)}
   .rl{font-size:11px;color:var(--faint);margin-top:-4px}
   @media (max-width:640px){.glist{grid-template-columns:1fr}.gc-side{width:110px}}
+  /* Goals | Tasks */
+  .kind{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:5px;box-shadow:var(--shadow);margin-bottom:18px}
+  .kind button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;background:none;border-radius:12px;padding:9px 22px 10px;cursor:pointer;text-align:left}
+  .kind button{font:600 16px var(--display);color:var(--ink2)}.kind small{font:600 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+  .kind button[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6);color:#fff}.kind button[aria-pressed="true"] small{color:#E9CF9E}
+  .tk-row{display:grid;grid-template-columns:minmax(0,1fr) 210px 170px 170px auto;gap:14px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .tk-row:last-child{border-bottom:0}.tk-row.hl{background:#F6F0FC}
+  .tk-row b{display:block;font:600 15px/1.35 var(--display);color:var(--ink)}
+  .tk-row .ds{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tk-row .src{display:inline-block;margin-top:5px;font:600 11.5px var(--body);color:var(--accent)}
+  .tk-row .who{font-size:13.5px;color:var(--ink2)}.tk-row .who small{display:block;font-size:12px;color:var(--faint)}
+  .tk-row select.gl{border:0;cursor:pointer;font:600 12px var(--body);appearance:none;-webkit-appearance:none;padding:5px 12px}
+  .tk-h{padding:10px 18px;background:#FAF9F7;border-bottom:1px solid var(--line);font:700 11px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);display:flex;gap:8px;align-items:center}
+  .tk-h i{width:8px;height:8px;border-radius:50%}
+  .tscrim{position:fixed;inset:0;background:rgba(29,27,34,.45);display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;z-index:30;overflow:auto}
+  .tdlg{width:560px;max-width:100%;background:#fff;border-radius:22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.45)}
+  .tdlg .dh{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line)}.tdlg .dh h2{font:600 21px var(--display);color:var(--ink)}
+  .tdlg .db{padding:16px 24px;display:flex;flex-direction:column;gap:14px}
+  .tdlg .f{display:flex;flex-direction:column;gap:6px}.tdlg .f label{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+  .tdlg .in{border:1px solid var(--border);border-radius:11px;background:var(--bg);padding:9px 12px;font:500 14px var(--body);color:var(--ink);width:100%}
+  .tdlg textarea.in{min-height:110px;resize:vertical;line-height:1.5}
+  .tdlg .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tdlg .df{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--line)}
+  .tdlg .x{border:0;background:none;font-size:24px;color:var(--muted);cursor:pointer}
+  @media (max-width:1000px){.tk-row{grid-template-columns:1fr}}
   .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
   /* Goal details */
   .det{margin-top:18px;padding:20px 22px}
@@ -197,6 +222,7 @@
     <div class="hr"><div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
       <button class="btn pri" type="button" id="newgoal" hidden style="height:42px;padding:0 18px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New goal</button></div>
   </header>
+  <div class="kind" id="kind"><button type="button" data-k="goals" aria-pressed="true">Goals<small>Long-term</small></button><button type="button" data-k="tasks" aria-pressed="false">Tasks<small id="tcount">Short-term, one-time</small></button></div>
   <section class="filters closed" id="fbox">
     <div class="filters-head" id="fhead">
       <div class="t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="f-badge" id="f-badge">All optional</span></div>
@@ -220,6 +246,8 @@
     <div class="vgrp"><span class="vl">Group by</span><div class="seg" id="groupby"><button type="button" data-g="status" aria-pressed="true">Status</button><button type="button" data-g="tag" aria-pressed="false">Tag</button><button type="button" data-g="none" aria-pressed="false">None</button></div></div></div>
   <div id="t"><div class="card empty">Loading…</div></div>
   <div class="card det" id="det" hidden></div>
+  <div id="tasksv" hidden></div>
+  <div id="twin"></div>
 </div>
 
 <script>
@@ -420,14 +448,91 @@ window.openGoal=id=>{const g=G.find(x=>x.id===id);if(g&&!csOf(g).length)CSEL=[];
 async function load(keep){
   try{
     const j=await ArtiumAuth.call('goals',{});
-    G=j.goals||[];ACT=j.activity||[];INITS=j.inits||{};STAFF=j.staff||[];CAN=!!j.canEdit;ME=j.me||'';CENTRES=j.centres||CENTRES;
+    G=j.goals||[];TASKS=j.tasks||[];ACT=j.activity||[];INITS=j.inits||{};STAFF=j.staff||[];CAN=!!j.canEdit;ME=j.me||'';CENTRES=j.centres||CENTRES;
     const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';
     render();
     if(!keep){let id=null;try{id=sessionStorage.getItem('artium_open_goal');sessionStorage.removeItem('artium_open_goal');}catch(e){}
       try{const m=window.top.location.hash.match(/[&?]g=(\w+)/);if(m)id=m[1];}catch(e){}
-      if(id)openGoal(id);}
+      if(id)openGoal(id);
+      try{const m=window.top.location.hash.match(/[&?]t=(\w+)/);if(m)openTask(m[1]);}catch(e){}}
   }catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';document.getElementById('t').innerHTML='<tbody><tr><td class="empty">Couldn\'t load the goals.</td></tr></tbody>';}
 }
+
+/* ── Tasks: short-term, one-time work with one owner. Made here or from a teacher's request on Teacher Experience. ── */
+let TASKS=[],KIND='goals',TSEL=null,tbusy=false;
+try{KIND=localStorage.getItem('artium_goals_kind')==='tasks'?'tasks':'goals';}catch(e){}
+const TST={tbp:'To be picked',inp:'In progress',cmp:'Completed'};
+const renderGoals=render;
+render=function(){
+  document.querySelectorAll('#kind button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===KIND));
+  const open=TASKS.filter(t=>t.status!=='cmp').length;
+  document.getElementById('tcount').textContent=open?open+' open':'Short-term, one-time';
+  const tasks=KIND==='tasks';
+  ['.bar','#chips','.vbar','#t'].forEach(q=>document.querySelector(q).hidden=tasks);
+  document.getElementById('tasksv').hidden=!tasks;
+  renderGoals();
+  const tg=document.querySelector('#fsel .ms[data-f=tag]');if(tg)tg.style.display=tasks?'none':'';
+  if(tasks){document.getElementById('det').hidden=true;document.getElementById('newgoal').lastChild.textContent='New task';
+    document.getElementById('subtitle').textContent='Short-term, one-time tasks, each with one owner';renderTasks();}
+  else document.getElementById('newgoal').lastChild.textContent='New goal';
+};
+const tDue=t=>t.due?fromIso(t.due):null;
+function tGroup(t){if(t.draft)return'draft';if(t.status==='cmp')return'cmp';const d=tDue(t);if(d&&d<TODAY)return'late';return t.status;}
+function renderTasks(){
+  const list=TASKS.filter(t=>!CSEL.length||CSEL.includes(t.centre)).filter(t=>!PSEL.length||(t.owner&&PSEL.includes(t.owner.email)))
+    .sort((a,b)=>(tDue(a)||9e15)-(tDue(b)||9e15));
+  const cnt=k=>list.filter(t=>tGroup(t)===k).length;
+  document.getElementById('chips').hidden=false;
+  document.getElementById('chips').innerHTML=[['Open tasks',list.filter(t=>t.status!=='cmp').length],['Past due',cnt('late')],['To be picked',cnt('tbp')],['In progress',cnt('inp')],['Yet to email',cnt('draft')],['Completed',cnt('cmp')]]
+    .map(([l,v])=>`<div class="k"><small>${l}</small><b>${v}</b></div>`).join('');
+  const el=document.getElementById('tasksv');
+  if(!list.length){el.innerHTML=`<div class="card empty">No tasks yet.${CAN?' Use <b>New task</b>, or make one from a teacher\'s request on the Teacher Experience page.':''}</div>`;return;}
+  const G2=[['late','Past due','#B42318'],['inp','In progress','#C98A1B'],['tbp','To be picked','#B42318'],['draft','Yet to email','#8D6BB5'],['cmp','Completed','#1F7A4D']];
+  el.innerHTML=`<div class="card" style="overflow:hidden">${G2.map(([k,l,c])=>{const xs=list.filter(t=>tGroup(t)===k);if(!xs.length)return'';
+    return`<div class="tk-h"><i style="background:${c}"></i>${l} · ${xs.length}</div>`+xs.map(taskRow).join('');}).join('')}</div>`;
+}
+function taskRow(t){
+  const d=tDue(t),can=CAN||(t.owner&&t.owner.email===ME),late=d&&d<TODAY&&t.status!=='cmp';
+  const due=t.status==='cmp'?(t.completed?'Done '+fmtD(day(new Date(t.completed))):'Done'):d?(late?days(d,TODAY)+' days past due':'Due '+fmtD(d)+(days(TODAY,d)<=7?' · in '+days(TODAY,d)+' day'+(days(TODAY,d)===1?'':'s'):'')):'No due date';
+  const src=t.source&&t.source.kind==='texp'?`<a class="src" href="#" data-tsrc="1">From a teacher's request ›</a>`:'';
+  const st=t.draft?`<span class="gl draft"><i></i>Yet to email</span>`:can?`<select class="gl ${t.status}" data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(k=>`<option value="${k}"${k===t.status?' selected':''}>${TST[k]}</option>`).join('')}</select>`:`<span class="gl ${t.status}"><i></i>${TST[t.status]}</span>`;
+  return`<div class="tk-row${TSEL===t.id?' hl':''}" id="task-${t.id}"><div><b>${esc(t.title)}</b>${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}${src}</div>
+    <div class="who">${esc(t.owner?t.owner.name:'')}<small>${esc(t.centre||'')}</small></div><div class="who" style="color:${late?'var(--bad)':'inherit'}">${due}</div><div>${st}</div>
+    <div style="display:flex;gap:6px;justify-content:flex-end">${CAN&&t.draft?`<button class="btn" style="height:32px" data-temail="${t.id}">Email ${esc((t.owner&&t.owner.name||'').split(' ')[0])}</button>`:''}${CAN?`<button class="btn" style="height:32px" data-tedit="${t.id}">Edit</button>`:''}</div></div>`;
+}
+document.getElementById('kind').onclick=e=>{const b=e.target.closest('button');if(!b)return;KIND=b.dataset.k;try{localStorage.setItem('artium_goals_kind',KIND);}catch(err){}SEL=null;render();};
+document.getElementById('tasksv').addEventListener('click',async e=>{
+  const m=e.target.closest('[data-temail]');if(m){if(!confirm('Email this task now? You\'ll be copied.'))return;await tcall('emailTask',{id:m.dataset.temail});return;}
+  const ed=e.target.closest('[data-tedit]');if(ed){taskWin(TASKS.find(t=>t.id===ed.dataset.tedit));return;}
+  const s=e.target.closest('[data-tsrc]');if(s){e.preventDefault();try{window.top.location.hash='texp';}catch(err){}}
+});
+document.getElementById('tasksv').addEventListener('change',e=>{const s=e.target.closest('[data-tst]');if(s)tcall('taskStatus',{id:s.dataset.tst,s:s.value});});
+document.getElementById('newgoal').addEventListener('click',e=>{if(KIND!=='tasks')return;e.stopImmediatePropagation();taskWin(null);},true);
+async function tcall(action,body,msg){
+  document.getElementById('dot').className='dot loading';
+  try{const j=await ArtiumAuth.call(action,body);G=j.goals||G;TASKS=j.tasks||[];document.getElementById('dot').className='dot';render();return true;}
+  catch(err){if(msg)msg.textContent='Couldn\'t save: '+err.message+'.';else alert('Couldn\'t save: '+err.message+'.');document.getElementById('dot').className='dot';return false;}
+}
+function taskWin(t){
+  const staff=STAFF.filter(s=>s.email),w=document.getElementById('twin');
+  w.innerHTML=`<div class="tscrim"><div class="tdlg" role="dialog" aria-label="Task"><div class="dh"><h2>${t?'Edit the task':'New task'}</h2><button class="x" data-x>×</button></div>
+    <div class="db"><div class="f"><label for="xt">Task</label><input class="in" id="xt" value="${esc(t?t.title:'')}" placeholder="What needs doing?"></div>
+      <div class="f"><label for="xd">Details</label><textarea class="in" id="xd" placeholder="Anything the owner needs to know.">${esc(t?t.desc:'')}</textarea></div>
+      <div class="g2"><div class="f"><label for="xo">For</label><select class="in" id="xo"><option value="">Choose…</option>${staff.map(s=>`<option value="${esc(s.email)}"${t&&t.owner&&t.owner.email===s.email?' selected':''}>${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}</select></div>
+        <div class="f"><label for="xdue">Due</label><input class="in" type="date" id="xdue" value="${t&&t.due?t.due:''}"></div></div></div>
+    <div class="df"><span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span><div style="display:flex;gap:8px"><button class="btn" data-x>Cancel</button>${t&&!t.draft?'':`<button class="btn" id="xnow">Save and email now</button>`}<button class="btn pri" id="xsave">${t&&!t.draft?'Save':'Save task — email later'}</button></div></div></div></div>`;
+  w.onclick=async e=>{
+    if(e.target.closest('[data-x]')){if(!tbusy)w.innerHTML='';return;}
+    if(e.target.id!=='xsave'&&e.target.id!=='xnow')return;
+    const msg=w.querySelector('#xmsg'),ow=staff.find(s=>s.email===w.querySelector('#xo').value);
+    if(!w.querySelector('#xt').value.trim()){msg.textContent='Give the task a title.';return;}if(!ow){msg.textContent='Choose who the task is for.';return;}
+    if(e.target.id==='xnow'&&!confirm('Email this task now? You\'ll be copied.'))return;
+    tbusy=true;e.target.disabled=true;
+    const ok=await tcall('saveTask',{task:{id:t?t.id:'',title:w.querySelector('#xt').value,desc:w.querySelector('#xd').value,owner:{email:ow.email},centre:ow.centre,due:w.querySelector('#xdue').value,emailNow:e.target.id==='xnow'}},msg);
+    tbusy=false;if(ok)w.innerHTML='';else e.target.disabled=false;
+  };
+}
+window.openTask=id=>{KIND='tasks';TSEL=id;CSEL=[];PSEL=[];render();setTimeout(()=>{const r=document.getElementById('task-'+id);if(r)r.scrollIntoView({behavior:'smooth',block:'center'});},80);};
 load();
 </script>
 </body>

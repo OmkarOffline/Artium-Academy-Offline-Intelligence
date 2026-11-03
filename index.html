@@ -89,6 +89,7 @@
     <iframe id="frame-collections" data-src="collections.html" title="Collections Overview" allow="fullscreen" allowfullscreen hidden></iframe>
     <iframe id="frame-updates" data-src="updates.html" title="Key Updates" allow="fullscreen" allowfullscreen hidden></iframe>
     <iframe id="frame-spotlight" data-src="spotlight.html" title="Spotlight" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
+    <iframe id="frame-texp" data-src="texp.html" title="Teacher Experience" hidden></iframe>
     <iframe id="frame-home" data-src="home.html" title="Business Pulse" hidden></iframe>
     <iframe id="frame-daily" data-src="daily.html" title="Daily Tracker" hidden></iframe>
     <iframe id="frame-pipeline" data-src="pipeline.html" title="Renewal Pipeline" hidden></iframe>
@@ -148,6 +149,10 @@
       <button class="tab" role="tab" data-tab="focus" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>Focus Groups</button>
      </div>
      <div class="nav-g">
+      <div class="nav-t">Experience</div>
+      <button class="tab" role="tab" data-tab="texp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M19 9h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v2l-3-2"/></svg>Teacher Experience</button>
+     </div>
+     <div class="nav-g">
       <div class="nav-t">Funnel &amp; Centres</div>
       <button class="tab" role="tab" data-tab="dashboard" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>Lead to Purchase</button>
       <button class="tab" role="tab" data-tab="centres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
@@ -180,6 +185,8 @@
     if(location.hash.slice(1).split("&")[0] !== name) history.replaceState(null, "", "#" + name + extra);
     const gm = extra.match(/g=(\w+)/);
     if(name === "goals" && gm){ try{ sessionStorage.setItem("artium_open_goal", gm[1]); const f = document.getElementById("frame-goals"); if(f.contentWindow && f.contentWindow.openGoal) f.contentWindow.openGoal(gm[1]); }catch(e){} }
+    const tm = extra.match(/t=(\w+)/);
+    if(name === "goals" && tm){ try{ const f = document.getElementById("frame-goals"); if(f.contentWindow && f.contentWindow.openTask) f.contentWindow.openTask(tm[1]); }catch(e){} }
   }
 
   /* Sidebar: opens when the mouse reaches the menu button or the left edge, closes when it leaves; a click or tap also toggles it */
@@ -205,7 +212,7 @@
     const u = s || ArtiumAuth.user || {};
     document.getElementById("who").innerHTML = (u.name ? `<b>${esc(u.name)}</b>` : "") + `<span>${esc(u.email)}</span>`;
     const h = location.hash.slice(1);
-    show(/^goals&g=/.test(h) ? h : "start");   // an email link to a goal opens it; otherwise every visit starts on Home
+    show(/^goals&[gt]=/.test(h) ? h : "start");   // an email link to a goal opens it; otherwise every visit starts on Home
     startBell();
   });
 
