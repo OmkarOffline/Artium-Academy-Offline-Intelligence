@@ -188,7 +188,8 @@
   .det .from{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6}.det .from b{color:var(--accent);font-weight:600}
   .btn{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--ink2);font:600 13px var(--display);cursor:pointer;white-space:nowrap}
   .btn:hover{background:var(--accent-soft);color:var(--accent)}.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}.btn:disabled{opacity:.55;cursor:default}
-  .desc{margin-top:14px;padding:14px 16px;border-radius:12px;background:#FAF8FC;border-left:3px solid #C9B6DE;font-size:14px;line-height:1.65;white-space:pre-wrap;color:var(--ink2)}
+  .desc{margin-top:14px;padding:14px 16px;border-radius:12px;background:#FAF8FC;border-left:3px solid #C9B6DE;font-size:14px;line-height:1.65;color:var(--ink2)}
+  .desc p{margin:0 0 8px}.desc p:last-child,.desc ul:last-child{margin-bottom:0}.desc h3{font:600 17px/1.35 var(--display);color:var(--ink);margin:12px 0 6px}.desc h3:first-child{margin-top:0}.desc ul{margin:0 0 8px;padding-left:22px}.desc li{margin:2px 0}
   .lab{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin:20px 0 10px}
   .grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:22px;align-items:start}
   .mx{width:100%;border-collapse:separate;border-spacing:0;min-width:0;border:1px solid var(--border);border-radius:14px;overflow:hidden}
@@ -365,7 +366,7 @@ function renderDet(){
   el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CSEL.length===1?'at '+esc(CSEL[0])+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Saved, not emailed to the stakeholders yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
       <div style="display:flex;gap:8px;align-items:flex-start">${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${cv(g).status}"><i></i>${ST[cv(g).status]}</span>`}${CAN&&g.draft?'<button class="btn pri" type="button" id="sendmail">✉ Email stakeholders</button>':''}${CAN?'<button class="btn" type="button" id="edit">Edit goal</button>':''}<button class="btn" type="button" id="closeDet" aria-label="Close">✕</button></div></div>
     ${(g.tags||[]).length?`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">${tagChips(g)}</div>`:''}
-    ${g.desc?`<div class="desc">${esc(g.desc)}</div>`:''}
+    ${g.desc?`<div class="desc rich">${GoalForm.descHtml(g.desc)}</div>`:''}
     <div class="grid2"><div><div class="lab">${tasks.length?'Subtasks by centre':'Centres'}</div>${mx}</div>
       <div><div class="lab">Updates</div><div class="feed">${feed||'<div class="sys" style="padding-left:0">No updates yet.</div>'}</div>
       ${canPost(g)&&!g.draft?`<div class="post"><textarea id="ptext" placeholder="Write an update…"></textarea><div class="att" id="patt"></div>
@@ -390,7 +391,7 @@ document.getElementById('det').addEventListener('click',async e=>{
   if(b.id==='closeDet'){SEL=null;render();return;}
   if(b.dataset.rf!=null){FILES.splice(+b.dataset.rf,1);document.getElementById('patt').innerHTML=FILES.map((f,i)=>`<span class="chip">${esc(f.name)}<button type="button" data-rf="${i}">✕</button></span>`).join('');return;}
   if(b.id==='sendmail'){const g=G.find(x=>x.id===SEL),cs=Object.keys(g.centres||{});
-    const miss=!g.desc.trim()?'Add a goal description first — it goes into the email.':cs.some(c=>!(g.centres[c].owners||[]).length)?'Every centre needs an owner before emailing.':'';
+    const miss=!GoalForm.descText(g.desc)?'Add a goal description first — it goes into the email.':cs.some(c=>!(g.centres[c].owners||[]).length)?'Every centre needs an owner before emailing.':'';
     if(miss){alert(miss);return;}
     if(!confirm('Email '+cs.map(c=>(g.centres[c].owners||[]).map(o=>o.name||o.email).join(', ')).join(', ')+' about this goal now?'))return;
     b.disabled=true;try{await ArtiumAuth.call('saveGoal',{goal:{...g,draft:false}});await load(true);}catch(err){alert('Couldn\'t send: '+err.message);b.disabled=false;}return;}
