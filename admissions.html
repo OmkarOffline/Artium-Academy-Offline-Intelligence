@@ -220,6 +220,17 @@
   .kvs .kv:nth-child(2){border-left:1px solid var(--line);padding-left:18px}
   @media (max-width:1000px){.kvs{grid-template-columns:1fr 1fr!important}.kl{grid-column:1/-1}.kv.blank{display:none}.kvs .kv:nth-child(2){border:0;padding:0}}
   .kvs.alt{background:#FBF9FD}.kv.blank{min-height:1px}.kv span b{display:inline;font:600 12px var(--body);color:var(--ink2);margin:0}
+  .nolog{border:0;background:none;padding:0;font:600 12px var(--body);color:var(--bad);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .dlg{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(29,20,40,.5);backdrop-filter:blur(2px)}
+  .dlg-c{width:100%;max-width:860px;max-height:85vh;display:flex;flex-direction:column;background:#fff;border-radius:20px;box-shadow:0 30px 70px -20px rgba(30,15,45,.55);overflow:hidden}
+  .dlg-h{display:flex;justify-content:space-between;gap:16px;padding:20px 22px 14px;border-bottom:1px solid var(--line)}
+  .dlg-h h3{font:600 19px var(--display);color:var(--ink)}.dlg-h p{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+  .dlg-x{flex:none;width:34px;height:34px;border:0;border-radius:10px;background:var(--bg);font-size:20px;color:var(--muted);cursor:pointer}
+  .dlg-b{overflow:auto;padding:4px 22px 18px}
+  .dt{width:100%;min-width:0;border-collapse:collapse}
+  .dt th,.dt td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;font:400 13.5px var(--body);color:var(--ink2);background:none!important;position:static!important;white-space:nowrap}
+  .dt th{font:600 11px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}.dt .n{text-align:right}
+  .dt td b{display:block;font-weight:600;color:var(--ink)}.dt td small{display:block;font-size:12px;color:var(--faint);white-space:normal}
   #gaps.gaps{background:none;border:0;box-shadow:none;padding:0;margin:0}
   .att{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding:0 4px}
   .att>b{font:600 13px var(--body);color:var(--ink);margin-right:4px}.att em{font-style:normal;font-size:13px;color:var(--muted)}
@@ -294,7 +305,7 @@ const days=(a,b)=>Math.round((b-a)/864e5);
 const valid=d=>d&&d.getFullYear()>=2020?d:null;
 const pl=(n,w)=>n+' '+w+(n===1?'':'s');
 const tel=p=>p.length===10?p.slice(0,5)+' '+p.slice(5):'—';
-let V=null,TARGETS={};
+let V=null,F=[],TARGETS={};
 
 /* Every centre visit, as sent by the data service:
    [visit date, visitor, phone, age group, lead source, visit type, course, demo taken, demo teacher, visit status, next call date, notes,
@@ -302,19 +313,31 @@ let V=null,TARGETS={};
    A visitor is in the pipeline when the Centre Manager has marked the probability Yes and entered an expected date and amount.
    They count as converted when the sheet says YES; as not joining when the visit status says so; otherwise overdue once the expected date has passed. */
 const LOST=/not interested|unsuitable|admission restricted|suggested to other|efac/i;
-function build(data){
+function build(data,fresh){
   const out=[];
   CENTRES.forEach(c=>(data[c.name]||[]).forEach(r=>{const date=valid(parseDate(r[0]));if(!date)return;
     const x={centre:c.name,date,name:String(r[1]||'').trim(),phone:String(r[2]||'').replace(/\D/g,'').slice(-10),age:String(r[3]||'').trim(),src:String(r[4]||'').trim(),
       vt:String(r[5]||'').trim(),course:String(r[6]||'').trim(),demo:String(r[7]||'').trim(),teacher:String(r[8]||'').trim(),status:String(r[9]||'').trim(),
       ncd:valid(parseDate(r[10])),note:String(r[11]||'').trim(),prob:String(r[12]||'').trim(),ed:valid(parseDate(r[13])),ea:parseNum(r[14]),
       conv:/^y/i.test(String(r[15]||'').trim()),act:parseNum(r[16]),cd:valid(parseDate(r[17]))};
-    x.yes=/^y/i.test(x.prob);x.no=/^n/i.test(x.prob);
+    x.yes=/^y/i.test(x.prob);x.no=/^n/i.test(x.prob);x.fs=[];
+    out.push(x);}));
+  // Admissions come from Fresh Sales (one row per learner). Each is matched to the visit with the same phone number at that centre:
+  // the latest visit on or before the admission (allowing 3 days for late entries). Family members joining on one phone share that visit.
+  const byPhone=new Map();out.forEach(x=>{if(x.phone.length===10){const k=x.centre+'|'+x.phone;(byPhone.get(k)||byPhone.set(k,[]).get(k)).push(x);}});
+  F=[];CENTRES.forEach(c=>(fresh[c.name]||[]).forEach(r=>{const date=valid(parseDate(r[0]));if(!date)return;
+    const f={centre:c.name,date,id:String(r[1]||'').trim(),name:String(r[2]||'').trim(),phone:String(r[3]||'').replace(/\D/g,'').slice(-10),course:String(r[4]||'').trim(),type:String(r[5]||'').trim(),amt:parseNum(r[6])};
+    const lim=new Date(date);lim.setDate(lim.getDate()+3);
+    f.visit=(byPhone.get(c.name+'|'+f.phone)||[]).filter(x=>x.date<=lim).sort((a,b)=>b.date-a.date)[0]||null;
+    if(f.visit)f.visit.fs.push(f);
+    F.push(f);}));
+  out.forEach(x=>{
+    if(x.fs.length){x.conv=true;x.cd=new Date(Math.min(...x.fs.map(f=>f.date)));x.act=x.fs.reduce((s,f)=>s+f.amt,0);}
     x.state=x.conv?'paid':LOST.test(x.status)||x.no?'lost':x.ed&&x.ed<TODAY?'late':'wait';
     x.inPipe=x.yes&&!!x.ed&&x.ea>0;
     x.tat=x.conv&&x.cd?Math.max(0,days(x.date,x.cd)):null;            // visit to admission, in days
     x.ptp=x.conv&&x.cd&&x.ed?days(x.ed,x.cd):null;                     // paid minus promised: below 0 early, 0 on the day, above 0 late
-    out.push(x);}));
+  });
   return out;
 }
 
@@ -390,25 +413,41 @@ function renderVisits(P,sel){
   document.getElementById('foot-l').textContent=`Visited ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
 }
 
-/* Admissions in the period, by date of conversion, with both turnaround times */
+/* Admissions in the period: every learner in Fresh Sales, with the visit they were matched to and both turnaround times */
+let NOVISIT=[];
 function renderAdm(P,sel){
-  const base=V.filter(x=>(!sel||x.centre===sel.name)&&x.conv&&x.cd&&x.cd>=P.a&&x.cd<=P.b);
-  renderFilters(base);const list=base.filter(passF).sort((a,b)=>b.cd-a.cd||a.name.localeCompare(b.name));
+  const base=F.filter(f=>(!sel||f.centre===sel.name)&&f.date>=P.a&&f.date<=P.b).map(f=>{const v=f.visit||{};
+    return{...f,teacher:v.teacher||'',age:v.age||'',src:v.src||'',tat:v.date?Math.max(0,days(v.date,f.date)):null,ed:v.ed||null,ea:v.ea||0,ptp:v.ed?days(v.ed,f.date):null};});
+  renderFilters(base);const list=base.filter(passF).sort((a,b)=>b.date-a.date||a.name.localeCompare(b.name));
   document.getElementById('flt').innerHTML='';
-  const sum=list.reduce((s,x)=>s+x.act,0);
-  document.getElementById('ptitle').innerHTML=`Admissions <small>${pl(list.length,'learner')} · ${inr(sum)}</small>`;
-  const head=['Converted','Visitor',...(sel?[]:['Centre']),'Course','Visited','Visit to conversion','Promised date','Promise to payment',{t:'Expected',n:1},{t:'Collected',n:1}];
+  const nl=list.filter(f=>!f.visit).length;
+  document.getElementById('ptitle').innerHTML=`Admissions <small>${pl(list.length,'learner')} · ${inr(list.reduce((s,x)=>s+x.amt,0))}${nl?` · ${pl(nl,'visit')} not logged`:''}</small>`;
+  const head=['Joined','Learner',...(sel?[]:['Centre']),'Course','Visited','Visit to conversion','Promised date','Promise to payment',{t:'Expected',n:1},{t:'Collected',n:1}];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No admissions between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
   list.forEach(x=>{
-    h+=`<tr><td class="date"><b>${WD[x.cd.getDay()]}, ${x.cd.getDate()} ${MON[x.cd.getMonth()]}</b></td>
-      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
-      <td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${fmtD(x.date)}</td>
+    h+=`<tr><td class="date"><b>${WD[x.date.getDay()]}, ${x.date.getDate()} ${MON[x.date.getMonth()]}</b></td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}${x.type?' · '+esc(x.type):''}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
+      <td>${x.visit?fmtD(x.visit.date)+(x.visit.fs.length>1?`<span class="sub">${x.visit.fs.length} joined on this visit</span>`:''):'<span class="pp late">Visit not logged</span>'}</td>
       <td>${x.tat==null?'—':x.tat===0?'Same day':pl(x.tat,'day')}</td><td>${x.ed?fmtD(x.ed):'<span style="color:var(--faint)">Not promised</span>'}</td><td>${ptpPill(x)||'—'}</td>
-      <td class="n">${x.ea>0?inr(x.ea):'—'}</td><td class="n amt">${x.act?inr(x.act):'—'}</td></tr>`;
+      <td class="n">${x.ea>0?inr(x.ea):'—'}</td><td class="n amt">${x.amt?inr(x.amt):'—'}</td></tr>`;
   });
   document.getElementById('t').innerHTML=h+'</tbody>';
-  document.getElementById('foot-l').textContent=`Converted ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+  document.getElementById('foot-l').textContent=`Joined ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'} · from Fresh Sales`;
+}
+/* The learners who joined in the period but have no centre visit logged (no visit with the same phone number) */
+function noLogDialog(P,sel){
+  const list=NOVISIT.slice().sort((a,b)=>a.centre.localeCompare(b.centre)||a.date-b.date);
+  const box=document.createElement('div');box.className='dlg';box.setAttribute('role','dialog');box.setAttribute('aria-label','Visits not logged');
+  box.innerHTML=`<div class="dlg-c"><div class="dlg-h"><div><h3>Visits not logged</h3><p>${pl(list.length,'learner')} joined in ${esc(P.label)}${sel?' at '+esc(sel.name):''}, but no centre visit has their phone number. Log the visit, or check that the phone number matches.</p></div><button type="button" class="dlg-x" aria-label="Close">×</button></div>
+    <div class="dlg-b"><table class="dt"><thead><tr><th>Joined</th><th>Learner</th>${sel?'':'<th>Centre</th>'}<th>Phone</th><th>Course</th><th>Type of sale</th><th class="n">Collected</th></tr></thead><tbody>
+    ${list.map(f=>{const fam=F.filter(g=>g!==f&&g.centre===f.centre&&g.phone===f.phone&&g.phone.length===10&&Math.abs(days(g.date,f.date))<=3);
+      return`<tr><td>${fmtD(f.date)}</td><td><b>${esc(f.name)}</b><small>${esc(f.id)}${fam.length?' · same phone as '+fam.map(g=>esc(g.name)).join(', '):''}</small></td>${sel?'':`<td>${esc(f.centre)}</td>`}<td>${tel(f.phone)}</td><td>${esc(f.course)||'—'}</td><td>${esc(f.type)||'—'}</td><td class="n">${inr(f.amt)}</td></tr>`;}).join('')}
+    </tbody></table></div></div>`;
+  const close=()=>{box.remove();document.removeEventListener('keydown',key);},key=e=>{if(e.key==='Escape')close();};
+  box.onclick=e=>{if(e.target===box||e.target.closest('.dlg-x'))close();};document.addEventListener('keydown',key);
+  document.body.appendChild(box);
 }
 
 document.getElementById('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;lv=b.dataset.v;show='all';try{localStorage.setItem('artium_ap_list',lv);}catch(err){}render();};
@@ -430,14 +469,17 @@ function render(){
   const sum=(l,f)=>l.reduce((s,x)=>s+f(x),0),n=v=>v.toLocaleString('en-IN');
   // Current status: centre visits in the period, and admissions (conversions) in the period, whenever the visit was
   const vis=V.filter(x=>mine(x)&&inP(x.date)),adm=V.filter(x=>mine(x)&&x.conv&&inP(x.cd));
-  const aSame=adm.filter(x=>inP(x.date)).length,aEarlier=adm.length-aSame;
+  // Admissions in the period: every Fresh Sales learner, whether or not the visit was logged
+  const admF=F.filter(f=>mine(f)&&inP(f.date)),noVisit=admF.filter(f=>!f.visit);
+  const aSame=admF.filter(f=>f.visit&&inP(f.visit.date)).length,aEarlier=admF.length-aSame-noVisit.length;
+  NOVISIT=noVisit;
   // visit to conversion: all admissions in the period ÷ the period's centre visits; the cohort is this period's visitors and what they have paid
-  const rate=vis.length?adm.length/vis.length*100:null,coh=vis.filter(x=>x.conv),cohCol=sum(coh,x=>x.act);
-  const col=sum(adm,x=>x.act),atv=adm.length?col/adm.length:null;
+  const rate=vis.length?admF.length/vis.length*100:null,coh=F.filter(f=>mine(f)&&f.visit&&inP(f.visit.date)),cohCol=sum(coh,f=>f.amt);
+  const col=sum(admF,f=>f.amt),atv=admF.length?col/admF.length:null;
   // Pipeline: promised (probability Yes, with a date and amount) for this period, not converted yet
   const all=V.filter(x=>mine(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
   const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),pipe=wait.concat(late);
-  const expN=pipe.length,expAmt=sum(pipe,x=>x.ea),expAtv=expN?expAmt/expN:null,rrN=adm.length+expN,rrAmt=col+expAmt;
+  const expN=pipe.length,expAmt=sum(pipe,x=>x.ea),expAtv=expN?expAmt/expN:null,rrN=admF.length+expN,rrAmt=col+expAmt;
   // Targets (Targets page), in Month view only: fresh sales and fresh sales collections
   const tg=mode==='month'?(TARGETS[viewY+'-'+String(viewM+1).padStart(2,'0')]||{}):{},cs=(sel?[sel]:CENTRES).map(c=>c.name);
   const tgt=key=>{const has=cs.filter(c=>tg[c]&&tg[c][key]!=null);return has.length?{v:has.reduce((s,c)=>s+tg[c][key],0),has,all:has.length===cs.length}:null;};
@@ -476,7 +518,7 @@ function render(){
       ${kv('ATV',coh.length?inr(cohCol/coh.length):'–','')}</div>
     <div class="s2-row kvs alt"><div class="kl"><b>All admissions ${mode==='month'?'in '+esc(MONTH_FULL[viewM]):'in this range'}</b><span>whenever the visitor came</span></div>
       <div class="kv blank"></div>
-      ${kv('Admissions',n(adm.length),aEarlier?`<b>${aSame}</b> visited this ${mode==='month'?'month':'range'} · <b>${aEarlier}</b> visited earlier`:'')}
+      ${kv('Admissions',n(admF.length),[`<b>${aSame}</b> visited this ${mode==='month'?'month':'range'}`,aEarlier?`<b>${aEarlier}</b> visited earlier`:'',noVisit.length?`<button type="button" class="nolog" id="nolog">${pl(noVisit.length,'visit')} not logged ›</button>`:''].filter(Boolean).join(' · '))}
       ${kv('Visit to conversion',rate==null?'–':Math.round(rate)+'%','all admissions ÷ centre visits')}
       ${kv('Collections',inr(col),T.amt?`target ${inr(T.amt.v)}`:'')}
       ${kv('ATV',atv==null?'–':inr(atv),'')}</div>
@@ -485,13 +527,13 @@ function render(){
         <table class="pt"><thead><tr><th></th><th>Visitors</th><th>Expected</th><th></th></tr></thead><tbody>
         ${pRows.map(([l,xs])=>prow(l,xs)).join('')}${prow('Total pipeline',pipe,'tot')}</tbody></table></div>
       <div class="blk"><div class="bt">Where ${mode==='month'?esc(MONTH_FULL[viewM]):'this range'} could land <span>done plus pipeline</span></div>
-        ${land('Admissions',adm.length,expN,tN,v=>n(v))}${land('Collections',col,expAmt,tA,v=>inr(v))}
+        ${land('Admissions',admF.length,expN,tN,v=>n(v))}${land('Collections',col,expAmt,tA,v=>inr(v))}
         <div class="lg2"><span><i class="dn"></i>Done${so}</span><span><i class="ex"></i>Expected</span>${tN||tA?'<span><s></s>Target</span>':''}</div></div></div>
     <div class="s2-row tat2"><div class="bt">Turnaround</div>
       <div><small>Visit to conversion</small><b>${dayTxt(avgT)}</b><span>average${tl.length?' · median '+dayTxt(med(tl.map(x=>x.tat))):''}</span></div>
       <div><small>Promise to payment</small><b>${ptpTxt(avgP)}</b><span>average${pr.length?'':' · no promises kept yet'}</span></div>
       <div><small>Paid by the promised date</small><b>${pr.length?Math.round((early+onDay)/pr.length*100)+'%':'–'}</b><span>${pr.length?`${early+onDay} of ${pr.length}`:''}</span></div></div></div>`;
-  document.getElementById('sumline').innerHTML=[`<span>Admissions <b>${n(adm.length)}</b></span>`,`<span>Visit to conversion <b>${rate==null?'–':Math.round(rate)+'%'}</b></span>`,`<span>Collected <b>${inr(col)}</b></span>`,`<span>Pipeline <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Could land at <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`].join('');
+  document.getElementById('sumline').innerHTML=[`<span>Admissions <b>${n(admF.length)}</b></span>`,`<span>Visit to conversion <b>${rate==null?'–':Math.round(rate)+'%'}</b></span>`,`<span>Collected <b>${inr(col)}</b></span>`,`<span>Pipeline <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Could land at <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`].join('');
   document.getElementById('sumbox').classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
   // Needs attention: visitors from this period whose promise is missing or incomplete, and promises from earlier that have passed unpaid
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
@@ -501,6 +543,7 @@ function render(){
   const att=GAP.filter(([g])=>gc[g].length);
   document.getElementById('gaps').innerHTML=`<div class="att"><b>Needs attention</b>${att.length?att.map(([g,l,d])=>`<button type="button" class="ach${show===g?' on':''}" data-g="${g}" title="${esc(d)}"><span>${gc[g].length}</span>${esc(l)}</button>`).join(''):'<em>Nothing. Every visitor has a promise filled in.</em>'}</div>`;
   document.querySelectorAll('.ach').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
+  const nl=document.getElementById('nolog');if(nl)nl.onclick=e=>{e.stopPropagation();noLogDialog(P,sel);};
   if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
   if(lv==='visits')return renderVisits(P,sel);
   if(lv==='adm')return renderAdm(P,sel);
@@ -551,7 +594,7 @@ async function load(){
   render();
   try{
     const j=await ArtiumAuth.call('admissions',{});
-    V=build(j.visits||{});
+    V=build(j.visits||{},j.fresh||{});
     ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets){TARGETS=j.targets;render();}}).catch(()=>{});   // monthly targets (Targets page)
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
