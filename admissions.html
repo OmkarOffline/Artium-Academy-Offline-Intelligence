@@ -187,6 +187,46 @@
   .ty.rp{background:#EEF1F8;color:#3F5592}
   td.ds{max-width:260px;white-space:normal;line-height:1.45}
   .grp.tat{background:#fff}
+  .s2{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+  .s2-row{padding:18px 22px}.s2-row+.s2-row{border-top:1px solid var(--line)}
+  .kvs{display:grid;grid-template-columns:repeat(5,1fr)}
+  .kv{padding:0 18px;border-left:1px solid var(--line)}.kv:first-child{padding-left:0;border-left:0}
+  .kv small{display:block;font:600 12px var(--body);color:var(--muted)}
+  .kv b{display:block;font:600 26px/1.15 var(--display);color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums}
+  .kv span{display:block;font-size:12px;color:var(--faint);margin-top:3px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0}.two .blk{padding:18px 22px}.two .blk+.blk{border-left:1px solid var(--line)}
+  .bt{font:600 14px var(--display);color:var(--ink);margin-bottom:10px}.bt span{font:400 12.5px var(--body);color:var(--muted);margin-left:6px}
+  .pt{width:100%;border-collapse:collapse;min-width:0}
+  .pt th,.pt td{padding:9px 0;border-bottom:1px solid var(--line);font:400 14px var(--body);color:var(--ink2);text-align:right;white-space:nowrap;background:none;position:static;letter-spacing:0;text-transform:none}
+  .pt th:first-child{text-align:left;font-weight:500;color:var(--ink)}
+  .pt thead th{font:600 11.5px var(--body);color:var(--muted);padding-top:0;background:none!important;box-shadow:none!important}
+  .pt td,.pt th{background:none!important}
+  .pt tr.tot th,.pt tr.tot td{border-bottom:0;font-weight:700;color:var(--ink);font-size:15px}
+  .pt .od{color:var(--bad);font-size:12.5px;font-weight:600}.mut{color:var(--faint)}.sm{font-size:12.5px;margin-top:8px}
+  .ld+.ld{margin-top:16px}
+  .ld-t{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline;font-size:13px;color:var(--muted)}
+  .ld-t>b{font:600 13.5px var(--body);color:var(--ink)}.ld-t span b{color:var(--ink)}.ld-t i{font-style:normal;color:var(--faint);margin:0 2px}.ld-t em{font-style:normal;color:var(--muted)}
+  .ld-b{position:relative;display:flex;height:12px;border-radius:7px;background:#F1EEF5;margin-top:8px;overflow:visible}
+  .ld-b i{display:block;height:100%}.ld-b i:first-child{border-radius:7px 0 0 7px}
+  .ld-b .dn{background:var(--accent)}.ld-b .ex{background:repeating-linear-gradient(45deg,#C9B4E3 0 6px,#DCCDEE 6px 12px)}
+  .ld-b s{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold);border-radius:2px}
+  .lg2{display:flex;gap:14px;margin-top:14px;font-size:12px;color:var(--muted)}.lg2 span{display:inline-flex;align-items:center;gap:6px}
+  .lg2 i{width:10px;height:10px;border-radius:3px}.lg2 i.dn{background:var(--accent)}.lg2 i.ex{background:repeating-linear-gradient(45deg,#C9B4E3 0 3px,#DCCDEE 3px 6px)}.lg2 s{width:2px;height:12px;background:var(--gold)}
+  .tat2{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:0;align-items:center}.tat2 .bt{margin:0 26px 0 0}
+  .tat2>div:not(.bt){padding:0 18px;border-left:1px solid var(--line)}
+  .tat2 small{display:block;font:600 12px var(--body);color:var(--muted)}.tat2 b{font:600 18px var(--display);color:var(--ink);margin-right:6px}.tat2 span{font-size:12px;color:var(--faint)}
+  .kvs{grid-template-columns:200px repeat(5,1fr)!important;align-items:start}
+  .kl b{display:block;font:600 14px var(--display);color:var(--ink)}.kl span{display:block;font-size:12px;color:var(--faint);margin-top:3px;line-height:1.4;padding-right:12px}
+  .kvs .kv:nth-child(2){border-left:1px solid var(--line);padding-left:18px}
+  @media (max-width:1000px){.kvs{grid-template-columns:1fr 1fr!important}.kl{grid-column:1/-1}.kv.blank{display:none}.kvs .kv:nth-child(2){border:0;padding:0}}
+  .kvs.alt{background:#FBF9FD}.kv.blank{min-height:1px}.kv span b{display:inline;font:600 12px var(--body);color:var(--ink2);margin:0}
+  #gaps.gaps{background:none;border:0;box-shadow:none;padding:0;margin:0}
+  .att{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;padding:0 4px}
+  .att>b{font:600 13px var(--body);color:var(--ink);margin-right:4px}.att em{font-style:normal;font-size:13px;color:var(--muted)}
+  .ach{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px 0 5px;border:1px solid #F0DDB5;background:#FFF9EC;border-radius:999px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .ach span{min-width:22px;height:22px;border-radius:999px;background:#7A5A22;color:#fff;font:700 11.5px/22px var(--body);text-align:center;padding:0 6px}
+  .ach:hover{border-color:#E2BE73}.ach.on{background:#7A5A22;border-color:#7A5A22;color:#fff}.ach.on span{background:#fff;color:#7A5A22}
+  @media (max-width:1000px){.kvs{grid-template-columns:repeat(2,1fr);gap:14px}.kv{border:0;padding:0}.two{grid-template-columns:1fr}.two .blk+.blk{border-left:0;border-top:1px solid var(--line)}.tat2{grid-template-columns:1fr;gap:12px}.tat2>div:not(.bt){border:0;padding:0}}
   .nt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:240px;white-space:normal}
   .tiles.t4{grid-template-columns:repeat(4,1fr)}
   @media (max-width:1200px){.tiles.t4{grid-template-columns:repeat(2,1fr)}}
@@ -283,7 +323,7 @@ let selCentre=(()=>{try{const v=localStorage.getItem('artium_ap_centre');return 
 let sumOpen=(()=>{try{return localStorage.getItem('artium_ap_summary')!=='closed';}catch(e){return true;}})();
 let lv=(()=>{try{const v=localStorage.getItem('artium_ap_list');return['pipe','visits','adm'].includes(v)?v:'pipe';}catch(e){return'pipe';}})();
 let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,show='all';
-const GAP=[['none','Probability not marked','Visited, not converted, and Yes or No not chosen yet'],['noamt','Yes, but no amount','Expected date entered, expected amount is blank'],['nodate','Yes, but no date','Expected amount entered, expected date is blank']];
+const GAP=[['none','without Yes or No','Visited, not converted, and Yes or No not chosen yet'],['noamt','Yes, but no amount','Expected date entered, expected amount is blank'],['nodate','Yes, but no date','Expected amount entered, expected date is blank'],['stale','promised earlier, not paid','The expected date passed before this period. Update the date or mark No.']];
 const STATES=[['all','All'],['wait','Yet to pay','#B3AFBB'],['late','Overdue','#D9534F'],['paid','Converted','#2DA06A'],['lost','Not joining','#9A96A3']];
 const FV={age:'',teacher:'',course:'',src:''};
 const FL=[['age','All ages'],['teacher','All demo teachers'],['course','All courses'],['src','All lead sources']];
@@ -311,7 +351,7 @@ function renderGap(list,sel,P){
   document.getElementById('flt').innerHTML=`<button type="button" aria-pressed="false" id="back-all">← Back to promised payments</button>`;
   document.getElementById('back-all').onclick=()=>{show='all';render();};
   renderFilters(list);list=list.filter(passF).sort((a,b)=>b.date-a.date);
-  document.getElementById('ptitle').innerHTML=`${esc(g[1])} <small>${pl(list.length,'visitor')} · visited ${esc(P.label)}</small>`;
+  document.getElementById('ptitle').innerHTML=`${g[0]==='stale'?'Promised earlier, not paid':esc(g[1][0].toUpperCase()+g[1].slice(1))} <small>${pl(list.length,'visitor')} · ${g[0]==='stale'?'expected before '+esc(P.label):'visited '+esc(P.label)}</small>`;
   const head=['Visited','Visitor',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Notes'];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">Nothing missing here. Every visitor from ${esc(P.label)} has this filled in.</td></tr>`;
@@ -357,7 +397,7 @@ function renderAdm(P,sel){
   document.getElementById('flt').innerHTML='';
   const sum=list.reduce((s,x)=>s+x.act,0);
   document.getElementById('ptitle').innerHTML=`Admissions <small>${pl(list.length,'learner')} · ${inr(sum)}</small>`;
-  const head=['Converted','Visitor',...(sel?[]:['Centre']),'Course','Visited','Visit to admission','Promised date','Promise to payment',{t:'Expected',n:1},{t:'Collected',n:1}];
+  const head=['Converted','Visitor',...(sel?[]:['Centre']),'Course','Visited','Visit to conversion','Promised date','Promise to payment',{t:'Expected',n:1},{t:'Collected',n:1}];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No admissions between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
   list.forEach(x=>{
@@ -391,7 +431,8 @@ function render(){
   // Current status: centre visits in the period, and admissions (conversions) in the period, whenever the visit was
   const vis=V.filter(x=>mine(x)&&inP(x.date)),adm=V.filter(x=>mine(x)&&x.conv&&inP(x.cd));
   const aSame=adm.filter(x=>inP(x.date)).length,aEarlier=adm.length-aSame;
-  const rate=vis.length?vis.filter(x=>x.conv).length/vis.length*100:null,rCls=rate==null?'':rate>=50?'ok':rate>=30?'mid':'low';
+  // visit to conversion: all admissions in the period ÷ the period's centre visits; the cohort is this period's visitors and what they have paid
+  const rate=vis.length?adm.length/vis.length*100:null,coh=vis.filter(x=>x.conv),cohCol=sum(coh,x=>x.act);
   const col=sum(adm,x=>x.act),atv=adm.length?col/adm.length:null;
   // Pipeline: promised (probability Yes, with a date and amount) for this period, not converted yet
   const all=V.filter(x=>mine(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
@@ -412,34 +453,54 @@ function render(){
   const dist=(parts)=>{const tot=parts.reduce((s,p)=>s+p[1],0)||1;return`<span class="dist">${parts.map(([,v,c])=>v?`<i style="width:${v/tot*100}%;background:${c}"></i>`:'').join('')}</span><span class="lg">${parts.map(([l,v,c])=>`<span><i style="background:${c}"></i>${l} <b>${v}</b></span>`).join('')}</span>`;};
   const dayTxt=v=>v==null?'–':(Math.round(v*10)/10).toLocaleString('en-IN')+(Math.round(v*10)/10===1?' day':' days');
   const ptpTxt=v=>v==null?'–':Math.abs(v)<.05?'On the day':dayTxt(Math.abs(v))+(v<0?' early':' late');
-  document.getElementById('ren').innerHTML=`<div class="grp"><div class="gt">Current status <span>${esc(P.label)}${mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth()?' · so far':''}</span></div><div class="tiles">
-      ${tile('Centre visits',n(vis.length),vs(T.v,sum(part(T.v,vis),()=>1),false)||'visited in this period')}
-      ${tile('Admissions',n(adm.length),vs(T.n,sum(part(T.n,adm),()=>1),false)+`<span class="split"><span><b>${aSame}</b> visited ${mode==='month'?'this month':'in range'}</span><span><b>${aEarlier}</b> visited earlier</span></span>`)}
-      ${tile('Visit to admission conversion',rate==null?'–':Math.round(rate)+'%',rate==null?'':`<span class="bar"><i style="width:${Math.min(100,rate)}%"></i></span>of this period's visitors have joined`,'eff '+rCls)}
-      ${tile('Collections – Admissions',inr(col),vs(T.amt,sum(part(T.amt,adm),x=>x.act),true))}
-      ${tile('ATV – Admissions',atv==null?'–':inr(atv),'')}</div></div>
-    <div class="grp pipe"><div class="gt">Pipeline <span>promised, not paid yet</span></div><div class="tiles">
-      ${tile('No. of expected admissions',n(expN),`${wait.length} yet to pay · <b class="lt">${late.length} overdue</b>`)}
-      ${tile('Run-rate · admissions',n(rrN),vs(T.n,sum(part(T.n,adm),()=>1)+part(T.n,pipe).length,false),'rr')}
-      ${tile('Expected admission collection',inr(expAmt),late.length?`<b class="lt">${inr(sum(late,x=>x.ea))}</b> of it overdue`:'')}
-      ${tile('Expected ATV',expAtv==null?'–':inr(expAtv),'')}
-      ${tile('Run-rate · collections',inr(rrAmt),vs(T.amt,sum(part(T.amt,adm),x=>x.act)+sum(part(T.amt,pipe),x=>x.ea),true),'rr')}</div>
-      <div class="pnote">Promises kept so far: <b>${paid.length}</b> of ${all.length} visitors who promised · ${inr(sum(paid,x=>x.act||x.ea))}${lost.length?` · <b>${lost.length}</b> not joining`:''}</div></div>
-    <div class="grp tat"><div class="gt">Turnaround <span>admissions in this period</span></div><div class="tiles t4">
-      ${tile('Visit to admission · average',dayTxt(avgT),tl.length?dist([['Same day',sameDay,'#5B2A86'],['Within a week',wk,'#9B7BC4'],['Longer',more,'#D9CCEA']]):'')}
-      ${tile('Visit to admission · median',dayTxt(med(tl.map(x=>x.tat))),tl.length?`half of the ${pl(tl.length,'admission')} took this long or less`:'')}
-      ${tile('Promise to payment · average',ptpTxt(avgP),pr.length?dist([['Early',early,'#2DA06A'],['On the day',onDay,'#B3AFBB'],['Late',lateP,'#D9534F']]):'no admissions with a promised date yet')}
-      ${tile('Paid by the promised date',pr.length?Math.round((early+onDay)/pr.length*100)+'%':'–',pr.length?`${early+onDay} of ${pl(pr.length,'admission')} that had a promise`:'')}</div></div>`;
-  document.getElementById('sumline').innerHTML=[`<span>Visits <b>${n(vis.length)}</b></span>`,`<span>Admissions <b>${n(adm.length)}</b></span>`,`<span>Conversion <b>${rate==null?'–':Math.round(rate)+'%'}</b></span>`,
-    `<span>Collected <b>${inr(col)}</b></span>`,`<span>Expected <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Run-rate <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`].join('');
+  // ── Pipeline by when the visitor came: this period, the month before, and earlier (they can still convert in this period) ──
+  const ym=d=>d.getFullYear()*12+d.getMonth(),pm=ym(P.a);
+  const prevLbl=mode==='month'?MONTH_FULL[(viewM+11)%12]:'Before '+fmtD(P.a);
+  const rowsP=mode==='month'?[[MONTH_FULL[viewM]+' visitors',x=>ym(x.date)===pm],[prevLbl+' visitors',x=>ym(x.date)===pm-1],['Earlier visitors',x=>ym(x.date)<pm-1]]
+    :[['Visited in this range',x=>x.date>=P.a],['Visited before',x=>x.date<P.a]];
+  const prow=(l,xs,cls='')=>`<tr class="${cls}"><th>${l}</th><td>${n(xs.length)}</td><td>${inr(sum(xs,x=>x.ea))}</td><td>${xs.filter(x=>x.state==='late').length?`<span class="od">${xs.filter(x=>x.state==='late').length} overdue</span>`:'<span class="mut">—</span>'}</td></tr>`;
+  const pRows=rowsP.map(([l,f])=>[l,pipe.filter(f)]).filter(([,xs],i)=>i<2||xs.length);
+  // Where the period could land: what is in hand plus what is promised, against the target
+  const land=(label,done,exp,t,fmt)=>{const tot=done+exp,max=Math.max(tot,t?t.v:0)||1;
+    return`<div class="ld"><div class="ld-t"><b>${label}</b><span>${fmt(done)} done <i>+</i> ${fmt(exp)} expected <i>=</i> <b>${fmt(tot)}</b>${t?` <em>of ${fmt(t.v)} target${t.all?'':'*'} · ${Math.round(tot/t.v*100)}%</em>`:''}</span></div>
+      <div class="ld-b"><i class="dn" style="width:${done/max*100}%"></i><i class="ex" style="width:${exp/max*100}%"></i>${t?`<s style="left:${Math.min(100,t.v/max*100)}%"></s>`:''}</div></div>`;};
+  const tN=T.n?{...T.n}:null,tA=T.amt?{...T.amt}:null;
+  const kv=(k,v,sub)=>`<div class="kv"><small>${k}</small><b>${v}</b>${sub?`<span>${sub}</span>`:''}</div>`;
+  const so=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth()?' so far':'';
+  document.getElementById('ren').innerHTML=`<div class="s2">
+    <div class="s2-row kvs"><div class="kl"><b>${mode==='month'?esc(MONTH_FULL[viewM])+' visitors':'Visitors in this range'}</b><span>this period's visits and what they have brought in so far</span></div>
+      ${kv('Centre visits',n(vis.length),T.v?`target ${n(T.v.v)}`:'')}
+      ${kv('Admissions',n(coh.length),'')}
+      ${kv('Visit to conversion',vis.length?Math.round(coh.length/vis.length*100)+'%':'–','')}
+      ${kv('Collections',inr(cohCol),'')}
+      ${kv('ATV',coh.length?inr(cohCol/coh.length):'–','')}</div>
+    <div class="s2-row kvs alt"><div class="kl"><b>All admissions ${mode==='month'?'in '+esc(MONTH_FULL[viewM]):'in this range'}</b><span>whenever the visitor came</span></div>
+      <div class="kv blank"></div>
+      ${kv('Admissions',n(adm.length),aEarlier?`<b>${aSame}</b> visited this ${mode==='month'?'month':'range'} · <b>${aEarlier}</b> visited earlier`:'')}
+      ${kv('Visit to conversion',rate==null?'–':Math.round(rate)+'%','all admissions ÷ centre visits')}
+      ${kv('Collections',inr(col),T.amt?`target ${inr(T.amt.v)}`:'')}
+      ${kv('ATV',atv==null?'–':inr(atv),'')}</div>
+    <div class="s2-row two">
+      <div class="blk"><div class="bt">Pipeline <span>expected to pay ${mode==='month'?'in '+esc(MONTH_FULL[viewM]):'in this range'}, by when they visited</span></div>
+        <table class="pt"><thead><tr><th></th><th>Visitors</th><th>Expected</th><th></th></tr></thead><tbody>
+        ${pRows.map(([l,xs])=>prow(l,xs)).join('')}${prow('Total pipeline',pipe,'tot')}</tbody></table></div>
+      <div class="blk"><div class="bt">Where ${mode==='month'?esc(MONTH_FULL[viewM]):'this range'} could land <span>done plus pipeline</span></div>
+        ${land('Admissions',adm.length,expN,tN,v=>n(v))}${land('Collections',col,expAmt,tA,v=>inr(v))}
+        <div class="lg2"><span><i class="dn"></i>Done${so}</span><span><i class="ex"></i>Expected</span>${tN||tA?'<span><s></s>Target</span>':''}</div></div></div>
+    <div class="s2-row tat2"><div class="bt">Turnaround</div>
+      <div><small>Visit to conversion</small><b>${dayTxt(avgT)}</b><span>average${tl.length?' · median '+dayTxt(med(tl.map(x=>x.tat))):''}</span></div>
+      <div><small>Promise to payment</small><b>${ptpTxt(avgP)}</b><span>average${pr.length?'':' · no promises kept yet'}</span></div>
+      <div><small>Paid by the promised date</small><b>${pr.length?Math.round((early+onDay)/pr.length*100)+'%':'–'}</b><span>${pr.length?`${early+onDay} of ${pr.length}`:''}</span></div></div></div>`;
+  document.getElementById('sumline').innerHTML=[`<span>Admissions <b>${n(adm.length)}</b></span>`,`<span>Visit to conversion <b>${rate==null?'–':Math.round(rate)+'%'}</b></span>`,`<span>Collected <b>${inr(col)}</b></span>`,`<span>Pipeline <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Could land at <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`].join('');
   document.getElementById('sumbox').classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
-  // Visitors from this period, not converted and not ruled out, whose promise is missing or incomplete
+  // Needs attention: visitors from this period whose promise is missing or incomplete, and promises from earlier that have passed unpaid
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
   const open=vis.filter(x=>!x.conv&&x.state!=='lost');
-  const gc={none:open.filter(x=>!x.prob&&x.date<=Y),noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),nodate:open.filter(x=>x.yes&&!x.ed&&x.ea>0)};
-  document.getElementById('gaps').innerHTML=`<div class="gh"><b>Not in the pipeline yet</b><span>Visitors from ${esc(P.label)} who haven't converted, and whose promise is missing or incomplete</span></div>
-    <div class="gtiles">${GAP.map(([g,l,d])=>`<button type="button" class="gtile${show===g?' on':''}${gc[g].length?'':' zero'}" data-g="${g}"><span class="gn">${gc[g].length}</span><span class="gl"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`;
-  document.querySelectorAll('.gtile').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
+  const gc={none:open.filter(x=>!x.prob&&x.date<=Y),noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),nodate:open.filter(x=>x.yes&&!x.ed&&x.ea>0),
+    stale:V.filter(x=>mine(x)&&x.inPipe&&x.state==='late'&&x.ed<P.a&&days(x.ed,P.a)<=62)};
+  const att=GAP.filter(([g])=>gc[g].length);
+  document.getElementById('gaps').innerHTML=`<div class="att"><b>Needs attention</b>${att.length?att.map(([g,l,d])=>`<button type="button" class="ach${show===g?' on':''}" data-g="${g}" title="${esc(d)}"><span>${gc[g].length}</span>${esc(l)}</button>`).join(''):'<em>Nothing. Every visitor has a promise filled in.</em>'}</div>`;
+  document.querySelectorAll('.ach').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
   if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
   if(lv==='visits')return renderVisits(P,sel);
   if(lv==='adm')return renderAdm(P,sel);
