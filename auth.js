@@ -43,7 +43,8 @@
   function fresh(){ const s=stored(); if(s&&(!session||s.exp>session.exp)) session=s; return session&&session.exp>Date.now()+30000; }
 
   async function service(body){
-    const r=await fetch(SERVICE_URL,{method:'POST',body:JSON.stringify(Object.assign({token:session&&session.token},body))});
+    const fresh=window.ArtiumAuth&&ArtiumAuth.freshUntil>Date.now();   // just after the refresh button: skip the data service's short-term copy
+    const r=await fetch(SERVICE_URL,{method:'POST',body:JSON.stringify(Object.assign({token:session&&session.token},fresh?{fresh:true}:{},body))});
     if(!r.ok) throw new Error('Could not reach the data service ('+r.status+')');
     const j=await r.json();
     if(j&&j.session&&j.session.token&&session){ session=Object.assign({},session,{token:j.session.token,exp:+j.session.exp}); if(session.email) save(session); }
@@ -120,6 +121,7 @@
   async function loadPhotos(){ try{ const j=await service({action:'photos'}); if(j&&j.photos) setPhotos(j.photos); }catch(e){} }
   window.ArtiumAuth={
     photo:photoOf,
+    freshUntil:0,
     get user(){return session;},
     get pages(){return session&&session.pages||[];},
     fetchRows, signOut,

@@ -391,6 +391,8 @@ async function load(){
   catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';}
   render();
 }
+// the site's refresh button and automatic refresh: wait while editing, with unsaved changes, or while a file uploads
+window.artiumBusy=()=>VIEW==='edit'||DIRTY||UPLOADING>0;
 addEventListener('beforeunload',e=>{if(DIRTY||UPLOADING){e.preventDefault();e.returnValue='';}});
 document.fonts&&document.fonts.ready.then(fit);
 load();

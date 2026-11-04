@@ -66,6 +66,13 @@
   /* Notification bell, top right */
   .bell{position:fixed;top:10px;right:12px;z-index:45;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;border:1px solid rgba(91,42,134,.14);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);color:#5B2A86;cursor:pointer;box-shadow:0 6px 18px -10px rgba(43,24,64,.45)}
   .bell[hidden]{display:none}
+  /* Refresh button, beside the bell: fetches the latest data for the page on screen */
+  .rf{position:fixed;top:10px;right:12px;z-index:45;display:grid;place-items:center;width:38px;height:38px;border-radius:12px;border:1px solid rgba(91,42,134,.14);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);color:#5B2A86;cursor:pointer;box-shadow:0 6px 18px -10px rgba(43,24,64,.45)}
+  .rf[hidden]{display:none}.bell:not([hidden])~.rf{right:58px}
+  .rf svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+  .rf:hover{background:#fff}.rf.spin svg{animation:rfspin .9s linear infinite}@keyframes rfspin{to{transform:rotate(360deg)}}
+  .rf .tip{position:absolute;top:calc(100% + 8px);right:0;white-space:nowrap;background:#2B1840;color:#fff;font:500 12px "Poppins",sans-serif;border-radius:8px;padding:6px 9px;opacity:0;transform:translateY(-3px);transition:opacity .15s,transform .15s;pointer-events:none}
+  .rf:hover .tip,.rf.show .tip{opacity:1;transform:none}
   .bell svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .bell b{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;border-radius:999px;background:#5B2A86;color:#fff;font:700 10.5px/19px "Poppins",sans-serif;text-align:center;padding:0 5px;border:2px solid #F6F5F2}
   .bell b[hidden]{display:none}
@@ -110,6 +117,7 @@
   </main>
 
   <button class="bell" id="bell" type="button" aria-label="Notifications" hidden><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg><b id="bell-n" hidden>0</b></button>
+  <button class="rf" id="rf" type="button" aria-label="Refresh this page's data" hidden><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg><span class="tip" id="rf-tip">Refresh</span></button>
   <div class="npop" id="npop" hidden><h4>Notifications<button type="button" id="nread">Mark all read</button></h4><div class="nlist" id="nlist"></div></div>
   <button class="menu-btn" id="menu-btn" type="button" aria-label="Menu" aria-controls="sidebar" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h11M4 17h16"/></svg></button>
   <div class="edge" id="edge" aria-hidden="true"></div>
@@ -182,6 +190,7 @@
     document.querySelectorAll(".frames iframe").forEach(f => {
       const on = f.id === "frame-" + name;
       if(on && !f.getAttribute("src")) f.src = f.dataset.src + "?v=" + Date.now(); // load each page the first time it is opened, always the latest version
+      else if(on && f.hidden && stale(f, 10)) setTimeout(() => refresh(false), 0);  // back on a page last refreshed 10+ minutes ago
       f.hidden = !on;
     });
     if(location.hash.slice(1).split("&")[0] !== name) history.replaceState(null, "", "#" + name + extra);
@@ -214,9 +223,55 @@
     const u = s || ArtiumAuth.user || {};
     document.getElementById("who").innerHTML = (u.name ? `<b>${esc(u.name)}</b>` : "") + `<span>${esc(u.email)}</span>`;
     const h = location.hash.slice(1);
+    rf.hidden = false;
     show(/^goals&[gt]=/.test(h) ? h : "start");   // an email link to a goal opens it; otherwise every visit starts on Home
     startBell();
   });
+
+  /* ── Refresh: the button fetches the latest data for the page on screen (skipping the data service's short-term copy);
+     the page also refreshes itself every 10 minutes while it is on screen, and when you come back to this tab after 2+ minutes away.
+     An automatic refresh waits while a window is open, something is being typed or a slideshow is full screen. ── */
+  const rf = document.getElementById("rf"), rfTip = document.getElementById("rf-tip");
+  const LAST = new WeakMap();   // when each page last fetched its data
+  const cur = () => document.querySelector(".frames iframe:not([hidden])");
+  const stale = (f, min) => f && f.getAttribute("src") && Date.now() - (LAST.get(f) || 0) >= min * 60000;
+  const hhmm = t => new Date(t).toLocaleTimeString("en-IN", {hour:"numeric", minute:"2-digit"});
+  document.querySelectorAll(".frames iframe").forEach(f => f.addEventListener("load", () => { LAST.set(f, Date.now()); if(f === cur()) tip(); }));
+  function tip(){ const f = cur(), t = f && LAST.get(f); rfTip.textContent = t ? "Refresh · updated " + hhmm(t) + "." : "Refresh."; }
+  function busy(f){
+    try{
+      const w = f.contentWindow, d = w.document;
+      if(d.fullscreenElement) return true;
+      if(typeof w.artiumBusy === "function" && w.artiumBusy()) return true;
+      const a = d.activeElement;
+      if(a && (a.isContentEditable || a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && /^(text|number|email|search|tel|url|)$/.test(a.type)))) return true;
+      return [...d.querySelectorAll('[role="dialog"],[aria-modal="true"],dialog[open],.modal,.dlg,.win')].some(e => {
+        if(e.hidden || !e.getClientRects().length) return false;
+        const cs = w.getComputedStyle(e); return cs.display !== "none" && cs.visibility !== "hidden" && +cs.opacity > 0.05;
+      });
+    }catch(e){ return true; }
+  }
+  let refreshing = false;
+  async function refresh(manual){
+    const f = cur(); if(!f || !f.getAttribute("src") || refreshing) return;
+    if(busy(f) && (!manual || !confirm("Something is open or being edited on this page. Refresh anyway? Anything not saved will be lost."))) return;
+    refreshing = true; rf.classList.add("spin");
+    if(manual) ArtiumAuth.freshUntil = Date.now() + 60000;   // ask the data service for the newest data, not its saved copy
+    try{
+      const w = f.contentWindow;
+      if(typeof w.artiumRefresh === "function") await w.artiumRefresh(manual);
+      else if(typeof w.load === "function") await w.load(true);      // pages re-fetch their data and keep what you had selected
+      else {                                                         // a page without its own refresh: reload it where you were
+        const y = w.scrollY;
+        await new Promise(res => { f.addEventListener("load", () => { try{ f.contentWindow.scrollTo(0, y); }catch(e){} res(); }, {once:true}); w.location.reload(); });
+      }
+    }catch(e){}
+    LAST.set(f, Date.now()); refreshing = false; rf.classList.remove("spin"); tip();
+  }
+  rf.addEventListener("click", () => refresh(true));
+  rf.addEventListener("mouseenter", tip);
+  setInterval(() => { if(document.visibilityState === "visible" && stale(cur(), 10)) refresh(false); }, 30000);
+  document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && stale(cur(), 2)) refresh(false); });
 
   /* Notification bell: activity on goals (updates, status changes), checked every 2 minutes */
   const bell = document.getElementById("bell"), pop = document.getElementById("npop");

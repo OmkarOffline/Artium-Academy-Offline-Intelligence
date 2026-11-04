@@ -625,6 +625,8 @@ async function call(action,body,wait,msgEl){
 }
 function take(j){D=j;CAN=!!j.canEdit;const n=document.getElementById('note');n.hidden=!j.note;n.textContent=j.note||'';
   const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
+// the site's refresh button and automatic refresh: fetch the conversations again and redraw, keeping what is selected
+window.artiumRefresh=async()=>{take(await ArtiumAuth.call('texp',{}));render();};
 (async()=>{try{take(await ArtiumAuth.call('texp',{}));}catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';document.getElementById('main').innerHTML='<div class="card empty">Couldn\'t load the conversations.</div>';return;}render();})();
 </script>
 </body>

@@ -314,6 +314,8 @@ async function load(){
   catch(err){document.getElementById('updated').textContent='Error — '+err.message;document.getElementById('dot').className='dot error';}
   if(k===dk())render();
 }
+// the site's refresh button and automatic refresh: wait while the edit view is open
+window.artiumBusy=()=>VIEW==='edit';
 document.fonts&&document.fonts.ready.then(fit);
 load();
 </script>
