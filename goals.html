@@ -166,24 +166,51 @@
   .tk-row .ds{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .tk-row .src{display:inline-block;margin-top:5px;font:600 11.5px var(--body);color:var(--accent)}
   .tk-row .who{font-size:13.5px;color:var(--ink2)}.tk-row .who small{display:block;font-size:12px;color:var(--faint)}
-  .board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
-  .bcol{background:#EFEDF2;border-radius:18px;padding:10px;min-height:200px;transition:background .15s}
-  .bcol.over{background:#E4D9F1}
-  .bh{display:flex;align-items:center;gap:8px;padding:4px 6px 10px;font:700 11.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
-  .bh i{width:9px;height:9px;border-radius:50%}.bh span{margin-left:auto;font-size:12px;color:var(--muted);background:#fff;border-radius:999px;padding:1px 9px;letter-spacing:0}
-  .bl{display:flex;flex-direction:column;gap:10px}
-  .bc{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 1px 2px rgba(31,26,36,.05);display:flex;flex-direction:column;gap:8px;border-left:4px solid #D9D3E2}
-  .bc[draggable="true"]{cursor:grab}.bc.drag{opacity:.45}.bc.late{border-left-color:#B42318}.bc.hl{outline:2px solid var(--accent)}
-  .bc b{font:600 14.5px/1.35 var(--display);color:var(--ink)}
-  .bc .ds{font-size:12.5px;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .bo{display:flex;align-items:center;gap:4px;min-width:0}.bo .av{width:24px;height:24px;border-radius:50%;background:#8D6BB5;color:#fff;display:grid;place-items:center;font:700 10px var(--body);flex:none;border:2px solid #fff;margin-left:-6px}.bo .av:first-child{margin-left:0}
-  .bo .on{font-size:12.5px;color:var(--ink2);margin-left:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .bf{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bf .due{font-size:12.5px;color:var(--muted)}.bf .due.bad{color:var(--bad);font-weight:600}
-  .ba{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding-top:8px}
-  .ba select.gl{border:0;cursor:pointer;font:600 12px var(--body);appearance:none;-webkit-appearance:none;padding:5px 26px 5px 12px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-opacity='.45' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
-  .bc .src{font:600 11.5px var(--body);color:var(--accent)}
-  .bempty{font-size:13px;color:var(--faint);text-align:center;padding:18px 0}
-  @media (max-width:1000px){.board{grid-template-columns:1fr}}
+  /* Board: one header row of statuses, columns as soft wells, compact cards */
+  .board{--colbg:#EFEDE9}
+  .bhead,.lrow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .bhead{position:sticky;top:0;z-index:3;background:var(--bg);padding:6px 0 10px}
+  .bh{display:flex;align-items:center;gap:9px;padding:0 6px}
+  .bh b{font:600 13.5px var(--body);color:var(--ink)}
+  .bh span{font:500 13px var(--body);color:var(--faint)}
+  .bh .bplus{margin-left:auto;width:26px;height:26px;border:0;border-radius:7px;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+  .bh .bplus:hover{background:#fff;color:var(--accent);box-shadow:0 1px 2px rgba(31,26,36,.08)}
+  .bcol{background:var(--colbg);border-radius:14px;padding:8px;min-height:150px;display:flex;flex-direction:column;gap:8px;transition:background .15s,box-shadow .15s}
+  .bcol.over{background:#E9E1F3;box-shadow:inset 0 0 0 1.5px #CDB8E6}
+  .lane2{margin-top:6px}.lane2 .bcol{min-height:72px}
+  .lh{display:flex;align-items:center;gap:9px;width:100%;border:0;background:none;padding:12px 6px 10px;cursor:pointer;text-align:left;font:600 13.5px var(--body);color:var(--ink)}
+  .lh svg{color:var(--faint);transition:transform .15s}.lane2.shut .lh svg{transform:rotate(-90deg)}.lane2.shut .lrow{display:none}
+  .lh i{width:8px;height:8px;border-radius:3px}.lh span{font-weight:500;color:var(--faint)}
+  .lh::after{content:"";flex:1;height:1px;background:#E6E2DC;margin-left:6px}
+  .bc{position:relative;background:#fff;border:1px solid #E7E4EA;border-radius:11px;padding:12px 13px 11px;box-shadow:0 1px 2px rgba(31,26,36,.05);
+    display:flex;flex-direction:column;gap:7px;transition:border-color .15s,box-shadow .15s}
+  .bc:hover{border-color:#D6CEE0;box-shadow:0 4px 14px -6px rgba(31,26,36,.18)}
+  .bc[draggable="true"]{cursor:grab}.bc.drag{opacity:.35}.bc.hl{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .bct{display:flex;gap:9px;align-items:flex-start}
+  .bsi{position:relative;flex:none;width:16px;height:16px;margin-top:2px;display:grid;place-items:center;border-radius:50%}
+  .bsi select{position:absolute;inset:-4px;opacity:0;cursor:pointer;width:24px;height:24px}
+  .bsi:hover{box-shadow:0 0 0 4px #F1EDF5}
+  .bc h4{font:600 14px/1.42 var(--body);color:var(--ink);letter-spacing:-.005em}
+  .bc.done h4{color:var(--muted);text-decoration:line-through;text-decoration-color:#C9C4CF}
+  .bd{font-size:12.5px;line-height:1.5;color:var(--muted);margin:-2px 0 0 25px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .bp{display:flex;flex-wrap:wrap;gap:5px;margin-left:25px}.bp:empty{display:none}
+  .pill{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border:1px solid #E7E4EA;border-radius:6px;background:#fff;font:500 11.5px var(--body);color:var(--ink2);white-space:nowrap;text-decoration:none}
+  .pill i{width:7px;height:7px;border-radius:50%;background:var(--tc)}
+  .pill.mail{color:#5B2A86;background:#F6F1FB;border-color:#E6DAF3}
+  .pill.src{color:var(--accent)}
+  .bf{display:flex;align-items:center;gap:8px;margin-left:25px;font:500 12px var(--body);color:var(--muted)}
+  .bdue{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}.bdue.bad{color:var(--bad);font-weight:600}
+  .bctr{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--faint)}
+  .bav{display:flex;flex:none;margin-left:auto}.bav i{width:22px;height:22px;border-radius:50%;color:#fff;display:grid;place-items:center;font:600 9.5px var(--body);font-style:normal;box-shadow:0 0 0 2px #fff;margin-left:-6px}
+  .bav i:first-child{margin-left:0}.bav i.more{background:#E9E5EE;color:var(--ink2)}
+  .bx{position:absolute;top:8px;right:8px;display:flex;gap:2px;padding:2px;background:#fff;border:1px solid #E7E4EA;border-radius:8px;box-shadow:0 4px 12px -4px rgba(31,26,36,.18);opacity:0;transform:translateY(-2px);transition:opacity .12s,transform .12s;pointer-events:none}
+  .bc:hover .bx,.bc:focus-within .bx{opacity:1;transform:none;pointer-events:auto}
+  .bib{width:26px;height:26px;display:grid;place-items:center;border:0;border-radius:6px;background:none;color:var(--muted);cursor:pointer}
+  .bib:hover{background:var(--accent-soft);color:var(--accent)}
+  .bempty{font-size:12.5px;color:var(--faint);text-align:center;padding:18px 0}
+  .badd{border:0;background:none;color:var(--muted);font:500 12.5px var(--body);text-align:left;padding:6px 8px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:6px}.badd:hover{background:#fff;color:var(--accent)}
+  @media (hover:none){.bx{opacity:1;pointer-events:auto;transform:none;position:static;align-self:flex-end;box-shadow:none}}
+  @media (max-width:1000px){.bhead{display:none}.lrow{grid-template-columns:1fr}}
   .ttags{display:flex;flex-wrap:wrap;gap:6px}
   .ttag{border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
   .ttag:hover{border-color:#CDBFE0}.ttag[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -272,7 +299,7 @@
     <div class="by">Show goals <div class="seg" id="basis"><button type="button" data-b="active" aria-pressed="true">Active</button><button type="button" data-b="created" aria-pressed="false">Created</button><button type="button" data-b="completed" aria-pressed="false">Completed</button></div> in this period</div>
   </div>
   <div class="chips" id="chips"></div>
-  <div class="vbar"><div class="vgrp"><span class="vl">View</span><div class="seg" id="view"><button type="button" data-v="list" aria-pressed="true">☰ List</button><button type="button" data-v="cards" aria-pressed="false">▦ Cards</button></div></div>
+  <div class="vbar"><div class="vgrp"><span class="vl">View</span><div class="seg" id="view"><button type="button" data-v="list" aria-pressed="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>List</button><button type="button" data-v="cards" aria-pressed="false">▦ Cards</button></div></div>
     <div class="vgrp"><span class="vl">Group by</span><div class="seg" id="groupby"><button type="button" data-g="status" aria-pressed="true">Status</button><button type="button" data-g="tag" aria-pressed="false">Tag</button><button type="button" data-g="none" aria-pressed="false">None</button></div></div></div>
   <div id="t"><div class="card empty">Loading…</div></div>
   <div class="card det" id="det" hidden></div>
@@ -520,11 +547,13 @@ function renderTasks(){
   document.getElementById('chips').innerHTML=[['Open tasks',list.filter(t=>t.status!=='cmp').length],['Past due',cnt('late')],['To be picked',list.filter(t=>t.status==='tbp').length],['In progress',list.filter(t=>t.status==='inp').length],['Yet to email',list.filter(t=>t.draft).length],['Completed',cnt('cmp')]]
     .map(([l,v])=>`<div class="k"><small>${l}</small><b>${v}</b></div>`).join('');
   const el=document.getElementById('tasksv');
-  const sw=`<div class="vbar" style="margin:0 0 12px"><div class="vgrp"><span class="vl">View</span><div class="seg" id="tview"><button type="button" data-tv="list" aria-pressed="${TVIEW==='list'}">☰ List</button><button type="button" data-tv="board" aria-pressed="${TVIEW==='board'}">▥ Board</button></div></div>${TVIEW==='list'?`<div class="vgrp"><span class="vl">Group by</span><div class="seg" id="tgroup"><button type="button" data-tg="status" aria-pressed="${TGROUP==='status'}">Status</button><button type="button" data-tg="tag" aria-pressed="${TGROUP==='tag'}">Tag</button></div></div>`:''}</div>`;
+  const sw=`<div class="vbar" style="margin:0 0 12px"><div class="vgrp"><span class="vl">View</span><div class="seg" id="tview"><button type="button" data-tv="list" aria-pressed="${TVIEW==='list'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>List</button><button type="button" data-tv="board" aria-pressed="${TVIEW==='board'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>Board</button></div></div><div class="vgrp"><span class="vl">Group by</span><div class="seg" id="tgroup"><button type="button" data-tg="status" aria-pressed="${TGROUP==='status'}" title="${TVIEW==='board'?'The board\'s columns are the statuses':''}">Status</button><button type="button" data-tg="tag" aria-pressed="${TGROUP==='tag'}">Tag</button><button type="button" data-tg="none" aria-pressed="${TGROUP==='none'}">None</button></div></div></div>`;
   if(!list.length){el.innerHTML=sw+`<div class="card empty">No tasks yet.${CAN?' Use <b>New task</b>, or make one from a teacher\'s request on the Teacher Experience page.':''}</div>`;return;}
   const G2=[['late','Past due','#B42318'],['inp','In progress','#C98A1B'],['tbp','To be picked','#B42318'],['cmp','Completed','#1F7A4D']];
-  if(TVIEW==='board'){el.innerHTML=sw+boardHtml(list);return;}
-  el.innerHTML=sw+`<div class="card" style="overflow:hidden"><div class="tk-row tk-cols"><span>Task</span><span>Owner</span><span>Due</span><span>Status</span><span>Email</span><span></span></div>${(TGROUP==='tag'?TAGS.map(x=>[x,x,'#A8844F']).concat([['','No tag','#B3AFBB']]):G2).map(([k,l,c])=>{const xs=TGROUP==='tag'?list.filter(t=>k?(t.tags||[]).includes(k):!(t.tags||[]).length):list.filter(t=>tGroup(t)===k);if(!xs.length)return'';
+  if(TVIEW==='board'){
+    if(TGROUP!=='tag'){el.innerHTML=sw+boardHtml([['',list]]);return;}
+    el.innerHTML=sw+boardHtml(TAGS.map(x=>[x,list.filter(t=>(t.tags||[]).includes(x))]).concat([['No tag',list.filter(t=>!(t.tags||[]).length)]]).filter(l=>l[1].length));return;}
+  el.innerHTML=sw+`<div class="card" style="overflow:hidden"><div class="tk-row tk-cols"><span>Task</span><span>Owner</span><span>Due</span><span>Status</span><span>Email</span><span></span></div>${TGROUP==='none'?list.map(taskRow).join(''):(TGROUP==='tag'?TAGS.map(x=>[x,x,'#A8844F']).concat([['','No tag','#B3AFBB']]):G2).map(([k,l,c])=>{const xs=TGROUP==='tag'?list.filter(t=>k?(t.tags||[]).includes(k):!(t.tags||[]).length):list.filter(t=>tGroup(t)===k);if(!xs.length)return'';
     return`<div class="tk-h"><i style="background:${c}"></i>${l} · ${xs.length}</div>`+xs.map(taskRow).join('');}).join('')}</div>`;
 }
 const tOwners=t=>t.owners&&t.owners.length?t.owners:t.owner?[t.owner]:[];
@@ -535,17 +564,38 @@ function dueText(t){const d=tDue(t),late=d&&d<TODAY&&t.status!=='cmp',left=d?day
 /* Board: a column for each status; drag a card to another column, or use its status menu */
 let TGROUP=(()=>{try{return localStorage.getItem('artium_tasks_group')||'status';}catch(e){return'status';}})();
 let TVIEW=(()=>{try{return localStorage.getItem('artium_tasks_view')||'list';}catch(e){return'list';}})();
-function boardHtml(list){
-  const cols=[['tbp','To be picked','#B42318'],['inp','In progress','#C98A1B'],['cmp','Completed','#1F7A4D']];
-  return`<div class="board">${cols.map(([k,l,c])=>{const xs=list.filter(t=>t.status===k).sort((a,b)=>(tDue(a)||9e15)-(tDue(b)||9e15));
-    return`<div class="bcol" data-col="${k}"><div class="bh"><i style="background:${c}"></i>${l}<span>${xs.length}</span></div><div class="bl">${xs.map(t=>{const [due,late]=dueText(t),os=tOwners(t),can=canT(t);
-      return`<div class="bc${late?' late':''}${TSEL===t.id?' hl':''}" id="task-${t.id}" data-card="${t.id}"${can?' draggable="true"':''}>
-        <b>${esc(t.title)}</b>${(t.tags||[]).length?`<div class="gt-m">${tagChips(t)}</div>`:''}${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}
-        <div class="bo">${os.map(o=>`<span class="av" title="${esc(o.name||o.email)}">${esc((o.name||o.email).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</span>`).join('')}<span class="on">${esc(os.map(o=>(o.name||o.email).split(' ')[0]).join(', '))}${t.centre?' · '+esc(t.centre):''}</span></div>
-        <div class="bf"><span class="due${late?' bad':''}">${esc(due)}</span>${t.draft?'<span class="gl draft"><i></i>Yet to email</span>':''}</div>
-        ${t.source&&t.source.kind==='texp'?`<a class="src" href="#" data-tsrc="1">From a teacher's request ›</a>`:''}
-        <div class="ba">${can?`<select class="gl ${t.status}" data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(s=>`<option value="${s}"${s===t.status?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}<span style="flex:1"></span>
-          ${CAN&&t.draft?`<button class="btn" style="height:30px;padding:0 10px;font-size:12px" data-temail="${t.id}">${esc(emailLabel(t))}</button>`:''}${CAN?`<button class="btn" style="height:30px;padding:0 10px;font-size:12px" data-tedit="${t.id}">Edit</button>`:''}</div></div>`;}).join('')||'<div class="bempty">Nothing here.</div>'}</div></div>`;}).join('')}</div>`;
+// Tag colours (the same as Key Updates and Teacher Experience), and a colour per person for the avatars
+const TAGC={'Academics':['#8A4A1F','#F8EEE6'],'Learner Experience':['#5B2A86','#F2ECF8'],'Finance':['#1F4E79','#E6EEF6'],'Hiring':['#3E4C9A','#E9EBF7'],'Marketing':['#A0306E','#F8E8F1'],
+  'Operations':['#3D5A6C','#E7EEF2'],'People Management':['#2F6F8F','#E3F0F5'],'Product / Tech':['#2557C7','#E7EEFB'],'Social Media':['#8E3FB5','#F3E9F9'],'Design & Content':['#4A5568','#ECEEF1'],'Teacher Experience':['#9C4A5E','#F7E9ED']};
+const AVC=['#6B4E9B','#2F6F8F','#9C4A5E','#3E4C9A','#8A4A1F','#3D5A6C','#A0306E','#2557C7'];
+const avc=e=>{let h=0;for(const ch of String(e))h=(h*31+ch.charCodeAt(0))>>>0;return AVC[h%AVC.length];};
+const initials=n=>String(n).split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+const ICAL='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
+const IMAIL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6 8.5-6"/></svg>';
+const IEDIT='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+const IPLUS='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+const ICHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+const SICON={tbp:'<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="#9A96A3" stroke-width="1.6" stroke-dasharray="2.6 2.1"/></svg>',
+  inp:'<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="#C98A1B" stroke-width="1.6"/><path d="M8 4.2a3.8 3.8 0 0 1 0 7.6z" fill="#C98A1B"/></svg>',
+  cmp:'<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="#1F7A4D"/><path d="M5 8.2l2 2 4-4.2" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+const BCOLS=[['tbp','To be picked'],['inp','In progress'],['cmp','Completed']];
+function cardHtml(t){const [due,late]=dueText(t),os=tOwners(t),can=canT(t),k=t.status;
+  return`<article class="bc${k==='cmp'?' done':''}${TSEL===t.id?' hl':''}" id="task-${t.id}" data-card="${t.id}"${can?' draggable="true"':''}>
+    <div class="bct"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><h4>${esc(t.title)}</h4></div>
+    ${t.desc&&t.desc!==t.title?`<p class="bd">${esc(t.desc)}</p>`:''}
+    <div class="bp">${(t.tags||[]).map(x=>`<span class="pill" style="--tc:${(TAGC[x]||['#9A96A3'])[0]}"><i></i>${esc(x)}</span>`).join('')}${t.draft?`<span class="pill mail" title="Not emailed to the owners yet">${IMAIL.replace(/14/g,'12')}Yet to email</span>`:''}${t.source&&t.source.kind==='texp'?`<a class="pill src" href="#" data-tsrc="1">↳ Teacher conversation</a>`:''}</div>
+    <div class="bf"><span class="bdue${late?' bad':''}">${ICAL.replace(/13/g,'12')}${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span class="bctr">· ${esc(t.centre)}</span>`:''}
+      <span class="bav" title="${esc(os.map(o=>o.name||o.email).join(', '))}">${os.slice(0,3).map(o=>`<i style="background:${avc(o.email)}">${esc(initials(o.name||o.email))}</i>`).join('')}${os.length>3?`<i class="more">+${os.length-3}</i>`:''}</span></div>
+    ${CAN?`<div class="bx">${t.draft?`<button class="bib" data-temail="${t.id}" title="${esc(emailLabel(t))}">${IMAIL}</button>`:''}<button class="bib" data-tedit="${t.id}" title="Edit">${IEDIT}</button></div>`:''}
+  </article>`;}
+// lanes: [[name, tasks]]; a name of '' means no lanes
+function boardHtml(lanes){
+  const all=lanes.flatMap(l=>l[1]),uniq=new Set(all.map(t=>t.id));
+  const head=`<div class="bhead">${BCOLS.map(([k,l])=>{const n=[...uniq].filter(id=>TASKS.find(t=>t.id===id).status===k).length;
+    return`<div class="bh">${SICON[k]}<b>${l}</b><span>${n}</span>${k==='tbp'&&CAN?`<button class="bplus" data-badd title="New task">${IPLUS}</button>`:''}</div>`;}).join('')}</div>`;
+  const row=(xs,lane)=>`<div class="lrow">${BCOLS.map(([k])=>{const ys=xs.filter(t=>t.status===k).sort((a,b)=>(tDue(a)||9e15)-(tDue(b)||9e15));
+    return`<div class="bcol" data-col="${k}">${ys.map(cardHtml).join('')||(lane?'':`<div class="bempty">${k==='tbp'?'Nothing waiting.':k==='inp'?'Nothing in progress.':'Nothing completed yet.'}</div>`)}${k==='tbp'&&CAN&&!lane?`<button class="badd" data-badd>${IPLUS}New task</button>`:''}</div>`;}).join('')}</div>`;
+  return`<div class="board">${head}${lanes.map(([n,xs])=>n?`<div class="lane2"><button class="lh" type="button" data-lane>${ICHEV}<i style="background:${(TAGC[n]||['#B3AFBB'])[0]}"></i>${esc(n)}<span>${xs.length}</span></button>${row(xs,true)}</div>`:row(xs,false)).join('')}</div>`;
 }
 function taskRow(t){
   const d=tDue(t),can=canT(t),late=d&&d<TODAY&&t.status!=='cmp';
@@ -574,6 +624,7 @@ document.getElementById('tasksv').addEventListener('dragend',e=>{const c=e.targe
 document.getElementById('tasksv').addEventListener('dragover',e=>{const col=e.target.closest('[data-col]');if(!col||!DRAG)return;e.preventDefault();document.querySelectorAll('.bcol.over').forEach(x=>{if(x!==col)x.classList.remove('over');});col.classList.add('over');});
 document.getElementById('tasksv').addEventListener('drop',e=>{const col=e.target.closest('[data-col]');if(!col||!DRAG)return;e.preventDefault();const t=TASKS.find(x=>x.id===DRAG);DRAG=null;col.classList.remove('over');
   if(t&&t.status!==col.dataset.col){t.status=col.dataset.col;render();tcall('taskStatus',{id:t.id,s:col.dataset.col});}});
+document.getElementById('tasksv').addEventListener('click',e=>{if(e.target.closest('[data-badd]')){taskWin(null);return;}const l=e.target.closest('[data-lane]');if(l)l.parentNode.classList.toggle('shut');});
 document.getElementById('tasksv').addEventListener('change',e=>{const s=e.target.closest('[data-tst]');if(s)tcall('taskStatus',{id:s.dataset.tst,s:s.value});});
 document.getElementById('newgoal').addEventListener('click',e=>{if(KIND!=='tasks')return;e.stopImmediatePropagation();taskWin(null);},true);
 async function tcall(action,body,msg){
