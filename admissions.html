@@ -346,7 +346,7 @@ let selCentre=(()=>{try{const v=localStorage.getItem('artium_ap_centre');return 
 let sumOpen=(()=>{try{return localStorage.getItem('artium_ap_summary')!=='closed';}catch(e){return true;}})();
 let lv=(()=>{try{const v=localStorage.getItem('artium_ap_list');return['pipe','visits','adm'].includes(v)?v:'pipe';}catch(e){return'pipe';}})();
 let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,show='all';
-const GAP=[['none','without Yes or No','Visited, not converted, and Yes or No not chosen yet'],['noamt','Yes, but no amount','Expected date entered, expected amount is blank'],['nodate','Yes, but no date','Expected amount entered, expected date is blank'],['stale','promised earlier, not paid','The expected date passed before this period. Update the date or mark No.']];
+const GAP=[['none','without Yes or No','Visited, not converted, and Yes or No not chosen yet'],['noamt','Yes, but no amount','Marked Yes with an expected date, but the expected amount is blank'],['nodate','Yes, but no date','Marked Yes, but the expected date is blank'],['stale','promised earlier, not paid','The expected date passed before this period. Update the date or mark No.']];
 const STATES=[['all','All'],['wait','Yet to pay','#B3AFBB'],['late','Overdue','#D9534F'],['paid','Converted','#2DA06A'],['lost','Not joining','#9A96A3']];
 const FV={age:'',teacher:'',course:'',src:''};
 const FL=[['age','All ages'],['teacher','All demo teachers'],['course','All courses'],['src','All lead sources']];
@@ -374,7 +374,7 @@ function renderGap(list,sel,P){
   document.getElementById('flt').innerHTML=`<button type="button" aria-pressed="false" id="back-all">← Back to promised payments</button>`;
   document.getElementById('back-all').onclick=()=>{show='all';render();};
   renderFilters(list);list=list.filter(passF).sort((a,b)=>b.date-a.date);
-  document.getElementById('ptitle').innerHTML=`${g[0]==='stale'?'Promised earlier, not paid':esc(g[1][0].toUpperCase()+g[1].slice(1))} <small>${pl(list.length,'visitor')} · ${g[0]==='stale'?'expected before '+esc(P.label):'visited '+esc(P.label)}</small>`;
+  document.getElementById('ptitle').innerHTML=`${g[0]==='stale'?'Promised earlier, not paid':esc(g[1][0].toUpperCase()+g[1].slice(1))} <small>${pl(list.length,'visitor')} · ${g[0]==='stale'?'expected before '+esc(P.label):'to follow up for '+esc(P.label)}</small>`;
   const head=['Visited','Visitor',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Notes'];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">Nothing missing here. Every visitor from ${esc(P.label)} has this filled in.</td></tr>`;
@@ -525,7 +525,7 @@ function render(){
     <div class="s2-row two">
       <div class="blk"><div class="bt">Pipeline <span>expected to pay ${mode==='month'?'in '+esc(MONTH_FULL[viewM]):'in this range'}, by when they visited</span></div>
         <table class="pt"><thead><tr><th></th><th>Visitors</th><th>Expected</th><th></th></tr></thead><tbody>
-        ${pRows.map(([l,xs])=>prow(l,xs)).join('')}${prow('Total pipeline',pipe,'tot')}</tbody></table></div>
+        ${pRows.map(([l,xs])=>prow(l,xs)).join('')}${prow('Total pipeline',pipe,'tot')}</tbody></table><div class="mut sm" id="pmore"></div></div>
       <div class="blk"><div class="bt">Where ${mode==='month'?esc(MONTH_FULL[viewM]):'this range'} could land <span>done plus pipeline</span></div>
         ${land('Admissions',admF.length,expN,tN,v=>n(v))}${land('Collections',col,expAmt,tA,v=>inr(v))}
         <div class="lg2"><span><i class="dn"></i>Done${so}</span><span><i class="ex"></i>Expected</span>${tN||tA?'<span><s></s>Target</span>':''}</div></div></div>
@@ -537,11 +537,17 @@ function render(){
   document.getElementById('sumbox').classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
   // Needs attention: visitors from this period whose promise is missing or incomplete, and promises from earlier that have passed unpaid
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
-  const open=vis.filter(x=>!x.conv&&x.state!=='lost');
-  const gc={none:open.filter(x=>!x.prob&&x.date<=Y),noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),nodate:open.filter(x=>x.yes&&!x.ed&&x.ea>0),
+  // Who to look at: visitors not converted and not ruled out who visited in this period, or the month before, or whose expected date is in this period
+  const from=new Date(P.a.getFullYear(),P.a.getMonth()-1,1);
+  const open=V.filter(x=>mine(x)&&!x.conv&&x.state!=='lost'&&x.date<=P.b&&(x.date>=from||inP(x.ed)));
+  const gc={none:open.filter(x=>!x.prob&&((inP(x.date)&&x.date<=Y)||inP(x.ed))),   // Yes / No not chosen (including those with a date or amount but no Yes)
+    noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),                                 // Yes and a date, but no amount
+    nodate:open.filter(x=>x.yes&&!x.ed),                                          // Yes, but no date (and maybe no amount)
     stale:V.filter(x=>mine(x)&&x.inPipe&&x.state==='late'&&x.ed<P.a&&days(x.ed,P.a)<=62)};
   const att=GAP.filter(([g])=>gc[g].length);
-  document.getElementById('gaps').innerHTML=`<div class="att"><b>Needs attention</b>${att.length?att.map(([g,l,d])=>`<button type="button" class="ach${show===g?' on':''}" data-g="${g}" title="${esc(d)}"><span>${gc[g].length}</span>${esc(l)}</button>`).join(''):'<em>Nothing. Every visitor has a promise filled in.</em>'}</div>`;
+  const yesOut=gc.noamt.length+gc.nodate.length;
+  document.getElementById('pmore').innerHTML=yesOut?`<b>${pl(yesOut,'more visitor')}</b> marked Yes ${yesOut===1?'is':'are'} not counted yet, because the expected ${gc.nodate.length&&gc.noamt.length?'date or amount':gc.nodate.length?'date':'amount'} is missing.`:'';
+  document.getElementById('gaps').innerHTML=`<div class="att"><b>Needs attention</b>${att.length?att.map(([g,l,d])=>`<button type="button" class="ach${show===g?' on':''}" data-g="${g}" title="${esc(d)}"><span>${gc[g].length}</span>${esc(l)}</button>`).join(''):'<em>Nothing. Every visitor has Yes or No, and every Yes has a date and amount.</em>'}</div>`;
   document.querySelectorAll('.ach').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
   const nl=document.getElementById('nolog');if(nl)nl.onclick=e=>{e.stopPropagation();noLogDialog(P,sel);};
   if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
