@@ -477,7 +477,9 @@ function render(){
   const rate=vis.length?admF.length/vis.length*100:null,coh=F.filter(f=>mine(f)&&f.visit&&inP(f.visit.date)),cohCol=sum(coh,f=>f.amt);
   const col=sum(admF,f=>f.amt),atv=admF.length?col/admF.length:null;
   // Pipeline: promised (probability Yes, with a date and amount) for this period, not converted yet
-  const all=V.filter(x=>mine(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
+  // Only this period's visitors and the immediate previous month's count: older visitors stay out even if a Yes was never changed
+  const from=new Date(P.a.getFullYear(),P.a.getMonth()-1,1),recent=x=>x.date>=from&&x.date<=P.b;
+  const all=V.filter(x=>mine(x)&&recent(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
   const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),pipe=wait.concat(late);
   const expN=pipe.length,expAmt=sum(pipe,x=>x.ea),expAtv=expN?expAmt/expN:null,rrN=admF.length+expN,rrAmt=col+expAmt;
   // Targets (Targets page), in Month view only: fresh sales and fresh sales collections
@@ -497,9 +499,9 @@ function render(){
   const ptpTxt=v=>v==null?'–':Math.abs(v)<.05?'On the day':dayTxt(Math.abs(v))+(v<0?' early':' late');
   // ── Pipeline by when the visitor came: this period, the month before, and earlier (they can still convert in this period) ──
   const ym=d=>d.getFullYear()*12+d.getMonth(),pm=ym(P.a);
-  const prevLbl=mode==='month'?MONTH_FULL[(viewM+11)%12]:'Before '+fmtD(P.a);
-  const rowsP=mode==='month'?[[MONTH_FULL[viewM]+' visitors',x=>ym(x.date)===pm],[prevLbl+' visitors',x=>ym(x.date)===pm-1],['Earlier visitors',x=>ym(x.date)<pm-1]]
-    :[['Visited in this range',x=>x.date>=P.a],['Visited before',x=>x.date<P.a]];
+  const prevLbl=mode==='month'?MONTH_FULL[(viewM+11)%12]:'Previous month\'s';
+  const rowsP=mode==='month'?[[MONTH_FULL[viewM]+' visitors',x=>ym(x.date)===pm],[prevLbl+' visitors',x=>ym(x.date)===pm-1]]
+    :[['Visited in this range',x=>x.date>=P.a],['Visited the month before',x=>x.date<P.a]];
   const prow=(l,xs,cls='')=>`<tr class="${cls}"><th>${l}</th><td>${n(xs.length)}</td><td>${inr(sum(xs,x=>x.ea))}</td><td>${xs.filter(x=>x.state==='late').length?`<span class="od">${xs.filter(x=>x.state==='late').length} overdue</span>`:'<span class="mut">—</span>'}</td></tr>`;
   const pRows=rowsP.map(([l,f])=>[l,pipe.filter(f)]).filter(([,xs],i)=>i<2||xs.length);
   // Where the period could land: what is in hand plus what is promised, against the target
@@ -538,12 +540,11 @@ function render(){
   // Needs attention: visitors from this period whose promise is missing or incomplete, and promises from earlier that have passed unpaid
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
   // Who to look at: visitors not converted and not ruled out who visited in this period, or the month before, or whose expected date is in this period
-  const from=new Date(P.a.getFullYear(),P.a.getMonth()-1,1);
-  const open=V.filter(x=>mine(x)&&!x.conv&&x.state!=='lost'&&x.date<=P.b&&(x.date>=from||inP(x.ed)));
+  const open=V.filter(x=>mine(x)&&!x.conv&&x.state!=='lost'&&recent(x));
   const gc={none:open.filter(x=>!x.prob&&((inP(x.date)&&x.date<=Y)||inP(x.ed))),   // Yes / No not chosen (including those with a date or amount but no Yes)
     noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),                                 // Yes and a date, but no amount
     nodate:open.filter(x=>x.yes&&!x.ed),                                          // Yes, but no date (and maybe no amount)
-    stale:V.filter(x=>mine(x)&&x.inPipe&&x.state==='late'&&x.ed<P.a&&days(x.ed,P.a)<=62)};
+    stale:V.filter(x=>mine(x)&&recent(x)&&x.inPipe&&x.state==='late'&&x.ed<P.a)};
   const att=GAP.filter(([g])=>gc[g].length);
   const yesOut=gc.noamt.length+gc.nodate.length;
   document.getElementById('pmore').innerHTML=yesOut?`<b>${pl(yesOut,'more visitor')}</b> marked Yes ${yesOut===1?'is':'are'} not counted yet, because the expected ${gc.nodate.length&&gc.noamt.length?'date or amount':gc.nodate.length?'date':'amount'} is missing.`:'';
