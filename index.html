@@ -29,7 +29,7 @@
   .edge{position:fixed;left:0;top:0;bottom:0;width:10px;z-index:25}
 
   /* Sidebar */
-  .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:40;width:272px;display:flex;flex-direction:column;color:#fff;
+  .sidebar{position:fixed;top:0;left:0;bottom:0;z-index:40;width:292px;display:flex;flex-direction:column;color:#fff;
     background:linear-gradient(180deg,var(--plum) 0%,var(--plum2) 100%);visibility:hidden;
     transform:translateX(-100%);transition:transform .32s cubic-bezier(.3,.7,.2,1),box-shadow .32s,visibility 0s .32s}
   body.open .sidebar{transform:none;visibility:visible;box-shadow:24px 0 60px -30px rgba(31,16,41,.7);transition:transform .32s cubic-bezier(.3,.7,.2,1),box-shadow .32s}
@@ -40,21 +40,69 @@
   .brand{position:relative;display:flex;align-items:center;gap:10px;padding:22px 22px 18px;font:700 15px "Poppins",sans-serif;letter-spacing:-.01em}
   .brand i{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold)}
   .brand small{display:block;font:600 9.5px/1 "Poppins",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(226,196,138,.8);margin-top:4px}
-  .nav-g{display:flex;flex-direction:column;gap:1px}
-  .nav-g+.nav-g{margin-top:10px}
+  /* Search, pinned pages, folding sections */
+  .sb-top{position:relative;display:flex;gap:8px;padding:0 14px 12px}
+  .srch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-radius:11px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);transition:background .15s,border-color .15s}
+  .srch:focus-within{background:rgba(255,255,255,.11);border-color:rgba(226,196,138,.45)}
+  .srch svg{width:15px;height:15px;flex:none;fill:none;stroke:rgba(255,255,255,.5);stroke-width:2;stroke-linecap:round}
+  .srch input{flex:1;min-width:0;width:100%;border:0;outline:0;background:none;color:#fff;font:400 13px "Poppins",sans-serif}
+  .srch input::placeholder{color:rgba(255,255,255,.42)}
+  .srch kbd{font:600 10.5px "Poppins",sans-serif;color:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.16);border-radius:5px;padding:1px 6px}
+  .dock{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:11px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:rgba(255,255,255,.55);cursor:pointer;transition:background .15s,color .15s}
+  .dock:hover{background:rgba(255,255,255,.1);color:#fff}.dock[aria-pressed="true"]{color:var(--gold);background:rgba(226,196,138,.14);border-color:rgba(226,196,138,.3)}
+  .dock svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .nav-g{display:flex;flex-direction:column;gap:2px}
+  .nav-g+.nav-g{margin-top:4px}
   .nav-g:not(:has(.tab:not([hidden]))){display:none}   /* a section with no pages this person may open */
-  .nav-t{position:relative;padding:8px 14px 6px;font:600 10px/1 "Poppins",sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.38)}
-  .tabs{position:relative;flex:1;display:flex;flex-direction:column;gap:2px;padding:4px 12px 12px;overflow-y:auto;scrollbar-width:none}
+  /* Section rows: an icon, the name and how many pages; click to open or fold. Only the section you are in starts open. */
+  .nav-t{position:relative;display:flex;align-items:center;gap:10px;width:100%;height:40px;padding:0 6px 0 8px;border:0;border-radius:11px;background:none;cursor:pointer;text-align:left;
+    font:600 13px "Poppins",sans-serif;color:rgba(255,255,255,.9);transition:background .15s,color .15s}
+  .nav-t:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-t .si{width:28px;height:28px;flex:none;display:grid;place-items:center;border-radius:8px;background:rgba(255,255,255,.07);color:rgba(226,196,138,.9)}
+  .nav-t .si svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .nav-t .sn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .nav-t .cnt{margin-left:auto;min-width:20px;height:20px;border-radius:999px;background:rgba(255,255,255,.08);font:600 11px/20px "Poppins",sans-serif;text-align:center;color:rgba(255,255,255,.55);padding:0 6px}
+  .nav-t .ch{width:14px;height:14px;flex:none;fill:none;stroke:rgba(255,255,255,.45);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transform:rotate(-90deg);transition:transform .2s}
+  .nav-g.open .ch,.nav-g:has(.tab[aria-selected="true"]) .ch{transform:none}
+  .nav-g.open .cnt,.nav-g:has(.tab[aria-selected="true"]) .cnt{visibility:hidden}
+  .nav-g:has(.tab[aria-selected="true"]) .si{background:rgba(226,196,138,.18);color:var(--gold)}
+  .nav-g:has(.nav-t):not(.open):not(:has(.tab[aria-selected="true"])) .tab{display:none}
+  /* pages inside a section: indented under it, with a thin guide line, no icons */
+  .nav-g:not(.pins):has(.nav-t) > .tab{height:34px;padding-left:48px;font-size:13px}
+  .nav-g:not(.pins):has(.nav-t) > .tab > svg:first-child{display:none}
+  .nav-g:not(.pins):has(.nav-t)::after{content:"";position:absolute;left:22px;top:44px;bottom:6px;width:1px;background:rgba(255,255,255,.1);pointer-events:none}
+  .nav-g{position:relative}.nav-g:not(.open):not(:has(.tab[aria-selected="true"]))::after{display:none}
+  .nav-g.open,.nav-g:has(.tab[aria-selected="true"]){padding-bottom:6px}
+  .pins-t{padding:6px 10px 6px 12px;font:600 11px "Poppins",sans-serif;color:rgba(226,196,138,.8);letter-spacing:.04em}
+  .nav-g.pins{padding-bottom:8px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .home-g{padding-bottom:8px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .tabs{position:relative;flex:1;display:flex;flex-direction:column;gap:2px;padding:2px 12px 12px;overflow-y:auto;scrollbar-width:none;
+    mask-image:linear-gradient(180deg,transparent 0,#000 10px,#000 calc(100% - 18px),transparent)}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{position:relative;display:flex;align-items:center;gap:12px;width:100%;height:38px;padding:0 14px;border:0;border-radius:11px;background:transparent;text-align:left;
-    color:rgba(255,255,255,.66);font:500 13.5px "Poppins",sans-serif;cursor:pointer;white-space:nowrap;transition:color .18s,background-color .18s}
-  .tab svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+  .tab{position:relative;display:flex;align-items:center;gap:12px;width:100%;height:36px;padding:0 10px 0 14px;border:0;border-radius:10px;background:transparent;text-align:left;
+    color:rgba(255,255,255,.7);font:500 13.5px "Poppins",sans-serif;cursor:pointer;white-space:nowrap;transition:color .18s,background-color .18s}
+  .tab svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.8}
   .tab:hover{color:#fff;background:rgba(255,255,255,.06)}
-  .tab[aria-selected="true"]{color:#fff;background:linear-gradient(90deg,rgba(226,196,138,.16),rgba(226,196,138,.04))}
+  .tab[aria-selected="true"]{color:#fff;background:linear-gradient(90deg,rgba(226,196,138,.2),rgba(226,196,138,.05));box-shadow:inset 0 0 0 1px rgba(226,196,138,.14)}
   .tab[aria-selected="true"]::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:var(--gold)}
   .tab[aria-selected="true"] svg{color:var(--gold);opacity:1}
   .tab:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
   .tab[hidden]{display:none}
+  .tab .star{margin-left:auto;width:24px;height:24px;display:grid;place-items:center;border-radius:7px;color:rgba(255,255,255,.4);opacity:0;transition:opacity .15s,color .15s,background .15s}
+  .tab .star svg{width:14px;height:14px;opacity:1}
+  .tab:hover .star{opacity:1}.tab .star:hover{color:var(--gold);background:rgba(255,255,255,.08)}
+  .tab .star.on{opacity:1;color:var(--gold)}.tab .star.on svg{fill:currentColor}
+  .nav-g:not(.pins) .tab .star.on{opacity:0}.nav-g:not(.pins) .tab:hover .star.on{opacity:1}
+  .tab mark{background:none;color:var(--gold);font-weight:600}
+  .nores{display:none;padding:14px;font-size:12.5px;color:rgba(255,255,255,.45)}
+  body.searching .nav-g .tab{display:none!important}body.searching .nav-g .tab.hit{display:flex!important}body.searching .nav-g::after{display:none}body.searching .home-g{border:0}body.searching .nav-g.pins{display:none!important}
+  body.searching .nav-g:not(:has(.tab.hit)){display:none}body.searching .nav-t .ch{display:none}
+  /* Kept open: the menu stays beside the page on wide screens */
+  @media (min-width:1100px){
+    body.docked .sidebar{transform:none;visibility:visible;box-shadow:none;transition:none}
+    body.docked .frames{left:292px}
+    body.docked .menu-btn,body.docked .edge,body.docked .scrim{display:none}
+  }
   /* Signed-in person, at the bottom (auth.js puts the avatar here) */
   .shell-bar{position:relative;display:flex;align-items:center;gap:12px;margin:0 12px 14px;padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
   .shell-bar .who{min-width:0;flex:1;order:2}
@@ -125,28 +173,31 @@
 
   <aside class="sidebar" id="sidebar" aria-label="Pages">
     <div class="brand"><i></i><div>Artium Academy<small>Offline Intelligence</small></div></div>
+    <div class="sb-top"><label class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="text" placeholder="Find a page" aria-label="Find a page" autocomplete="off"><kbd>/</kbd></label>
+      <button class="dock" id="dock" type="button" aria-pressed="false" title="Keep the menu open beside the page"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button></div>
     <nav class="tabs" role="tablist" aria-orientation="vertical">
-     <div class="nav-g">
+     <div class="nav-g pins" id="pins" hidden><div class="pins-t">Pinned</div></div>
+     <div class="nav-g home-g">
       <button class="tab" role="tab" data-tab="start" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg>Home</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Execs Call</div>
+      <button type="button" class="nav-t">Execs Call<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="collections" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 13l3-3 2 2 5-5"/></svg>Collections Overview</button>
       <button class="tab" role="tab" data-tab="updates" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg>Key Updates</button>
       <button class="tab" role="tab" data-tab="spotlight" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="11" height="14" rx="2"/><path d="M16 8.5l5.5-3v13l-5.5-3"/></svg>Spotlight</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Daily Operations</div>
+      <button type="button" class="nav-t">Daily Operations<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="home" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12h4l2.5-6 4.5 12 2.5-6H22"/></svg>Business Pulse</button>
       <button class="tab" role="tab" data-tab="daily" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 4v16"/></svg>Daily Tracker</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Pipeline</div>
+      <button type="button" class="nav-t">Pipeline<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="admissions" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>Admissions Pipeline</button>
       <button class="tab" role="tab" data-tab="pipeline" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4 2v-8z"/><path d="M8 9h8"/></svg>Renewal Pipeline</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Performance Tracking</div>
+      <button type="button" class="nav-t">Performance Tracking<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="performance" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Monthly Performance</button>
       <button class="tab" role="tab" data-tab="teachers" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/><path d="M22 9v5"/></svg>Teacher Performance</button>
       <button class="tab" role="tab" data-tab="courses" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Course Performance</button>
@@ -154,39 +205,40 @@
       <button class="tab" role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 6h3v2a3 3 0 0 1-3 3M7 6H4v2a3 3 0 0 0 3 3"/></svg>Statistics</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Learners</div>
+      <button type="button" class="nav-t">Learners<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="analysis" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.7-3.6 3.3-5.5 6.5-5.5 1.2 0 2.3.3 3.2.8"/><circle cx="17.5" cy="16.5" r="2.8"/><path d="M19.6 18.6L21.5 20.5"/></svg>Learner Analysis</button>
       <button class="tab" role="tab" data-tab="focus" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>Focus Groups</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Experience</div>
+      <button type="button" class="nav-t">Experience<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="texp" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M19 9h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v2l-3-2"/></svg>Teacher Experience</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Funnel &amp; Centres</div>
+      <button type="button" class="nav-t">Funnel &amp; Centres<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="dashboard" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l-6 8v6l-4 2v-8z"/></svg>Lead to Purchase</button>
       <button class="tab" role="tab" data-tab="centres" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>Offline Centres</button>
      </div>
      <div class="nav-g">
-      <div class="nav-t">Planner</div>
+      <button type="button" class="nav-t">Planner<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <button class="tab" role="tab" data-tab="planner" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/><path d="M9 12l2 2 4-4"/></svg>Recurring Events</button>
       <button class="tab" role="tab" data-tab="goals" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>Goals</button>
       <button class="tab" role="tab" data-tab="calendar" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8 14h2M14 14h2M8 17h2"/></svg>Calendar</button>
       <button class="tab" role="tab" data-tab="targets" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Targets</button>
      </div>
+     <div class="nores" id="nores">No page matches that.</div>
     </nav>
     <div class="shell-bar"><div class="who" id="who"></div></div>
   </aside>
 <script>
 (function(){   // kept private so nothing here replaces the browser's own functions (e.g. window.open, which Google sign-in needs)
-  const tabs = document.querySelectorAll(".tab");
+  let tabs = document.querySelectorAll(".tab");
   function show(name){
     if(!ArtiumAuth.user) return;   // nothing loads before sign-in
     const extra = String(name || "").includes("&") ? String(name).slice(String(name).indexOf("&")) : "";
     name = String(name || "").split("&")[0];
     if(!document.getElementById("frame-" + name)) name = "start";
     if(!ArtiumAuth.pages.includes(name)) name = ArtiumAuth.pages[0];   // only pages this person may open
-    tabs.forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
+    document.querySelectorAll(".tab[data-tab]").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
     document.querySelectorAll(".frames iframe").forEach(f => {
       const on = f.id === "frame-" + name;
       if(on && !f.getAttribute("src")) f.src = f.dataset.src + "?v=" + Date.now(); // load each page the first time it is opened, always the latest version
@@ -204,7 +256,7 @@
   const body = document.body, side = document.getElementById("sidebar"), btn = document.getElementById("menu-btn");
   let closeTimer = null;
   function openMenu(){ clearTimeout(closeTimer); body.classList.add("open"); btn.setAttribute("aria-expanded", "true"); }
-  function closeMenu(){ clearTimeout(closeTimer); body.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+  function closeMenu(){ clearTimeout(closeTimer); if(document.activeElement && document.activeElement.id === "q") return; body.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
   function closeSoon(){ clearTimeout(closeTimer); closeTimer = setTimeout(() => { if(!side.querySelector(".um-pop.open")) closeMenu(); }, 260); }
   btn.addEventListener("mouseenter", openMenu);
   document.getElementById("edge").addEventListener("mouseenter", openMenu);
@@ -213,7 +265,67 @@
   btn.addEventListener("click", () => body.classList.contains("open") ? closeMenu() : openMenu());
   document.getElementById("scrim").addEventListener("click", closeMenu);
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeMenu(); });
-  tabs.forEach(t => t.addEventListener("click", () => { show(t.dataset.tab); closeMenu(); }));
+  // pages: a click anywhere in the list (pinned copies included); the star pins or unpins
+  document.querySelector(".tabs").addEventListener("click", e => {
+    const st = e.target.closest(".star"); if(st){ e.stopPropagation(); togglePin(st.closest(".tab").dataset.tab); return; }
+    const h = e.target.closest(".nav-t"); if(h){ const g = h.parentNode; if(g.querySelector('.tab[aria-selected="true"]')) return; g.classList.toggle("open"); saveOpen(); return; }
+    const t = e.target.closest(".tab[data-tab]"); if(t){ clearSearch(); show(t.dataset.tab); closeMenu(); }
+  });
+
+  /* ── Pinned pages, folded sections and "keep open": remembered in this browser ── */
+  const ls = (k, v) => { try{ if(v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } };
+  const STAR = '<svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" stroke-linejoin="round"/></svg>';
+  document.querySelectorAll(".nav-g .tab[data-tab]").forEach(t => { if(t.dataset.tab !== "start") t.insertAdjacentHTML("beforeend", `<span class="star" role="button" title="Pin to the top">${STAR}</span>`); });
+  let PINS = ls("artium_nav_pins") || [];
+  function renderPins(){
+    const box = document.getElementById("pins");
+    box.querySelectorAll(".tab").forEach(x => x.remove());
+    const ok = PINS.map(k => document.querySelector(`.nav-g:not(.pins) .tab[data-tab="${k}"]`)).filter(t => t && !t.hidden);   // pinned copies keep their icon
+    ok.forEach(t => { const c = t.cloneNode(true); c.removeAttribute("id"); const s = c.querySelector(".star"); s.classList.add("on"); s.title = "Unpin"; box.appendChild(c); });
+    box.hidden = !ok.length;
+    document.querySelectorAll(".nav-g:not(.pins) .star").forEach(s => { const on = PINS.includes(s.closest(".tab").dataset.tab); s.classList.toggle("on", on); s.title = on ? "Unpin" : "Pin to the top"; });
+  }
+  function togglePin(k){ PINS = PINS.includes(k) ? PINS.filter(x => x !== k) : PINS.concat(k); ls("artium_nav_pins", PINS); renderPins(); }
+  // section icons
+  const SI = {"Execs Call":'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',"Daily Operations":'<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+    "Pipeline":'<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',"Performance Tracking":'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',"Learners":'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+    "Experience":'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',"Funnel & Centres":'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    "Planner":'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M16 3v4M8 3v4M3 10h18"/>'};
+  const nameOf = h => h.firstChild.textContent.trim();
+  document.querySelectorAll(".nav-g .nav-t").forEach(h => { const n = nameOf(h); h.firstChild.remove(); h.insertAdjacentHTML("afterbegin", `<span class="si"><svg viewBox="0 0 24 24">${SI[n] || '<circle cx="12" cy="12" r="8"/>'}</svg></span><span class="sn"></span>`); h.querySelector(".sn").textContent = n; });
+  const nameOfT = h => h.querySelector(".sn").textContent.trim();
+  const saveOpen = () => ls("artium_nav_open", [...document.querySelectorAll(".nav-g.open .nav-t")].map(nameOfT));
+  (ls("artium_nav_open") || []).forEach(n => document.querySelectorAll(".nav-g .nav-t").forEach(h => { if(nameOfT(h) === n) h.parentNode.classList.add("open"); }));
+  function counts(){ document.querySelectorAll(".nav-g:not(.pins)").forEach(g => { const c = g.querySelector(".cnt"); if(c) c.textContent = g.querySelectorAll(".tab:not([hidden])").length; }); }
+  const dock = document.getElementById("dock");
+  function setDock(on){ body.classList.toggle("docked", on); dock.setAttribute("aria-pressed", on); dock.title = on ? "Hide the menu when not in use" : "Keep the menu open beside the page"; ls("artium_nav_dock", on); }
+  dock.addEventListener("click", () => { setDock(!body.classList.contains("docked")); });
+  setDock(!!ls("artium_nav_dock"));
+
+  /* ── Find a page: type to filter; Enter opens the first match; "/" from anywhere opens the menu here ── */
+  const q = document.getElementById("q");
+  const label = t => t.textContent.trim();
+  function search(){
+    const v = q.value.trim().toLowerCase(), list = document.querySelectorAll(".nav-g:not(.pins) .tab[data-tab]:not([hidden])");
+    body.classList.toggle("searching", !!v);
+    let n = 0;
+    list.forEach(t => {
+      const h = t.closest(".nav-g").querySelector(".nav-t"), sec = h ? nameOfT(h).toLowerCase() : "";
+      const hit = !!v && (label(t).toLowerCase().includes(v) || sec.includes(v));
+      t.classList.toggle("hit", hit); if(hit) n++;
+    });
+    document.getElementById("nores").style.display = v && !n ? "block" : "none";
+  }
+  function clearSearch(){ if(q.value){ q.value = ""; search(); } }
+  q.addEventListener("input", search);
+  q.addEventListener("keydown", e => {
+    if(e.key === "Enter"){ const t = document.querySelector(".tab.hit"); if(t){ show(t.dataset.tab); clearSearch(); q.blur(); closeMenu(); } }
+    if(e.key === "Escape"){ e.stopPropagation(); if(q.value) clearSearch(); else { q.blur(); closeMenu(); } }
+  });
+  q.addEventListener("blur", () => setTimeout(() => { if(!side.matches(":hover")) closeSoon(); }, 150));
+  function slash(e){ if(e.key === "/" && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || "")) && !(e.target.isContentEditable)){ e.preventDefault(); openMenu(); q.focus(); } }
+  document.addEventListener("keydown", slash);
+  document.querySelectorAll(".frames iframe").forEach(f => f.addEventListener("load", () => { try{ f.contentWindow.document.addEventListener("keydown", slash); }catch(e){} }));
   window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 
   // Name and email under the avatar at the bottom of the sidebar
@@ -223,7 +335,7 @@
     const u = s || ArtiumAuth.user || {};
     document.getElementById("who").innerHTML = (u.name ? `<b>${esc(u.name)}</b>` : "") + `<span>${esc(u.email)}</span>`;
     const h = location.hash.slice(1);
-    rf.hidden = false;
+    rf.hidden = false; renderPins(); counts();
     show(/^goals&[gt]=/.test(h) ? h : "start");   // an email link to a goal opens it; otherwise every visit starts on Home
     startBell();
   });
