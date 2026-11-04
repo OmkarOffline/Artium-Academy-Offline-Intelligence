@@ -205,7 +205,10 @@
     const bar=document.querySelector('.shell-bar');if(!bar||!session||bar.querySelector('.user-menu'))return;
     const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const initial=esc((session.name||session.email||'?').trim().charAt(0).toUpperCase());
-    const face=session.picture?`<img src="${esc(session.picture)}" alt="" referrerpolicy="no-referrer">`:initial;
+    // Own photos, kept in the photos folder, used in place of the Google picture
+    const PHOTOS={'omkar@artiumacademy.com':'photos/omkar.jpg'};
+    const pic=PHOTOS[String(session.email||'').toLowerCase()]||session.picture;
+    const face=pic?`<img src="${esc(pic)}" alt="" referrerpolicy="no-referrer">`:initial;
     const menu=el(`<div class="user-menu">
       <button class="um-av" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Account">${face}</button>
       <div class="um-pop" role="dialog" aria-label="Account">
