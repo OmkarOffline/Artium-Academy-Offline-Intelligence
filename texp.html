@@ -160,6 +160,53 @@
   .hint{display:flex;gap:10px;align-items:center;background:var(--accent-soft);border-radius:10px;padding:8px 10px;font-size:13px;color:var(--ink2)}
   .hint p{flex:1}
   @media (max-width:1000px){.rp .cols{grid-template-columns:1fr}.rp .col+.col{border-left:0;border-top:1px solid var(--line)}}
+  /* By function */
+  .fwrap{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
+  .frail{padding:8px;position:sticky;top:12px}
+  .frh{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 12px 8px}
+  .fi{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;width:100%;border:0;background:none;text-align:left;cursor:pointer;font:inherit}
+  .fi:hover{background:#FAF8FC}.fi.on{background:var(--accent-soft)}
+  .fi .sw{width:10px;height:10px;border-radius:3px;background:var(--c);flex:none}
+  .fi .fnm{min-width:0}.fi b{display:block;font:600 14.5px var(--display);color:var(--ink)}.fi small{display:block;font-size:12px;color:var(--faint);margin-top:1px}
+  .fi .n{margin-left:auto;font:600 13px var(--display);color:var(--ink2)}
+  .fi .rp2{margin-left:auto;font:700 10px var(--body);color:#fff;background:var(--accent);border-radius:999px;padding:2px 7px}.fi .rp2+.n{margin-left:8px}
+  .fsep{height:1px;background:var(--line);margin:8px 12px}
+  .fempty{padding:6px 12px 10px;font-size:12.5px;color:var(--faint);line-height:1.55}
+  .fpane{overflow:hidden;border-radius:22px}
+  .fph{padding:26px 34px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,color-mix(in srgb,var(--fc) 6%,#fff),#fff);position:relative}
+  .fph::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;background:var(--fc)}
+  .feb{font:700 10.5px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--fc)}
+  .fph h2{font:600 30px/1.2 var(--display);color:var(--ink);margin:6px 0 14px}
+  .fstats{display:flex;gap:28px;flex-wrap:wrap}.fstats b{display:block;font:600 22px/1.1 var(--display);color:var(--ink)}.fstats small{font-size:12px;color:var(--muted)}
+  .ftools{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 34px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .fchips{display:flex;gap:6px;flex-wrap:wrap}
+  .fchips button{font:600 12.5px var(--body);color:var(--ink2);border:1px solid var(--border);border-radius:999px;padding:5px 12px;background:#fff;cursor:pointer}
+  .fchips button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .fsort{font-size:12.5px;color:var(--faint)}
+  .fbody{display:grid;grid-template-columns:minmax(0,1fr) 300px}
+  .flist{padding:8px 34px 28px}
+  .who-h{display:flex;align-items:center;gap:10px;margin:22px 0 4px;flex-wrap:wrap}
+  .who-h .av{width:30px;height:30px;font-size:12px}
+  .who-h b{font:600 15px var(--display);color:var(--ink)}.who-h small{font-size:12.5px;color:var(--faint)}
+  .tkr2{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:14px;padding:16px 14px;margin:0 -14px;border-bottom:1px solid var(--line);border-radius:12px;align-items:start}
+  .tkr2:hover{background:linear-gradient(90deg,#FBF9FD,#fff 70%)}
+  .tkr2 .no{font:600 13px var(--display);color:color-mix(in srgb,var(--fc) 55%,#fff);padding-top:3px}
+  .tkr2 p{font-size:16px;line-height:1.65;color:var(--ink);max-width:70ch}
+  .tkr2 .meta{font-size:12.5px;color:var(--faint);margin-top:5px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}.tkr2 .meta a{color:var(--accent);text-decoration:none}
+  .tkr2 .acts{opacity:0;transition:opacity .15s}.tkr2:hover .acts,.tkr2:focus-within .acts{opacity:1}
+  .rblock{margin:22px 0 6px;border:1px solid #E2D3F2;background:#FBF8FE;border-radius:16px;padding:14px 18px}
+  .rbh{display:flex;align-items:center;gap:10px;font:600 13.5px var(--display);color:var(--accent);margin-bottom:6px}
+  .rbn{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 13px var(--display)}
+  .rbi{padding:8px 0;border-top:1px solid #EDE3F7}.rbi:first-of-type{border-top:0}.rbi p{font-size:15.5px;line-height:1.6;color:var(--ink)}.rbi small{font-size:12.5px;color:var(--faint)}
+  .fside{border-left:1px solid var(--line);padding:22px 24px;background:#FCFBFA}
+  .lb2{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+  .blk2+.blk2{margin-top:24px}
+  .rq3{padding:10px 0;border-top:1px solid var(--line)}.rq3:first-of-type{border-top:0}.rq3 p{font-size:13.5px;line-height:1.45;color:var(--ink)}.rq3 small{display:block;font-size:12px;color:var(--faint);margin:3px 0 6px}
+  .cbar{display:grid;grid-template-columns:1fr auto;font-size:13px;margin-bottom:10px}.cbar i{grid-column:1/-1;height:6px;border-radius:6px;background:var(--fc);opacity:.7;margin-top:4px}
+  .lnk2{border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;text-align:left;padding:0}
+  .fnone{font-size:13.5px;color:var(--faint);padding:14px 0}
+  .fpts{margin-top:26px;border-top:1px solid var(--line);padding-top:14px}.fpt{padding:8px 0}.fpt p{font-size:14.5px;line-height:1.55;color:var(--ink2)}.fpt small{font-size:12px;color:var(--faint)}
+  @media (max-width:1100px){.fwrap{grid-template-columns:1fr}.frail{position:static}.fbody{grid-template-columns:1fr}.fside{border-left:0;border-top:1px solid var(--line)}}
   .tkr{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:14px;padding:10px}
   .tkr textarea.in{min-height:58px}
   .tkc{display:flex;gap:10px;align-items:center}.tkc select{width:190px;flex:none}.tkc select[data-kk=same]{flex:1;width:auto;min-width:0}.tkc .del{flex:none}
@@ -370,20 +417,56 @@ function convHtml(c){
 const fnSelect=(f,attrs)=>{const [c,cs]=TC[f||'']||TC[''];return`<select class="chip" style="--c:${c};--cs:${cs}" ${attrs} aria-label="Function"><option value="">No function</option>${D.tags.map(t=>`<option${t===f?' selected':''}>${esc(t)}</option>`).join('')}</select>`;};
 
 /* ── By function ── */
+/* ── By function: the functions on the left, one function at a time on the right, read like a page ── */
+let FSEL=null,FTEACH='',FPTS=false;
+function fnData(tm){
+  const pts={};D.conversations.forEach(c=>c.points.forEach(p=>{if(p.fn)(pts[p.fn]=pts[p.fn]||[]).push({p,c});}));
+  const G=tkGroups(),out={};
+  D.conversations.forEach(c=>(c.takeaways||[]).forEach(k=>{const f=k.fn||'';(out[f]=out[f]||{f,items:[],pts:pts[f]||[]}).items.push({k,c,who:(k.teachers&&k.teachers.length?k.teachers:c.teachers)});}));
+  Object.keys(pts).forEach(f=>{if(!out[f])out[f]={f,items:[],pts:pts[f]};});
+  Object.values(out).forEach(F=>{F.reps=G.filter(g=>(g.fn||'')===F.f&&g.teachers.length>1);F.teachers=[...new Set(F.items.flatMap(x=>x.who))];
+    F.latest=F.items.concat(F.pts).map(x=>x.c.date).sort().pop()||'';F.convs=new Set(F.items.map(x=>x.c.id));});
+  return Object.values(out).sort((a,b)=>b.reps.length-a.reps.length||b.items.length-a.items.length||(a.latest<b.latest?1:-1));
+}
 function renderFunctions(tm){
-  const pts={};D.conversations.forEach(c=>c.points.forEach(p=>{if(!p.fn)return;(pts[p.fn]=pts[p.fn]||[]).push({p,c});}));
-  const byFn={};tkGroups().forEach(g=>(byFn[g.fn||'']=byFn[g.fn||'']||[]).push(g));
-  const fns=[...new Set(Object.keys(byFn).concat(Object.keys(pts)))].map(f=>({f,gs:byFn[f]||[],ps:pts[f]||[]}))
-    .sort((a,b)=>Math.max(0,...b.gs.map(g=>g.teachers.length))-Math.max(0,...a.gs.map(g=>g.teachers.length))||b.gs.length-a.gs.length||b.ps.length-a.ps.length);
-  if(!fns.length){document.getElementById('main').innerHTML='<div class="card empty">Functions appear here once key takeaways are written.</div>';return;}
-  document.getElementById('main').innerHTML=`<div class="fg">${fns.map(({f,gs,ps})=>{
-    const teachers=new Set(gs.flatMap(g=>g.teachers).concat(ps.flatMap(x=>x.c.teachers))),centres=new Set([...teachers].map(e=>(tm[e]||{}).centre).filter(Boolean)),[c]=TC[f]||TC[''];
-    const items=gs.length?gs.map(g=>{const who=g.teachers.map(e=>(tm[e]||{}).name).filter(Boolean),m=who.length>1;
-      return`<div class="ft${m?' many':''}"><p>${esc(g.text)}</p><small>${m?'Raised by '+who.length+' teachers: ':''}${esc(who.join(', '))} · ${g.items.length>1?fmtD(g.items[g.items.length-1].c.date)+' to '+fmtD(g.latest):fmtD(g.latest)}</small></div>`;}).join('')
-      :'<div class="ft"><small>No key takeaways for this function yet.</small></div>';
-    return`<div class="card fc" style="--c:${c}"><div class="h">${chip(f)}<span>${gs.length} takeaway${gs.length===1?'':'s'} · ${teachers.size} teacher${teachers.size===1?'':'s'} · ${esc([...centres].join(', '))}</span></div>
-      ${items}${ps.length?`<button class="more" data-act="fnmore" data-f="${esc(f)}">${FN_OPEN[f]?'Hide':'See'} the ${ps.length} insight${ps.length===1?'':'s'} labelled ${esc(f||'with no function')}</button>`:''}
-      ${FN_OPEN[f]?`<div class="src">${ps.map(({p,c})=>`<div class="ins"><p>${esc(p.t)}<small>${esc(c.teachers.map(e=>(tm[e]||{}).name).join(', '))} · ${fmtD(c.date)}${p.h?' · '+esc(p.h):''}</small></p></div>`).join('')}</div>`:''}</div>`;}).join('')}</div>`;
+  const F=fnData(tm);
+  if(!F.length){document.getElementById('main').innerHTML='<div class="card empty">Functions appear here once key takeaways are written.</div>';return;}
+  if(!F.some(x=>x.f===FSEL)){FSEL=F[0].f;FTEACH='';}
+  const X=F.find(x=>x.f===FSEL),[col]=TC[X.f]||TC[''],name=e=>(tm[e]||{}).name||'';
+  const empty=D.tags.filter(t=>!F.some(x=>x.f===t));
+  const rail=`<div class="card frail"><div class="frh">Functions</div>${F.map(x=>{const [c]=TC[x.f]||TC[''];
+    return`<button type="button" class="fi${x.f===FSEL?' on':''}" data-fsel="${esc(x.f)}" style="--c:${c}"><span class="sw"></span><span class="fnm"><b>${esc(x.f||'No function')}</b><small>${x.teachers.length} teacher${x.teachers.length===1?'':'s'}${x.latest?' · last '+fmtD(x.latest):''}</small></span>${x.reps.length?`<span class="rp2" title="Raised by 2+ teachers">${x.reps.length}</span>`:''}<span class="n">${x.items.length}</span></button>`;}).join('')}
+    ${empty.length?`<div class="fsep"></div><div class="fempty">Nothing yet on ${esc(empty.length>1?empty.slice(0,-1).join(', ')+' or '+empty[empty.length-1]:empty[0])}.</div>`:''}</div>`;
+  // the takeaways, grouped by teacher (a takeaway made with several teachers sits under the first); points raised by 2+ teachers first
+  const items=X.items.filter(x=>!FTEACH||x.who.includes(FTEACH));
+  const repIds=new Set(X.reps.flatMap(g=>g.items.map(i=>i.k.id)));
+  let no=0;const num=()=>String(++no).padStart(2,'0');
+  const tkRow=x=>{const task=Object.values(D.tasks).find(t=>t.tk===x.k.id);const st=task?reqStatus({task:task.id}):null;
+    return`<div class="tkr2"><span class="no">${num()}</span><div><p>${esc(x.k.text)}</p><div class="meta">${fmtD(x.c.date)} · <a href="#" data-opennotes="${esc(x.c.id)}" data-t="${esc(x.who[0])}">Open the notes</a>${task?` · <span class="st ${st.k}"><i></i>${st.l}</span>`:''}</div></div>
+      <div class="acts">${CAN&&!task?`<button class="btn sm" data-tktask="${esc(x.k.id)}" data-c="${esc(x.c.id)}">Make it a task</button>`:''}</div></div>`;};
+  const reps=X.reps.filter(g=>!FTEACH||g.teachers.includes(FTEACH)).map(g=>`<div class="rblock"><div class="rbh"><span class="rbn">${g.teachers.length}</span>Raised by ${g.teachers.length} teachers: ${esc(g.teachers.map(name).join(', '))}</div>
+    ${g.items.slice().sort((a,b)=>a.c.date<b.c.date?-1:1).map(i=>`<div class="rbi"><p>“${esc(i.k.text)}”</p><small>${esc((i.k.teachers&&i.k.teachers.length?i.k.teachers:i.c.teachers).map(name).join(', '))} · ${fmtD(i.c.date)}</small></div>`).join('')}</div>`).join('');
+  const rest=items.filter(x=>!repIds.has(x.k.id));
+  const byT={};rest.forEach(x=>(byT[x.who[0]]=byT[x.who[0]]||[]).push(x));
+  const order=Object.keys(byT).sort((a,b)=>{const la=byT[a].map(x=>x.c.date).sort().pop(),lb=byT[b].map(x=>x.c.date).sort().pop();return la<lb?1:la>lb?-1:name(a).localeCompare(name(b));});
+  const groups=order.map(e=>{const t=tm[e]||{},xs=byT[e].sort((a,b)=>a.c.date<b.c.date?1:-1),cs=[...new Set(xs.map(x=>x.c.date))];
+    return`<div class="who-h"><span class="av">${esc(name(e).split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</span><b>${esc(name(e))}</b><small>${esc([t.centre,t.course].filter(Boolean).join(' · '))} · ${cs.map(fmtD).join(', ')}</small></div>${xs.map(tkRow).join('')}`;}).join('');
+  const ptsHtml=FPTS?`<div class="fpts"><div class="lb2">Points in the notes labelled ${esc(X.f||'with no function')}</div>${X.pts.filter(x=>!FTEACH||x.c.teachers.includes(FTEACH)).map(({p,c})=>`<div class="fpt"><p>${esc(p.t)}</p><small>${esc(c.teachers.map(name).join(', '))} · ${fmtD(c.date)}${p.h?' · '+esc(p.h):''}</small></div>`).join('')}</div>`:'';
+  const reqs=allReqs().filter(r=>(r.q.fn||'')===X.f&&(!FTEACH||r.q.teacher===FTEACH));
+  const cen={};X.items.forEach(x=>{const c=(tm[x.who[0]]||{}).centre||'Other';cen[c]=(cen[c]||0)+1;});const cmax=Math.max(1,...Object.values(cen));
+  const dates=X.items.map(x=>x.c.date).sort();
+  document.getElementById('main').innerHTML=`<div class="fwrap">${rail}<div class="card fpane" style="--fc:${col}">
+    <div class="fph"><div class="feb">Function</div><h2>${esc(X.f||'No function')}</h2>
+      <div class="fstats"><div><b>${X.items.length}</b><small>key takeaway${X.items.length===1?'':'s'}</small></div><div><b>${X.teachers.length}</b><small>teacher${X.teachers.length===1?'':'s'}</small></div>
+        <div><b>${Object.keys(cen).length}</b><small>centre${Object.keys(cen).length===1?'':'s'}${Object.keys(cen).length===1?' · '+esc(Object.keys(cen)[0]):''}</small></div>
+        <div><b>${X.convs.size}</b><small>conversation${X.convs.size===1?'':'s'}${dates.length?' · '+fmtD(dates[0])+(dates[0]!==dates[dates.length-1]?' to '+fmtD(dates[dates.length-1]):''):''}</small></div>
+        <div><b>${X.reps.length}</b><small>raised by 2+ teachers</small></div></div></div>
+    <div class="ftools"><div class="fchips"><button type="button" class="${FTEACH?'':'on'}" data-ft="">All teachers</button>${X.teachers.map(e=>`<button type="button" class="${FTEACH===e?'on':''}" data-ft="${esc(e)}">${esc(name(e))} · ${X.items.filter(x=>x.who.includes(e)).length}</button>`).join('')}</div>
+      <div class="fsort">Points raised by 2+ teachers first, then by teacher, newest first.</div></div>
+    <div class="fbody"><div class="flist">${reps}${groups||(!reps?'<p class="fnone">No key takeaways here yet.</p>':'')}${ptsHtml}</div>
+      <div class="fside"><div class="blk2"><div class="lb2">${esc(X.f||'Unlabelled')} requests</div>${reqs.length?reqs.map(r=>`<div class="rq3"><p>${esc(r.q.text)}</p><small>${esc(name(r.q.teacher))} · ${fmtD(r.c.date)}</small><span class="st ${r.s.k}"><i></i>${r.s.l}</span></div>`).join(''):'<p class="fnone">None yet.</p>'}</div>
+        <div class="blk2"><div class="lb2">Where it comes from</div>${Object.keys(cen).sort((a,b)=>cen[b]-cen[a]).map(c=>`<div class="cbar"><span>${esc(c)}</span><b>${cen[c]}</b><i style="width:${cen[c]/cmax*100}%"></i></div>`).join('')}</div>
+        ${X.pts.length?`<div class="blk2"><div class="lb2">Insights in the notes</div><button type="button" class="lnk2" data-fpts>${FPTS?'Hide':'Show'} the ${X.pts.length} point${X.pts.length===1?'':'s'} labelled ${esc(X.f)} ›</button></div>`:''}</div></div></div></div>`;
 }
 
 /* ── Requests ── */
@@ -400,6 +483,12 @@ document.getElementById('tabs').onclick=e=>{const b=e.target.closest('button');i
 document.getElementById('att').onclick=e=>{const b=e.target.closest('[data-go]');if(!b)return;if(b.dataset.go==='rep'){document.getElementById('rep').scrollIntoView({behavior:'smooth',block:'start'});return;}VIEW=b.dataset.go;if(VIEW==='r')REQF='open';render();};
 document.getElementById('log').onclick=()=>logWindow(null,[]);
 document.getElementById('main').addEventListener('click',async e=>{
+  const fs=e.target.closest('[data-fsel]');if(fs){FSEL=fs.dataset.fsel;FTEACH='';FPTS=false;render();return;}
+  const ft=e.target.closest('[data-ft]');if(ft){FTEACH=ft.dataset.ft;render();return;}
+  if(e.target.closest('[data-fpts]')){FPTS=!FPTS;render();return;}
+  const on=e.target.closest('[data-opennotes]');if(on){e.preventDefault();VIEW='t';SEL=on.dataset.t;OPEN[on.dataset.opennotes]=true;render();setTimeout(()=>{const n=document.querySelector('.notes');if(n)n.scrollIntoView({behavior:'smooth',block:'start'});},60);return;}
+  const tt=e.target.closest('[data-tktask]');if(tt){const c=D.conversations.find(x=>x.id===tt.dataset.c),k=c.takeaways.find(x=>x.id===tt.dataset.tktask);
+    taskWindow(c,{text:k.text,teacher:(k.teachers&&k.teachers[0])||c.teachers[0],tk:k.id,fn:k.fn});return;}
   const t=e.target.closest('[data-t]');if(t){SEL=t.dataset.t;render();return;}
   const f=e.target.closest('#reqf button');if(f){REQF=f.dataset.f;render();return;}
   const b=e.target.closest('[data-act]');if(!b)return;e.preventDefault();
@@ -510,10 +599,10 @@ function taskWindow(c,q){
   const w=document.getElementById('win');
   w.innerHTML=`<div class="scrim"><div class="dlg sm" role="dialog" aria-label="Make it a task"><div class="dh"><h2>Make it a task</h2><button class="x" data-x>×</button></div>
     <div class="db"><div class="f"><label for="tt">Task</label><input class="in" id="tt" value="${esc(q.text)}"></div>
-      <div class="f"><label for="tdsc">Details</label><textarea class="in" id="tdsc" style="min-height:110px">${esc(q.text+'\n\nRequested by '+t.name+' ('+t.centre+') on '+fmtD(c.date)+'.')}</textarea></div>
+      <div class="f"><label for="tdsc">Details</label><textarea class="in" id="tdsc" style="min-height:110px">${esc(q.text+'\n\n'+(q.tk?'From a conversation with ':'Requested by ')+t.name+' ('+t.centre+') on '+fmtD(c.date)+'.')}</textarea></div>
       <div class="g2"><div class="f"><label for="tow">For</label><select class="in" id="tow">${staff.map(s=>`<option value="${esc(s.email)}"${cm&&cm.email===s.email?' selected':''}>${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}</select></div>
         <div class="f"><label for="tdue">Due</label><input class="in" type="date" id="tdue" min="${iso(TODAY)}"></div></div>
-      <small style="color:var(--faint);font-size:12.5px">The task goes on the Goals page under Tasks. When it's marked done there, this request shows it too.</small></div>
+      <small style="color:var(--faint);font-size:12.5px">The task goes on the Goals page under Tasks${q.tk&&q.fn?', tagged '+esc(q.fn):''}. When it's marked done there, this ${q.tk?'takeaway':'request'} shows it too.</small></div>
     <div class="df"><span class="msg" id="tmsg"></span><div style="display:flex;gap:10px"><button class="btn" data-x>Cancel</button><button class="btn" id="tnow">Save and email now</button><button class="btn pri" id="tlater">Save task — email later</button></div></div></div></div>`;
   w.onchange=null;
   w.onclick=async e=>{
@@ -523,7 +612,7 @@ function taskWindow(c,q){
     if(e.target.id==='tnow'&&!confirm('Email this task now? You\'ll be copied.'))return;
     busy=true;e.target.disabled=true;
     const ow=staff.find(s=>s.email===w.querySelector('#tow').value)||{};
-    const ok=await call('texpMakeTask',{conv:c.id,req:q.id,task:{title,desc:w.querySelector('#tdsc').value,owner:{email:ow.email},centre:t.centre,due:w.querySelector('#tdue').value,emailNow:e.target.id==='tnow'}},null,msg);
+    const ok=await call(q.tk?'texpTakeawayTask':'texpMakeTask',{conv:c.id,req:q.id,tk:q.tk,task:{title,desc:w.querySelector('#tdsc').value,owner:{email:ow.email},centre:t.centre,due:w.querySelector('#tdue').value,emailNow:e.target.id==='tnow'}},null,msg);
     busy=false;if(ok)w.innerHTML='';else e.target.disabled=false;
   };
 }
