@@ -147,6 +147,9 @@
   .avs{display:inline-flex}
   .avs b{width:22px;height:22px;border-radius:50%;background:#8D6BB5;color:#fff;font:700 9.5px/22px var(--body);text-align:center;border:2px solid #fff;margin-left:-6px}
   .avs b:first-child{margin-left:0}.avs b:nth-child(2){background:#5B7BC4}.avs b:nth-child(3){background:#C9A66B}
+  .avs b img,.av img,.bav i img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}.av,.avs b{overflow:hidden}
+  .mav{display:inline-flex;flex:none;vertical-align:middle;margin:0 2px}.mav i{width:20px;height:20px;border-radius:50%;overflow:hidden;color:#fff;display:grid;place-items:center;font:600 8.5px var(--body);font-style:normal;box-shadow:0 0 0 2px #fff;margin-left:-5px}.mav i:first-child{margin-left:0}.mav img{width:100%;height:100%;object-fit:cover;display:block}
+  .wav{display:flex;align-items:center;gap:9px}.wav .mav i{width:26px;height:26px;font-size:10px}
   .avs b.none{background:#E4E1EA;color:var(--muted)}
   .gc-side{flex:none;width:150px;display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:8px;text-align:right}
   .due{font:600 12px/1.35 var(--body);color:var(--muted)}
@@ -160,7 +163,7 @@
   .kind button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:0;background:none;border-radius:12px;padding:9px 22px 10px;cursor:pointer;text-align:left}
   .kind button{font:600 16px var(--display);color:var(--ink2)}.kind small{font:600 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
   .kind button[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6);color:#fff}.kind button[aria-pressed="true"] small{color:#E9CF9E}
-  .tk-row{display:grid;grid-template-columns:minmax(0,1fr) 190px 170px 150px 210px 70px;gap:14px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .tk-row{display:grid;grid-template-columns:minmax(0,1fr) 240px 160px 150px 210px 70px;gap:14px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
   .tk-row:last-child{border-bottom:0}.tk-row.hl{background:#F6F0FC}
   .tk-row b{display:block;font:600 15px/1.35 var(--display);color:var(--ink)}
   .tk-row .ds{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -375,6 +378,9 @@ function render(){
   }
   renderDet();
 }
+const PH=e=>{try{return(window.ArtiumAuth&&ArtiumAuth.photo&&ArtiumAuth.photo(e))||'';}catch(err){return'';}};
+const phImg=e=>{const u=PH(e);return u?`<img src="${esc(u)}" alt="">`:'';};
+const mav=os=>os.length?`<span class="mav">${os.slice(0,3).map(o=>`<i style="background:${avc(o.email)}">${phImg(o.email)||esc(initials(o.name||o.email))}</i>`).join('')}</span>`:'';
 const ini=n=>String(n||'?').split(/[\s.@]+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
 function dueOf(g){const c=completed(g),tg=target(g);
   if(g.draft)return[tg?'Target '+fmtD(tg):'No target yet','mut'];
@@ -385,7 +391,7 @@ const tagChips=g=>(g.tags||[]).map(t=>`<span class="tchip">${esc(t)}</span>`).jo
 function grow(g){
   const p=pairs(g),cs=Object.keys(g.centres||{}).filter(inC),[due,dc]=dueOf(g),pc=p.t?Math.round(p.d/p.t*100):0,s=cv(g).status;
   return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td class="gt-g"><b>${esc(g.title)}</b><div class="gt-m">${tagChips(g)}<span>${whereOf(g)?esc(whereOf(g)):'Standalone goal'}</span></div></td>
-    <td><div class="gt-c">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s||'tbp',ow=C.owners||[];return`<span class="cd ${st}" title="${esc(k)}${st?' — '+ST[st]:''} · ${esc(ow.map(o=>o.name||o.email).join(', ')||'no owner yet')}"><i></i>${esc(k)}<em>${esc(ow.map(o=>(o.name||o.email).split(' ')[0]).join(', ')||'—')}</em></span>`;}).join('')}</div></td>
+    <td><div class="gt-c">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s||'tbp',ow=C.owners||[];return`<span class="cd ${st}" title="${esc(k)}${st?' — '+ST[st]:''} · ${esc(ow.map(o=>o.name||o.email).join(', ')||'no owner yet')}"><i></i>${esc(k)}${mav(ow)}<em>${esc(ow.map(o=>(o.name||o.email).split(' ')[0]).join(', ')||'—')}</em></span>`;}).join('')}</div></td>
     <td class="nw"><span class="due ${dc}">${due}</span></td>
     <td>${g.draft?'<span class="due mut">—</span>':`<span class="ring sm" style="--p:${pc}"><span>${p.d}/${p.t}</span></span>`}</td>
     <td>${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${s}"><i></i>${ST[s]}</span>`}</td></tr>`;
@@ -397,7 +403,7 @@ function gcard(g){
   return`<button type="button" class="gc ${g.draft?'draft':s}${SEL===g.id?' sel':''}" data-g="${g.id}">
     <div class="gc-main"><div class="gc-t">${esc(g.title)}</div><div class="gc-src">${tagChips(g)}${whereOf(g)?esc(whereOf(g)):'Standalone goal'} · created ${fmtD(created(g))}</div>
       <div class="gc-cen">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s||'tbp',ow=C.owners||[];
-        return`<span class="cp ${st}" title="${esc(k)}${st?' — '+ST[st]:''}${ow.length?' · '+esc(ow.map(o=>o.name||o.email).join(', ')):' · no owner yet'}"><i></i>${esc(k)}<span class="avs">${ow.length?ow.slice(0,3).map(o=>`<b>${esc(ini(o.name||o.email))}</b>`).join(''):'<b class="none">?</b>'}</span></span>`;}).join('')}</div></div>
+        return`<span class="cp ${st}" title="${esc(k)}${st?' — '+ST[st]:''}${ow.length?' · '+esc(ow.map(o=>o.name||o.email).join(', ')):' · no owner yet'}"><i></i>${esc(k)}<span class="avs">${ow.length?ow.slice(0,3).map(o=>`<b>${phImg(o.email)||esc(ini(o.name||o.email))}</b>`).join(''):'<b class="none">?</b>'}</span></span>`;}).join('')}</div></div>
     <div class="gc-side"><span class="due ${dc}">${due}</span>
       ${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="ring" style="--p:${pc}"><span>${p.d}/${p.t}</span></span><span class="rl">${(g.tasks||[]).length?'steps done':'centres done'}</span>`}</div></button>`;
 }
@@ -416,7 +422,7 @@ function renderDet(){
   const acts=ACT.filter(a=>a.goal===g.id).slice().reverse();
   const feed=acts.map(a=>{
     const who=esc(a.name||a.by.split('@')[0]);
-    if(a.kind==='update')return`<div class="upd"><span class="av">${esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;
+    if(a.kind==='update')return`<div class="upd"><span class="av">${phImg(a.by)||esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;
     if(a.kind==='status'){let x={};try{x=JSON.parse(a.text);}catch(e){}return`<div class="sys"><b>${who}</b> set ${x.task?'<b>'+esc(x.what)+'</b>':'the status'} for ${esc(x.centre)} to <b>${ST[x.s]||''}</b> · ${ago(a.at)}</div>`;}
     return`<div class="sys"><b>${who}</b> ${esc(a.text.charAt(0).toLowerCase()+a.text.slice(1))} · ${ago(a.at)}</div>`;}).join('');
   el.innerHTML=`<div class="det-top"><div><h2>${esc(g.title)}</h2><div class="from">${whereOf(g)?'From <b>'+esc(whereOf(g))+'</b><br>':''}Created ${fmtD(created(g))}${g.createdByName?' by '+esc(g.createdByName):''} · Target ${tg?fmtD(tg):'not set'} · ${c?'Completed '+(CSEL.length===1?'at '+esc(CSEL[0])+' ':'')+fmtD(c)+' in '+days(created(g),c)+' days':g.draft?'Saved, not emailed to the stakeholders yet':'Open for '+days(created(g),TODAY)+' days'}</div></div>
@@ -585,7 +591,7 @@ function cardHtml(t){const [due,late]=dueText(t),os=tOwners(t),can=canT(t),k=t.s
     ${t.desc&&t.desc!==t.title?`<p class="bd">${esc(t.desc)}</p>`:''}
     <div class="bp">${(t.tags||[]).map(x=>`<span class="pill" style="--tc:${(TAGC[x]||['#9A96A3'])[0]}"><i></i>${esc(x)}</span>`).join('')}${t.draft?`<span class="pill mail" title="Not emailed to the owners yet">${IMAIL.replace(/14/g,'12')}Yet to email</span>`:''}${t.source&&t.source.kind==='texp'?`<a class="pill src" href="#" data-tsrc="1">↳ Teacher conversation</a>`:''}</div>
     <div class="bf"><span class="bdue${late?' bad':''}">${ICAL.replace(/13/g,'12')}${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span class="bctr">· ${esc(t.centre)}</span>`:''}
-      <span class="bav" title="${esc(os.map(o=>o.name||o.email).join(', '))}">${os.slice(0,3).map(o=>`<i style="background:${avc(o.email)}">${esc(initials(o.name||o.email))}</i>`).join('')}${os.length>3?`<i class="more">+${os.length-3}</i>`:''}</span></div>
+      <span class="bav" title="${esc(os.map(o=>o.name||o.email).join(', '))}">${os.slice(0,3).map(o=>`<i style="background:${avc(o.email)}">${phImg(o.email)||esc(initials(o.name||o.email))}</i>`).join('')}${os.length>3?`<i class="more">+${os.length-3}</i>`:''}</span></div>
     ${CAN?`<div class="bx">${t.draft?`<button class="bib" data-temail="${t.id}" title="${esc(emailLabel(t))}">${IMAIL}</button>`:''}<button class="bib" data-tedit="${t.id}" title="Edit">${IEDIT}</button></div>`:''}
   </article>`;}
 // lanes: [[name, tasks]]; a name of '' means no lanes
@@ -605,11 +611,13 @@ function taskRow(t){
   // the status can be changed straight from the list, whether or not the task has been emailed
   const st=can?`<select class="gl ${t.status}" data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(k=>`<option value="${k}"${k===t.status?' selected':''}>${TST[k]}</option>`).join('')}</select>`:`<span class="gl ${t.status}"><i></i>${TST[t.status]}</span>`;
   return`<div class="tk-row${TSEL===t.id?' hl':''}" id="task-${t.id}"><div><b>${esc(t.title)}</b>${(t.tags||[]).length?`<div class="gt-m" style="margin-top:4px">${tagChips(t)}</div>`:''}${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}${src}</div>
-    <div class="who">${esc(tOwners(t).map(o=>o.name||o.email).join(', '))}<small>${esc(t.centre||'')}</small></div><div class="who" style="color:${late?'var(--bad)':'inherit'}">${due}</div><div>${st}</div>
+    <div class="who wav">${mav(tOwners(t))}<div style="min-width:0">${esc(tOwners(t).map(o=>o.name||o.email).join(', '))}<small>${esc(t.centre||'')}</small></div></div><div class="who" style="color:${late?'var(--bad)':'inherit'}">${due}</div><div>${st}</div>
     <div style="display:flex;gap:8px;align-items:center">${t.draft?(CAN?`<button class="btn" style="height:32px" data-temail="${t.id}">${esc(emailLabel(t))}</button>`:'')+`<span class="gl draft"><i></i>Yet to email</span>`
       :`<span class="em">Emailed${t.emailedAt?' '+fmtD(day(new Date(t.emailedAt))):''}</span>`}</div>
     <div style="display:flex;justify-content:flex-end">${CAN?`<button class="btn" style="height:32px" data-tedit="${t.id}">Edit</button>`:''}</div></div>`;
 }
+// a profile photo was added or changed: redraw the owner pictures
+window.addEventListener('artium-photos',()=>{try{render();}catch(e){}});
 document.getElementById('kind').onclick=e=>{const b=e.target.closest('button');if(!b)return;KIND=b.dataset.k;try{localStorage.setItem('artium_goals_kind',KIND);}catch(err){}SEL=null;render();};
 document.getElementById('tasksv').addEventListener('click',async e=>{
   const m=e.target.closest('[data-temail]');if(m){if(!confirm('Email this task now? You\'ll be copied.'))return;await tcall('emailTask',{id:m.dataset.temail});return;}

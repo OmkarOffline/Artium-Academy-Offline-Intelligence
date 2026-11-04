@@ -105,7 +105,21 @@
     return (j.rows||[]).map(row=>row.map(v=>String(v).trim()));
   }
 
+  // Profile photos: the ones people upload (kept by the data service), then any kept in the photos folder.
+  // Used for the signed-in person and wherever someone appears as an owner.
+  const PHOTOS={'omkar@artiumacademy.com':'photos/omkar.jpg'};
+  const PKEY='artium_photos';
+  let UP=(()=>{try{return JSON.parse(localStorage.getItem(PKEY)||'{}')||{};}catch(e){return{};}})();
+  const photoOf=e=>{e=String(e||'').trim().toLowerCase();return UP[e]||PHOTOS[e]||'';};
+  function setPhotos(p){
+    UP=p||{};try{localStorage.setItem(PKEY,JSON.stringify(UP));}catch(e){}
+    paintMe();
+    // let the open pages redraw their owner pictures
+    document.querySelectorAll('iframe').forEach(f=>{try{f.contentWindow.dispatchEvent(new Event('artium-photos'));}catch(e){}});
+  }
+  async function loadPhotos(){ try{ const j=await service({action:'photos'}); if(j&&j.photos) setPhotos(j.photos); }catch(e){} }
   window.ArtiumAuth={
+    photo:photoOf,
     get user(){return session;},
     get pages(){return session&&session.pages||[];},
     fetchRows, signOut,
@@ -126,6 +140,7 @@
 
   /* ── Sign-in screen ── */
   const G='<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+  const IUP='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></svg>';
   const css=`
   .ag{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:24px;background:#F6F5F2;
     background-image:radial-gradient(1200px 600px at 50% -10%,#EFE6F7 0%,rgba(239,230,247,0) 60%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
@@ -161,7 +176,26 @@
   .um-pop hr{border:0;border-top:1px solid #EFEDF2;margin:14px 0}
   .um-out{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;border-radius:11px;border:1px solid #E4E1EA;background:#FAF9F7;
     font:600 13px 'Poppins',sans-serif;color:#B42318;cursor:pointer;transition:background .15s,border-color .15s}
-  .um-out:hover{background:#FDECEB;border-color:#F5C6C2}`;
+  .um-out:hover{background:#FDECEB;border-color:#F5C6C2}
+  .um-ph{display:flex;gap:8px;margin-top:14px}
+  .um-ph button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:36px;border-radius:10px;border:1px solid #E4E1EA;background:#fff;font:600 12.5px 'Poppins',sans-serif;color:#3B3742;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+  .um-ph button:hover{background:#F2ECF8;border-color:#DCCDEE;color:#5B2A86}
+  .um-ph button[hidden]{display:none}
+  .um-who .um-av{position:relative}
+  .pc{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:rgba(29,20,40,.55);backdrop-filter:blur(3px);font-family:'Poppins',sans-serif}
+  .pc-card{width:100%;max-width:380px;background:#fff;border-radius:22px;padding:24px 24px 20px;box-shadow:0 30px 70px -20px rgba(30,15,45,.6)}
+  .pc-card h3{margin:0;font:600 19px 'Poppins',sans-serif;color:#1D1B22}
+  .pc-card p{margin:4px 0 16px;font:400 13px/1.45 'Poppins',sans-serif;color:#6B6774}
+  .pc-stage{position:relative;width:280px;height:280px;margin:0 auto;border-radius:16px;overflow:hidden;background:#1D1B22;touch-action:none;cursor:grab;user-select:none}
+  .pc-stage.drag{cursor:grabbing}
+  .pc-stage img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;pointer-events:none}
+  .pc-ring{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,rgba(0,0,0,0) 119px,rgba(255,255,255,.9) 120px,rgba(255,255,255,.9) 121.5px,rgba(20,12,30,.6) 122px)}
+  .pc-zoom{display:flex;align-items:center;gap:10px;margin:16px 4px 0;color:#9A96A3}
+  .pc-zoom input{flex:1;accent-color:#5B2A86}
+  .pc-msg{min-height:18px;margin-top:10px;font-size:12.5px;color:#B42318;text-align:center}
+  .pc-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+  .pc-btns button{height:40px;padding:0 18px;border-radius:11px;border:1px solid #E4E1EA;background:#fff;font:600 13px 'Poppins',sans-serif;color:#3B3742;cursor:pointer}
+  .pc-btns .go{background:#5B2A86;border-color:#5B2A86;color:#fff}.pc-btns .go:disabled{opacity:.6;cursor:default}`;
   function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
 
   let gate;
@@ -198,31 +232,86 @@
     const pages=session.pages||[];
     document.querySelectorAll('.tab[data-tab]').forEach(t=>{ t.hidden=!pages.includes(t.dataset.tab); });
     showUser();
+    loadPhotos();
     ready=true;
     listeners.splice(0).forEach(fn=>fn(session));
   }
   function showUser(){
     const bar=document.querySelector('.shell-bar');if(!bar||!session||bar.querySelector('.user-menu'))return;
     const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    const initial=esc((session.name||session.email||'?').trim().charAt(0).toUpperCase());
-    // Own photos, kept in the photos folder, used in place of the Google picture
-    const PHOTOS={'omkar@artiumacademy.com':'photos/omkar.jpg'};
-    const pic=PHOTOS[String(session.email||'').toLowerCase()]||session.picture;
-    const face=pic?`<img src="${esc(pic)}" alt="" referrerpolicy="no-referrer">`:initial;
+    const face='';
     const menu=el(`<div class="user-menu">
       <button class="um-av" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Account">${face}</button>
       <div class="um-pop" role="dialog" aria-label="Account">
         <div class="um-who"><span class="um-av">${face}</span><div style="min-width:0">${session.name?`<div class="um-n">${esc(session.name)}</div>`:''}<div class="um-e">${esc(session.email)}</div></div></div>
+        <div class="um-ph"><button type="button" class="um-up">${IUP}<span>Upload a photo</span></button><button type="button" class="um-rm" hidden>Remove</button></div>
+        <input type="file" accept="image/*" class="um-file" hidden>
         <hr><button class="um-out" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>Sign out</button>
       </div></div>`);
     const btn=menu.querySelector('.um-av'),pop=menu.querySelector('.um-pop');
     const set=open=>{pop.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);};
     btn.onclick=e=>{e.stopPropagation();set(!pop.classList.contains('open'));};
     menu.querySelector('.um-out').onclick=signOut;
+    const file=menu.querySelector('.um-file');
+    menu.querySelector('.um-up').onclick=()=>{file.value='';file.click();};
+    file.onchange=()=>{const f=file.files&&file.files[0];if(f){set(false);cropPhoto(f);}};
+    menu.querySelector('.um-rm').onclick=async e=>{const b=e.currentTarget;b.disabled=true;
+      try{const j=await service({action:'savePhoto',photo:''});if(j.error)throw new Error(j.error);setPhotos(j.photos);}catch(err){alert(err.message);}b.disabled=false;};
     document.addEventListener('click',e=>{if(!menu.contains(e.target))set(false);});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')set(false);});
     window.addEventListener('blur',()=>set(false));   // a click inside a page (iframe) also closes it
     bar.appendChild(menu);
+    paintMe();
+  }
+  // The signed-in person's picture: their uploaded photo, else one in the photos folder, else Google's, else their initial
+  function paintMe(){
+    const menu=document.querySelector('.shell-bar .user-menu');if(!menu||!session)return;
+    const e=String(session.email||'').toLowerCase(),pic=photoOf(e)||session.picture;
+    const initial=String(session.name||session.email||'?').trim().charAt(0).toUpperCase();
+    menu.querySelectorAll('.um-av').forEach(a=>{a.textContent='';if(pic){const i=document.createElement('img');i.alt='';i.referrerPolicy='no-referrer';i.src=pic;a.appendChild(i);}else a.textContent=initial;});
+    menu.querySelector('.um-up span').textContent=UP[e]?'Change photo':'Upload a photo';
+    menu.querySelector('.um-rm').hidden=!UP[e];
+  }
+  /* Crop a chosen photo to a circle: drag to place the face, slide to zoom, then save a small square JPEG */
+  function cropPhoto(f){
+    const url=URL.createObjectURL(f);
+    const box=el(`<div class="pc" role="dialog" aria-label="Your photo"><div class="pc-card">
+      <h3>Your photo</h3><p>Drag to place your face inside the circle, and zoom if you need to.</p>
+      <div class="pc-stage"><img alt=""><div class="pc-ring"></div></div>
+      <div class="pc-zoom"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg><input type="range" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg></div>
+      <div class="pc-msg" role="alert"></div>
+      <div class="pc-btns"><button type="button" class="no">Cancel</button><button type="button" class="go" disabled>Save photo</button></div></div></div>`);
+    document.body.appendChild(box);
+    const st=box.querySelector('.pc-stage'),img=st.querySelector('img'),zoom=box.querySelector('input'),msg=box.querySelector('.pc-msg'),go=box.querySelector('.go');
+    const S=280,R=20,D=S-2*R;   // stage, ring inset, circle size
+    let base=1,z=1,x=0,y=0,w=0,h=0;
+    const close=()=>{URL.revokeObjectURL(url);box.remove();document.removeEventListener('keydown',key);};
+    const key=e=>{if(e.key==='Escape')close();};document.addEventListener('keydown',key);
+    box.querySelector('.no').onclick=close;box.onclick=e=>{if(e.target===box)close();};
+    // keep the circle covered by the photo
+    const clamp=()=>{const k=base*z;x=Math.min(R,Math.max(R+D-w*k,x));y=Math.min(R,Math.max(R+D-h*k,y));img.style.transform=`translate(${x}px,${y}px) scale(${k})`;};
+    img.onload=()=>{w=img.naturalWidth;h=img.naturalHeight;base=D/Math.min(w,h);x=R+(D-w*base)/2;y=R+(D-h*base)/2;clamp();go.disabled=false;};
+    img.onerror=()=>{msg.textContent='This photo could not be opened. Please try a JPG or PNG.';};
+    img.src=url;
+    zoom.oninput=()=>{const k0=base*z,cx=S/2,cy=S/2;z=+zoom.value;const k=base*z;x=cx-(cx-x)*k/k0;y=cy-(cy-y)*k/k0;clamp();};
+    let drag=null;
+    st.addEventListener('pointerdown',e=>{if(!w)return;drag={px:e.clientX,py:e.clientY,x,y};st.setPointerCapture(e.pointerId);st.classList.add('drag');});
+    st.addEventListener('pointermove',e=>{if(!drag)return;x=drag.x+e.clientX-drag.px;y=drag.y+e.clientY-drag.py;clamp();});
+    const up=()=>{drag=null;st.classList.remove('drag');};st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
+    st.addEventListener('wheel',e=>{if(!w)return;e.preventDefault();zoom.value=Math.min(4,Math.max(1,z-e.deltaY/400));zoom.oninput();},{passive:false});
+    go.onclick=async()=>{
+      go.disabled=true;msg.textContent='';go.textContent='Saving…';
+      try{
+        const k=base*z,out=256,c=document.createElement('canvas');c.width=c.height=out;
+        const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,out,out);g.imageSmoothingQuality='high';
+        g.drawImage(img,(R-x)/k,(R-y)/k,D/k,D/k,0,0,out,out);
+        let q=.88,data=c.toDataURL('image/jpeg',q);
+        while(data.length>46000&&q>.4){q-=.08;data=c.toDataURL('image/jpeg',q);}
+        const j=await service({action:'savePhoto',photo:data});
+        if(j.error) throw new Error(j.error==='expired'?'Your session has expired. Please sign in again.':j.error);
+        setPhotos(j.photos);close();
+      }catch(err){msg.textContent=err.message;go.disabled=false;go.textContent='Save photo';}
+    };
   }
   async function start(){
     // Styles for the sign-in screen and the name in the top bar (needed even when already signed in)
