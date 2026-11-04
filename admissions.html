@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admissions Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
+    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;--warn:#9A6200;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:26px}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
+  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
+  .ct-btn:hover{background:var(--accent-soft)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}.ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+
+  /* Period: a month, or any date range */
+  .period{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:7px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .seg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px}
+  .seg button{border:0;background:none;border-radius:9px;padding:7px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(31,26,36,.15)}
+  .mbtn{width:34px;height:36px;border:0;border-radius:10px;background:var(--bg);color:var(--ink2);font-size:16px;cursor:pointer}
+  .mbtn:hover{background:var(--accent-soft);color:var(--accent)}
+  .mlabel{min-width:140px;text-align:center;font:600 15px var(--display);color:var(--ink)}
+  .range{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .range input{font:500 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:7px 10px}
+  .range input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  #prange[hidden]{display:none}
+  .quick{display:inline-flex;gap:4px}
+  .quick button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 11px;font:600 12px var(--body);color:var(--ink2);cursor:pointer}
+  .quick button:hover{background:var(--accent-soft);color:var(--accent)}
+
+  /* Totals for the period */
+  .kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+  .kpi{position:relative;background:#fff;border:1px solid var(--border);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow);overflow:hidden}
+  .kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c,#C9A66B)}
+  .kpi .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .kpi .v{font:700 30px/1.1 var(--display);color:var(--ink);margin-top:10px;font-variant-numeric:tabular-nums}
+  .kpi .s{font-size:13px;color:var(--muted);margin-top:6px}.kpi .s b{color:var(--ink);font-weight:600}
+  .kpi.main{background:linear-gradient(135deg,#3A1A5A 0%,#5B2A86 100%);border-color:transparent;color:#fff}
+  .kpi.main::before{background:linear-gradient(90deg,#E9CF9E,#C9A66B)}
+  .kpi.main .k{color:#E9CF9E}.kpi.main .v{color:#fff;font-size:34px}.kpi.main .s{color:rgba(255,255,255,.75)}.kpi.main .s b{color:#fff}
+  .prog{height:8px;border-radius:6px;background:rgba(255,255,255,.18);margin-top:14px;overflow:hidden;display:flex}
+  .prog i{display:block;height:100%}
+  .prog .p1{background:#7BD3A4}.prog .p2{background:#F2B8B0}
+  .legend{display:flex;gap:14px;margin-top:8px;font-size:11.5px;color:rgba(255,255,255,.75)}.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
+
+  /* List */
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;box-shadow:0 24px 48px -36px rgba(75,31,111,.25);padding:18px 22px 22px}
+  .ptop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .ptitle{position:relative;padding-left:16px;font:600 20px/1.3 var(--display);color:var(--ink)}
+  .ptitle::before{content:"";position:absolute;left:0;top:50%;width:4px;height:20px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
+  .ptitle small{font:400 13px var(--body);color:var(--muted);margin-left:8px}
+  .flt{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .flt button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;border-radius:10px;padding:7px 13px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
+  .flt button span{font:600 11.5px var(--body);color:var(--muted);background:#F3F1F6;border-radius:999px;padding:1px 8px}
+  .flt button[aria-pressed="true"]{background:var(--accent);color:#fff}.flt button[aria-pressed="true"] span{background:rgba(255,255,255,.2);color:#fff}
+  .flt .d{width:7px;height:7px;border-radius:50%}
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);scrollbar-width:thin}
+  table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
+  th,td{padding:12px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);position:sticky;top:0}
+  th.n,td.n{text-align:right}
+  td{font:400 14px var(--body);color:var(--ink2)}
+  td.amt{font:600 14.5px var(--display);color:var(--accent)}
+  tbody tr:hover td{background:#FCFBFE}
+  /* Promised date and Learner stay in view while the table scrolls sideways */
+  tbody td:nth-child(-n+2),thead th:nth-child(-n+2){position:sticky;z-index:1;background:#fff}
+  thead th:nth-child(-n+2){background:#FAF9F7;z-index:2}
+  td:nth-child(1),th:nth-child(1){left:0;min-width:128px}
+  td:nth-child(2),th:nth-child(2){left:128px;box-shadow:8px 0 10px -10px rgba(43,24,64,.3)}
+  tr.wk td{position:static!important;box-shadow:none!important}
+  tr.wk td{background:#FBFAF8;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:8px 14px}
+  tr.wk td span{color:var(--muted);letter-spacing:.04em;margin-left:8px;text-transform:none;font-weight:600}
+  tr.done td{color:var(--muted)}tr.done td.amt{color:var(--ok)}
+  .date b{display:block;font:600 14px var(--display);color:var(--ink)}
+  .date small{font-size:12px;color:var(--faint)}
+  .date small.late{color:var(--bad);font-weight:600}.date small.soon{color:var(--warn);font-weight:600}
+  .who b{display:block;font:600 14px var(--body);color:var(--ink)}
+  .who small{font:500 11.5px var(--body);color:var(--faint)}
+  .ctr{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font:600 12px var(--body)}
+  .st{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);border-radius:999px;padding:4px 10px;white-space:nowrap}
+  .st i{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .st.paid{background:#E5F4EC;color:var(--ok)}.st.wait{background:#F3F1F6;color:var(--ink2)}.st.late{background:#FDECEB;color:var(--bad)}.st.lost{background:#F3F1F6;color:var(--faint);text-decoration:line-through}
+  .sub{display:block;font-size:11.5px;color:var(--faint);margin-top:3px}
+  .pr{display:inline-block;font:600 11.5px var(--body);border-radius:6px;padding:2px 8px}
+  .pr.hi{background:#E5F4EC;color:var(--ok)}.pr.md{background:#FBF1DC;color:var(--warn)}.pr.lo{background:#FDECEB;color:var(--bad)}.pr.na{color:var(--faint)}
+  .sumbox{margin-bottom:22px;background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
+    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:6px 20px 20px}
+  .sumbox.closed{padding-bottom:6px}
+  .sumhead{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:14px 2px 14px;cursor:pointer;text-align:left;font:inherit}
+  .st-t{position:relative;padding-left:16px;font:600 18px/1.3 var(--display);color:var(--ink)}
+  .st-t::before{content:"";position:absolute;left:0;top:50%;width:4px;height:18px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
+  .sumline{display:none;flex-wrap:wrap;gap:6px;flex:1}
+  .sumline span{font-size:12.5px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:999px;padding:4px 11px}.sumline b{color:var(--ink);font-weight:600;margin-left:3px}
+  .sumbox .chev{margin-left:auto;width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s;flex:none}
+  .sumhead:hover .chev{background:var(--accent-soft);color:var(--accent)}
+  .sumbox.closed .chev{transform:rotate(-90deg)}
+  .sumbox.closed .sumbody{display:none}.sumbox.closed .sumline{display:flex}
+  .sumbody .gaps{margin-bottom:0}
+  .grp{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:14px 16px 16px;margin-bottom:14px}
+  .grp.pipe{background:linear-gradient(180deg,#FBF8FE,#fff);border-color:#E3D6F2}
+  .gt{font:600 15px var(--display);color:var(--ink);margin:0 4px 12px}.gt span{font:400 13px var(--body);color:var(--muted);margin-left:8px}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .tl{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;min-width:0}
+  .tl .k{font:700 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);line-height:1.35}
+  .tl .v{font:700 24px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
+  .tl .s{font-size:12px;color:var(--muted);margin-top:6px}.tl .s b{color:var(--ink);font-weight:600}.tl .s b.lt{color:var(--bad)}
+  .tl .split{display:flex;flex-wrap:wrap;gap:4px}.tl .split span{background:#F6F4F9;border-radius:999px;padding:2px 8px;font-size:11.5px}
+  .tl.eff .v{color:var(--accent)}.tl.eff.ok .v{color:var(--ok)}.tl.eff.mid .v{color:var(--warn)}.tl.eff.low .v{color:var(--bad)}
+  .tl .bar{display:block;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;margin-top:4px}.tl .bar i{display:block;height:100%;background:currentColor}
+  .tl.eff.ok .s{color:var(--ok)}.tl.eff.mid .s{color:#C9A66B}.tl.eff.low .s{color:var(--bad)}
+  .tl.rr{background:linear-gradient(135deg,#3A1A5A,#5B2A86);border-color:transparent}.tl.rr .k{color:#E9CF9E}.tl.rr .v{color:#fff}.tl.rr .s{color:rgba(255,255,255,.75)}
+  .tg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 4px;font-size:12px;color:var(--muted)}.tg b{color:var(--ink);font-weight:600}
+  .tg sup{color:var(--gold);font-weight:700}
+  .gap{font:600 11.5px var(--body);border-radius:999px;padding:2px 8px;white-space:nowrap}.gap.up{background:#E5F4EC;color:var(--ok)}.gap.dn{background:#FDECEB;color:var(--bad)}
+  .tl.rr .tg{color:rgba(255,255,255,.75)}.tl.rr .tg b{color:#fff}.tl.rr .gap.up{background:rgba(123,211,164,.22);color:#9BE3BB}.tl.rr .gap.dn{background:rgba(242,184,176,.22);color:#F6C3BC}
+  .pnote{font-size:12.5px;color:var(--muted);margin:12px 4px 0}.pnote b{color:var(--ink)}
+  @media (max-width:1200px){.tiles{grid-template-columns:repeat(3,1fr)}}
+  @media (max-width:700px){.tiles{grid-template-columns:1fr 1fr}}
+  .ren{display:block;margin-bottom:0}
+  .ren-old{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .rs{padding:16px 22px;border-left:1px solid var(--line)}.rs:first-child{border-left:0}
+  .rs .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .rs .v{font:700 28px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
+  .rs .s{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:10px}
+  .split{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .split span{font-size:12px;color:var(--muted);background:#F6F4F9;border-radius:999px;padding:3px 10px}.split b{color:var(--ink);font-weight:600}
+  .rs.eff .v{color:var(--accent)}.rs.eff.ok .v{color:var(--ok)}.rs.eff.mid .v{color:var(--warn)}.rs.eff.low .v{color:var(--bad)}
+  .rs .bar{flex:1;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;max-width:160px}.rs .bar i{display:block;height:100%;background:currentColor}
+  .rs.eff.ok .bar{color:var(--ok)}.rs.eff.mid .bar{color:#C9A66B}.rs.eff.low .bar{color:var(--bad)}
+  @media (max-width:900px){.ren{grid-template-columns:1fr}.rs{border-left:0;border-top:1px solid var(--line)}.rs:first-child{border-top:0}}
+  .gaps{background:#fff;border:1px solid #F0DDB5;border-radius:20px;padding:14px 16px 16px;margin-bottom:22px;box-shadow:var(--shadow)}
+  .gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 4px 12px}.gh b{font:600 15px var(--display);color:var(--ink)}.gh span{font-size:13px;color:var(--muted)}
+  .gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .gtile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;border:1px solid #F0DDB5;background:#FFF9EC;border-radius:14px;padding:12px 14px;cursor:pointer;font:inherit}
+  .gtile:hover{border-color:#E2BE73}
+  .gtile.on{background:#7A5A22;border-color:#7A5A22}.gtile.on *{color:#fff!important}
+  .gtile.zero{background:#fff;border-color:var(--border)}.gtile.zero .gn{color:var(--ok)}
+  .gn{grid-row:1/3;font:700 28px/1 var(--display);color:#8A5A00;min-width:36px}
+  .gl b{display:block;font:600 14px var(--body);color:var(--ink)}.gl small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+  .ga{grid-column:2;font-size:12px;color:#8A5A00;margin-top:4px}
+  .miss{display:inline-block;font:600 11.5px var(--body);color:var(--bad);background:#FDECEB;border-radius:6px;padding:2px 7px}
+  @media (max-width:900px){.gtiles{grid-template-columns:1fr}}
+  .note{min-width:160px;max-width:220px;white-space:normal;font-size:13px;color:var(--muted);line-height:1.4}
+  .tel{letter-spacing:.01em}
+  .empty{padding:36px;text-align:center;color:var(--muted);font-size:14px;white-space:normal}
+  .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--faint)}
+  @media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}}
+  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.panel{padding:12px;border-radius:22px}.kpis{grid-template-columns:1fr}}
+  /* List switch (Pipeline / renewals due) and filters */
+  .lvrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 16px;padding-bottom:16px;border-bottom:1px dashed #E4DEEB}
+  .seg.lv{background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;box-shadow:var(--shadow)}
+  .seg.lv button{padding:8px 14px;font-size:13px}
+  .seg.lv button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:0 6px 14px -8px rgba(91,42,134,.7)}
+  .fsel{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .fsel select{height:36px;border:1px solid var(--border);border-radius:11px;background:#fff;padding:0 10px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;max-width:200px}
+  .fsel select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .fsel .clr{border:0;background:none;color:var(--accent);font:600 12.5px var(--body);cursor:pointer}
+  .st.due{background:var(--accent-soft);color:var(--accent)}
+  .ty{display:inline-block;margin-top:4px;font:700 10px var(--body);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 6px;background:#F1ECF8;color:var(--accent)}
+  .ty.rp{background:#EEF1F8;color:#3F5592}
+  td.ds{max-width:260px;white-space:normal;line-height:1.45}
+  .grp.tat{background:#fff}
+  .nt{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:240px;white-space:normal}
+  .tiles.t4{grid-template-columns:repeat(4,1fr)}
+  @media (max-width:1200px){.tiles.t4{grid-template-columns:repeat(2,1fr)}}
+  .tl .dist{display:flex;height:8px;border-radius:5px;overflow:hidden;margin-top:8px;background:#F1EEF5}.tl .dist i{display:block;height:100%}
+  .tl .lg{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11.5px;color:var(--muted)}.tl .lg span{display:inline-flex;align-items:center;gap:5px}.tl .lg i{width:7px;height:7px;border-radius:2px;display:inline-block}
+  .pp{display:inline-block;font:600 11.5px var(--body);border-radius:999px;padding:2px 8px;margin-top:4px;background:#F3F1F6;color:var(--ink2)}
+  .pp.early{background:#E5F4EC;color:var(--ok)}.pp.late{background:#FDECEB;color:var(--bad)}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Admissions Pipeline</h1>
+      <div class="subtitle">Visitors expected to join, by the date they promised to pay</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+  </header>
+  <div class="bar">
+    <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+    <div class="period">
+      <div class="seg" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
+      <div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="mbtn" id="prev" aria-label="Previous month">‹</button><div class="mlabel" id="mlabel">—</div><button class="mbtn" id="next" aria-label="Next month">›</button></div>
+      <div id="prange" class="range" hidden><input type="date" id="from" aria-label="From"><span>to</span><input type="date" id="to" aria-label="To">
+        <span class="quick"><button type="button" data-q="week">This week</button><button type="button" data-q="next7">Next 7 days</button><button type="button" data-q="late">All overdue</button></span></div>
+    </div>
+  </div>
+  <section class="sumbox" id="sumbox">
+    <button type="button" class="sumhead" id="sumhead" aria-expanded="true" aria-controls="sumbody"><span class="st-t">Summary</span><span class="sumline" id="sumline"></span>
+      <span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
+    <div class="sumbody" id="sumbody"><div class="ren" id="ren"></div><div class="gaps" id="gaps"></div></div>
+  </section>
+  <section class="panel">
+    <div class="lvrow"><div class="seg lv" id="lv" role="group" aria-label="List">
+        <button type="button" data-v="pipe" aria-pressed="true">Pipeline</button><button type="button" data-v="visits" aria-pressed="false">All centre visits</button><button type="button" data-v="adm" aria-pressed="false">Admissions</button></div>
+      <div class="fsel" id="fbar"></div></div>
+    <div class="ptop"><div class="ptitle" id="ptitle">Promised payments</div><div class="flt" id="flt" role="group" aria-label="Show"></div></div>
+    <div class="tbl-wrap"><table id="t"></table></div>
+    <div class="foot"><span id="foot-l"></span><span>From each centre's visit entries. The Centre Manager marks the probability, expected date and expected amount.</span></div>
+  </section>
+</div>
+
+<script>
+const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),d.getDate());
+}
+const parseNum=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const inr=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtD=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'—';
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fromIso=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const days=(a,b)=>Math.round((b-a)/864e5);
+const valid=d=>d&&d.getFullYear()>=2020?d:null;
+const pl=(n,w)=>n+' '+w+(n===1?'':'s');
+const tel=p=>p.length===10?p.slice(0,5)+' '+p.slice(5):'—';
+let V=null,TARGETS={};
+
+/* Every centre visit, as sent by the data service:
+   [visit date, visitor, phone, age group, lead source, visit type, course, demo taken, demo teacher, visit status, next call date, notes,
+    probability of conversion, expected date of conversion, expected amount, converted (YES/NO), actual net collections, date of conversion]
+   A visitor is in the pipeline when the Centre Manager has marked the probability Yes and entered an expected date and amount.
+   They count as converted when the sheet says YES; as not joining when the visit status says so; otherwise overdue once the expected date has passed. */
+const LOST=/not interested|unsuitable|admission restricted|suggested to other|efac/i;
+function build(data){
+  const out=[];
+  CENTRES.forEach(c=>(data[c.name]||[]).forEach(r=>{const date=valid(parseDate(r[0]));if(!date)return;
+    const x={centre:c.name,date,name:String(r[1]||'').trim(),phone:String(r[2]||'').replace(/\D/g,'').slice(-10),age:String(r[3]||'').trim(),src:String(r[4]||'').trim(),
+      vt:String(r[5]||'').trim(),course:String(r[6]||'').trim(),demo:String(r[7]||'').trim(),teacher:String(r[8]||'').trim(),status:String(r[9]||'').trim(),
+      ncd:valid(parseDate(r[10])),note:String(r[11]||'').trim(),prob:String(r[12]||'').trim(),ed:valid(parseDate(r[13])),ea:parseNum(r[14]),
+      conv:/^y/i.test(String(r[15]||'').trim()),act:parseNum(r[16]),cd:valid(parseDate(r[17]))};
+    x.yes=/^y/i.test(x.prob);x.no=/^n/i.test(x.prob);
+    x.state=x.conv?'paid':LOST.test(x.status)||x.no?'lost':x.ed&&x.ed<TODAY?'late':'wait';
+    x.inPipe=x.yes&&!!x.ed&&x.ea>0;
+    x.tat=x.conv&&x.cd?Math.max(0,days(x.date,x.cd)):null;            // visit to admission, in days
+    x.ptp=x.conv&&x.cd&&x.ed?days(x.ed,x.cd):null;                     // paid minus promised: below 0 early, 0 on the day, above 0 late
+    out.push(x);}));
+  return out;
+}
+
+/* ── State ── */
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_ap_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+let sumOpen=(()=>{try{return localStorage.getItem('artium_ap_summary')!=='closed';}catch(e){return true;}})();
+let lv=(()=>{try{const v=localStorage.getItem('artium_ap_list');return['pipe','visits','adm'].includes(v)?v:'pipe';}catch(e){return'pipe';}})();
+let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,show='all';
+const GAP=[['none','Probability not marked','Visited, not converted, and Yes or No not chosen yet'],['noamt','Yes, but no amount','Expected date entered, expected amount is blank'],['nodate','Yes, but no date','Expected amount entered, expected date is blank']];
+const STATES=[['all','All'],['wait','Yet to pay','#B3AFBB'],['late','Overdue','#D9534F'],['paid','Converted','#2DA06A'],['lost','Not joining','#9A96A3']];
+const FV={age:'',teacher:'',course:'',src:''};
+const FL=[['age','All ages'],['teacher','All demo teachers'],['course','All courses'],['src','All lead sources']];
+const AGE_ORDER=['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'];
+const passF=x=>Object.keys(FV).every(k=>!FV[k]||x[k]===FV[k]);
+function period(){
+  if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
+  const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);
+  return{a,b,label:fmtD(a)+' to '+fmtD(b)};
+}
+function renderFilters(base){
+  const opts=k=>{const v=[...new Set(base.map(x=>x[k]).filter(Boolean))];
+    return k==='age'?v.sort((a,b)=>((AGE_ORDER.indexOf(a)+1)||99)-((AGE_ORDER.indexOf(b)+1)||99)):v.sort((a,b)=>a.localeCompare(b));};
+  document.getElementById('fbar').innerHTML=FL.map(([k,all])=>{const o=opts(k);if(FV[k]&&!o.includes(FV[k]))o.unshift(FV[k]);
+    return`<select data-f="${k}" class="${FV[k]?'set':''}" aria-label="${all}"><option value="">${all}</option>${o.map(v=>`<option${FV[k]===v?' selected':''}>${esc(v)}</option>`).join('')}</select>`;}).join('')+
+    (FL.some(([k])=>FV[k])?'<button type="button" class="clr" id="clr">Clear</button>':'');
+}
+// Paid compared with the promised date
+const ptpPill=x=>x.ptp==null?'':x.ptp<0?`<span class="pp early">${pl(-x.ptp,'day')} early</span>`:x.ptp===0?'<span class="pp">On the promised day</span>':`<span class="pp late">${pl(x.ptp,'day')} late</span>`;
+const visited=x=>`<small>Visited ${x.date.getDate()} ${MON[x.date.getMonth()]}${x.demo?' · '+(/^yes/i.test(x.demo)?'demo taken':'no demo'):''}</small>`;
+
+/* The list for one kind of missing promise */
+function renderGap(list,sel,P){
+  const g=GAP.find(x=>x[0]===show);
+  document.getElementById('flt').innerHTML=`<button type="button" aria-pressed="false" id="back-all">← Back to promised payments</button>`;
+  document.getElementById('back-all').onclick=()=>{show='all';render();};
+  renderFilters(list);list=list.filter(passF).sort((a,b)=>b.date-a.date);
+  document.getElementById('ptitle').innerHTML=`${esc(g[1])} <small>${pl(list.length,'visitor')} · visited ${esc(P.label)}</small>`;
+  const head=['Visited','Visitor',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Notes'];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">Nothing missing here. Every visitor from ${esc(P.label)} has this filled in.</td></tr>`;
+  list.forEach(x=>{const d=days(x.date,TODAY);
+    h+=`<tr><td class="date"><b>${WD[x.date.getDay()]}, ${x.date.getDate()} ${MON[x.date.getMonth()]}</b><small>${d===0?'Today':pl(d,'day')+' ago'}</small></td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${esc(x.src)||'—'}</td>
+      <td>${esc(x.status)||'—'}</td><td>${x.prob?esc(x.prob):'<span class="miss">Missing</span>'}</td>
+      <td>${x.ed?fmtD(x.ed):x.yes?'<span class="miss">Missing</span>':'—'}</td><td class="n">${x.ea>0?inr(x.ea):x.yes?'<span class="miss">Missing</span>':'—'}</td>
+      <td class="note">${x.note?`<div class="nt" title="${esc(x.note)}">${esc(x.note)}</div>`:'<span style="color:var(--faint)">—</span>'}</td></tr>`;});
+  document.getElementById('t').innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`Visited ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+
+/* All centre visits in the period, by visit date */
+const VSTATES=[['all','All'],['paid','Converted','#2DA06A'],['open','Not converted yet','#5B2A86'],['lost','Not joining','#9A96A3']];
+let vshow='all';
+function renderVisits(P,sel){
+  const base=V.filter(x=>(!sel||x.centre===sel.name)&&x.date>=P.a&&x.date<=P.b);
+  renderFilters(base);const list=base.filter(passF),st=x=>x.state==='paid'?'paid':x.state==='lost'?'lost':'open',cnt=s=>list.filter(x=>st(x)===s).length;
+  document.getElementById('flt').innerHTML=VSTATES.map(([k,l,c])=>`<button type="button" data-s="${k}" aria-pressed="${vshow===k}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${k==='all'?list.length:cnt(k)}</span></button>`).join('');
+  document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{vshow=b.dataset.s;render();});
+  const shown=list.filter(x=>vshow==='all'||st(x)===vshow).sort((a,b)=>b.date-a.date||a.name.localeCompare(b.name));
+  document.getElementById('ptitle').innerHTML=`Centre visits <small>${pl(shown.length,'visitor')} · ${cnt('paid')} of ${list.length} converted${list.length?' ('+Math.round(cnt('paid')/list.length*100)+'%)':''}</small>`;
+  const head=['Visited','Visitor',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Converted'];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!shown.length)h+=`<tr><td colspan="${head.length}" class="empty">No centre visits ${vshow==='all'?'':'like this '}between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
+  shown.forEach(x=>{
+    h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.date.getDay()]}, ${x.date.getDate()} ${MON[x.date.getMonth()]}</b><small>${esc(x.vt)}</small></td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${esc(x.src)||'—'}</td><td>${esc(x.status)||'—'}</td>
+      <td>${x.prob?esc(x.prob):'<span style="color:var(--faint)">—</span>'}</td><td>${fmtD(x.ed)}</td><td class="n amt">${x.ea>0?inr(x.ea):'<span style="color:var(--faint);font-weight:400">—</span>'}</td>
+      <td>${x.conv?`<span class="st paid"><i></i>Converted</span><span class="sub">${x.cd?fmtD(x.cd):''}${x.act?' · '+inr(x.act):''}</span>`:x.state==='lost'?`<span class="st lost"><i></i>Not joining</span>`:'<span class="st due"><i></i>Not yet</span>'}</td></tr>`;
+  });
+  document.getElementById('t').innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`Visited ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+
+/* Admissions in the period, by date of conversion, with both turnaround times */
+function renderAdm(P,sel){
+  const base=V.filter(x=>(!sel||x.centre===sel.name)&&x.conv&&x.cd&&x.cd>=P.a&&x.cd<=P.b);
+  renderFilters(base);const list=base.filter(passF).sort((a,b)=>b.cd-a.cd||a.name.localeCompare(b.name));
+  document.getElementById('flt').innerHTML='';
+  const sum=list.reduce((s,x)=>s+x.act,0);
+  document.getElementById('ptitle').innerHTML=`Admissions <small>${pl(list.length,'learner')} · ${inr(sum)}</small>`;
+  const head=['Converted','Visitor',...(sel?[]:['Centre']),'Course','Visited','Visit to admission','Promised date','Promise to payment',{t:'Expected',n:1},{t:'Collected',n:1}];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No admissions between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
+  list.forEach(x=>{
+    h+=`<tr><td class="date"><b>${WD[x.cd.getDay()]}, ${x.cd.getDate()} ${MON[x.cd.getMonth()]}</b></td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${fmtD(x.date)}</td>
+      <td>${x.tat==null?'—':x.tat===0?'Same day':pl(x.tat,'day')}</td><td>${x.ed?fmtD(x.ed):'<span style="color:var(--faint)">Not promised</span>'}</td><td>${ptpPill(x)||'—'}</td>
+      <td class="n">${x.ea>0?inr(x.ea):'—'}</td><td class="n amt">${x.act?inr(x.act):'—'}</td></tr>`;
+  });
+  document.getElementById('t').innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`Converted ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+
+document.getElementById('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;lv=b.dataset.v;show='all';try{localStorage.setItem('artium_ap_list',lv);}catch(err){}render();};
+document.getElementById('fbar').addEventListener('change',e=>{const k=e.target.dataset.f;if(k){FV[k]=e.target.value;render();}});
+document.getElementById('fbar').addEventListener('click',e=>{if(e.target.id==='clr'){Object.keys(FV).forEach(k=>FV[k]='');render();}});
+
+function render(){
+  document.querySelectorAll('#lv button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===lv));
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+  document.getElementById('pmonth').style.display=mode==='month'?'flex':'none';document.getElementById('prange').hidden=mode!=='range';
+  const P=period();document.getElementById('mlabel').textContent=P.label;
+  if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
+  const t=document.getElementById('t');
+  if(!V){t.innerHTML='<tr><td class="empty">Loading…</td></tr>';return;}
+  const mine=x=>!sel||x.centre===sel.name,inP=d=>d&&d>=P.a&&d<=P.b;
+  const sum=(l,f)=>l.reduce((s,x)=>s+f(x),0),n=v=>v.toLocaleString('en-IN');
+  // Current status: centre visits in the period, and admissions (conversions) in the period, whenever the visit was
+  const vis=V.filter(x=>mine(x)&&inP(x.date)),adm=V.filter(x=>mine(x)&&x.conv&&inP(x.cd));
+  const aSame=adm.filter(x=>inP(x.date)).length,aEarlier=adm.length-aSame;
+  const rate=vis.length?vis.filter(x=>x.conv).length/vis.length*100:null,rCls=rate==null?'':rate>=50?'ok':rate>=30?'mid':'low';
+  const col=sum(adm,x=>x.act),atv=adm.length?col/adm.length:null;
+  // Pipeline: promised (probability Yes, with a date and amount) for this period, not converted yet
+  const all=V.filter(x=>mine(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
+  const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),pipe=wait.concat(late);
+  const expN=pipe.length,expAmt=sum(pipe,x=>x.ea),expAtv=expN?expAmt/expN:null,rrN=adm.length+expN,rrAmt=col+expAmt;
+  // Targets (Targets page), in Month view only: fresh sales and fresh sales collections
+  const tg=mode==='month'?(TARGETS[viewY+'-'+String(viewM+1).padStart(2,'0')]||{}):{},cs=(sel?[sel]:CENTRES).map(c=>c.name);
+  const tgt=key=>{const has=cs.filter(c=>tg[c]&&tg[c][key]!=null);return has.length?{v:has.reduce((s,c)=>s+tg[c][key],0),has,all:has.length===cs.length}:null;};
+  const T={n:tgt('conv'),amt:tgt('fscol'),v:tgt('visits')};
+  const part=(t,l)=>t?l.filter(x=>t.has.includes(x.centre)):[];
+  const vs=(t,actual,isAmt)=>{if(!t)return'';const d=actual-t.v,pc=t.v?d/t.v*100:0,fmt=v=>isAmt?inr(Math.abs(v)):Math.abs(Math.round(v)).toLocaleString('en-IN');
+    return `<div class="tg"><span>Target <b>${isAmt?inr(t.v):t.v.toLocaleString('en-IN')}</b>${t.all?'':'<sup title="Not every centre has this target">*</sup>'}</span><span class="gap ${d>=0?'up':'dn'}">${d>=0?'▲ Ahead':'▼ Behind'} ${fmt(d)} · ${Math.abs(Math.round(pc))}%</span></div>`;};
+  const tile=(k,v,sub,cls='')=>`<div class="tl ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
+  // Turnaround: visit to admission (admissions in the period), and paid compared with the promised date (admissions that had a promise)
+  const tl=adm.filter(x=>x.tat!=null),avgT=tl.length?sum(tl,x=>x.tat)/tl.length:null,sameDay=tl.filter(x=>x.tat===0).length,wk=tl.filter(x=>x.tat>0&&x.tat<=7).length,more=tl.length-sameDay-wk;
+  const med=l=>{if(!l.length)return null;const s=l.slice().sort((a,b)=>a-b),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+  const pr=adm.filter(x=>x.ptp!=null),early=pr.filter(x=>x.ptp<0).length,onDay=pr.filter(x=>x.ptp===0).length,lateP=pr.length-early-onDay,avgP=pr.length?sum(pr,x=>x.ptp)/pr.length:null;
+  const dist=(parts)=>{const tot=parts.reduce((s,p)=>s+p[1],0)||1;return`<span class="dist">${parts.map(([,v,c])=>v?`<i style="width:${v/tot*100}%;background:${c}"></i>`:'').join('')}</span><span class="lg">${parts.map(([l,v,c])=>`<span><i style="background:${c}"></i>${l} <b>${v}</b></span>`).join('')}</span>`;};
+  const dayTxt=v=>v==null?'–':(Math.round(v*10)/10).toLocaleString('en-IN')+(Math.round(v*10)/10===1?' day':' days');
+  const ptpTxt=v=>v==null?'–':Math.abs(v)<.05?'On the day':dayTxt(Math.abs(v))+(v<0?' early':' late');
+  document.getElementById('ren').innerHTML=`<div class="grp"><div class="gt">Current status <span>${esc(P.label)}${mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth()?' · so far':''}</span></div><div class="tiles">
+      ${tile('Centre visits',n(vis.length),vs(T.v,sum(part(T.v,vis),()=>1),false)||'visited in this period')}
+      ${tile('Admissions',n(adm.length),vs(T.n,sum(part(T.n,adm),()=>1),false)+`<span class="split"><span><b>${aSame}</b> visited ${mode==='month'?'this month':'in range'}</span><span><b>${aEarlier}</b> visited earlier</span></span>`)}
+      ${tile('Visit to admission conversion',rate==null?'–':Math.round(rate)+'%',rate==null?'':`<span class="bar"><i style="width:${Math.min(100,rate)}%"></i></span>of this period's visitors have joined`,'eff '+rCls)}
+      ${tile('Collections – Admissions',inr(col),vs(T.amt,sum(part(T.amt,adm),x=>x.act),true))}
+      ${tile('ATV – Admissions',atv==null?'–':inr(atv),'')}</div></div>
+    <div class="grp pipe"><div class="gt">Pipeline <span>promised, not paid yet</span></div><div class="tiles">
+      ${tile('No. of expected admissions',n(expN),`${wait.length} yet to pay · <b class="lt">${late.length} overdue</b>`)}
+      ${tile('Run-rate · admissions',n(rrN),vs(T.n,sum(part(T.n,adm),()=>1)+part(T.n,pipe).length,false),'rr')}
+      ${tile('Expected admission collection',inr(expAmt),late.length?`<b class="lt">${inr(sum(late,x=>x.ea))}</b> of it overdue`:'')}
+      ${tile('Expected ATV',expAtv==null?'–':inr(expAtv),'')}
+      ${tile('Run-rate · collections',inr(rrAmt),vs(T.amt,sum(part(T.amt,adm),x=>x.act)+sum(part(T.amt,pipe),x=>x.ea),true),'rr')}</div>
+      <div class="pnote">Promises kept so far: <b>${paid.length}</b> of ${all.length} visitors who promised · ${inr(sum(paid,x=>x.act||x.ea))}${lost.length?` · <b>${lost.length}</b> not joining`:''}</div></div>
+    <div class="grp tat"><div class="gt">Turnaround <span>admissions in this period</span></div><div class="tiles t4">
+      ${tile('Visit to admission · average',dayTxt(avgT),tl.length?dist([['Same day',sameDay,'#5B2A86'],['Within a week',wk,'#9B7BC4'],['Longer',more,'#D9CCEA']]):'')}
+      ${tile('Visit to admission · median',dayTxt(med(tl.map(x=>x.tat))),tl.length?`half of the ${pl(tl.length,'admission')} took this long or less`:'')}
+      ${tile('Promise to payment · average',ptpTxt(avgP),pr.length?dist([['Early',early,'#2DA06A'],['On the day',onDay,'#B3AFBB'],['Late',lateP,'#D9534F']]):'no admissions with a promised date yet')}
+      ${tile('Paid by the promised date',pr.length?Math.round((early+onDay)/pr.length*100)+'%':'–',pr.length?`${early+onDay} of ${pl(pr.length,'admission')} that had a promise`:'')}</div></div>`;
+  document.getElementById('sumline').innerHTML=[`<span>Visits <b>${n(vis.length)}</b></span>`,`<span>Admissions <b>${n(adm.length)}</b></span>`,`<span>Conversion <b>${rate==null?'–':Math.round(rate)+'%'}</b></span>`,
+    `<span>Collected <b>${inr(col)}</b></span>`,`<span>Expected <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Run-rate <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`].join('');
+  document.getElementById('sumbox').classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
+  // Visitors from this period, not converted and not ruled out, whose promise is missing or incomplete
+  const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
+  const open=vis.filter(x=>!x.conv&&x.state!=='lost');
+  const gc={none:open.filter(x=>!x.prob&&x.date<=Y),noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),nodate:open.filter(x=>x.yes&&!x.ed&&x.ea>0)};
+  document.getElementById('gaps').innerHTML=`<div class="gh"><b>Not in the pipeline yet</b><span>Visitors from ${esc(P.label)} who haven't converted, and whose promise is missing or incomplete</span></div>
+    <div class="gtiles">${GAP.map(([g,l,d])=>`<button type="button" class="gtile${show===g?' on':''}${gc[g].length?'':' zero'}" data-g="${g}"><span class="gn">${gc[g].length}</span><span class="gl"><b>${l}</b><small>${d}</small></span></button>`).join('')}</div>`;
+  document.querySelectorAll('.gtile').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
+  if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
+  if(lv==='visits')return renderVisits(P,sel);
+  if(lv==='adm')return renderAdm(P,sel);
+  // Promised payments, grouped by week (Monday to Sunday)
+  renderFilters(all);const allP=all.filter(passF);
+  const pc=s=>allP.filter(x=>x.state===s).length,cnt={all:allP.length,wait:pc('wait'),late:pc('late'),paid:pc('paid'),lost:pc('lost')};
+  document.getElementById('flt').innerHTML=STATES.filter(([s])=>s!=='lost'||cnt.lost).map(([s,l,c])=>`<button type="button" data-s="${s}" aria-pressed="${show===s}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${cnt[s]}</span></button>`).join('');
+  document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{show=b.dataset.s;render();});
+  const list=(show==='all'?allP:allP.filter(x=>x.state===show)).slice().sort((a,b)=>a.ed-b.ed||b.ea-a.ea);
+  document.getElementById('ptitle').innerHTML=`Promised payments <small>${pl(list.length,'visitor')} · ${inr(sum(list,x=>x.ea))}</small>`;
+  const head=['Promised date','Visitor',...(sel?[]:['Centre']),'Phone','Course',{t:'Expected',n:1},'Status','Visit status','Notes'];
+  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No promised payments ${show==='all'?'':'with this status '}between ${fmtD(P.a)} and ${fmtD(P.b)}.</td></tr>`;
+  let wkKey='';
+  list.forEach(x=>{
+    const mon=new Date(x.ed);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));const key=iso(mon);
+    if(key!==wkKey){wkKey=key;const sun=new Date(mon);sun.setDate(sun.getDate()+6);const wl=list.filter(y=>y.ed>=mon&&y.ed<=sun);
+      h+=`<tr class="wk"><td colspan="${head.length}">Week of ${mon.getDate()} ${MON[mon.getMonth()]}<span>${pl(wl.length,'visitor')} · ${inr(sum(wl,y=>y.ea))}</span></td></tr>`;}
+    const d=days(TODAY,x.ed);
+    const when=x.state==='late'?`<small class="late">${pl(-d,'day')} late</small>`:x.state==='wait'?(d===0?'<small class="soon">Today</small>':`<small class="${d<=3?'soon':''}">in ${pl(d,'day')}</small>`):'';
+    const st=x.state==='paid'?`<span class="st paid"><i></i>Converted</span><span class="sub">${x.cd?fmtD(x.cd):''}${x.act?' · '+inr(x.act):''}</span>${ptpPill(x)}`
+      :x.state==='late'?'<span class="st late"><i></i>Overdue</span>':x.state==='lost'?'<span class="st lost"><i></i>Not joining</span>':'<span class="st wait"><i></i>Yet to pay</span>';
+    h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.ed.getDay()]}, ${x.ed.getDate()} ${MON[x.ed.getMonth()]}</b>${when}</td>
+      <td class="who"><b>${esc(x.name)||'—'}</b>${visited(x)}</td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
+      <td class="n amt">${inr(x.ea)}</td><td>${st}</td><td>${esc(x.status)||'—'}</td><td class="note">${x.note?`<div class="nt" title="${esc(x.note)}">${esc(x.note)}</div>`:'<span style="color:var(--faint)">—</span>'}</td></tr>`;
+  });
+  t.innerHTML=h+'</tbody>';
+  document.getElementById('foot-l').textContent=`${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+}
+
+/* ── Controls ── */
+document.getElementById('sumhead').onclick=()=>{sumOpen=!sumOpen;try{localStorage.setItem('artium_ap_summary',sumOpen?'open':'closed');}catch(e){}render();};
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_ap_centre',selCentre);}catch(e){}render();});
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='range'&&!rFrom){rFrom=new Date(viewY,viewM,1);rTo=new Date(viewY,viewM+1,0);}render();});
+document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
+document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
+['from','to'].forEach(id=>document.getElementById(id).onchange=e=>{const d=fromIso(e.target.value);if(!d)return;if(id==='from')rFrom=d;else rTo=d;if(rFrom&&rTo&&rFrom>rTo)[rFrom,rTo]=[rTo,rFrom];render();});
+document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{const q=b.dataset.q;
+  if(q==='week'){rFrom=new Date(TODAY);rFrom.setDate(rFrom.getDate()-((rFrom.getDay()+6)%7));rTo=new Date(rFrom);rTo.setDate(rTo.getDate()+6);show='all';}
+  if(q==='next7'){rFrom=new Date(TODAY);rTo=new Date(TODAY);rTo.setDate(rTo.getDate()+6);show='all';}
+  if(q==='late'){const l=(V||[]).filter(x=>x.inPipe&&x.state==='late').map(x=>x.ed);rFrom=l.length?new Date(Math.min(...l)):new Date(TODAY);rTo=new Date(TODAY);rTo.setDate(rTo.getDate()-1);show='late';lv='pipe';}
+  render();});
+
+async function load(){
+  render();
+  try{
+    const j=await ArtiumAuth.call('admissions',{});
+    V=build(j.visits||{});
+    ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets){TARGETS=j.targets;render();}}).catch(()=>{});   // monthly targets (Targets page)
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';render();
+  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+}
+load();
+</script>
+</body>
+</html>
