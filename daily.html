@@ -145,6 +145,9 @@
   tr.ratio td{height:36px;font-size:12.5px;color:var(--muted);background:#fff}tr.ratio td.m{color:var(--muted);font-weight:400}tr.ratio td .pf{font-weight:500;color:var(--ink2)}
   tr.ratio td.m:before{content:"%";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:#F3F1F6;color:var(--faint);font:700 10px var(--body);margin-right:8px}
   tr.ratio td.s{background:#FCFBF9}
+  tr.rp td{height:38px;padding-top:10px;vertical-align:bottom;background:#fff;border-bottom:0}tr.rp td.m{font-weight:600;color:var(--ink)}
+  tr.rp td.m:before{content:"%";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:var(--accent-soft);color:var(--accent);font:700 10px var(--body);margin-right:8px;vertical-align:-1px}
+  tr.ratio.rs td.m{padding-left:46px}tr.ratio.rs td.m:before{display:none}
   tr.head td{height:50px;font-size:15px;font-weight:600;color:var(--ink)}tr.head td.m{font:600 15px var(--display);color:var(--ink)}tr.head td.s1 b{font-size:15.5px;font-weight:700}
   tr.head td.zero{font-weight:400}
   /* level 2: ordinary rows */
@@ -257,12 +260,16 @@ function prep(name){
 function series(name,days){
   const P=PREP[name];if(!P)return null;
   const idx=new Map(days.map((k,i)=>[k,i])),z=()=>days.map(()=>0),S={};
-  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone'].forEach(k=>S[k]=z());
+  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR'].forEach(k=>S[k]=z());
   const put=(k,d,n=1)=>{const i=idx.get(d);if(i!=null)S[k][i]+=n;};
-  if(P.leads){P.leads.forEach(l=>{put('L',l.d);if(l.appt)put('LA',l.d);if(l.visit)put('LV',l.d);if(l.paid)put('LC',l.d);});}
+  const end=days[days.length-1];
+  if(P.leads){P.leads.forEach(l=>{put('L',l.d);if(l.appt)put('LA',l.d);if(l.visit)put('LV',l.d);if(l.paid)put('LC',l.d);
+    // cohort: of the leads that came in that day, who booked, visited and paid by the end of the period
+    const kA=l.appt&&(!l.apptD||l.apptD<=end),kV=l.visitD&&l.visitD<=end,kC=l.paidD&&l.paidD<=end;
+    if(kA)put('kA',l.d);if(kV)put('kV',l.d);if(kC)put('kC',l.d);if(kA&&kV)put('kAV',l.d);});}
   P.t.leads.forEach(([d,n])=>{if(!(P.leads&&d>=LEAD_FROM))put('leads',d,n);});   // ads tracker before the lead list starts
   if(P.leads)P.leads.forEach(l=>{if(l.d>=LEAD_FROM)put('leads',l.d);});
-  if(P.hasAppts){P.appts.forEach(a=>{if(a[1])put('exp',a[1]);if(!a[0])return;put('appts',a[0]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
+  if(P.hasAppts){P.appts.forEach(a=>{if(a[1])put('exp',a[1]);put('apR',a[0]||a[1]);if(!a[0])return;put('appts',a[0]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
   const VK={today:'vToday',earlier:'vEarlier',later:'vLater',walk:'vWalk',booked:'vBooked',unknown:'vUnknown'};
   P.visits.forEach(v=>{put('vis',v.d);put(VK[v.kind],v.d);if(v.paid)put('vPaid',v.d);if(['today','earlier','later'].includes(v.kind))put('apptVis',v.d);});
   P.fresh.forEach(f=>{put('conv',f.d);put('fs',f.d);put('fc',f.d,f.amt);put({appt:'cAppt',walk:'cWalk',unknown:'cUnknown',nolog:'cNolog'}[f.journey],f.d);if(f.when==='same')put('cSame',f.d);else if(f.when==='earlier')put('cEarlier',f.d);});
@@ -280,12 +287,14 @@ const GI={'At a glance':['<path d="M3 12h4l3-7 4 14 3-7h4"/>','the day\'s result
   'Fresh sales':['<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>','new learners'],
   'Renewals':['<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>','existing learners'],
   'Total':['<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>','fresh sales and renewals'],
+  'Ratios':['<path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>','this month\'s leads, and the month overall'],
   'Breakdown':['<path d="M3 6h18M7 12h14M11 18h10"/>','how the visits and conversions came about'],
   'Lead journey':['<path d="M4 6h16M7 12h10M10 18h4"/>','each lead followed by mobile number, from 1 November']};
 const ROWS=[
   {g:'At a glance'},
   {id:'leads',label:'Leads registered',kind:'count',tkey:'leads',head:1,need:'leads'},
   {id:'appts',label:'Appointments scheduled',kind:'count',tkey:'appts',head:1,need:'booked'},
+  {id:'exp',label:'Visits expected',kind:'count',need:'appts',tip:'Appointments due to visit that day'},
   {id:'vis',label:'Centre visits',kind:'count',tkey:'visits',head:1},
   {id:'conv',label:'Conversions',kind:'count',tkey:'conv',head:1},
   {g:'Fresh sales'},
@@ -298,26 +307,33 @@ const ROWS=[
   {id:'ar',label:'ATV – Renewals',kind:'atv',minor:1,num:'rc',den:'rn',tn:'rncol',td:'renewed'},
   {g:'Total'},
   {id:'tc',label:'Total collections',kind:'money',tkeys:['fscol','rncol'],head:1},
+  {g:'Ratios'},
+  {label:'Lead to appointment %',pair:[
+    {num:'kA',den:'L',need:'list',tip:'Leads registered this month who have booked an appointment this month ÷ leads registered this month'},
+    {num:'apR',den:'leads',need:'both',tn:'appts',td:'leads',tip:'Appointments booked this month ÷ leads registered this month'}]},
+  {label:'Show-up rate',pair:[
+    {num:'kAV',den:'kA',need:'list',tip:'Leads registered and booked this month who have visited ÷ appointments booked by leads registered this month'},
+    {num:'apptVis',den:'apR',need:'appts',tip:'Centre visits this month by people who booked an appointment, this month or earlier ÷ appointments booked this month'}]},
+  {label:'Visit to conversion %',pair:[
+    {num:'kC',den:'kV',need:'list',tip:'Conversions by leads registered this month ÷ centre visits by leads registered this month'},
+    {num:'conv',den:'vis',tn:'conv',td:'visits',tip:'Conversions this month ÷ centre visits this month'}]},
+  {label:'Lead to conversion %',pair:[
+    {num:'kC',den:'L',need:'list',tip:'Conversions by leads registered this month ÷ leads registered this month'},
+    {num:'conv',den:'leads',need:'leads',tn:'conv',td:'leads',tip:'Conversions this month ÷ leads registered this month'}]},
   {g:'Breakdown'},
   {id:'apB',label:'Appointments scheduled, by lead',kind:'count',src:'appts',need:'booked',open:'a',subs:[
     {id:'aToday',label:'From leads that came in that day'},{id:'aEarlier',label:'From leads that came in earlier'},{id:'aNone',label:'Lead not in the lead list',opt:1}]},
-  {id:'exp',label:'Visits expected',kind:'count',need:'appts'},
-  {id:'show',label:'Show-up rate',kind:'ratio',num:'vToday',den:'exp',need:'appts',tip:'Of the visits expected that day, how many came that day'},
   {id:'visB',label:'Centre visits, by appointment',kind:'count',src:'vis',open:'v',subs:[
     {id:'vToday',label:'Expected today, and came'},{id:'vEarlier',label:'Expected earlier, came today'},{id:'vLater',label:'Expected later, came today'},
     {id:'vWalk',label:'Direct walk-ins'},{id:'vBooked',label:'Booked (no appointment record)',opt:1},{id:'vUnknown',label:'Visit type not recorded',opt:1}]},
   {id:'convB',label:'Conversions, by journey',kind:'count',src:'conv',open:'c',subs:[
-    {h:'Their journey'},{id:'cAppt',label:'Booked an appointment, visited, paid'},{id:'cWalk',label:'No appointment, visited, paid'},{id:'cUnknown',label:'Visited, paid (appointment not recorded)',opt:1},{id:'cNolog',label:'Paid, visit not logged',opt:1},
-    {h:'When they visited'},{id:'cSame',label:'Visited today, paid today'},{id:'cEarlier',label:'Visited earlier, paid today'},{id:'cNolog',label:'Paid, visit not logged',opt:1}]},
-  {id:'vc',label:'Visit to conversion %',kind:'ratio',num:'vPaid',den:'vis',tn:'conv',td:'visits',tip:'Of the people who visited that day, how many have paid so far'},
+    {h:'Funnel tracking'},{id:'cAppt',label:'Booked an appointment, visited, converted'},{id:'cWalk',label:'No appointment, visited, converted'},{id:'cUnknown',label:'Visited, converted (appointment not recorded)',opt:1},
+    {h:'When they visited'},{id:'cSame',label:'Spot payments: visited today, paid today'},{id:'cEarlier',label:'Follow-up payments: visited earlier, paid today'},{id:'cNolog',label:'Paid, visit not logged',opt:1}]},
   {g:'Lead journey',journey:1},
   {id:'L',label:'Leads that came in',kind:'count',need:'list'},
   {id:'LA',label:'… of them booked an appointment',kind:'count',need:'list'},
   {id:'LV',label:'… of them visited the centre',kind:'count',need:'list'},
-  {id:'LC',label:'… of them paid',kind:'count',need:'list'},
-  {id:'la',label:'Lead to appointment %',kind:'ratio',num:'LA',den:'L',need:'list',tn:'appts',td:'leads',tip:'Of the leads that came in that day, how many have booked an appointment so far'},
-  {id:'lv',label:'Lead to visit %',kind:'ratio',num:'LV',den:'L',need:'list',tip:'Of the leads that came in that day, how many have visited so far'},
-  {id:'lc',label:'Lead to conversion %',kind:'ratio',num:'LC',den:'L',need:'list',tip:'Of the leads that came in that day, how many have paid so far'}
+  {id:'LC',label:'… of them paid',kind:'count',need:'list'}
 ];
 
 function period(){
@@ -369,6 +385,21 @@ function render(){
   };
   ROWS.forEach(r=>{
     if(r.g){const gi=GI[r.g]||['',''];h+=`<tr class="grp"><td class="m"><span class="gh"><i><svg viewBox="0 0 24 24">${gi[0]}</svg></i>${r.g}<small>${gi[1]}</small></span>${r.journey?'<button type="button" class="jbtn" id="jbtn">See each lead ›</button>':''}</td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
+    if(r.pair){
+      h+=`<tr class="rp"><td class="m">${r.label}</td>${blank()}<td colspan="${days.length}"></td></tr>`;
+      const coh=P.month?(cur?"This month's cohort":"That month's cohort"):"This period's cohort";
+      r.pair.forEach((q,k)=>{
+        const ps=ok(q.need),lab=k?'Overall':coh;
+        if(!ps.length){h+=`<tr class="ratio rs"><td class="m" title="${esc(q.tip)}">${lab}</td>`+sc(NR,'','',null)+ORD.map(i=>cell(i,'–','zero')).join('')+'</tr>';return;}
+        const an=add(q.num,ps),ad=add(q.den,ps),tn=tot(an),td=tot(ad),so=td?tn/td*100:null;
+        const pc=(n,d)=>`<span class="pf">${fmtP(n/d*100)}</span><span class="nd">${fmtN(n)} / ${fmtN(d)}</span>`;
+        let t='',gap=null;
+        if(P.month&&q.tn){const both=per.filter(p=>p.T[q.tn]!=null&&p.T[q.td]!=null),nu=both.reduce((s,p)=>s+p.T[q.tn],0),de=both.reduce((s,p)=>s+p.T[q.td],0);
+          if(both.length&&de){const tv=nu/de*100;t=fmtP(tv);if(so!=null)gap={v:so-tv,t:(so-tv>0?'+':'−')+Math.abs(so-tv).toFixed(1)+' pts'};}}
+        h+=`<tr class="ratio rs"><td class="m" title="${esc(q.tip)}">${lab}</td>`+sc(so!=null?pc(tn,td):'–',t,'',gap)
+          +ORD.map(i=>ad[i]?cell(i,pc(an[i],ad[i])):cell(i,'–','zero')).join('')+'</tr>';
+      });
+      return;}
     const ps=ok(r.need);
     if(!ps.length){h+=`<tr class="${r.kind==='ratio'?'ratio':''}"><td class="m">${r.label}</td>`+sc(NR,'','',null)+ORD.map(i=>cell(i,'–','zero')).join('')+'</tr>';return;}
     if(r.kind==='count'||r.kind==='money'){
@@ -417,10 +448,10 @@ function render(){
   else if(missing.length)msgs.push(`<sup class="ast">*</sup>Not every centre has a target for ${[...new Set(missing)].join(', ')}, so the target and surplus / deficit cover only the centres that do.`);
   const noA=per.filter(p=>!p.S.hasAppts).map(p=>p.c.name);
   if(noA.length)msgs.push(`<b>${noA.join(', ')}:</b> no appointments sheet, so ${noA.length>1?'they are':'it is'} left out of appointments, visits expected and show-up; ${noA.length>1?'their':'its'} visits are split by the visit sheet's Visit Type.`);
-  if(per.some(p=>PREP[p.c.name]&&PREP[p.c.name].fwNoDate))msgs.push('<b>Futwork appointments</b> have no booking date yet, so they count in visits expected, show-up, the visit split and the lead journey, but not in appointments scheduled.');
+  if(per.some(p=>PREP[p.c.name]&&PREP[p.c.name].fwNoDate))msgs.push('<b>Futwork appointments</b> have no booking date yet, so they count in visits expected, the visit split and the lead journey, but not in appointments scheduled; in the ratios they count on their visit date.');
   const noL=per.filter(p=>!p.S.hasLeads).map(p=>p.c.name);
   if(noL.length)msgs.push(`<b>${noL.join(', ')}:</b> no leads in the ads tracker for this period.`);
-  msgs.push('Leads: from 1 November 2026, every lead in the lead list (all sources); before that, the Meta and Google ads tracker. Lead % rows follow each lead: of the leads that came in that day, how many have booked, visited or paid so far. Visits, appointments and fresh sales are matched by phone number or lead ID.');
+  msgs.push('Leads: from 1 November 2026, every lead in the lead list (all sources); before that, the Meta and Google ads tracker. Ratios: the cohort follows the leads registered in the period (in each day\'s column, the leads that came in that day) and counts what they did by the end of the period; overall compares the period\'s totals. Visits, appointments and fresh sales are matched by phone number or lead ID.');
   notes.innerHTML=msgs.join('<br>');
 }
 
