@@ -107,6 +107,21 @@
   td .pf{display:block;font-weight:600;line-height:1.15}td .nd{display:block;font:500 11px var(--body);color:var(--faint);margin-top:1px}
   tr.ratio td{height:48px}
   td.pmuted{color:#D6D2DB}
+  /* Lead journey: button and window */
+  .jbtn{margin-left:14px;border:1px solid #DCCDEE;background:#fff;color:var(--accent);font:600 12px var(--body);letter-spacing:0;text-transform:none;border-radius:999px;padding:4px 11px;cursor:pointer;vertical-align:middle}
+  .jbtn:hover{background:var(--accent);color:#fff}
+  .jdlg{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:20px;background:rgba(29,20,40,.5);backdrop-filter:blur(2px)}
+  .jc{width:100%;max-width:980px;max-height:86vh;display:flex;flex-direction:column;background:#fff;border-radius:20px;box-shadow:0 30px 70px -20px rgba(30,15,45,.55);overflow:hidden}
+  .jh{display:flex;justify-content:space-between;gap:16px;padding:20px 22px 10px}.jh h3{font:600 19px var(--display);color:var(--ink)}.jh p{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.45}
+  .jx{flex:none;width:34px;height:34px;border:0;border-radius:10px;background:var(--bg);font-size:20px;color:var(--muted);cursor:pointer}
+  .jf{display:flex;gap:6px;flex-wrap:wrap;padding:4px 22px 12px;border-bottom:1px solid var(--line)}
+  .jf button{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer}
+  .jf button span{font-weight:500;color:var(--faint)}.jf button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.jf button[aria-pressed="true"] span{color:#E3D3F3}
+  .jb{overflow:auto;padding:0 22px 16px}
+  .jt{width:100%;min-width:0;border-collapse:collapse}
+  .jt th,.jt td{position:static!important;background:none!important;padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;font:400 13.5px var(--body);color:var(--ink2);white-space:nowrap;height:auto;box-shadow:none!important}
+  .jt th{font:600 11px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--muted);position:sticky!important;top:0;background:#fff!important}
+  .jt td b{display:block;font-weight:600;color:var(--ink)}.jt td small{display:block;font-size:11.5px;color:var(--faint)}.jt .mut{color:#C9C5CF}
   /* Period picker */
   .seg{display:inline-flex;gap:2px;background:var(--bg);border-radius:12px;padding:3px}
   .seg button{border:0;background:none;border-radius:9px;padding:8px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
@@ -203,12 +218,17 @@ let TR=null,TARGETS={},loaded=false,PREP={};
    A fresh sale is matched to the latest visit with the same phone number on or before the payment (3 days' grace for late entries). */
 function prep(name){
   const t=TR&&TR[name];if(!t)return null;
-  const appts=t.appts,byPhone=new Map();
+  // Appointments: the centre's own Appointments tab plus those booked by Futwork (no booking date there yet: 0).
+  // A Futwork booking already in the centre's tab (same phone, same visit date) counts once.
+  const own=t.appts;
+  const fw=(t.futwork||[]).filter(f=>f[1]&&!(own||[]).some(a=>a[2]===f[2]&&a[1]===f[1])).map(f=>Object.assign([f[0],f[1],f[2],''],{fw:1,name:f[3]}));
+  const appts=own||fw.length?(own||[]).concat(fw):null,byPhone=new Map();
   (appts||[]).forEach(a=>{if(a[2]){(byPhone.get(a[2])||byPhone.set(a[2],[]).get(a[2])).push(a);}});
-  const visits=t.visits.map(v=>{const [d,p,type]=v;let kind='walk';
+  const visits=t.visits.map(v=>{const [d,p,type]=v;let kind=null;
     if(appts){const mine=(byPhone.get(p)||[]).filter(a=>a[0]<=d&&a[1]);
       if(mine.some(a=>a[1]===d))kind='today';else if(mine.some(a=>a[1]<d&&diff(a[1],d)<=90))kind='earlier';else if(mine.some(a=>a[1]>d))kind='later';}
-    else kind=type===1?'booked':type===0?'walk':'unknown';
+    // no appointment found: a walk-in, or, for a centre without its own Appointments tab, what the visit sheet's Visit Type says
+    if(!kind)kind=own?'walk':type===1?'booked':type===0?'walk':'unknown';
     return{d,p,kind};});
   const vByPhone=new Map();visits.forEach(v=>{if(v.p)(vByPhone.get(v.p)||vByPhone.set(v.p,[]).get(v.p)).push(v);});
   const fresh=t.fresh.map(f=>{const [d,p,amt]=f;const v=(vByPhone.get(p)||[]).filter(x=>x.d<=addDays(d,3)).sort((a,b)=>b.d-a.d)[0]||null;if(v)v.paid=1;
@@ -221,15 +241,16 @@ function prep(name){
   if(LL){
     const byId=new Map(),byPh=new Map();
     const seen=new Set();   // one person asking about two courses on the same day counts once
-    LL.forEach(([d,p,id])=>{const k=d+'|'+(p||id);if(seen.has(k))return;seen.add(k);const l={d,p,id};leads.push(l);if(id)byId.set(id,l);if(p&&(!byPh.has(p)||byPh.get(p).d>d))byPh.set(p,l);});
+    LL.forEach(([d,p,id,nm])=>{const k=d+'|'+(p||id);if(seen.has(k))return;seen.add(k);const l={d,p,id,name:nm||'',centre:name};leads.push(l);if(id)byId.set(id,l);if(p&&(!byPh.has(p)||byPh.get(p).d>d))byPh.set(p,l);});
     const fByPh=new Map();t.fresh.forEach(f=>{if(f[1])(fByPh.get(f[1])||fByPh.set(f[1],[]).get(f[1])).push(f[0]);});
     leads.forEach(l=>{
-      l.appt=(appts||[]).some(a=>a[0]>=l.d&&((l.id&&a[3]===l.id)||(l.p&&a[2]===l.p)));
-      l.visit=!!l.p&&(vByPhone.get(l.p)||[]).some(v=>v.d>=l.d);
-      l.paid=!!l.p&&(fByPh.get(l.p)||[]).some(d=>d>=l.d);});
-    (appts||[]).forEach(a=>{const l=(a[3]&&byId.get(a[3]))||(a[2]&&byPh.get(a[2]))||null;a.src=!l||l.d>a[0]?'none':l.d===a[0]?'today':'earlier';});
+      const ap=(appts||[]).filter(a=>(a[0]||a[1])>=l.d&&((l.id&&a[3]===l.id)||(l.p&&a[2]===l.p))).sort((a,b)=>(a[0]||a[1])-(b[0]||b[1]))[0];
+      l.appt=!!ap;l.apptD=ap?(ap[0]||0):0;l.apptE=ap?ap[1]:0;l.fw=ap?!!ap.fw:false;
+      const vd=(vByPhone.get(l.p)||[]).filter(v=>v.d>=l.d).map(v=>v.d).sort()[0],pd=(fByPh.get(l.p)||[]).filter(d=>d>=l.d).sort()[0];
+      l.visit=!!(l.p&&vd);l.visitD=vd||0;l.paid=!!(l.p&&pd);l.paidD=pd||0;});
+    (appts||[]).forEach(a=>{if(!a[0])return;const l=(a[3]&&byId.get(a[3]))||(a[2]&&byPh.get(a[2]))||null;a.src=!l||l.d>a[0]?'none':l.d===a[0]?'today':'earlier';});
   }
-  return{t,visits,fresh,show,hasAppts:!!appts,leads:LL?leads:null};
+  return{t,visits,fresh,show,appts,hasAppts:!!appts,hasBooked:!!own||fw.some(a=>a[0]),hasFw:fw.length>0,fwNoDate:fw.length>0&&!fw.some(a=>a[0]),leads:LL?leads:null};
 }
 
 /* Daily series for one centre over the given days (yyyymmdd list, oldest first) */
@@ -241,14 +262,14 @@ function series(name,days){
   if(P.leads){P.leads.forEach(l=>{put('L',l.d);if(l.appt)put('LA',l.d);if(l.visit)put('LV',l.d);if(l.paid)put('LC',l.d);});}
   P.t.leads.forEach(([d,n])=>{if(!(P.leads&&d>=LEAD_FROM))put('leads',d,n);});   // ads tracker before the lead list starts
   if(P.leads)P.leads.forEach(l=>{if(l.d>=LEAD_FROM)put('leads',l.d);});
-  if(P.hasAppts){P.t.appts.forEach(a=>{put('appts',a[0]);if(a[1])put('exp',a[1]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
+  if(P.hasAppts){P.appts.forEach(a=>{if(a[1])put('exp',a[1]);if(!a[0])return;put('appts',a[0]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
   const VK={today:'vToday',earlier:'vEarlier',later:'vLater',walk:'vWalk',booked:'vBooked',unknown:'vUnknown'};
   P.visits.forEach(v=>{put('vis',v.d);put(VK[v.kind],v.d);if(v.paid)put('vPaid',v.d);if(['today','earlier','later'].includes(v.kind))put('apptVis',v.d);});
   P.fresh.forEach(f=>{put('conv',f.d);put('fs',f.d);put('fc',f.d,f.amt);put({appt:'cAppt',walk:'cWalk',unknown:'cUnknown',nolog:'cNolog'}[f.journey],f.d);if(f.when==='same')put('cSame',f.d);else if(f.when==='earlier')put('cEarlier',f.d);});
   P.t.renew.forEach(([d,a,end])=>{put('rn',d);put('rc',d,a);if(end)put('due',end);});
   P.t.fresh.forEach(f=>{if(f[3])put('due',f[3]);});   // memberships ending that day: renewals due
   S.tc=S.fc.map((v,i)=>v+S.rc[i]);
-  S.hasAppts=P.hasAppts;S.hasLeads=P.t.leads.length>0||!!P.leads;S.hasList=!!P.leads;
+  S.hasAppts=P.hasAppts;S.hasBooked=P.hasBooked;S.hasLeads=P.t.leads.length>0||!!P.leads;S.hasList=!!P.leads;
   return S;
 }
 
@@ -259,11 +280,12 @@ const GI={'At a glance':['<path d="M3 12h4l3-7 4 14 3-7h4"/>','the day\'s result
   'Fresh sales':['<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>','new learners'],
   'Renewals':['<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/>','existing learners'],
   'Total':['<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>','fresh sales and renewals'],
-  'Breakdown':['<path d="M3 6h18M7 12h14M11 18h10"/>','how the visits and conversions came about']};
+  'Breakdown':['<path d="M3 6h18M7 12h14M11 18h10"/>','how the visits and conversions came about'],
+  'Lead journey':['<path d="M4 6h16M7 12h10M10 18h4"/>','each lead followed by mobile number, from 1 November']};
 const ROWS=[
   {g:'At a glance'},
   {id:'leads',label:'Leads registered',kind:'count',tkey:'leads',head:1,need:'leads'},
-  {id:'appts',label:'Appointments scheduled',kind:'count',tkey:'appts',head:1,need:'appts'},
+  {id:'appts',label:'Appointments scheduled',kind:'count',tkey:'appts',head:1,need:'booked'},
   {id:'vis',label:'Centre visits',kind:'count',tkey:'visits',head:1},
   {id:'conv',label:'Conversions',kind:'count',tkey:'conv',head:1},
   {g:'Fresh sales'},
@@ -277,7 +299,7 @@ const ROWS=[
   {g:'Total'},
   {id:'tc',label:'Total collections',kind:'money',tkeys:['fscol','rncol'],head:1},
   {g:'Breakdown'},
-  {id:'apB',label:'Appointments scheduled, by lead',kind:'count',src:'appts',need:'appts',open:'a',subs:[
+  {id:'apB',label:'Appointments scheduled, by lead',kind:'count',src:'appts',need:'booked',open:'a',subs:[
     {id:'aToday',label:'From leads that came in that day'},{id:'aEarlier',label:'From leads that came in earlier'},{id:'aNone',label:'Lead not in the lead list',opt:1}]},
   {id:'exp',label:'Visits expected',kind:'count',need:'appts'},
   {id:'show',label:'Show-up rate',kind:'ratio',num:'vToday',den:'exp',need:'appts',tip:'Of the visits expected that day, how many came that day'},
@@ -287,9 +309,14 @@ const ROWS=[
   {id:'convB',label:'Conversions, by journey',kind:'count',src:'conv',open:'c',subs:[
     {h:'Their journey'},{id:'cAppt',label:'Booked an appointment, visited, paid'},{id:'cWalk',label:'No appointment, visited, paid'},{id:'cUnknown',label:'Visited, paid (appointment not recorded)',opt:1},{id:'cNolog',label:'Paid, visit not logged',opt:1},
     {h:'When they visited'},{id:'cSame',label:'Visited today, paid today'},{id:'cEarlier',label:'Visited earlier, paid today'},{id:'cNolog',label:'Paid, visit not logged',opt:1}]},
+  {id:'vc',label:'Visit to conversion %',kind:'ratio',num:'vPaid',den:'vis',tn:'conv',td:'visits',tip:'Of the people who visited that day, how many have paid so far'},
+  {g:'Lead journey',journey:1},
+  {id:'L',label:'Leads that came in',kind:'count',need:'list'},
+  {id:'LA',label:'… of them booked an appointment',kind:'count',need:'list'},
+  {id:'LV',label:'… of them visited the centre',kind:'count',need:'list'},
+  {id:'LC',label:'… of them paid',kind:'count',need:'list'},
   {id:'la',label:'Lead to appointment %',kind:'ratio',num:'LA',den:'L',need:'list',tn:'appts',td:'leads',tip:'Of the leads that came in that day, how many have booked an appointment so far'},
   {id:'lv',label:'Lead to visit %',kind:'ratio',num:'LV',den:'L',need:'list',tip:'Of the leads that came in that day, how many have visited so far'},
-  {id:'vc',label:'Visit to conversion %',kind:'ratio',num:'vPaid',den:'vis',tn:'conv',td:'visits',tip:'Of the people who visited that day, how many have paid so far'},
   {id:'lc',label:'Lead to conversion %',kind:'ratio',num:'LC',den:'L',need:'list',tip:'Of the leads that came in that day, how many have paid so far'}
 ];
 
@@ -314,7 +341,7 @@ function render(){
   const ORD=days.map((_,i)=>i).reverse();
   const list=selCentre==='All'?CENTRES:CENTRES.filter(c=>c.name===selCentre);
   const per=list.map(c=>({c,S:series(c.name,days),T:P.month?((TARGETS[monthKey(viewY,viewM)]||{})[c.name]||{}):{}})).filter(p=>p.S);
-  const ok=need=>per.filter(p=>!need||(need==='appts'?p.S.hasAppts:need==='leads'?p.S.hasLeads:need==='list'?p.S.hasList:p.S.hasAppts&&p.S.hasLeads));
+  const ok=need=>per.filter(p=>!need||(need==='appts'?p.S.hasAppts:need==='booked'?p.S.hasBooked:need==='leads'?p.S.hasLeads:need==='list'?p.S.hasList:p.S.hasAppts&&p.S.hasLeads));
   const add=(id,ps)=>days.map((_,i)=>ps.reduce((s,p)=>s+p.S[id][i],0));
   const tot=a=>a.reduce((s,v)=>s+v,0),cum=a=>{let c=0;return a.map(v=>c+=v);};
   // month view: run-rate over working days (Mondays off) and targets
@@ -341,7 +368,7 @@ function render(){
     return`<tr class="${cls}"><td class="m">${label}</td>`+sc(fm(r.kind,so),t,rr,gap)+ORD.map(i=>cell(i,a[i]?(r.kind==='money'?`<span title="${fmtR(a[i])}">${fmtC(a[i])}</span>`:fmtN(a[i])):'–',a[i]?'':'zero')).join('')+'</tr>';
   };
   ROWS.forEach(r=>{
-    if(r.g){const gi=GI[r.g]||['',''];h+=`<tr class="grp"><td class="m"><span class="gh"><i><svg viewBox="0 0 24 24">${gi[0]}</svg></i>${r.g}<small>${gi[1]}</small></span></td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
+    if(r.g){const gi=GI[r.g]||['',''];h+=`<tr class="grp"><td class="m"><span class="gh"><i><svg viewBox="0 0 24 24">${gi[0]}</svg></i>${r.g}<small>${gi[1]}</small></span>${r.journey?'<button type="button" class="jbtn" id="jbtn">See each lead ›</button>':''}</td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
     const ps=ok(r.need);
     if(!ps.length){h+=`<tr class="${r.kind==='ratio'?'ratio':''}"><td class="m">${r.label}</td>`+sc(NR,'','',null)+ORD.map(i=>cell(i,'–','zero')).join('')+'</tr>';return;}
     if(r.kind==='count'||r.kind==='money'){
@@ -382,6 +409,7 @@ function render(){
   grid.className=P.month?'':'rng';
   grid.innerHTML=h+'</tbody>';
   document.getElementById('sc').scrollLeft=0;
+  const jb=document.getElementById('jbtn');if(jb)jb.onclick=()=>journeyDialog(P,list.map(c=>c.name));
   grid.querySelectorAll('tr[data-open]').forEach(tr=>tr.onclick=()=>{const k=tr.dataset.open;OPEN=OPEN.includes(k)?OPEN.filter(x=>x!==k):OPEN.concat(k);try{localStorage.setItem('artium_daily_open',JSON.stringify(OPEN));}catch(e){}render();});
   // Notes, in plain words
   const msgs=[];
@@ -389,11 +417,34 @@ function render(){
   else if(missing.length)msgs.push(`<sup class="ast">*</sup>Not every centre has a target for ${[...new Set(missing)].join(', ')}, so the target and surplus / deficit cover only the centres that do.`);
   const noA=per.filter(p=>!p.S.hasAppts).map(p=>p.c.name);
   if(noA.length)msgs.push(`<b>${noA.join(', ')}:</b> no appointments sheet, so ${noA.length>1?'they are':'it is'} left out of appointments, visits expected and show-up; ${noA.length>1?'their':'its'} visits are split by the visit sheet's Visit Type.`);
+  if(per.some(p=>PREP[p.c.name]&&PREP[p.c.name].fwNoDate))msgs.push('<b>Futwork appointments</b> have no booking date yet, so they count in visits expected, show-up, the visit split and the lead journey, but not in appointments scheduled.');
   const noL=per.filter(p=>!p.S.hasLeads).map(p=>p.c.name);
   if(noL.length)msgs.push(`<b>${noL.join(', ')}:</b> no leads in the ads tracker for this period.`);
   msgs.push('Leads: from 1 November 2026, every lead in the lead list (all sources); before that, the Meta and Google ads tracker. Lead % rows follow each lead: of the leads that came in that day, how many have booked, visited or paid so far. Visits, appointments and fresh sales are matched by phone number or lead ID.');
   notes.innerHTML=msgs.join('<br>');
 }
+
+/* Each lead that came in during the period, followed by mobile number: when they booked, visited and paid */
+function journeyDialog(P,names){
+  const a=ymd(P.a),b=ymd(P.b),L=[];names.forEach(n=>{const pr=PREP[n];if(pr&&pr.leads)pr.leads.forEach(l=>{if(l.d>=a&&l.d<=b)L.push(l);});});
+  L.sort((x,y)=>y.d-x.d||x.name.localeCompare(y.name));
+  const F=[['all','All',()=>true],['nobook','Not booked yet',l=>!l.appt&&!l.visit&&!l.paid],['bookednv','Booked, not visited',l=>l.appt&&!l.visit&&!l.paid],['visitednp','Visited, not paid',l=>l.visit&&!l.paid],['paid','Paid',l=>l.paid]];
+  let f='all';
+  const d=k=>{if(!k)return'<span class="mut">—</span>';const t=fromYmd(k);return t.getDate()+' '+MON[t.getMonth()];};
+  const box=document.createElement('div');box.className='jdlg';box.setAttribute('role','dialog');box.setAttribute('aria-label','Lead journey');
+  const draw=()=>{const fn=F.find(x=>x[0]===f)[2],xs=L.filter(fn);
+    box.innerHTML=`<div class="jc"><div class="jh"><div><h3>Lead journey</h3><p>${pl(L.length,'lead')} that came in from ${d(a)} to ${d(b)}${names.length===1?' at '+esc(names[0]):''}. Matched by mobile number across the lead list, appointments (the centre's and Futwork's), centre visits and Fresh Sales.</p></div><button type="button" class="jx" aria-label="Close">×</button></div>
+      <div class="jf">${F.map(([k,l,fn2])=>`<button type="button" data-f="${k}" aria-pressed="${f===k}">${l}<span>${L.filter(fn2).length}</span></button>`).join('')}</div>
+      <div class="jb"><table class="jt"><thead><tr><th>Lead came in</th><th>Name</th>${names.length>1?'<th>Centre</th>':''}<th>Mobile</th><th>Appointment</th><th>Visited</th><th>Paid</th></tr></thead><tbody>
+      ${xs.map(l=>`<tr><td>${d(l.d)}</td><td><b>${esc(l.name)||'—'}</b><small>${esc(l.id)}</small></td>${names.length>1?`<td>${esc(l.centre)}</td>`:''}<td>${l.p.length===10?l.p.slice(0,5)+' '+l.p.slice(5):'—'}</td>
+        <td>${l.appt?(l.apptD?'Booked '+d(l.apptD):'Booked')+(l.apptE?`<small>for ${d(l.apptE)}${l.fw?' · Futwork':''}</small>`:''):'<span class="mut">—</span>'}</td><td>${d(l.visitD)}</td><td>${d(l.paidD)}</td></tr>`).join('')||`<tr><td colspan="7" class="mut" style="padding:20px 8px">No leads here.</td></tr>`}
+      </tbody></table></div></div>`;
+    box.querySelector('.jx').onclick=close;box.querySelectorAll('.jf button').forEach(x=>x.onclick=()=>{f=x.dataset.f;draw();});};
+  const close=()=>{box.remove();document.removeEventListener('keydown',key);},key=e=>{if(e.key==='Escape')close();};
+  box.onclick=e=>{if(e.target===box)close();};document.addEventListener('keydown',key);
+  draw();document.body.appendChild(box);
+}
+const pl=(n,w)=>n+' '+w+(n===1?'':'s');
 
 /* ── Controls ── */
 let SUMOPEN=(()=>{try{return localStorage.getItem('artium_daily_sum')==='open';}catch(e){return false;}})();
