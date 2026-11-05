@@ -76,6 +76,26 @@
   .gh small{font:500 11.5px var(--body);letter-spacing:0;text-transform:none;color:#9C86B5;margin-left:2px}
   tr.tot td{font-weight:600}tr.tot td.m{color:var(--accent)}
   .neg{color:var(--bad)}.pos{color:var(--ok)}
+  /* premium details */
+  td .tv{display:block;line-height:1.2}
+  .lgbar{position:relative;display:inline-block;width:30px;height:6px;border-radius:6px;background:#EEE8F5;margin-right:7px;vertical-align:1px}.lgbar i{position:absolute;left:0;top:0;bottom:0;width:45%;border-radius:6px;background:var(--accent)}.lgbar b{position:absolute;left:60%;top:-3px;width:2px;height:12px;background:var(--ink2)}
+  td .prog{display:flex;align-items:center;justify-content:flex-end;gap:7px;margin-top:6px}
+  td .prog em{font:600 11px/1 var(--body);font-style:normal;color:var(--accent);min-width:28px;text-align:right}
+  td .trk{position:relative;display:block;width:64px;height:6px;border-radius:6px;background:#EEE8F5}
+  td .trk i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:linear-gradient(90deg,#9466C9,var(--accent))}
+  td .trk b{position:absolute;top:-3px;width:2px;height:12px;margin-left:-1px;border-radius:1px;background:var(--ink2)}
+  td .tp{position:absolute;right:14px;bottom:9px;width:58px;height:3px;border-radius:3px;background:#ECE6F3;overflow:hidden}td .tp i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#8E5CC2,var(--accent))}
+  td.s1 b{display:inline}
+  td .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:600;font-size:12.5px}
+  td.neg .pill{background:#FDF0EE;color:var(--bad)}td.pos .pill{background:#ECF6F0;color:var(--ok)}
+  td.d.ht{background-image:linear-gradient(rgba(91,42,134,calc(var(--h)*.11)),rgba(91,42,134,calc(var(--h)*.11)))}
+  tr.has td.s2.sbar,tr.sub td.s2.sbar{text-align:left;padding:0 16px;box-shadow:8px 0 12px -10px rgba(43,24,64,.25);border-right:1px solid var(--border)}
+  .stack{display:flex;gap:2px;height:10px;border-radius:6px;overflow:hidden;max-width:300px}.stack i{display:block;min-width:3px}
+  .bar{display:block;height:6px;border-radius:4px;background:#F0ECF5;max-width:300px;overflow:hidden}.bar i{display:block;height:100%;border-radius:4px}
+  i.sw{display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:10px;vertical-align:1px}
+  tr.sub td.m{padding-left:40px}
+  tr.subh td.m{padding-left:40px;padding-top:6px}
+  tr.stot td{background:#fff}tr.stot td.m{padding-left:58px}
   td .na{color:var(--faint);font-size:12px}
   .legend{display:flex;flex-wrap:wrap;gap:8px 18px;padding:12px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
   .legend span{display:inline-flex;align-items:center;gap:6px}.sq{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
@@ -140,6 +160,9 @@
   tr.has:hover .tg{background:var(--accent-soft);color:var(--accent)}tr.has.open .tg{background:var(--accent);color:#fff;transform:rotate(90deg)}
   tr.sub td{height:34px;font-size:12.5px;color:var(--muted);background:#FDFCFE}tr.sub td.m{padding-left:46px;color:var(--muted);font-weight:400}tr.sub td.s1 b{font-weight:400;color:var(--muted)}
   tr.sub td.s{background:#FAF8FC}
+  tr.has td.s1,tr.has td.d{padding-right:62px}   /* the breakdown's headline number sits above its lines' numbers, past the share slot */
+  td em.sh{display:inline-block;width:42px;text-align:left;font:500 11px var(--body);font-style:normal;color:var(--faint);margin-left:6px}
+  tr.stot td{border-top:1px solid var(--border);color:var(--ink2)}tr.stot td.m{font-weight:600;color:var(--ink2)}tr.sub.stot td.s1 b{font-weight:600;color:var(--ink2)}
   tr.subh td{height:28px;background:#FDFCFE;border-bottom:0}tr.subh td.m{padding-left:44px;font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
   tr.subh td.s{background:#FAF8FC}
   tr.ratio td{height:36px;font-size:12.5px;color:var(--muted);background:#fff}tr.ratio td.m{color:var(--muted);font-weight:400}tr.ratio td .pf{font-weight:500;color:var(--ink2)}
@@ -182,7 +205,7 @@
     <div class="kpis" id="kpis"></div></section>
   <div class="grid-wrap">
     <div class="scroll" id="sc"><table id="grid"></table></div>
-    <div class="legend"><span><i class="sq" style="background:#EBE0F7"></i>Today (so far)</span><span><i class="sq" style="background:#F2EEE7"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span></div>
+    <div class="legend"><span><i class="sq" style="background:#EBE0F7"></i>Today (so far)</span><span><i class="sq" style="background:#F2EEE7"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span><span><i class="lgbar"><i></i><b></b></i>Share of the month's target reached; the dark mark is where it should be by today</span></div>
   </div>
   <div class="notes" id="notes"></div>
 </div>
@@ -231,7 +254,7 @@ function prep(name){
     if(appts){const mine=(byPhone.get(p)||[]).filter(a=>a[0]<=d&&a[1]);
       if(mine.some(a=>a[1]===d))kind='today';else if(mine.some(a=>a[1]<d&&diff(a[1],d)<=90))kind='earlier';else if(mine.some(a=>a[1]>d))kind='later';}
     // no appointment found: a walk-in, or, for a centre without its own Appointments tab, what the visit sheet's Visit Type says
-    if(!kind)kind=own?'walk':type===1?'booked':type===0?'walk':'unknown';
+    if(!kind)kind=type===1?'booked':type===0?'walk':own?'walk':'unknown';
     return{d,p,kind};});
   const vByPhone=new Map();visits.forEach(v=>{if(v.p)(vByPhone.get(v.p)||vByPhone.set(v.p,[]).get(v.p)).push(v);});
   const fresh=t.fresh.map(f=>{const [d,p,amt]=f;const v=(vByPhone.get(p)||[]).filter(x=>x.d<=addDays(d,3)).sort((a,b)=>b.d-a.d)[0]||null;if(v)v.paid=1;
@@ -243,8 +266,7 @@ function prep(name){
   const LL=t.leadList&&t.leadList.length?t.leadList:null,leads=[];
   if(LL){
     const byId=new Map(),byPh=new Map();
-    const seen=new Set();   // one person asking about two courses on the same day counts once
-    LL.forEach(([d,p,id,nm])=>{const k=d+'|'+(p||id);if(seen.has(k))return;seen.add(k);const l={d,p,id,name:nm||'',centre:name};leads.push(l);if(id)byId.set(id,l);if(p&&(!byPh.has(p)||byPh.get(p).d>d))byPh.set(p,l);});
+    LL.forEach(([d,p,id,nm])=>{const l={d,p,id,name:nm||'',centre:name};leads.push(l);if(id)byId.set(id,l);if(p&&(!byPh.has(p)||byPh.get(p).d>d))byPh.set(p,l);});
     const fByPh=new Map();t.fresh.forEach(f=>{if(f[1])(fByPh.get(f[1])||fByPh.set(f[1],[]).get(f[1])).push(f[0]);});
     leads.forEach(l=>{
       const ap=(appts||[]).filter(a=>(a[0]||a[1])>=l.d&&((l.id&&a[3]===l.id)||(l.p&&a[2]===l.p))).sort((a,b)=>(a[0]||a[1])-(b[0]||b[1]))[0];
@@ -290,11 +312,12 @@ const GI={'At a glance':['<path d="M3 12h4l3-7 4 14 3-7h4"/>','the day\'s result
   'Ratios':['<path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>','this month\'s leads, and the month overall'],
   'Breakdown':['<path d="M3 6h18M7 12h14M11 18h10"/>','how the visits and conversions came about'],
   'Lead journey':['<path d="M4 6h16M7 12h10M10 18h4"/>','each lead followed by mobile number, from 1 November']};
+const SEG=['#5B2A86','#9466C9','#C7AAE8','#6E7587','#AEB3C0','#D8DBE2'];   // breakdown lines: the brand purple, then greys
 const ROWS=[
   {g:'At a glance'},
   {id:'leads',label:'Leads registered',kind:'count',tkey:'leads',head:1,need:'leads'},
-  {id:'appts',label:'Appointments scheduled',kind:'count',tkey:'appts',head:1,need:'booked'},
-  {id:'exp',label:'Visits expected',kind:'count',need:'appts',tip:'Appointments due to visit that day'},
+  {id:'appts',label:'Appointments scheduled in {p}',kind:'count',tkey:'appts',head:1,need:'booked',tip:'Booked during the period, for a visit on any date'},
+  {id:'exp',label:'Appointments scheduled for {p}',kind:'count',head:1,need:'appts',tip:'Visits due during the period, whenever they were booked'},
   {id:'vis',label:'Centre visits',kind:'count',tkey:'visits',head:1},
   {id:'conv',label:'Conversions',kind:'count',tkey:'conv',head:1},
   {g:'Fresh sales'},
@@ -322,13 +345,13 @@ const ROWS=[
     {num:'conv',den:'leads',need:'leads',tn:'conv',td:'leads',tip:'Conversions this month ÷ leads registered this month'}]},
   {g:'Breakdown'},
   {id:'apB',label:'Appointments scheduled, by lead',kind:'count',src:'appts',need:'booked',open:'a',subs:[
-    {id:'aToday',label:'From leads that came in that day'},{id:'aEarlier',label:'From leads that came in earlier'},{id:'aNone',label:'Lead not in the lead list',opt:1}]},
+    {id:'aToday',label:'From leads that came in that day'},{id:'aEarlier',label:'From leads that came in earlier'},{id:'aNone',label:'Lead not in the lead list',opt:1},{total:['aToday','aEarlier','aNone']}]},
   {id:'visB',label:'Centre visits, by appointment',kind:'count',src:'vis',open:'v',subs:[
     {id:'vToday',label:'Expected today, and came'},{id:'vEarlier',label:'Expected earlier, came today'},{id:'vLater',label:'Expected later, came today'},
-    {id:'vWalk',label:'Direct walk-ins'},{id:'vBooked',label:'Booked (no appointment record)',opt:1},{id:'vUnknown',label:'Visit type not recorded',opt:1}]},
+    {id:'vWalk',label:'Direct walk-ins'},{id:'vBooked',label:'Booked, not found in the appointment sheets',opt:1},{id:'vUnknown',label:'Visit type not recorded',opt:1},{total:['vToday','vEarlier','vLater','vWalk','vBooked','vUnknown']}]},
   {id:'convB',label:'Conversions, by journey',kind:'count',src:'conv',open:'c',subs:[
-    {h:'Funnel tracking'},{id:'cAppt',label:'Booked an appointment, visited, converted'},{id:'cWalk',label:'No appointment, visited, converted'},{id:'cUnknown',label:'Visited, converted (appointment not recorded)',opt:1},
-    {h:'When they visited'},{id:'cSame',label:'Spot payments: visited today, paid today'},{id:'cEarlier',label:'Follow-up payments: visited earlier, paid today'},{id:'cNolog',label:'Paid, visit not logged',opt:1}]},
+    {h:'Funnel tracking'},{id:'cAppt',label:'Booked an appointment, visited, converted'},{id:'cWalk',label:'No appointment, visited, converted'},{id:'cUnknown',label:'Visited, converted (appointment not recorded)',opt:1},{id:'cNolog',label:'Converted, no visit logged',opt:1},{total:['cAppt','cWalk','cUnknown','cNolog']},
+    {h:'Time of payment'},{id:'cSame',label:'Spot payments: visited today, paid today'},{id:'cEarlier',label:'Follow-up payments: visited earlier, paid today'},{id:'cNolog',label:'Paid, visit not logged',opt:1},{total:['cSame','cEarlier','cNolog']}]},
   {g:'Lead journey',journey:1},
   {id:'L',label:'Leads that came in',kind:'count',need:'list'},
   {id:'LA',label:'… of them booked an appointment',kind:'count',need:'list'},
@@ -367,8 +390,8 @@ function render(){
   const tgt=keys=>{const has=per.filter(p=>keys.every(k=>p.T[k]!=null));return has.length?{v:has.reduce((s,p)=>s+keys.reduce((a,k)=>a+p.T[k],0),0),has,all:has.length===per.length}:null;};
   const missing=[];
   const isOff=i=>!work(days[i]),isToday=i=>days[i]===TODAY,first=i=>days[i]%100===1&&i!==0;
-  const cell=(i,txt,cls='')=>`<td class="d ${isOff(i)?'off':''} ${isToday(i)?'today':''} ${first(i)?'first-of':''} ${cls}">${txt}</td>`;
-  const sc=(so,t,rr,gap)=>`<td class="s s1">${String(so).startsWith('<span class="pf')?so:'<b>'+so+'</b>'}</td>`+(P.month?`<td class="s s2">${t}</td><td class="s s3">${rr}</td><td class="s s4 ${gap&&gap.v<0?'neg':gap&&gap.v>0?'pos':''}">${gap?gap.t:''}</td>`:'');
+  const cell=(i,txt,cls='',ht=0)=>`<td class="d ${isOff(i)?'off':''} ${isToday(i)?'today':''} ${first(i)?'first-of':''} ${cls}${ht?' ht':''}"${ht?` style="--h:${ht.toFixed(2)}"`:''}>${txt}</td>`;
+  const sc=(so,t,rr,gap)=>`<td class="s s1">${String(so).startsWith('<span class="pf')?so:'<b>'+String(so).replace('<span class="tp"','</b><span class="tp"')+(String(so).includes('class="tp"')?'':'</b>')}</td>`+(P.month?`<td class="s s2">${t}</td><td class="s s3">${rr}</td><td class="s s4 ${gap&&gap.v<0?'neg':gap&&gap.v>0?'pos':''}">${gap?gap.t:''}</td>`:'');
   const blank=()=>`<td class="s s1"></td>`+(P.month?'<td class="s s2"></td><td class="s s3"></td><td class="s s4"></td>':'');
   const NR='<span class="na">Not recorded</span>';
   let h='<thead><tr><th class="m">Metric</th><th class="s s1">'+(P.month?(cur?'Month so far':'Month'):'Period total')+'</th>'+(P.month?'<th class="s s2">Target</th><th class="s s3">RR</th><th class="s s4">Surplus / Deficit</th>':'');
@@ -381,7 +404,12 @@ function render(){
     if(P.month&&keys){const T=tgt(keys);if(T){t=fm(r.kind,T.v)+(T.all?'':'<sup class="ast">*</sup>');if(!T.all)missing.push(r.label);
       const mine=tot(add(r.src||r.id,T.has.filter(p=>ps.includes(p))));gap={v:mine-T.v,t:(mine-T.v>0?'+':'')+fm(r.kind,mine-T.v)};}
       if(cur&&gone)rr=fm(r.kind,so/gone*all);}
-    return`<tr class="${cls}"><td class="m">${label}</td>`+sc(fm(r.kind,so),t,rr,gap)+ORD.map(i=>cell(i,a[i]?(r.kind==='money'?`<span title="${fmtR(a[i])}">${fmtC(a[i])}</span>`:fmtN(a[i])):'–',a[i]?'':'zero')).join('')+'</tr>';
+    const mx=Math.max(...a),T0=P.month&&keys?tgt(keys):null;
+    const val=fm(r.kind,so);
+    if(T0&&T0.v){const done=so/T0.v*100,pace=cur&&all?gone/all*100:100;
+      t=`<span class="tv">${t}</span><span class="prog" title="${Math.round(done)}% of the target reached; the mark shows where the month should be by today"><span class="trk"><i style="width:${Math.min(100,done)}%"></i><b style="left:${Math.min(100,pace)}%"></b></span><em>${Math.round(done)}%</em></span>`;}
+    if(gap)gap.t=`<span class="pill">${gap.t}</span>`;
+    return`<tr class="${cls}"><td class="m">${label}</td>`+sc(val,t,rr,gap)+ORD.map(i=>cell(i,a[i]?(r.kind==='money'?`<span title="${fmtR(a[i])}">${fmtC(a[i])}</span>`:fmtN(a[i])):'–',a[i]?'':'zero',a[i]&&mx?a[i]/mx:0)).join('')+'</tr>';
   };
   ROWS.forEach(r=>{
     if(r.g){const gi=GI[r.g]||['',''];h+=`<tr class="grp"><td class="m"><span class="gh"><i><svg viewBox="0 0 24 24">${gi[0]}</svg></i>${r.g}<small>${gi[1]}</small></span>${r.journey?'<button type="button" class="jbtn" id="jbtn">See each lead ›</button>':''}</td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
@@ -395,7 +423,7 @@ function render(){
         const pc=(n,d)=>`<span class="pf">${fmtP(n/d*100)}</span><span class="nd">${fmtN(n)} / ${fmtN(d)}</span>`;
         let t='',gap=null;
         if(P.month&&q.tn){const both=per.filter(p=>p.T[q.tn]!=null&&p.T[q.td]!=null),nu=both.reduce((s,p)=>s+p.T[q.tn],0),de=both.reduce((s,p)=>s+p.T[q.td],0);
-          if(both.length&&de){const tv=nu/de*100;t=fmtP(tv);if(so!=null)gap={v:so-tv,t:(so-tv>0?'+':'−')+Math.abs(so-tv).toFixed(1)+' pts'};}}
+          if(both.length&&de){const tv=nu/de*100;t=fmtP(tv);if(so!=null)gap={v:so-tv,t:`<span class="pill">${(so-tv>0?'+':'−')+Math.abs(so-tv).toFixed(1)+' pts'}</span>`};}}
         h+=`<tr class="ratio rs"><td class="m" title="${esc(q.tip)}">${lab}</td>`+sc(so!=null?pc(tn,td):'–',t,'',gap)
           +ORD.map(i=>ad[i]?cell(i,pc(an[i],ad[i])):cell(i,'–','zero')).join('')+'</tr>';
       });
@@ -406,23 +434,38 @@ function render(){
       const a=add(r.src||r.id,ps),opn=r.open&&OPEN.includes(r.open);
       const lab=r.open?`<span class="tg"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span><b>${r.label}</b>`:r.label;
       h+=line(r,lab,a,(r.head?'head ':'')+(r.open?'has '+(opn?'open':''):''),ps).replace('<tr ',r.open?`<tr data-open="${r.open}" `:'<tr ');
-      if(opn)r.subs.forEach(s=>{
-        if(s.h){h+=`<tr class="subh"><td class="m">${s.h}</td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
-        const b=add(s.id,ps);if(s.opt&&!tot(b))return;
-        h+=`<tr class="sub"><td class="m">${s.label}</td>`+sc(fmtN(tot(b)),'','',null)+ORD.map(i=>cell(i,b[i]?fmtN(b[i]):'–',b[i]?'':'zero')).join('')+'</tr>';
-      });
+      if(P.month&&r.subs){   // the headline row: its first section as one stacked bar
+        const sec=[];for(const x of r.subs){if(x.total)break;if(!x.h)sec.push(x);}
+        const tt=sec.reduce((acc,x)=>acc+tot(add(x.id,ps)),0);
+        const segs=sec.map((x,k)=>{const v=tot(add(x.id,ps));return v&&tt?`<i style="flex:${v};background:${SEG[k%SEG.length]}" title="${esc(x.label)}: ${v}"></i>`:'';}).join('');
+        h=h.replace(/<td class="s s2"><\/td><td class="s s3"><\/td><td class="s s4[^"]*"><\/td>(?![\s\S]*<td class="s s2"><\/td><td class="s s3">)/,`<td class="s s2 sbar" colspan="3">${tt?`<span class="stack">${segs}</span>`:''}</td>`);
+      }
+      if(opn){
+        // each section's total: the sum of its lines; a line's share is of that total
+        const secTot=k=>{const t=r.subs.slice(k).find(x=>x.total);return t?t.total.reduce((acc,id)=>acc.map((v,i)=>v+add(id,ps)[i]),days.map(()=>0)):a;};
+        const sh=(n,d)=>`<em class="sh">${n&&d?(n/d*100).toFixed(1)+'%':''}</em>`;
+        r.subs.forEach((s,k)=>{
+          if(s.h){h+=`<tr class="subh"><td class="m">${s.h}</td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
+          if(s.total){const b=secTot(k);h+=`<tr class="sub stot"><td class="m">Total</td><td class="s s1"><b>${fmtN(tot(b))}</b>${sh(0,0)}</td>`+(P.month?'<td class="s s2 sbar" colspan="3"></td>':'')
+            +ORD.map(i=>cell(i,b[i]?fmtN(b[i])+sh(0,0):'–'+sh(0,0),b[i]?'':'zero')).join('')+'</tr>';return;}
+          const b=add(s.id,ps);if(s.opt&&!tot(b))return;const T=secTot(k);
+          let ix=0;for(let j=k-1;j>=0&&!r.subs[j].h&&!r.subs[j].total;j--)ix++;
+          const col=SEG[ix%SEG.length],pct=tot(T)?tot(b)/tot(T)*100:0;
+          h+=`<tr class="sub"><td class="m"><i class="sw" style="background:${col}"></i>${s.label}</td><td class="s s1"><b>${fmtN(tot(b))}</b>${sh(tot(b),tot(T))}</td>`+(P.month?`<td class="s s2 sbar" colspan="3"><span class="bar"><i style="width:${pct}%;background:${col}"></i></span></td>`:'')
+            +ORD.map(i=>cell(i,b[i]?fmtN(b[i])+sh(b[i],T[i]):'–'+sh(0,0),b[i]?'':'zero')).join('')+'</tr>';
+        });}
     }else if(r.kind==='ratio'){
       const an=add(r.num,ps),ad=add(r.den,ps),tn=tot(an),td=tot(ad),so=td?tn/td*100:null;
       const pc=(n,d)=>`<span class="pf">${fmtP(n/d*100)}</span><span class="nd">${fmtN(n)} / ${fmtN(d)}</span>`;
       let t='',gap=null;
       if(P.month&&r.tn){const both=per.filter(p=>p.T[r.tn]!=null&&p.T[r.td]!=null),nu=both.reduce((s,p)=>s+p.T[r.tn],0),de=both.reduce((s,p)=>s+p.T[r.td],0);
-        if(both.length&&de){const tv=nu/de*100;t=fmtP(tv);if(so!=null)gap={v:so-tv,t:(so-tv>0?'+':'−')+Math.abs(so-tv).toFixed(1)+' pts'};}}
+        if(both.length&&de){const tv=nu/de*100;t=fmtP(tv);if(so!=null)gap={v:so-tv,t:`<span class="pill">${(so-tv>0?'+':'−')+Math.abs(so-tv).toFixed(1)+' pts'}</span>`};}}
       h+=`<tr class="ratio"><td class="m"${r.tip?` title="${esc(r.tip)}"`:''}>${r.label}</td>`+sc(so!=null?pc(tn,td):'–',t,'',gap)
         +ORD.map(i=>r.periodOnly?cell(i,'','pmuted'):ad[i]?cell(i,pc(an[i],ad[i])):cell(i,'–','zero')).join('')+'</tr>';
     }else if(r.kind==='atv'){
       const nu=add(r.num,ps),de=add(r.den,ps),so=tot(de)?tot(nu)/tot(de):null;let t='',gap=null;
       if(P.month){const both=per.filter(p=>p.T[r.tn]!=null&&p.T[r.td]!=null),n2=both.reduce((s,p)=>s+p.T[r.tn],0),d2=both.reduce((s,p)=>s+p.T[r.td],0);
-        if(both.length&&d2){const tv=n2/d2;t=fmtR(tv);if(so!=null)gap={v:so-tv,t:(so-tv>0?'+':'')+fmtR(so-tv)};}}
+        if(both.length&&d2){const tv=n2/d2;t=fmtR(tv);if(so!=null)gap={v:so-tv,t:`<span class="pill">${(so-tv>0?'+':'')+fmtR(so-tv)}</span>`};}}
       h+=`<tr class="${r.minor?'minor':''}"><td class="m">${r.label}</td>`+sc(so!=null?fmtR(so):'–',t,'',gap)+ORD.map(i=>de[i]?cell(i,`<span title="${fmtR(nu[i]/de[i])}">${fmtC(nu[i]/de[i])}</span>`):cell(i,'–','zero')).join('')+'</tr>';
     }
   });
@@ -432,13 +475,13 @@ function render(){
   const kc=(l,id,keys,need,money)=>{const ps=ok(need);if(!ps.length)return card(l,'–','Not recorded',null);const v=tot(add(id,ps)),T=P.month&&keys?tgt(keys):null;
     return card(l,money?fmtR(v):fmtN(v),T?`${Math.round(v/T.v*100)}% of ${money?fmtR(T.v):fmtN(T.v)} target`:sp,T?v/T.v*100:null);};
   const rnN=tot(add('rn',per)),dueN=tot(add('due',per)),eff=dueN?rnN/dueN*100:null,colT=tot(add('tc',per));
-  document.getElementById('kpis').innerHTML=[kc('Leads registered','leads',['leads'],'leads'),kc('Appointments scheduled','appts',['appts'],'appts'),kc('Centre visits','vis',['visits']),kc('Conversions','conv',['conv']),kc('Collections – Fresh Sales','fc',['fscol'],null,1),
+  document.getElementById('kpis').innerHTML=[kc('Leads registered','leads',['leads'],'leads'),kc('Appointments scheduled in '+(P.month?'this month':'this period'),'appts',['appts'],'booked'),kc('Centre visits','vis',['visits']),kc('Conversions','conv',['conv']),kc('Collections – Fresh Sales','fc',['fscol'],null,1),
     card('Renewals',`${fmtN(rnN)}<em> of ${fmtN(dueN)} due</em>`,'renewals paid · memberships ending',null),
     card('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%','renewed ÷ due',eff),
     kc('Collections – Renewals','rc',['rncol'],null,1),kc('Total collections','tc',['fscol','rncol'],null,1)].join('')+'<div class="kpi"></div>';
   document.getElementById('sumline').innerHTML=[['Leads',fmtN(tot(add('leads',ok('leads'))))],['Visits',fmtN(tot(add('vis',per)))],['Conversions',fmtN(tot(add('conv',per)))],['Renewals',fmtN(rnN)+(dueN?' of '+fmtN(dueN):'')],['Collected',fmtR(colT)]].map(([l,v])=>`<span>${l}<b>${v}</b></span>`).join('');
   grid.className=P.month?'':'rng';
-  grid.innerHTML=h+'</tbody>';
+  grid.innerHTML=h.split('{p}').join(P.month?'this month':'this period')+'</tbody>';
   document.getElementById('sc').scrollLeft=0;
   const jb=document.getElementById('jbtn');if(jb)jb.onclick=()=>journeyDialog(P,list.map(c=>c.name));
   grid.querySelectorAll('tr[data-open]').forEach(tr=>tr.onclick=()=>{const k=tr.dataset.open;OPEN=OPEN.includes(k)?OPEN.filter(x=>x!==k):OPEN.concat(k);try{localStorage.setItem('artium_daily_open',JSON.stringify(OPEN));}catch(e){}render();});
