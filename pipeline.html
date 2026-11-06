@@ -6,222 +6,125 @@
 <title>Renewal Pipeline</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;
-    --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;
-    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;--warn:#9A6200;
-    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
-  }
-  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
-  .page{max-width:1600px;margin:0 auto;padding:36px 48px 64px}
-  .page-header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:26px}
-  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
-  h1{font:600 38px/1.15 var(--display);letter-spacing:-.015em;color:var(--ink)}
-  .subtitle{font-size:15px;color:var(--muted);margin-top:6px}
-  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
-  .dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
-  @keyframes pulse{50%{opacity:.35}}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#dd30b1;--violet:#6601fd;--violet2:#4101f7;--purple:#7b2cf0;--deep:#2B0256;--navy:#01064c;--magenta:#ff319f;--lilac:#ECE7F8;
+  --ink:#120e2b;--ink2:#4a4466;--ink3:#6a6488;--ink4:#7a7196;--line:#dcd5ee;--edge:#ece4ff;
+  --tvbg:#f1eafe;--tvfg:#6b3fc7;--tpbg:#fde8f1;--tpfg:#b1286a;--tbbg:#eaf0ff;--tbfg:#2f4db8;--rose:#fce2e5;
+  --ok:#1f7a4d;--okbg:#e6f5ec;--bad:#B4443A;
+  --f:'Onest',system-ui,sans-serif;
+  --sh:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35);
+}
+body{font-family:var(--f);background:#F6F3FC;color:var(--ink2);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.hero{background:radial-gradient(120% 140% at 85% -20%,#4101f7 0%,rgba(65,1,247,0) 55%),linear-gradient(135deg,#2B0256 0%,#160240 55%,#01064c 100%);padding:34px 48px 92px;color:#fff}
+.hin{max-width:1504px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.eb{font:700 11px var(--f);letter-spacing:.18em;text-transform:uppercase;color:#cec8ea;margin-bottom:10px}
+h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(90deg,#FFFFFF 0%,#F1B6FA 45%,#9BB6FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font:400 16px/24px var(--f);color:#cec8ea;margin-top:10px}
+.hr{display:flex;flex-direction:column;align-items:flex-end;gap:14px}
+.upd{font-size:13px;color:#cec8ea;display:flex;align-items:center;gap:8px}.upd i{width:8px;height:8px;border-radius:50%;background:#4ade80}
+.vt{display:inline-flex;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:4px}
+.vt b{display:flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;font:600 14px var(--f);color:#cec8ea}
+.vt b.on{background:#fff;color:var(--violet2)}
+.vt svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.page{max-width:1600px;margin:-64px auto 0;padding:0 48px 64px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.seg{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:5px;box-shadow:var(--sh)}
+.seg .c{padding:9px 20px 10px;border-radius:13px}.seg .c small{display:block;font:700 9.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:3px}
+.seg .c span{font:700 15px var(--f);color:var(--ink)}
+.seg .c.on{background:linear-gradient(135deg,var(--violet),var(--violet2));box-shadow:0 8px 18px -10px rgba(65,1,247,.8)}.seg .c.on span{color:#fff}.seg .c.on small{color:#d9ccff}
+.per{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:7px;box-shadow:var(--sh)}
+.per .t{display:inline-flex;background:#F4F1FB;border-radius:11px;padding:3px}.per .t b{padding:7px 13px;border-radius:9px;font:600 13px var(--f);color:var(--ink2)}.per .t b.on{background:#fff;color:var(--violet2);box-shadow:0 1px 3px rgba(18,14,43,.12)}
+.per .m{width:34px;height:36px;border-radius:10px;background:#F4F1FB;display:grid;place-items:center;color:var(--ink2)}
+.per .l{min-width:150px;text-align:center;font:700 15px var(--f);color:var(--ink)}
+.sec{background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
+.sh{display:flex;align-items:center;gap:12px;padding:18px 24px;border-bottom:1px solid var(--edge)}
+.sh b{font:800 19px var(--f);color:var(--ink);letter-spacing:-.01em}.sh span{font-size:13px;color:var(--ink4)}
+.cv{margin-left:auto;width:30px;height:30px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);flex:none;background:#fff}
+.cv svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+.rw{padding:20px 24px 22px}.rw+.rw{border-top:1px solid var(--edge);background:linear-gradient(180deg,#FAF8FE,#fff)}
+.rl{font:700 10.5px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--ink4);margin-bottom:14px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.k{border:1px solid var(--edge);border-radius:18px;padding:18px 20px;background:#fff;min-height:136px;display:flex;flex-direction:column}
+.k .t{font:600 13px var(--f);color:var(--ink3)}
+.k .v{font:800 34px/1.1 var(--f);color:var(--ink);margin-top:10px;letter-spacing:-.02em}
+.k .s{font-size:13px;color:var(--ink3);margin-top:auto;padding-top:12px}.k .s b{color:var(--ink)}.k .s .bd{color:var(--bad);font-weight:700}
+.pg{margin-top:auto;padding-top:14px}.pg .x{display:flex;justify-content:space-between;font-size:13px;color:var(--ink3);margin-bottom:7px}.pg .x b{color:var(--tvfg);font-weight:800}
+.pg .tr{height:6px;border-radius:6px;background:#EEE8FB;overflow:hidden}.pg .tr i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--pink))}
+.k.rr{background:linear-gradient(140deg,#6601fd 0%,#4101f7 60%,#2B0256 130%);border:0;color:#fff;box-shadow:0 14px 30px -18px rgba(65,1,247,.9)}
+.k.rr .t{color:#d9ccff}.k.rr .v{color:#fff}.k.rr .eq{font-size:12.5px;color:#cec8ea;margin-top:6px}
+.k.rr .pg .x{color:#d9ccff}.k.rr .pg .x b{color:#fff}.k.rr .pg .tr{background:rgba(255,255,255,.2)}.k.rr .pg .tr i{background:linear-gradient(90deg,#F1B6FA,#fff)}
+.wvb{padding:18px;display:flex;flex-direction:column;gap:14px;background:#FAF8FE}
+.wc{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.wh{display:flex;align-items:center;gap:12px;padding:14px 18px}.wc:not(.closed) .wh{border-bottom:1px solid var(--edge)}
+.lb{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;display:grid;place-items:center;font:800 12px var(--f);flex:none}
+.wt{font:700 15.5px var(--f);color:var(--ink)}
+.ws{display:flex;gap:16px;margin-left:14px;font-size:13px;color:var(--ink3)}.ws b{color:var(--ink);font-weight:700;margin-left:3px}
+.wc:not(.closed) .ws{display:none}.wc.closed .wb{display:none}.wc.closed .cv{transform:rotate(-90deg)}
+.wb table,table.lt{width:100%;border-collapse:collapse}
+.wb th,.wb td{padding:11px 18px;text-align:right;border-bottom:1px solid #F1EDF9;font:400 14px var(--f);color:var(--ink2)}
+.wb tr:last-child th,.wb tr:last-child td{border-bottom:0}
+.wb thead th{padding:12px 18px 10px;background:#FBFAFE;border-bottom:1px solid var(--edge);vertical-align:bottom}
+.wb thead th b{font:700 13px var(--f);color:var(--ink)}.wb thead th small{display:block;font:400 11.5px var(--f);color:var(--ink4);margin-top:2px}
+.wb thead th em{display:inline-block;font:700 9.5px var(--f);font-style:normal;color:var(--tpfg);background:var(--tpbg);border-radius:5px;padding:2px 6px;margin-left:6px;vertical-align:2px}
+.wb th[scope=row],.wb thead th:first-child{text-align:left;width:300px;white-space:nowrap;font-weight:500;color:var(--ink2)}
+.wb .cw{background:#F8F4FF}.wb td.tt,.wb th.tt{background:#F4F1FB;font-weight:700;color:var(--ink)}
+.wb tr.key th,.wb tr.key td{font-weight:700;color:var(--ink)}
+.wb tr.acc td{color:var(--tvfg)}.wb tr.strong th,.wb tr.strong td{font-weight:800}.wb tr.strong th{color:var(--ink)}
+.wb tr.tline th,.wb tr.tline td{border-top:1px solid var(--line)}
+.wb tr.grp2 th{text-align:left;padding:16px 18px 6px;font:700 10px var(--f);letter-spacing:.15em;text-transform:uppercase;color:var(--ink4);background:#fff;border-bottom:0}
+.wb tr.wnr th,.wb tr.wnr td{color:var(--bad);background:#FDF3F4}.wb tr.wnr td.cw{background:#FBECEE}.wb tr.wnr td.tt{background:var(--rose);font-weight:700}
+.wb tr.ytc th,.wb tr.ytc td{color:var(--ink2);background:#F5F4F8;font-weight:500}.wb tr.ytc td.cw{background:#EFEDF4}.wb tr.ytc td.tt{background:#EAE8F0;font-weight:700}
+.dt{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:9px;vertical-align:1px}.dt.r{background:#D9665B}.dt.g{background:#9a94b3}
+table.lt th{text-align:left;padding:13px 24px 11px;font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);background:#FBFAFE;border-bottom:1px solid var(--edge)}
+table.lt td{padding:15px 24px;border-bottom:1px solid #F1EDF9;font:400 14px var(--f);color:var(--ink2);vertical-align:top}
+table.lt tr:last-child td{border-bottom:0}
+table.lt td b{font-weight:700;color:var(--ink)}table.lt td small{display:block;font-size:12px;color:var(--ink4);margin-top:3px}
+table.lt th,table.lt td{white-space:nowrap}table.lt td.ds{white-space:normal;max-width:440px;line-height:1.5;color:var(--ink)}table.lt td.ex{color:var(--tbfg);font-weight:600}
+.tg{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:6px;font:800 10px var(--f);letter-spacing:.06em;vertical-align:1px}
+.tg.ft{background:var(--tpbg);color:var(--tpfg)}.tg.rr{background:var(--tbbg);color:var(--tbfg)}
+.sh .ct{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 7px;border-radius:999px;font:800 12px var(--f)}
+.ct.r{background:var(--rose);color:var(--bad)}.ct.b{background:var(--tbbg);color:var(--tbfg)}
 
-  .bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-  .centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);max-width:100%;overflow-x:auto;scrollbar-width:none}
-  .centre-toggle::-webkit-scrollbar{display:none}
-  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left}
-  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
-  .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
-  .ct-btn:hover{background:var(--accent-soft)}
-  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
-  .ct-btn[aria-pressed="true"] span{color:#fff}.ct-btn[aria-pressed="true"] small{color:#E9CF9E}
-
-  /* Period: a month, or any date range */
-  .period{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:7px;box-shadow:var(--shadow);flex-wrap:wrap}
-  .seg{display:inline-flex;gap:2px;background:#F4F2F7;border-radius:11px;padding:3px}
-  .seg button{border:0;background:none;border-radius:9px;padding:7px 12px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer}
-  .seg button[aria-pressed="true"]{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(31,26,36,.15)}
-  .mbtn{width:34px;height:36px;border:0;border-radius:10px;background:var(--bg);color:var(--ink2);font-size:16px;cursor:pointer}
-  .mbtn:hover{background:var(--accent-soft);color:var(--accent)}
-  .mlabel{min-width:140px;text-align:center;font:600 15px var(--display);color:var(--ink)}
-  .range{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-  .range input{font:500 14px var(--body);color:var(--ink);border:1px solid var(--border);border-radius:10px;padding:7px 10px}
-  .range input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
-  #prange[hidden]{display:none}
-  .quick{display:inline-flex;gap:4px}
-  .quick button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:5px 11px;font:600 12px var(--body);color:var(--ink2);cursor:pointer}
-  .quick button:hover{background:var(--accent-soft);color:var(--accent)}
-
-  /* Totals for the period */
-  .kpis{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:16px;margin-bottom:22px}
-  .kpi{position:relative;background:#fff;border:1px solid var(--border);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow);overflow:hidden}
-  .kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--c,#C9A66B)}
-  .kpi .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-  .kpi .v{font:700 30px/1.1 var(--display);color:var(--ink);margin-top:10px;font-variant-numeric:tabular-nums}
-  .kpi .s{font-size:13px;color:var(--muted);margin-top:6px}.kpi .s b{color:var(--ink);font-weight:600}
-  .kpi.main{background:linear-gradient(135deg,#3A1A5A 0%,#5B2A86 100%);border-color:transparent;color:#fff}
-  .kpi.main::before{background:linear-gradient(90deg,#E9CF9E,#C9A66B)}
-  .kpi.main .k{color:#E9CF9E}.kpi.main .v{color:#fff;font-size:34px}.kpi.main .s{color:rgba(255,255,255,.75)}.kpi.main .s b{color:#fff}
-  .prog{height:8px;border-radius:6px;background:rgba(255,255,255,.18);margin-top:14px;overflow:hidden;display:flex}
-  .prog i{display:block;height:100%}
-  .prog .p1{background:#7BD3A4}.prog .p2{background:#F2B8B0}
-  .legend{display:flex;gap:14px;margin-top:8px;font-size:11.5px;color:rgba(255,255,255,.75)}.legend span{display:inline-flex;align-items:center;gap:5px}.legend i{width:8px;height:8px;border-radius:2px;display:inline-block}
-
-  /* List */
-  .panel{background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;box-shadow:0 24px 48px -36px rgba(75,31,111,.25);padding:18px 22px 22px}
-  .ptop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-  .ptitle{position:relative;padding-left:16px;font:600 20px/1.3 var(--display);color:var(--ink)}
-  .ptitle::before{content:"";position:absolute;left:0;top:50%;width:4px;height:20px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
-  .ptitle small{font:400 13px var(--body);color:var(--muted);margin-left:8px}
-  .flt{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;box-shadow:var(--shadow);flex-wrap:wrap}
-  .flt button{display:inline-flex;align-items:center;gap:7px;border:0;background:none;border-radius:10px;padding:7px 13px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
-  .flt button span{font:600 11.5px var(--body);color:var(--muted);background:#F3F1F6;border-radius:999px;padding:1px 8px}
-  .flt button[aria-pressed="true"]{background:var(--accent);color:#fff}.flt button[aria-pressed="true"] span{background:rgba(255,255,255,.2);color:#fff}
-  .flt .d{width:7px;height:7px;border-radius:50%}
-  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff;box-shadow:inset 0 3px 0 var(--gold),var(--shadow);scrollbar-width:thin}
-  table{width:max-content;min-width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums}
-  th,td{padding:12px 14px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
-  th{background:#FAF9F7;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);position:sticky;top:0}
-  th.n,td.n{text-align:right}
-  td{font:400 14px var(--body);color:var(--ink2)}
-  td.amt{font:600 14.5px var(--display);color:var(--accent)}
-  tbody tr:hover td{background:#FCFBFE}
-  /* Promised date and Learner stay in view while the table scrolls sideways */
-  tbody td:nth-child(-n+2),thead th:nth-child(-n+2){position:sticky;z-index:1;background:#fff}
-  thead th:nth-child(-n+2){background:#FAF9F7;z-index:2}
-  td:nth-child(1),th:nth-child(1){left:0;min-width:128px}
-  td:nth-child(2),th:nth-child(2){left:128px;box-shadow:8px 0 10px -10px rgba(43,24,64,.3)}
-  tr.wk td{position:static!important;box-shadow:none!important}
-  tr.wk td{background:#FBFAF8;font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:8px 14px}
-  tr.wk td span{color:var(--muted);letter-spacing:.04em;margin-left:8px;text-transform:none;font-weight:600}
-  tr.done td{color:var(--muted)}tr.done td.amt{color:var(--ok)}
-  .date b{display:block;font:600 14px var(--display);color:var(--ink)}
-  .date small{font-size:12px;color:var(--faint)}
-  .date small.late{color:var(--bad);font-weight:600}.date small.soon{color:var(--warn);font-weight:600}
-  .who b{display:block;font:600 14px var(--body);color:var(--ink)}
-  .who small{font:500 11.5px var(--body);color:var(--faint)}
-  .ctr{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:3px 10px;font:600 12px var(--body)}
-  .st{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);border-radius:999px;padding:4px 10px;white-space:nowrap}
-  .st i{width:6px;height:6px;border-radius:50%;background:currentColor}
-  .st.paid{background:#E5F4EC;color:var(--ok)}.st.wait{background:#F3F1F6;color:var(--ink2)}.st.late{background:#FDECEB;color:var(--bad)}.st.lost{background:#F3F1F6;color:var(--faint);text-decoration:line-through}
-  .sub{display:block;font-size:11.5px;color:var(--faint);margin-top:3px}
-  .pr{display:inline-block;font:600 11.5px var(--body);border-radius:6px;padding:2px 8px}
-  .pr.hi{background:#E5F4EC;color:var(--ok)}.pr.md{background:#FBF1DC;color:var(--warn)}.pr.lo{background:#FDECEB;color:var(--bad)}.pr.na{color:var(--faint)}
-  .sumbox{margin-bottom:22px;background:linear-gradient(180deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.45) 100%);border:1px solid #E9E5EE;border-radius:28px;
-    box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 24px 48px -36px rgba(75,31,111,.25);padding:6px 20px 20px}
-  .sumbox.closed{padding-bottom:6px}
-  .sumhead{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:14px 2px 14px;cursor:pointer;text-align:left;font:inherit}
-  .st-t{position:relative;padding-left:16px;font:600 18px/1.3 var(--display);color:var(--ink)}
-  .st-t::before{content:"";position:absolute;left:0;top:50%;width:4px;height:18px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#C9A66B,var(--gold))}
-  .sumline{display:none;flex-wrap:wrap;gap:6px;flex:1}
-  .sumline span{font-size:12.5px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:999px;padding:4px 11px}.sumline b{color:var(--ink);font-weight:600;margin-left:3px}
-  .sumbox .chev{margin-left:auto;width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s;flex:none}
-  .sumhead:hover .chev{background:var(--accent-soft);color:var(--accent)}
-  .sumbox.closed .chev{transform:rotate(-90deg)}
-  .sumbox.closed .sumbody{display:none}.sumbox.closed .sumline{display:flex}
-  .sumbody .gaps{margin-bottom:0}
-  .grp{background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);padding:14px 16px 16px;margin-bottom:14px}
-  .grp.pipe{background:linear-gradient(180deg,#FBF8FE,#fff);border-color:#E3D6F2}
-  .gt{font:600 15px var(--display);color:var(--ink);margin:0 4px 12px}.gt span{font:400 13px var(--body);color:var(--muted);margin-left:8px}
-  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-  .tl{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;min-width:0}
-  .tl .k{font:700 10px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);line-height:1.35}
-  .tl .v{font:700 24px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
-  .tl .s{font-size:12px;color:var(--muted);margin-top:6px}.tl .s b{color:var(--ink);font-weight:600}.tl .s b.lt{color:var(--bad)}
-  .tl .split{display:flex;flex-wrap:wrap;gap:4px}.tl .split span{background:#F6F4F9;border-radius:999px;padding:2px 8px;font-size:11.5px}
-  .tl.eff .v{color:var(--accent)}.tl.eff.ok .v{color:var(--ok)}.tl.eff.mid .v{color:var(--warn)}.tl.eff.low .v{color:var(--bad)}
-  .tl .bar{display:block;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;margin-top:4px}.tl .bar i{display:block;height:100%;background:currentColor}
-  .tl.eff.ok .s{color:var(--ok)}.tl.eff.mid .s{color:#C9A66B}.tl.eff.low .s{color:var(--bad)}
-  .tl.rr{background:linear-gradient(135deg,#3A1A5A,#5B2A86);border-color:transparent}.tl.rr .k{color:#E9CF9E}.tl.rr .v{color:#fff}.tl.rr .s{color:rgba(255,255,255,.75)}
-  .tg{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 4px;font-size:12px;color:var(--muted)}.tg b{color:var(--ink);font-weight:600}
-  .tg sup{color:var(--gold);font-weight:700}
-  .gap{font:600 11.5px var(--body);border-radius:999px;padding:2px 8px;white-space:nowrap}.gap.up{background:#E5F4EC;color:var(--ok)}.gap.dn{background:#FDECEB;color:var(--bad)}
-  .tl.rr .tg{color:rgba(255,255,255,.75)}.tl.rr .tg b{color:#fff}.tl.rr .gap.up{background:rgba(123,211,164,.22);color:#9BE3BB}.tl.rr .gap.dn{background:rgba(242,184,176,.22);color:#F6C3BC}
-  .pnote{font-size:12.5px;color:var(--muted);margin:12px 4px 0}.pnote b{color:var(--ink)}
-  @media (max-width:1200px){.tiles{grid-template-columns:repeat(3,1fr)}}
-  @media (max-width:700px){.tiles{grid-template-columns:1fr 1fr}}
-  .ren{display:block;margin-bottom:0}
-  .ren-old{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:0;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
-  .rs{padding:16px 22px;border-left:1px solid var(--line)}.rs:first-child{border-left:0}
-  .rs .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-  .rs .v{font:700 28px/1.1 var(--display);color:var(--ink);margin-top:8px;font-variant-numeric:tabular-nums}
-  .rs .s{font-size:12.5px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:10px}
-  .split{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-  .split span{font-size:12px;color:var(--muted);background:#F6F4F9;border-radius:999px;padding:3px 10px}.split b{color:var(--ink);font-weight:600}
-  .rs.eff .v{color:var(--accent)}.rs.eff.ok .v{color:var(--ok)}.rs.eff.mid .v{color:var(--warn)}.rs.eff.low .v{color:var(--bad)}
-  .rs .bar{flex:1;height:6px;border-radius:4px;background:#F1EEF5;overflow:hidden;max-width:160px}.rs .bar i{display:block;height:100%;background:currentColor}
-  .rs.eff.ok .bar{color:var(--ok)}.rs.eff.mid .bar{color:#C9A66B}.rs.eff.low .bar{color:var(--bad)}
-  @media (max-width:900px){.ren{grid-template-columns:1fr}.rs{border-left:0;border-top:1px solid var(--line)}.rs:first-child{border-top:0}}
-  .gaps{background:#fff;border:1px solid #F0DDB5;border-radius:20px;padding:14px 16px 16px;margin-bottom:22px;box-shadow:var(--shadow)}
-  .gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 4px 12px}.gh b{font:600 15px var(--display);color:var(--ink)}.gh span{font-size:13px;color:var(--muted)}
-  .gtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .gtile{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;text-align:left;border:1px solid #F0DDB5;background:#FFF9EC;border-radius:14px;padding:12px 14px;cursor:pointer;font:inherit}
-  .gtile:hover{border-color:#E2BE73}
-  .gtile.on{background:#7A5A22;border-color:#7A5A22}.gtile.on *{color:#fff!important}
-  .gtile.zero{background:#fff;border-color:var(--border)}.gtile.zero .gn{color:var(--ok)}
-  .gn{grid-row:1/3;font:700 28px/1 var(--display);color:#8A5A00;min-width:36px}
-  .gl b{display:block;font:600 14px var(--body);color:var(--ink)}.gl small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
-  .ga{grid-column:2;font-size:12px;color:#8A5A00;margin-top:4px}
-  .miss{display:inline-block;font:600 11.5px var(--body);color:var(--bad);background:#FDECEB;border-radius:6px;padding:2px 7px}
-  @media (max-width:900px){.gtiles{grid-template-columns:1fr}}
-  .note{min-width:160px;max-width:220px;white-space:normal;font-size:13px;color:var(--muted);line-height:1.4}
-  .tel{letter-spacing:.01em}
-  .empty{padding:36px;text-align:center;color:var(--muted);font-size:14px;white-space:normal}
-  .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;color:var(--faint)}
-  @media (max-width:1100px){.kpis{grid-template-columns:1fr 1fr}}
-  @media (max-width:900px){.page{padding:24px 16px 48px}h1{font-size:28px}.panel{padding:12px;border-radius:22px}.kpis{grid-template-columns:1fr}}
-  /* List switch (Pipeline / renewals due) and filters */
-  .lvrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 16px;padding-bottom:16px;border-bottom:1px dashed #E4DEEB}
-  .seg.lv{background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px;box-shadow:var(--shadow)}
-  .seg.lv button{padding:8px 14px;font-size:13px}
-  .seg.lv button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:0 6px 14px -8px rgba(91,42,134,.7)}
-  .fsel{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .fsel select{height:36px;border:1px solid var(--border);border-radius:11px;background:#fff;padding:0 10px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;max-width:200px}
-  .fsel select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
-  .fsel .clr{border:0;background:none;color:var(--accent);font:600 12.5px var(--body);cursor:pointer}
-  .st.due{background:var(--accent-soft);color:var(--accent)}
-  .ty{display:inline-block;margin-top:4px;font:700 10px var(--body);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 6px;background:#F1ECF8;color:var(--accent)}
-  .ty.rp{background:#EEF1F8;color:#3F5592}
-  td.ds{max-width:260px;white-space:normal;line-height:1.45}
+button{font:inherit}
+.seg .c{border:0;background:none;cursor:pointer;text-align:left}
+.ct-btn{display:flex;flex-direction:column;align-items:flex-start;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left}
+.ct-btn small{display:block;font:700 9.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);margin-bottom:3px}
+.ct-btn span{font:700 15px var(--f);color:var(--ink)}.ct-btn:hover{background:#F4F1FB}
+.ct-btn[aria-pressed="true"]{background:linear-gradient(135deg,var(--violet),var(--violet2));box-shadow:0 8px 18px -10px rgba(65,1,247,.8)}.ct-btn[aria-pressed="true"] span{color:#fff}.ct-btn[aria-pressed="true"] small{color:#d9ccff}
+.vt button{display:flex;align-items:center;gap:8px;padding:9px 18px;border:0;border-radius:10px;background:none;font:600 14px var(--f);color:#cec8ea;cursor:pointer}
+.vt button[aria-pressed="true"]{background:#fff;color:var(--violet2)}
+.per .t button{border:0;background:none;padding:7px 13px;border-radius:9px;font:600 13px var(--f);color:var(--ink2);cursor:pointer}.per .t button[aria-pressed="true"]{background:#fff;color:var(--violet2);box-shadow:0 1px 3px rgba(18,14,43,.12)}
+.per .m{border:0;cursor:pointer;font-size:16px}.per .m:hover{background:var(--tvbg);color:var(--violet2)}
+.range{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink3)}.range input{font:500 14px var(--f);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 10px}
+#prange[hidden]{display:none}
+.dot{width:8px;height:8px;border-radius:50%;background:#4ade80}.dot.loading{background:#F1B6FA;animation:pulse 1s infinite}.dot.error{background:#ff6b6b}@keyframes pulse{50%{opacity:.35}}
+.sh{width:100%;border:0;background:#fff;text-align:left;cursor:pointer;font:inherit}
+.sec.closed .sb{display:none}.sec.closed .sh{border-bottom:0}.sec.closed>.sh .cv,.wc.closed .cv{transform:rotate(-90deg)}
+.wh{width:100%;border:0;background:#fff;text-align:left;cursor:pointer;font:inherit}
+.tw{overflow-x:auto}
+.wb table{min-width:900px}table.lt{min-width:980px}
+.empty{padding:28px 24px;text-align:center;color:var(--ink3);font-size:14px}.empty.big{padding:56px 24px;font-size:15px}
+.mut{color:#C9C3DD}
+.sec .sh span.ct{display:inline-grid}
+@media (max-width:1100px){.cards{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.hero{padding:24px 16px 80px}.hin{flex-direction:column;align-items:flex-start}.hr{align-items:flex-start}h1{font-size:32px}.page{padding:0 16px 48px}.bar{flex-direction:column;align-items:stretch;gap:12px}.seg{overflow-x:auto}.cards{grid-template-columns:1fr}.ws{display:none!important}}
 </style>
 </head>
 <body>
+<div class="hero"><div class="hin"><div><div class="eb" id="eyebrow">All centres</div><h1>Renewal Pipeline</h1><div class="sub">Learners who have committed to renew, by the date they promised to pay</div></div>
+<div class="hr"><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+<div class="vt" id="vt" role="group" aria-label="View"><button type="button" data-v="glance" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Glance</button><button type="button" data-v="list" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button></div></div></div></div>
 <div class="page">
-  <header class="page-header">
-    <div>
-      <div class="eyebrow" id="eyebrow">All centres</div>
-      <h1>Renewal Pipeline</h1>
-      <div class="subtitle">Learners who have committed to renew, by the date they promised to pay</div>
-    </div>
-    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
-  </header>
-  <div class="bar">
-    <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
-    <div class="period">
-      <div class="seg" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
-      <div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="mbtn" id="prev" aria-label="Previous month">‹</button><div class="mlabel" id="mlabel">—</div><button class="mbtn" id="next" aria-label="Next month">›</button></div>
-      <div id="prange" class="range" hidden><input type="date" id="from" aria-label="From"><span>to</span><input type="date" id="to" aria-label="To">
-        <span class="quick"><button type="button" data-q="week">This week</button><button type="button" data-q="next7">Next 7 days</button><button type="button" data-q="late">All overdue</button></span></div>
-    </div>
-  </div>
-  <section class="sumbox" id="sumbox">
-    <button type="button" class="sumhead" id="sumhead" aria-expanded="true" aria-controls="sumbody"><span class="st-t">Summary</span><span class="sumline" id="sumline"></span>
-      <span class="chev" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
-    <div class="sumbody" id="sumbody"><div class="ren" id="ren"></div><div id="kpis"></div><div class="gaps" id="gaps"></div></div>
-  </section>
-  <section class="panel">
-    <div class="lvrow"><div class="seg lv" id="lv" role="group" aria-label="List">
-        <button type="button" data-v="pipe" aria-pressed="true">Pipeline</button><button type="button" data-v="all" aria-pressed="false">All renewals due</button><button type="button" data-v="first" aria-pressed="false">First-time renewals</button><button type="button" data-v="repeat" aria-pressed="false">Repeated renewals</button></div>
-      <div class="fsel" id="fbar"></div></div>
-    <div class="ptop"><div class="ptitle" id="ptitle">Promised payments</div><div class="flt" id="flt" role="group" aria-label="Show"></div></div>
-    <div class="tbl-wrap"><table id="t"></table></div>
-    <div class="foot"><span id="foot-l"></span><span>Promised date and amount come from the Next Call Date and Expected columns of Fresh Sales and Renewals.</span></div>
-  </section>
+<div class="bar"><nav class="seg" id="centre-toggle" aria-label="Centre"></nav>
+<div class="per"><div class="t" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
+<div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="m" id="prev" aria-label="Previous month">‹</button><div class="l" id="mlabel">—</div><button class="m" id="next" aria-label="Next month">›</button></div>
+<div id="prange" class="range" hidden><input type="date" id="from" aria-label="From"><span>to</span><input type="date" id="to" aria-label="To"></div></div></div>
+<div id="out"></div>
 </div>
-
 <script>
 const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -255,7 +158,7 @@ function build(){
   const T=[];
   CENTRES.forEach(c=>{const d=DATA[c.name];if(!d)return;
     [['fs',d.fs,17],['rn',d.rn,16]].forEach(([tab,rows,amt])=>rows.forEach(r=>{const date=parseDate(r[0]);if(!date)return;
-      T.push({r,centre:c.name,tab,date,id:String(r[3]||'').trim().toUpperCase(),paid:parseNum(r[amt]),m:parseNum(r[12]),end:valid(parseDate(r[23])),status:String(r[25]||'').trim(),
+      T.push({r,centre:c.name,tab,date,id:String(r[3]||'').trim().toUpperCase(),paid:parseNum(r[amt]),m:parseNum(r[12]),end:valid(parseDate(r[23])),newEnd:valid(parseDate(r[36])),ext:parseNum(r[37])||0,status:String(r[25]||'').trim(),
         desc:String(r[32]||'').trim(),ncd:valid(parseDate(r[33])),exp:parseNum(r[34]),prob:String(r[35]||'').trim()});}));});
   const byId=new Map();T.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
   byId.forEach(l=>l.sort((a,b)=>a.date-b.date));
@@ -280,48 +183,7 @@ function build(){
   });
 }
 
-/* ── State ── */
-let selCentre=(()=>{try{const v=localStorage.getItem('artium_rp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
-let sumOpen=(()=>{try{return localStorage.getItem('artium_rp_summary')!=='closed';}catch(e){return true;}})();
-let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null,show='all';
-const GAP=[['none','No date or amount','Membership ended by yesterday; nothing promised yet'],['noamt','Date, but no amount','Promised date entered, Expected is blank'],['nodate','Amount, but no date','Expected entered, Next Call Date is blank']];
-const STATES=[['all','All'],['wait','Yet to pay','#B3AFBB'],['late','Overdue','#D9534F'],['paid','Renewed','#2DA06A'],['lost',"Won't renew",'#9A96A3']];
 
-/* The list for one kind of missing promise */
-function renderGap(list,sel,P){
-  const g=GAP.find(x=>x[0]===show);
-  document.getElementById('flt').innerHTML=`<button type="button" aria-pressed="false" id="back-all">← Back to promised payments</button>`;
-  document.getElementById('back-all').onclick=()=>{show='all';render();};
-  list=list.slice().sort((a,b)=>a.end-b.end);
-  document.getElementById('ptitle').innerHTML=`${esc(g[1])} <small>${list.length} learner${list.length===1?'':'s'} · due ${esc(P.label)}</small>`;
-  const head=['Membership ended','Learner',...(sel?[]:['Centre']),'Phone','Course','Package',{t:'Last paid',n:1},'Promised date','Expected','Note'];
-  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
-  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">Nothing missing here. Every learner due ${esc(P.label)} has this filled in.</td></tr>`;
-  list.forEach(x=>{const d=days(x.end,TODAY);
-    const when=d>0?`<small class="late">${d} day${d===1?'':'s'} ago</small>`:d===0?'<small class="soon">Today</small>':`<small>in ${-d} day${d===-1?'':'s'}</small>`;
-    h+=`<tr><td class="date"><b>${WD[x.end.getDay()]}, ${x.end.getDate()} ${MON[x.end.getMonth()]}</b>${when}</td>
-      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
-      <td class="tel">${x.phone.length===10?x.phone.slice(0,5)+' '+x.phone.slice(5):'—'}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
-      <td>${x.m?x.m+(x.m===1?' month':' months'):'—'}</td><td class="n">${inr(x.paid)}</td>
-      <td>${x.ncd?fmtD(x.ncd):'<span class="miss">Missing</span>'}</td><td>${x.exp>0?inr(x.exp):'<span class="miss">Missing</span>'}</td>
-      <td class="note">${esc(x.desc)||'<span style="color:var(--faint)">—</span>'}</td></tr>`;});
-  document.getElementById('t').innerHTML=h+'</tbody>';
-  document.getElementById('foot-l').textContent=`Due ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
-}
-function period(){
-  if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
-  const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);
-  return{a,b,label:fmtD(a)+' to '+fmtD(b)};
-}
-
-/* ── Renewals due (the other list views): every membership whose end date falls in the period ──
-   First-time = a Fresh Sales membership, repeated = a Renewals one. Renewed when the same Learner ID has a later Renewals entry
-   (or the status says Renewed); won't renew when the status says so; overdue once the end date has passed. */
-let DUE=null,lv='pipe',dshow='all';
-const FV={age:'',teacher:'',course:'',pack:''};
-const FL=[['age','All ages'],['teacher','All teachers'],['course','All courses'],['pack','All packages']];
-const AGE_ORDER=['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'];
-const passF=x=>(!FV.age||x.age===FV.age)&&(!FV.teacher||x.teacher===FV.teacher)&&(!FV.course||x.course===FV.course)&&(!FV.pack||x.pack===FV.pack);
 function buildDue(){
   const byId=new Map();ALL.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
   return ALL.filter(t=>t.end).map(t=>{const r=t.r,later=(byId.get(t.id)||[]).filter(x=>x!==t&&x.tab==='rn'&&x.date>t.date).sort((a,b)=>a.date-b.date)[0];
@@ -329,151 +191,186 @@ function buildDue(){
     return{...t,st,paidOn:later?later.date:null,name:String(r[4]||'').trim(),phone:String(r[7]||'').replace(/\D/g,'').slice(-10),age:String(r[6]||'').trim(),course:String(r[8]||'').trim(),
       level:String(r[9]||'').trim(),pack:t.m?Math.round(t.m)+'M':'',start:valid(parseDate(r[22])),teacher:String(r[29]||'').trim()};});
 }
-function renderFilters(base){
-  const opts=k=>{const v=[...new Set(base.map(x=>x[k]).filter(Boolean))];
-    return k==='age'?v.sort((a,b)=>((AGE_ORDER.indexOf(a)+1)||99)-((AGE_ORDER.indexOf(b)+1)||99)):k==='pack'?v.sort((a,b)=>parseInt(a)-parseInt(b)):v.sort((a,b)=>a.localeCompare(b));};
-  document.getElementById('fbar').innerHTML=FL.map(([k,all])=>{const o=opts(k);if(FV[k]&&!o.includes(FV[k]))o.unshift(FV[k]);
-    return`<select data-f="${k}" class="${FV[k]?'set':''}" aria-label="${all}"><option value="">${all}</option>${o.map(v=>`<option${FV[k]===v?' selected':''}>${esc(v)}</option>`).join('')}</select>`;}).join('')+
-    (FL.some(([k])=>FV[k])?'<button type="button" class="clr" id="clr">Clear</button>':'');
+
+function period(){
+  if(mode==='month')return{a:new Date(viewY,viewM,1),b:new Date(viewY,viewM+1,0),label:MONTH_FULL[viewM]+' '+viewY};
+  const a=rFrom||new Date(viewY,viewM,1),b=rTo||new Date(viewY,viewM+1,0);
+  return{a,b,label:fmtD(a)+' to '+fmtD(b)};
 }
-const DSTATES=[['all','All'],['due','Yet to renew','#5B2A86'],['late','Overdue','#D9534F'],['paid','Renewed','#2DA06A'],['lost',"Won't renew",'#9A96A3']];
-function renderDue(P,sel){
-  const t=document.getElementById('t');
-  const base=(DUE||[]).filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(lv==='all'||(lv==='first'?x.tab==='fs':x.tab==='rn')));
-  renderFilters(base);
-  const list=base.filter(passF),cnt=s=>list.filter(x=>x.st===s).length;
-  document.getElementById('flt').innerHTML=DSTATES.map(([k,l,c])=>`<button type="button" data-s="${k}" aria-pressed="${dshow===k}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${k==='all'?list.length:cnt(k)}</span></button>`).join('');
-  document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{dshow=b.dataset.s;render();});
-  const shown=list.filter(x=>dshow==='all'||x.st===dshow).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
-  const nm={all:'Renewals due',first:'First-time renewals due',repeat:'Repeated renewals due'}[lv];
-  document.getElementById('ptitle').innerHTML=`${nm} <small>${shown.length} learner${shown.length===1?'':'s'} · ${cnt('paid')} of ${list.length} renewed${list.length?' ('+Math.round(cnt('paid')/list.length*100)+'%)':''}</small>`;
-  const stPill=x=>{const m={paid:['paid','Renewed'],late:['late','Overdue'],lost:['lost',"Won't renew"],due:['due','Yet to renew']}[x.st];
-    return`<span class="st ${m[0]}"><i></i>${m[1]}</span>${x.st==='paid'&&x.paidOn?`<span class="sub">Paid ${fmtD(x.paidOn)}</span>`:x.st==='late'?`<span class="sub">${days(x.end,TODAY)} days since end</span>`:x.status&&x.st==='due'?`<span class="sub">${esc(x.status)}</span>`:''}`;};
-  const head=['Learner',...(sel?[]:['Centre']),'Phone','Course','Level','Class start','Membership end','Renewal status','Description','Next call / expected payment',{t:'Expected amount',n:1}];
-  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
-  if(!shown.length)h+=`<tr><td colspan="${head.length}" class="empty">No memberships ${dshow==='all'?'':'with this status '}ending between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
-  shown.forEach(x=>{
-    h+=`<tr class="${x.st==='paid'||x.st==='lost'?'done':''}"><td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}${x.teacher?' · '+esc(x.teacher):''}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
-      <td class="tel">${x.phone.length===10?x.phone.slice(0,5)+' '+x.phone.slice(5):'—'}</td>
-      <td>${esc(x.course)||'—'}<br><span class="ty ${x.tab==='rn'?'rp':''}">${x.tab==='rn'?'Repeated':'First-time'}${x.pack?' · '+x.pack:''}</span></td>
-      <td>${esc(x.level)||'—'}</td><td>${fmtD(x.start)}</td><td><b>${fmtD(x.end)}</b></td><td>${stPill(x)}</td>
-      <td class="ds">${esc(x.desc)||'<span style="color:var(--faint)">—</span>'}</td>
-      <td>${x.ncd?fmtD(x.ncd)+(x.ncd<TODAY&&x.st!=='paid'&&x.st!=='lost'?'<span class="sub" style="color:var(--bad)">date passed</span>':''):'<span style="color:var(--faint)">—</span>'}</td>
-      <td class="n amt">${x.exp>0?inr(x.exp):'<span style="color:var(--faint);font-weight:400">—</span>'}</td></tr>`;
+
+
+/* ── State ── */
+let DUE=null;
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_rp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+let view=(()=>{try{return localStorage.getItem('artium_rp_view')==='list'?'list':'glance';}catch(e){return'glance';}})();
+let FOLD=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_fold')||'{}')||{};}catch(e){return{};}})();   // sections folded by the viewer
+let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null;
+const n=v=>Math.round(v).toLocaleString('en-IN');
+const pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
+const inP=(d,P)=>d&&d>=P.a&&d<=P.b;
+const CHEV='<span class="cv" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>';
+
+/* Weeks of the period: Tuesday to Sunday. Monday is the weekly off, so a Monday belongs to the week before it (the week ends on Monday).
+   The first and last weeks can be short. */
+function weeksOf(P){
+  const W=[];let s=new Date(P.a);
+  while(s<=P.b){const e=new Date(s);while(e.getDay()!==1&&e<P.b)e.setDate(e.getDate()+1);
+    W.push({a:new Date(s),b:new Date(e)});s=new Date(e);s.setDate(s.getDate()+1);}
+  return W;
+}
+const span=w=>w.a.getMonth()===w.b.getMonth()?(w.a.getDate()===w.b.getDate()?`${w.a.getDate()} ${MON[w.a.getMonth()]}`:`${w.a.getDate()}–${w.b.getDate()} ${MON[w.b.getMonth()]}`)
+  :`${w.a.getDate()} ${MON[w.a.getMonth()]}–${w.b.getDate()} ${MON[w.b.getMonth()]}`;
+
+/* The current month cohort: every membership whose Package Expiry Date falls in the period. Each learner lands in one outcome only,
+   in this order: renewed, pipeline (promised date in the period and an expected amount), will not renew, extended (extension days above 0),
+   and anyone left is yet to connect. First-time = a Fresh Sales membership, repeated = a Renewals one. */
+function outcome(x,P){
+  if(x.st==='paid')return'ren';
+  if(x.ncd&&x.exp>0&&inP(x.ncd,P))return'pipe';
+  if(x.st==='lost')return'wnr';
+  if(x.ext>0)return'ext';
+  return'ytc';
+}
+
+/* ── Building blocks ── */
+function fold(key,def=false){return key in FOLD?FOLD[key]:def;}
+function section(key,title,extra,body,cls=''){
+  return`<section class="sec ${cls}${fold(key)?' closed':''}" data-k="${key}"><button type="button" class="sh" aria-expanded="${!fold(key)}"><b>${title}</b>${extra||''}${CHEV}</button><div class="sb">${body}</div></section>`;
+}
+function wtable(W,P,rows){
+  const tl=mode==='month'?MONTH_FULL[viewM]:'Period';
+  const cur=W.findIndex(w=>TODAY>=w.a&&TODAY<=w.b),cc=i=>(i===cur?'cw':'')+(i===W.length?' tt':'');
+  let h='<div class="tw"><table><thead><tr><th></th>'+W.map((w,i)=>`<th class="${cc(i)}"><b>Week ${i+1}</b>${i===cur?'<em>This week</em>':''}<small>${span(w)}</small></th>`).join('')
+    +`<th class="tt"><b>${tl}</b><small>Total</small></th></tr></thead><tbody>`;
+  rows.forEach(r=>{
+    if(r.h){h+=`<tr class="grp2"><th colspan="${W.length+2}">${r.h}</th></tr>`;return;}
+    if(r.opt&&!r.v[r.v.length-1])return;
+    const dot=r.cls&&/wnr/.test(r.cls)?'<i class="dt r"></i>':r.cls&&/ytc/.test(r.cls)?'<i class="dt g"></i>':'';
+    h+=`<tr class="${r.cls||''}"><th scope="row">${dot}${r.l}</th>`+r.v.map((x,i)=>`<td class="${cc(i)}">${x}</td>`).join('')+'</tr>';
   });
-  t.innerHTML=h+'</tbody>';
-  document.getElementById('foot-l').textContent=`Membership end dates ${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+  return h+'</tbody></table></div>';
 }
-document.getElementById('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;lv=b.dataset.v;try{localStorage.setItem('artium_rp_list',lv);}catch(err){}render();};
-document.getElementById('fbar').addEventListener('change',e=>{const k=e.target.dataset.f;if(k){FV[k]=e.target.value;render();}});
-document.getElementById('fbar').addEventListener('click',e=>{if(e.target.id==='clr'){Object.keys(FV).forEach(k=>FV[k]='');render();}});
-try{const v=localStorage.getItem('artium_rp_list');if(['pipe','all','first','repeat'].includes(v))lv=v;}catch(e){}
+function part(key,L,title,summary,body){
+  return`<div class="wc${fold(key)?' closed':''}" data-k="${key}"><button type="button" class="wh" aria-expanded="${!fold(key)}"><span class="lb">${L}</span><span class="wt">${title}</span><span class="ws">${summary}</span>${CHEV}</button><div class="wb">${body}</div></div>`;
+}
+const SUM=(...kv)=>kv.map(([k,v])=>`<span>${k} <b>${v}</b></span>`).join('');
+
+function learnerList(list,ext){
+  if(!list.length)return'<div class="empty">No learners here.</div>';
+  const sel=selCentre!=='All';
+  let h=`<div class="tw"><table class="lt"><thead><tr><th>Learner</th><th>Course</th><th>Age group</th><th>Course level</th><th>Teacher</th>${ext?'<th>Extension</th>':''}<th>Latest discussion</th></tr></thead><tbody>`;
+  list.slice().sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name)).forEach(x=>{
+    h+=`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)} · due ${fmtD(x.end)}</small></td>
+      <td>${esc(x.course)||'—'}</td><td>${esc(x.age)||'—'}</td><td>${esc(x.level)||'—'}</td><td>${esc(x.teacher)||'—'}</td>
+      ${ext?`<td class="ex">${Math.round(x.ext)} day${Math.round(x.ext)===1?'':'s'}${x.newEnd?' · to '+fmtD(x.newEnd):''}</td>`:''}
+      <td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td></tr>`;});
+  return h+'</tbody></table></div>';
+}
+
+/* ── The page ── */
 function render(){
-  document.querySelectorAll('#lv button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===lv));
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
+  document.querySelectorAll('#vt button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===view));
   document.getElementById('pmonth').style.display=mode==='month'?'flex':'none';document.getElementById('prange').hidden=mode!=='range';
   const P=period();document.getElementById('mlabel').textContent=P.label;
   if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
-  const t=document.getElementById('t'),k=document.getElementById('kpis');
-  if(!ITEMS){t.innerHTML='<tr><td class="empty">Loading…</td></tr>';k.innerHTML='';return;}
-  const all=ITEMS.filter(x=>(!sel||x.centre===sel.name)&&x.ncd>=P.a&&x.ncd<=P.b);
-  // Renewals in the period, as on Monthly Performance Analysis: due = memberships ending in the period (Fresh Sales and Renewals);
-  // renewed = every renewal paid in the period, whenever it was due; efficiency = renewed ÷ due
-  const inP=d=>d&&d>=P.a&&d<=P.b,mine=x=>!sel||x.centre===sel.name;
-  const dueN=ALL.filter(x=>mine(x)&&inP(x.end)).length,rnl=ALL.filter(x=>mine(x)&&x.tab==='rn'&&inP(x.date));
-  const rCur=rnl.filter(x=>inP(x.prevEnd)).length,rPrev=rnl.filter(x=>x.prevEnd&&x.prevEnd<P.a).length,rAdv=rnl.filter(x=>x.prevEnd&&x.prevEnd>P.b).length,rUnk=rnl.length-rCur-rPrev-rAdv;
-  const eff=dueN?rnl.length/dueN*100:null,eCls=eff==null?'':eff>=90?'ok':eff>=70?'mid':'low';
-  const missN=GAPS.filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(x.miss!=='none'||x.end<=new Date(TODAY.getTime()-864e5))).length;
-  const sum=(l,f)=>l.reduce((s,x)=>s+f(x),0),by=s=>all.filter(x=>x.state===s);
-  const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost');
-  // Current status: renewals paid in the period
-  const col=sum(rnl,x=>x.paid),atv=rnl.length?col/rnl.length:null;
-  // Pipeline: promised renewals not paid yet (yet to pay + overdue); run-rate = what is in hand + what is promised
-  const pipe=wait.concat(late),expN=pipe.length,expAmt=sum(pipe,x=>x.exp),expAtv=expN?expAmt/expN:null;
-  const rrN=rnl.length+expN,rrAmt=col+expAmt,rrEff=dueN?rrN/dueN*100:null;
-  // Targets (monthly, set on the Targets page): in Month view only. For All centres, actual and target both cover the centres that have a target.
+  const out=document.getElementById('out');
+  if(view==='list'){out.innerHTML='<section class="sec"><div class="empty big">The list view is being redesigned. Switch to Glance for now.</div></section>';return;}
+  if(!DUE){out.innerHTML='<section class="sec"><div class="empty big">Loading…</div></section>';return;}
+  const mine=x=>!sel||x.centre===sel.name;
+  const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
+
+  /* At a glance (as on Monthly Performance Analysis): due = memberships whose package expires in the period;
+     achieved = every renewal paid in the period, whenever it was due; pipeline = promised payments in the period not paid yet */
+  const due=DUE.filter(x=>mine(x)&&inP(x.end,P));
+  const rnl=ALL.filter(x=>mine(x)&&x.tab==='rn'&&inP(x.date,P));
+  const col=rnl.reduce((s,x)=>s+x.paid,0),atv=rnl.length?col/rnl.length:null;
+  const prom=(ITEMS||[]).filter(x=>mine(x)&&inP(x.ncd,P)),pipe=prom.filter(x=>x.state==='wait'||x.state==='late'),late=pipe.filter(x=>x.state==='late');
+  const expAmt=pipe.reduce((s,x)=>s+x.exp,0),lateAmt=late.reduce((s,x)=>s+x.exp,0);
+  // Targets (monthly, from the Targets page): Month view only. Actual and target both cover the centres that have a target.
   const tg=mode==='month'?(TARGETS[viewY+'-'+String(viewM+1).padStart(2,'0')]||{}):{},cs=(sel?[sel]:CENTRES).map(c=>c.name);
-  const tgt=key=>{const has=cs.filter(c=>tg[c]&&tg[c][key]!=null);return has.length?{v:has.reduce((s,c)=>s+tg[c][key],0),has,all:has.length===cs.length}:null;};
-  const T={n:tgt('renewed'),amt:tgt('rncol')};
-  const actFor=(has,f)=>sum(rnl.filter(x=>has.includes(x.centre)),f);
-  const vs=(t,actual,isAmt)=>{if(!t)return'';const d=actual-t.v,pc=t.v?d/t.v*100:0,fmt=v=>isAmt?inr(Math.abs(v)):Math.abs(Math.round(v)).toLocaleString('en-IN');
-    return `<div class="tg"><span>Target <b>${isAmt?inr(t.v):t.v.toLocaleString('en-IN')}</b>${t.all?'':'<sup title="Not every centre has this target">*</sup>'}</span><span class="gap ${d>=0?'up':'dn'}">${d>=0?'▲ Ahead':'▼ Behind'} ${fmt(d)} · ${Math.abs(Math.round(pc))}%</span></div>`;};
-  const n=v=>v.toLocaleString('en-IN'),tile=(k,v,sub,cls='')=>`<div class="tl ${cls}"><div class="k">${k}</div><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
-  document.getElementById('ren').innerHTML=`<div class="grp"><div class="gt">Current status <span>${esc(P.label)}${mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth()?' · so far':''}</span></div><div class="tiles">
-      ${tile('No. of renewals due',n(dueN),'memberships ending in this period')}
-      ${tile('Renewed',n(rnl.length),vs(T.n,T.n?actFor(T.n.has,()=>1):0,false)+`<span class="split"><span><b>${rCur}</b> due ${mode==='month'?'this month':'in range'}</span><span><b>${rPrev}</b> due earlier</span><span><b>${rAdv}</b> in advance</span>${rUnk?`<span><b>${rUnk}</b> no earlier entry</span>`:''}</span>`)}
-      ${tile('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%',eff==null?'':`<span class="bar"><i style="width:${Math.min(100,eff)}%"></i></span>`,'eff '+eCls)}
-      ${tile('Collections – Renewals',inr(col),vs(T.amt,T.amt?actFor(T.amt.has,x=>x.paid):0,true))}
-      ${tile('ATV – Renewals',atv==null?'–':inr(atv),'')}</div></div>
-    <div class="grp pipe"><div class="gt">Pipeline <span>promised, not paid yet</span></div><div class="tiles">
-      ${tile('No. of expected renewals',n(expN),`${wait.length} yet to pay · <b class="lt">${late.length} overdue</b>`)}
-      ${tile('Run-rate · renewals',n(rrN),(rrEff==null?'':`${Math.round(rrEff)}% of renewals due`)+vs(T.n,T.n?actFor(T.n.has,()=>1)+pipe.filter(x=>T.n.has.includes(x.centre)).length:0,false),'rr')}
-      ${tile('Expected renewal collection',inr(expAmt),late.length?`<b class="lt">${inr(sum(late,x=>x.exp))}</b> of it overdue`:'')}
-      ${tile('Expected ATV',expAtv==null?'–':inr(expAtv),'')}
-      ${tile('Run-rate · collections',inr(rrAmt),vs(T.amt,T.amt?actFor(T.amt.has,x=>x.paid)+sum(pipe.filter(x=>T.amt.has.includes(x.centre)),x=>x.exp):0,true),'rr')}</div>
-      <div class="pnote">Promises kept so far: <b>${paid.length}</b> of ${all.length} learners who promised · ${inr(sum(paid,x=>x.paidAmt||x.exp))}${lost.length?` · <b>${lost.length}</b> won't renew`:''}</div></div>`;
-  k.innerHTML='';
-  document.getElementById('sumline').innerHTML=[`<span>Due <b>${n(dueN)}</b></span>`,`<span>Renewed <b>${n(rnl.length)}</b></span>`,`<span>Efficiency <b>${eff==null?'–':Math.round(eff)+'%'}</b></span>`,
-    `<span>Collected <b>${inr(col)}</b></span>`,`<span>Expected <b>${n(expN)} · ${inr(expAmt)}</b></span>`,`<span>Run-rate <b>${n(rrN)} · ${inr(rrAmt)}</b></span>`,`<span>Not in pipeline <b>${missN}</b></span>`].join('');
-  const sb=document.getElementById('sumbox');sb.classList.toggle('closed',!sumOpen);document.getElementById('sumhead').setAttribute('aria-expanded',sumOpen);
-  // Learners due in this period whose promise is missing or incomplete
-  const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
-  const due=GAPS.filter(x=>(!sel||x.centre===sel.name)&&x.end>=P.a&&x.end<=P.b&&(x.miss!=='none'||x.end<=Y));
-  const gc={};GAP.forEach(([g])=>gc[g]=due.filter(x=>x.miss===g));
-  document.getElementById('gaps').innerHTML=`<div class="gh"><b>Not in the pipeline yet</b><span>Learners due for renewal in ${esc(P.label)} who haven't renewed, and whose promise is missing or incomplete</span></div>
-    <div class="gtiles">${GAP.map(([g,l,d])=>`<button type="button" class="gtile${show===g?' on':''}${gc[g].length?'':' zero'}" data-g="${g}"><span class="gn">${gc[g].length}</span><span class="gl"><b>${l}</b><small>${d}</small></span><span class="ga">${gc[g].length?'Paid last time: '+inr(sum(gc[g],x=>x.paid)):''}</span></button>`).join('')}</div>`;
-  document.querySelectorAll('.gtile').forEach(b=>b.onclick=()=>{show=show===b.dataset.g?'all':b.dataset.g;render();});
-  if(GAP.some(([g])=>g===show)){renderGap(gc[show]||[],sel,P);return;}
-  // The other list views: renewals due (all / first-time / repeated)
-  if(lv!=='pipe')return renderDue(P,sel);
-  // Filter
-  renderFilters(all);const allP=all.filter(passF);
-  const pc=s=>allP.filter(x=>x.state===s).length,cnt={all:allP.length,wait:pc('wait'),late:pc('late'),paid:pc('paid'),lost:pc('lost')};
-  document.getElementById('flt').innerHTML=STATES.filter(([s])=>s!=='lost'||cnt.lost).map(([s,l,c])=>`<button type="button" data-s="${s}" aria-pressed="${show===s}">${c?`<i class="d" style="background:${c}"></i>`:''}${l}<span>${cnt[s]}</span></button>`).join('');
-  document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{show=b.dataset.s;render();});
-  const list=(show==='all'?allP:allP.filter(x=>x.state===show)).slice().sort((a,b)=>a.ncd-b.ncd||b.exp-a.exp);
-  document.getElementById('ptitle').innerHTML=`Promised payments <small>${list.length} learner${list.length===1?'':'s'} · ${inr(sum(list,x=>x.exp))}</small>`;
-  // Table, grouped by week (Monday to Sunday)
-  const head=['Promised date','Learner',...(sel?[]:['Centre']),'Phone','Course','Package','Membership ended',{t:'Expected',n:1},'Probability','Note','Status'];
-  let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
-  if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No promised payments ${show==='all'?'':'with this status '}between ${fmtD(P.a)} and ${fmtD(P.b)}.</td></tr>`;
-  let wk='';
-  list.forEach(x=>{
-    const mon=new Date(x.ncd);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));const key=iso(mon);
-    if(key!==wk){wk=key;const sun=new Date(mon);sun.setDate(sun.getDate()+6);const wl=list.filter(y=>y.ncd>=mon&&y.ncd<=sun);
-      h+=`<tr class="wk"><td colspan="${head.length}">Week of ${mon.getDate()} ${MON[mon.getMonth()]}<span>${wl.length} learner${wl.length===1?'':'s'} · ${inr(sum(wl,y=>y.exp))}</span></td></tr>`;}
-    const d=days(TODAY,x.ncd);
-    const when=x.state==='late'?`<small class="late">${-d} day${-d===1?'':'s'} late</small>`:x.state==='wait'?(d===0?'<small class="soon">Today</small>':`<small class="${d<=3?'soon':''}">in ${d} day${d===1?'':'s'}</small>`):'';
-    const st=x.state==='paid'?`<span class="st paid"><i></i>Renewed</span><span class="sub">${x.paidOn?fmtD(x.paidOn):''}${x.paidAmt?' · '+inr(x.paidAmt):''}</span>`
-      :x.state==='late'?'<span class="st late"><i></i>Overdue</span>':x.state==='lost'?`<span class="st lost"><i></i>Won't renew</span>`:'<span class="st wait"><i></i>Yet to pay</span>';
-    const pr=/high/i.test(x.prob)?'hi':/med/i.test(x.prob)?'md':/low/i.test(x.prob)?'lo':'na';
-    h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.ncd.getDay()]}, ${x.ncd.getDate()} ${MON[x.ncd.getMonth()]}</b>${when}</td>
-      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.id)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
-      <td class="tel">${x.phone.length===10?x.phone.slice(0,5)+' '+x.phone.slice(5):'—'}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
-      <td>${x.m?x.m+(x.m===1?' month':' months'):'—'}</td><td>${fmtD(x.end)}</td><td class="n amt">${inr(x.exp)}</td>
-      <td>${x.prob?`<span class="pr ${pr}">${esc(x.prob)}</span>`:'<span class="pr na">—</span>'}</td><td class="note">${esc(x.desc)||'<span style="color:var(--faint)">—</span>'}</td><td>${st}</td></tr>`;
-  });
-  t.innerHTML=h+'</tbody>';
-  document.getElementById('foot-l').textContent=`${fmtD(P.a)} to ${fmtD(P.b)}${sel?' · '+sel.name:' · all centres'}`;
+  const tgt=key=>{const has=cs.filter(c=>tg[c]&&tg[c][key]!=null);return has.length?{v:has.reduce((s,c)=>s+tg[c][key],0),has}:null;};
+  const Tn=tgt('renewed'),Ta=tgt('rncol');
+  const act=(T,f)=>T?rnl.filter(x=>T.has.includes(x.centre)).reduce((s,x)=>s+f(x),0):0;
+  const pip=(T,f)=>T?pipe.filter(x=>T.has.includes(x.centre)).reduce((s,x)=>s+f(x),0):0;
+  const prog=(T,actual,money)=>{if(!T||!T.v)return'';const p=actual/T.v*100;
+    return`<div class="pg"><div class="x"><span>Target – ${money?inr(T.v):n(T.v)}</span><b>${Math.round(p)}%</b></div><div class="tr"><i style="width:${Math.min(100,p)}%"></i></div></div>`;};
+  // ATV target: the renewal collections target ÷ the renewals target, for centres that have both
+  const Tatv=(()=>{const has=cs.filter(c=>tg[c]&&tg[c].renewed&&tg[c].rncol!=null);if(!has.length)return null;
+    const nn=has.reduce((s,c)=>s+tg[c].renewed,0),aa=has.reduce((s,c)=>s+tg[c].rncol,0),l=rnl.filter(x=>has.includes(x.centre));
+    return{v:aa/nn,act:l.length?l.reduce((s,x)=>s+x.paid,0)/l.length:0};})();
+  const card=(t,v,extra,cls='')=>`<div class="k ${cls}"><div class="t">${t}</div><div class="v">${v}</div>${extra||''}</div>`;
+  const rrN=rnl.length+pipe.length,rrAmt=col+expAmt;
+  const glance=`<div class="rw"><div class="rl">Achieved so far</div><div class="cards">
+      ${card('Renewals due',n(due.length))}
+      ${card('Renewals achieved',n(rnl.length),prog(Tn,act(Tn,()=>1)))}
+      ${card('Collections – Renewals',inr(col),prog(Ta,act(Ta,x=>x.paid),true))}
+      ${card('ATV – Renewals',atv==null?'–':inr(atv),Tatv?prog({v:Tatv.v},Tatv.act,true):'')}</div></div>
+    <div class="rw"><div class="rl">Pipeline and run-rate</div><div class="cards">
+      ${card('Expected payments',n(pipe.length),`<div class="s"><b>${n(pipe.length-late.length)}</b> yet to pay${late.length?` · <span class="bd">${n(late.length)} overdue</span>`:''}</div>`)}
+      ${card('Expected collections',inr(expAmt),lateAmt?`<div class="s"><span class="bd">${inr(lateAmt)} overdue</span></div>`:'')}
+      ${card('Run-rate · renewals',n(rrN),`<div class="eq">${n(rnl.length)} achieved + ${n(pipe.length)} expected</div>`+prog(Tn,act(Tn,()=>1)+pip(Tn,()=>1)),'rr')}
+      ${card('Run-rate · collections',inr(rrAmt),`<div class="eq">${inr(col)} achieved + ${inr(expAmt)} expected</div>`+prog(Ta,act(Ta,x=>x.paid)+pip(Ta,x=>x.exp),true),'rr')}</div></div>`;
+
+  /* Week on Week view */
+  const W=weeksOf(P),wi=d=>W.findIndex(w=>d>=w.a&&d<=w.b);
+  const zero=()=>W.map(()=>0).concat(0);
+  const put=(arr,d)=>{const i=wi(d);if(i>=0){arr[i]++;arr[W.length]++;}};
+  const cohort=due.map(x=>({...x,oc:outcome(x,P)}));
+  // A: renewals paid in the period, by the week they were paid, split by when the renewed membership was due
+  const rCur=zero(),rPrev=zero(),rAdv=zero(),rUnk=zero(),dueW=zero();
+  cohort.forEach(x=>put(dueW,x.end));
+  rnl.forEach(x=>put(inP(x.prevEnd,P)?rCur:x.prevEnd&&x.prevEnd<P.a?rPrev:x.prevEnd&&x.prevEnd>P.b?rAdv:rUnk,x.date));
+  const ach=dueW.map((_,i)=>rCur[i]+rPrev[i]+rAdv[i]+rUnk[i]),effW=ach.map((a,i)=>pc(a,dueW[i]));
+  const byOc=(list,oc)=>{const a=zero();list.filter(x=>x.oc===oc).forEach(x=>put(a,x.end));return a;};
+  const A=[{l:'Renewals due',v:dueW,cls:'key'},{l:'Renewed – current month cohort',v:rCur},{l:"Renewed – previous months' cohorts",v:rPrev},
+    {l:'Renewed – in advance',v:rAdv,opt:1},{l:'Renewed – earlier entry not found',v:rUnk,opt:1},
+    {l:'Total renewals achieved',v:ach,cls:'acc strong'},{l:'Renewal collection efficiency',v:effW,cls:'acc'},
+    {h:(mode==='month'?'Current month cohort':'Cohort due in this period')+' · where the rest stand'},
+    {l:'Pipeline',v:byOc(cohort,'pipe')},{l:'Extended',v:byOc(cohort,'ext')},{l:'Will not renew',v:byOc(cohort,'wnr'),cls:'wnr'},{l:'Yet to connect',v:byOc(cohort,'ytc'),cls:'ytc'}];
+  // B and C: first-time and repeated renewals of the cohort, by the week the package expires
+  const typ=tab=>{const L=cohort.filter(x=>x.tab===tab),d=zero(),r=byOc(L,'ren'),p=byOc(L,'pipe');L.forEach(x=>put(d,x.end));
+    const rr=r.map((x,i)=>x+p[i]);
+    return{rows:[{l:'Due',v:d,cls:'key'},{l:'Renewed',v:r},{l:'Renewal %',v:r.map((x,i)=>pc(x,d[i])),cls:'acc'},{h:'Pipeline and run-rate'},
+      {l:'Pipeline',v:p},{l:'Run-rate',v:rr,cls:'acc strong'},{l:'Projected renewal %',v:rr.map((x,i)=>pc(x,d[i])),cls:'acc'},{h:'Other outcomes'},
+      {l:'Extended',v:byOc(L,'ext')},{l:'Will not renew',v:byOc(L,'wnr'),cls:'wnr'},{l:'Yet to connect',v:byOc(L,'ytc'),cls:'ytc'}],
+      sum:SUM(['Due',n(d[W.length])],['Renewed',n(r[W.length])],['Run-rate',n(rr[W.length])])};};
+  const B=typ('fs'),C=typ('rn');
+  // D: the pipeline (promised payments in the period, not paid yet), by the week of the promised date, split by when the membership fell due
+  const pm=new Date(P.a.getFullYear(),P.a.getMonth()-1,1);
+  const DK=[['xprev','Extended from previous month'],['cur',mode==='month'?'Due in current month':'Due in this period'],['prev','Due in previous month',1],
+    ['past','Due in past months'],['xpast','Extended in past months'],['fut','Due in future months',1],['none','Package expiry not recorded',1]];
+  const dv={};DK.forEach(([k])=>dv[k]=zero());
+  pipe.forEach(x=>{const e=x.end;const k=!e?'none':inP(e,P)?'cur':e>P.b?'fut':e>=pm?(x.ext>0?'xprev':'prev'):(x.ext>0?'xpast':'past');put(dv[k],x.ncd);});
+  const dt=zero();Object.values(dv).forEach(a=>a.forEach((x,i)=>dt[i]+=x));
+  const D=DK.map(([k,l,o])=>({l,v:dv[k],opt:o})).concat([{l:'Total pipeline',v:dt,cls:'acc strong tline'}]);
+  const wow=`<div class="wvb">
+    ${part('wA','A','Renewal breakdown',SUM(['Due',n(due.length)],['Achieved',n(rnl.length)],['Efficiency',pc(rnl.length,due.length)]),wtable(W,P,A))}
+    ${part('wB','B','First-time renewals',B.sum,wtable(W,P,B.rows))}
+    ${part('wC','C','Repeated renewals',C.sum,wtable(W,P,C.rows))}
+    ${part('wD','D','Pipeline breakdown',SUM(['Total pipeline',n(pipe.length)]),wtable(W,P,D))}</div>`;
+
+  const wnr=cohort.filter(x=>x.oc==='wnr'),ext=cohort.filter(x=>x.oc==='ext');
+  const coh=mode==='month'?'current month cohort':'cohort due in this period';
+  out.innerHTML=section('glance','At a glance',`<span>${esc(P.label)}${isCur?' · so far':''}</span>`,glance)
+    +section('wow','Week on Week view','',wow,'wowsec')
+    +section('wnr','Will not renew',`<span class="ct r">${wnr.length}</span><span>${coh}</span>`,learnerList(wnr,false))
+    +section('ext','Extended',`<span class="ct b">${ext.length}</span><span>${coh}</span>`,learnerList(ext,true));
+  out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
 }
 
 /* ── Controls ── */
-document.getElementById('sumhead').onclick=()=>{sumOpen=!sumOpen;try{localStorage.setItem('artium_rp_summary',sumOpen?'open':'closed');}catch(e){}render();};
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
   .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
 document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_rp_centre',selCentre);}catch(e){}render();});
+document.querySelectorAll('#vt button').forEach(b=>b.onclick=()=>{view=b.dataset.v;try{localStorage.setItem('artium_rp_view',view);}catch(e){}render();});
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='range'&&!rFrom){rFrom=new Date(viewY,viewM,1);rTo=new Date(viewY,viewM+1,0);}render();});
 document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
 document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY++;}render();};
 ['from','to'].forEach(id=>document.getElementById(id).onchange=e=>{const d=fromIso(e.target.value);if(!d)return;if(id==='from')rFrom=d;else rTo=d;if(rFrom&&rTo&&rFrom>rTo)[rFrom,rTo]=[rTo,rFrom];render();});
-document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{const q=b.dataset.q;
-  if(q==='week'){rFrom=new Date(TODAY);rFrom.setDate(rFrom.getDate()-((rFrom.getDay()+6)%7));rTo=new Date(rFrom);rTo.setDate(rTo.getDate()+6);show='all';}
-  if(q==='next7'){rFrom=new Date(TODAY);rTo=new Date(TODAY);rTo.setDate(rTo.getDate()+6);show='all';}
-  if(q==='late'){const l=(ITEMS||[]).filter(x=>x.state==='late').map(x=>x.ncd);rFrom=l.length?new Date(Math.min(...l)):new Date(TODAY);rTo=new Date(TODAY);rTo.setDate(rTo.getDate()-1);show='late';}
-  render();});
 
 async function load(){
   render();
@@ -488,6 +385,7 @@ async function load(){
   }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
 }
 load();
+
 </script>
 </body>
 </html>
