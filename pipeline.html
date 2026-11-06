@@ -45,14 +45,14 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .sh b{font:800 19px var(--f);color:var(--ink);letter-spacing:-.01em}.sh span{font-size:13px;color:var(--ink4)}
 .cv{margin-left:auto;width:30px;height:30px;border-radius:999px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink3);flex:none;background:#fff}
 .cv svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
-.rw{padding:20px 24px 22px}.rw+.rw{border-top:1px solid var(--edge);background:linear-gradient(180deg,#FAF8FE,#fff)}
+.rw{padding:16px 24px 18px}.rw+.rw{border-top:1px solid var(--edge);background:linear-gradient(180deg,#FAF8FE,#fff)}
 .rl{font:700 10.5px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--ink4);margin-bottom:14px}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.k{border:1px solid var(--edge);border-radius:18px;padding:18px 20px;background:#fff;min-height:136px;display:flex;flex-direction:column}
+.k{border:1px solid var(--edge);border-radius:16px;padding:15px 18px;background:#fff;min-height:112px;display:flex;flex-direction:column}
 .k .t{font:600 13px var(--f);color:var(--ink3)}
-.k .v{font:800 34px/1.1 var(--f);color:var(--ink);margin-top:10px;letter-spacing:-.02em}
-.k .s{font-size:13px;color:var(--ink3);margin-top:auto;padding-top:12px}.k .s b{color:var(--ink)}.k .s .bd{color:var(--bad);font-weight:700}
-.pg{margin-top:auto;padding-top:14px}.pg .x{display:flex;justify-content:space-between;font-size:13px;color:var(--ink3);margin-bottom:7px}.pg .x b{color:var(--tvfg);font-weight:800}
+.k .v{font:800 30px/1.1 var(--f);color:var(--ink);margin-top:8px;letter-spacing:-.02em}
+.k .s{font-size:13px;color:var(--ink3);margin-top:auto;padding-top:10px}.k .s b{color:var(--ink)}.k .s .bd{color:var(--bad);font-weight:700}
+.pg{margin-top:auto;padding-top:10px}.pg .x{display:flex;justify-content:space-between;font-size:13px;color:var(--ink3);margin-bottom:7px}.pg .x b{color:var(--tvfg);font-weight:800}
 .pg .tr{height:6px;border-radius:6px;background:#EEE8FB;overflow:hidden}.pg .tr i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--purple),var(--pink))}
 .k.rr{background:linear-gradient(140deg,#6601fd 0%,#4101f7 60%,#2B0256 130%);border:0;color:#fff;box-shadow:0 14px 30px -18px rgba(65,1,247,.9)}
 .k.rr .t{color:#d9ccff}.k.rr .v{color:#fff}.k.rr .eq{font-size:12.5px;color:#cec8ea;margin-top:6px}
@@ -115,7 +115,7 @@ button{font:inherit}
 </style>
 </head>
 <body>
-<div class="hero"><div class="hin"><div><div class="eb" id="eyebrow">All centres</div><h1>Renewal Pipeline</h1><div class="sub">Learners who have committed to renew, by the date they promised to pay</div></div>
+<div class="hero"><div class="hin"><div><h1>Renewal Pipeline</h1><div class="sub" id="psub"></div></div>
 <div class="hr"><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
 <div class="vt" id="vt" role="group" aria-label="View"><button type="button" data-v="glance" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Glance</button><button type="button" data-v="list" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button></div></div></div></div>
 <div class="page">
@@ -270,12 +270,11 @@ function learnerList(list,ext){
 /* ── The page ── */
 function render(){
   const sel=CENTRES.find(c=>c.name===selCentre);
-  document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
   document.querySelectorAll('#vt button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===view));
   document.getElementById('pmonth').style.display=mode==='month'?'flex':'none';document.getElementById('prange').hidden=mode!=='range';
-  const P=period();document.getElementById('mlabel').textContent=P.label;
+  const P=period();document.getElementById('mlabel').textContent=P.label;document.getElementById('psub').textContent=P.label;   // the selected period, under the title
   if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
   const out=document.getElementById('out');
   if(view==='list'){out.innerHTML='<section class="sec"><div class="empty big">The list view is being redesigned. Switch to Glance for now.</div></section>';return;}
@@ -312,8 +311,8 @@ function render(){
     <div class="rw"><div class="rl">Pipeline and run-rate</div><div class="cards">
       ${card('Expected payments',n(pipe.length),`<div class="s"><b>${n(pipe.length-late.length)}</b> yet to pay${late.length?` · <span class="bd">${n(late.length)} overdue</span>`:''}</div>`)}
       ${card('Expected collections',inr(expAmt),lateAmt?`<div class="s"><span class="bd">${inr(lateAmt)} overdue</span></div>`:'')}
-      ${card('Run-rate · renewals',n(rrN),`<div class="eq">${n(rnl.length)} achieved + ${n(pipe.length)} expected</div>`+prog(Tn,act(Tn,()=>1)+pip(Tn,()=>1)),'rr')}
-      ${card('Run-rate · collections',inr(rrAmt),`<div class="eq">${inr(col)} achieved + ${inr(expAmt)} expected</div>`+prog(Ta,act(Ta,x=>x.paid)+pip(Ta,x=>x.exp),true),'rr')}</div></div>`;
+      ${card('Run-rate · renewals',n(rrN),prog(Tn,act(Tn,()=>1)+pip(Tn,()=>1)),'rr')}
+      ${card('Run-rate · collections',inr(rrAmt),prog(Ta,act(Ta,x=>x.paid)+pip(Ta,x=>x.exp),true),'rr')}</div></div>`;
 
   /* Week on Week view */
   const W=weeksOf(P),wi=d=>W.findIndex(w=>d>=w.a&&d<=w.b);
