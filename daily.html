@@ -165,7 +165,7 @@
   tr.has:hover .tg{background:var(--accent-soft);color:var(--accent)}tr.has.open .tg{background:var(--accent);color:#fff;transform:rotate(90deg)}
   tr.sub td{height:34px;font-size:12.5px;color:var(--muted);background:#FDFCFE}tr.sub td.m{padding-left:46px;color:var(--muted);font-weight:400}tr.sub td.s1 b{font-weight:400;color:var(--muted)}
   tr.sub td.s{background:#FAF8FC}
-  tr.has td.s1,tr.has td.d{padding-right:62px}   /* the breakdown's headline number sits above its lines' numbers, past the share slot */
+  tr.has:not(.head) td.s1,tr.has:not(.head) td.d{padding-right:62px}   /* the breakdown's headline number sits above its lines' numbers, past the share slot */
   td em.sh{display:inline-block;width:42px;text-align:left;font:500 11px var(--body);font-style:normal;color:var(--faint);margin-left:6px}
   tr.stot td{border-top:1px solid var(--border);color:var(--ink2)}tr.stot td.m{font-weight:600;color:var(--ink2)}tr.sub.stot td.s1 b{font-weight:600;color:var(--ink2)}
   tr.subh td{height:28px;background:#FDFCFE;border-bottom:0}tr.subh td.m{padding-left:44px;font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
@@ -210,7 +210,7 @@
     <div class="kpis" id="kpis"></div></section>
   <div class="grid-wrap">
     <div class="scroll" id="sc"><table id="grid"></table></div>
-    <div class="legend"><span><i class="sq" style="background:#EBE0F7"></i>Today (so far)</span><span><i class="sq" style="background:#F2EEE7"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span><span><i class="lgbar"><i></i><b></b></i>Line under a target: share reached; the tick is where it should be by today</span></div>
+    <div class="legend"><span><i class="sq" style="background:#EBE0F7"></i>Today (so far)</span><span><i class="sq" style="background:#F2EEE7"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span></div>
   </div>
   <div class="notes" id="notes"></div>
 </div>
@@ -415,7 +415,7 @@ function render(){
     const mx=Math.max(...a),T0=P.month&&keys?tgt(keys):null;
     const val=fm(r.kind,so);
     if(T0&&T0.v){const done=so/T0.v*100,pace=cur&&all?gone/all*100:100;
-      t=`<em class="pdone" title="${Math.round(done)}% of the target reached">${Math.round(done)}%</em>${t}<span class="hair" title="The fill is the share of the target reached; the tick is where the month should be by today"><i style="width:${Math.min(100,done)}%"></i><b style="left:${Math.min(100,pace)}%"></b></span>`;}
+      t=`<em class="pdone" title="${Math.round(done)}% of the target reached">${Math.round(done)}%</em>${t}`;}
     if(gap)gap.t=`<span class="pill">${gap.t}</span>`;
     return`<tr class="${cls}"><td class="m">${label}</td>`+sc(val,t,rr,gap)+ORD.map(i=>cell(i,a[i]?(r.kind==='money'?`<span title="${fmtR(a[i])}">${fmtC(a[i])}</span>`:fmtN(a[i])):'–',a[i]?'':'zero',a[i]&&mx?a[i]/mx:0)).join('')+'</tr>';
   };
