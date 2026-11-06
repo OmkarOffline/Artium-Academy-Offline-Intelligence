@@ -287,7 +287,7 @@ function prep(name){
 function series(name,days){
   const P=PREP[name];if(!P)return null;
   const idx=new Map(days.map((k,i)=>[k,i])),z=()=>days.map(()=>0),S={};
-  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR'].forEach(k=>S[k]=z());
+  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG'].forEach(k=>S[k]=z());
   const put=(k,d,n=1)=>{const i=idx.get(d);if(i!=null)S[k][i]+=n;};
   const end=days[days.length-1];
   if(P.leads){P.leads.forEach(l=>{put('L',l.d);if(l.appt)put('LA',l.d);if(l.visit)put('LV',l.d);if(l.paid)put('LC',l.d);
@@ -300,6 +300,7 @@ function series(name,days){
   const VK={today:'vToday',earlier:'vEarlier',later:'vLater',walk:'vWalk',booked:'vBooked',unknown:'vUnknown'};
   P.visits.forEach(v=>{put('vis',v.d);put(VK[v.kind],v.d);if(v.paid)put('vPaid',v.d);if(['today','earlier','later'].includes(v.kind))put('apptVis',v.d);});
   P.fresh.forEach(f=>{put('conv',f.d);put('fs',f.d);put('fc',f.d,f.amt);put({appt:'cAppt',walk:'cWalk',unknown:'cUnknown',nolog:'cNolog'}[f.journey],f.d);if(f.when==='same')put('cSame',f.d);else if(f.when==='earlier')put('cEarlier',f.d);});
+  (P.t.spend||[]).forEach(([d,m,g])=>{put('sp',d,m+g);put('spM',d,m);put('spG',d,g);});   // marketing spend: Meta + Google
   P.t.renew.forEach(([d,a,end])=>{put('rn',d);put('rc',d,a);if(end)put('due',end);});
   P.t.fresh.forEach(f=>{if(f[3])put('due',f[3]);});   // memberships ending that day: renewals due
   S.tc=S.fc.map((v,i)=>v+S.rc[i]);
@@ -325,6 +326,8 @@ const ROWS=[
   {id:'exp',label:'Appointments scheduled for {p}',kind:'count',head:1,need:'appts',tip:'Visits due during the period, whenever they were booked'},
   {id:'vis',label:'Centre visits',kind:'count',tkey:'visits',head:1},
   {id:'conv',label:'Conversions',kind:'count',tkey:'conv',head:1},
+  {id:'sp',label:'Marketing spend',kind:'money',tkey:'spend',head:1,open:'m',subs:[{id:'spM',label:'Meta'},{id:'spG',label:'Google'},{total:['spM','spG']}]},
+  {id:'cpl',label:'Blended CPL',kind:'atv',num:'sp',den:'leads',need:'leads',tn:'spend',td:'leads',inv:1,tip:'Marketing spend ÷ leads registered'},   // cost per lead: lower is better, so a figure above target shows red
   {g:'Fresh sales'},
   {id:'fs',label:'No. of admissions',kind:'count',tkey:'conv'},
   {id:'fc',label:'Collections – Fresh Sales',kind:'money',tkey:'fscol'},
@@ -443,21 +446,23 @@ function render(){
         const sec=[];for(const x of r.subs){if(x.total)break;if(!x.h)sec.push(x);}
         const tt=sec.reduce((acc,x)=>acc+tot(add(x.id,ps)),0);
         const segs=sec.map((x,k)=>{const v=tot(add(x.id,ps));return v&&tt?`<i style="flex:${v};background:${SEG[k%SEG.length]}" title="${esc(x.label)}: ${v}"></i>`:'';}).join('');
-        h=h.replace(/<td class="s s2"><\/td><td class="s s3"><\/td><td class="s s4[^"]*"><\/td>(?![\s\S]*<td class="s s2"><\/td><td class="s s3">)/,`<td class="s s2 sbar" colspan="3">${tt?`<span class="stack">${segs}</span>`:''}</td>`);
+        // only on this row, and only where it has no target
+        const at=h.lastIndexOf('<tr ');h=h.slice(0,at)+h.slice(at).replace(/<td class="s s2"><\/td><td class="s s3"><\/td><td class="s s4[^"]*"><\/td>/,`<td class="s s2 sbar" colspan="3">${tt?`<span class="stack">${segs}</span>`:''}</td>`);
       }
       if(opn){
         // each section's total: the sum of its lines; a line's share is of that total
         const secTot=k=>{const t=r.subs.slice(k).find(x=>x.total);return t?t.total.reduce((acc,id)=>acc.map((v,i)=>v+add(id,ps)[i]),days.map(()=>0)):a;};
+        const fv=(v,day)=>r.kind==='money'?(day?fmtC(v):fmtR(v)):fmtN(v);
         const sh=(n,d)=>`<em class="sh">${n&&d?(n/d*100).toFixed(1)+'%':''}</em>`;
         r.subs.forEach((s,k)=>{
           if(s.h){h+=`<tr class="subh"><td class="m">${s.h}</td>${blank()}<td colspan="${days.length}"></td></tr>`;return;}
-          if(s.total){const b=secTot(k);h+=`<tr class="sub stot"><td class="m">Total</td><td class="s s1"><b>${fmtN(tot(b))}</b>${sh(0,0)}</td>`+(P.month?'<td class="s s2 sbar" colspan="3"></td>':'')
-            +ORD.map(i=>cell(i,b[i]?fmtN(b[i])+sh(0,0):'–'+sh(0,0),b[i]?'':'zero')).join('')+'</tr>';return;}
+          if(s.total){const b=secTot(k);h+=`<tr class="sub stot"><td class="m">Total</td><td class="s s1"><b>${fv(tot(b))}</b>${sh(0,0)}</td>`+(P.month?'<td class="s s2 sbar" colspan="3"></td>':'')
+            +ORD.map(i=>cell(i,b[i]?fv(b[i],1)+sh(0,0):'–'+sh(0,0),b[i]?'':'zero')).join('')+'</tr>';return;}
           const b=add(s.id,ps);if(s.opt&&!tot(b))return;const T=secTot(k);
           let ix=0;for(let j=k-1;j>=0&&!r.subs[j].h&&!r.subs[j].total;j--)ix++;
           const col=SEG[ix%SEG.length],pct=tot(T)?tot(b)/tot(T)*100:0;
-          h+=`<tr class="sub"><td class="m"><i class="sw" style="background:${col}"></i>${s.label}</td><td class="s s1"><b>${fmtN(tot(b))}</b>${sh(tot(b),tot(T))}</td>`+(P.month?`<td class="s s2 sbar" colspan="3"><span class="bar"><i style="width:${pct}%;background:${col}"></i></span></td>`:'')
-            +ORD.map(i=>cell(i,b[i]?fmtN(b[i])+sh(b[i],T[i]):'–'+sh(0,0),b[i]?'':'zero')).join('')+'</tr>';
+          h+=`<tr class="sub"><td class="m"><i class="sw" style="background:${col}"></i>${s.label}</td><td class="s s1"><b>${fv(tot(b))}</b>${sh(tot(b),tot(T))}</td>`+(P.month?`<td class="s s2 sbar" colspan="3"><span class="bar"><i style="width:${pct}%;background:${col}"></i></span></td>`:'')
+            +ORD.map(i=>cell(i,b[i]?fv(b[i],1)+sh(b[i],T[i]):'–'+sh(0,0),b[i]?'':'zero')).join('')+'</tr>';
         });}
     }else if(r.kind==='ratio'){
       const an=add(r.num,ps),ad=add(r.den,ps),tn=tot(an),td=tot(ad),so=td?tn/td*100:null;
@@ -470,7 +475,7 @@ function render(){
     }else if(r.kind==='atv'){
       const nu=add(r.num,ps),de=add(r.den,ps),so=tot(de)?tot(nu)/tot(de):null;let t='',gap=null;
       if(P.month){const both=per.filter(p=>p.T[r.tn]!=null&&p.T[r.td]!=null),n2=both.reduce((s,p)=>s+p.T[r.tn],0),d2=both.reduce((s,p)=>s+p.T[r.td],0);
-        if(both.length&&d2){const tv=n2/d2;t=fmtR(tv);if(so!=null)gap={v:so-tv,t:`<span class="pill">${(so-tv>0?'+':'')+fmtR(so-tv)}</span>`};}}
+        if(both.length&&d2){const tv=n2/d2;t=fmtR(tv);if(so!=null)gap={v:r.inv?tv-so:so-tv,t:`<span class="pill">${(so-tv>0?'+':'')+fmtR(so-tv)}</span>`};}}
       h+=`<tr class="${r.minor?'minor':''}"><td class="m">${r.label}</td>`+sc(so!=null?fmtR(so):'–',t,'',gap)+ORD.map(i=>de[i]?cell(i,`<span title="${fmtR(nu[i]/de[i])}">${fmtC(nu[i]/de[i])}</span>`):cell(i,'–','zero')).join('')+'</tr>';
     }
   });
