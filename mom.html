@@ -279,10 +279,19 @@ function render(){
     {l:'Refunds',v:refund,t:-total('rf',1),f:v=>v<0?'<span class="ng">'+inr(v)+'</span>':inr(v),cls:'ref',hide:!hasOther},
     {l:'Net collections',v:net,t:sumT('fs','rn','ex','in','ot')-total('rf',1),f:inr,cls:'net'}];
   const missing=cs.filter(c=>!((DATA[c]||{}).tabs||[]).length);
+  /* 2 · Discounts: gross coaching fees, the discount given and what is left, for fresh sales and renewals */
+  const pc=v=>v==null||!isFinite(v)?'–':v.toFixed(1)+'%';
+  const dPct=(...ks)=>({v:cs0.map((c,i)=>{const g=ks.reduce((s,k)=>s+series(k,0)[i],0),d=ks.reduce((s,k)=>s+series(k,1)[i],0);return g?d/g*100:null;}),
+    t:(()=>{const g=ks.reduce((s,k)=>s+total(k,0),0),d=ks.reduce((s,k)=>s+total(k,1),0);return g?d/g*100:null;})()});
+  const netS=k=>series(k,0).map((g,i)=>g-series(k,1)[i]);
+  const dBlock=(h,k)=>[{h},row('Gross coaching fees',k,0,inr),row('Discount given',k,1,inr,'mut'),
+    {l:'Net coaching fees',v:netS(k),t:total(k,0)-total(k,1),f:inr},Object.assign({l:'% discount',f:pc,cls:'sum'},dPct(k))];
+  const D=[...dBlock('Fresh Sales','fd'),...dBlock('Renewals','rd'),{h:'Overall'},Object.assign({l:'% discount – Coaching fees',f:pc,cls:'net'},dPct('fd','rd'))];
   const note=missing.length?`<div class="fnote">${missing.join(' and ')} ${missing.length>1?'do':'does'} not record exam fees, instrument sales, other income or refunds yet${hasOther?', so those rows cover the other centres only':''}.</div>`:'';
 
   out.innerHTML=`<section class="sec strip${fold('glance')?' closed':''}" data-s="glance"><button type="button" class="sh"><span class="st"><b>${isQ?qName(m):full(m)} at a glance</b><span class="nt">${gM.indexOf(CUR)>=0?'so far, ':''}against this ${isQ?'quarter':'month'}'s targets</span></span>${CHEV}</button><div class="sb">${strip}</div></section>`
-    +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(cs0,C)+note);
+    +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(cs0,C)+note)
+    +section('s2',2,'Discounts','How much of the gross coaching fee is given away as discount.',table(cs0,D));
   out.querySelectorAll('section[data-s]>.sh').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.s;setFold(k,!fold(k));render();});
   out.querySelectorAll('tr.has').forEach(t=>t.onclick=()=>{const k=t.dataset.k;setFold(k,!fold(k,true));render();});
   }
