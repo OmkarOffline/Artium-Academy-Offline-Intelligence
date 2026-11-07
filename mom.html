@@ -118,7 +118,7 @@ button{font:inherit}
 .sh .st{display:flex;flex-direction:column;gap:2px;min-width:0}.sh .st b{font:800 19px var(--f);color:var(--ink);letter-spacing:-.01em}
 .sh .nt{font:400 13px var(--f);color:var(--ink3)}
 .strip .sh .st{flex-direction:row;align-items:baseline;gap:12px;flex-wrap:wrap}
-.cards.c6{grid-template-columns:repeat(6,1fr)}
+.cards.c6{grid-template-columns:repeat(6,1fr)}.cards.c5{grid-template-columns:repeat(5,1fr)}
 #next:disabled{opacity:.35;cursor:default}
 /* Tables: calm to read — one background and ink; lilac only for subtotals and the total column; solid violet for the bottom line */
 table.calm{width:100%;min-width:760px;border-collapse:collapse;font-variant-numeric:tabular-nums}
@@ -145,11 +145,12 @@ table.calm tr.has{cursor:pointer}
 .tgl svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}.tgl.on svg{transform:rotate(90deg)}
 .fnote{padding:12px 24px 16px;font-size:12.5px;color:var(--ink3);border-top:1px solid var(--edge)}
 @media (max-width:1280px){.cards.c6{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1100px){.cards.c5{grid-template-columns:repeat(3,1fr)}}
 .per .t button{white-space:nowrap}
 .bar{flex-wrap:wrap;row-gap:12px}
 table.calm td.at{box-shadow:8px 0 10px -8px rgba(18,14,43,.14)}
 table.calm tr.ref td{color:var(--ink2)}table.calm tr.ref td .ng{color:#B4443A}
-@media (max-width:760px){.cards.c6{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.cards.c6,.cards.c5{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -254,13 +255,13 @@ function render(){
     return`<div class="k"><div class="t">${t}</div><div class="v">${f(v)}</div>${note?`<div class="s">${note}</div>`:''}</div>`;};
   const tC=T('fscol','rncol'),tA=T('conv'),tR=T('renewed'),tL=T('leads'),tS=T('spend','leads');
   const leadsM=getG('leads'),spendM=getG('spend'),dueM=getG('due');
-  const strip=`<div class="rw"><div class="cards c6">
-    ${card('Net collections',netM,tC&&tC[0]+tC[1],inr)}
-    ${card('Admissions',getG('fs',0),tA&&tA[0],num)}
-    ${card('Renewals',getG('rn',0),tR&&tR[0],num)}
-    ${card('Renewal collection efficiency',dueM?getG('rn',0)/dueM*100:null,null,pctf,'renewed ÷ due')}
-    ${card('Leads registered',leadsM,tL&&tL[0],num)}
-    ${card('Blended CPL',leadsM?spendM/leadsM:null,tS&&tS[1]?tS[0]/tS[1]:null,inr,'',1)}</div></div>`;
+  const tAF=T('fscol','conv'),tAR=T('rncol','renewed'),fsN=getG('fs',0),rnN=getG('rn',0);
+  const strip=`<div class="rw"><div class="cards c5">
+    ${card('Total net collections',netM,tC&&tC[0]+tC[1],inr)}
+    ${card('No. of admissions',fsN,tA&&tA[0],num)}
+    ${card('No. of renewals',rnN,tR&&tR[0],num)}
+    ${card('ATV – Fresh Sales',fsN?getG('fs',1)/fsN:null,tAF&&tAF[1]?tAF[0]/tAF[1]:null,inr)}
+    ${card('ATV – Renewals',rnN?getG('rn',1)/rnN:null,tAR&&tAR[1]?tAR[0]/tAR[1]:null,inr)}</div></div>`;
 
   /* 1 · Collections */
   const coach=sumS('fs','rn'),other=sumS('ex','in','ot'),totC=sumS('fs','rn','ex','in','ot'),refund=series('rf',1).map(x=>-x),net=totC.map((x,i)=>x+refund[i]);
