@@ -75,6 +75,7 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .wb tr.key th,.wb tr.key td{font-weight:700;color:var(--ink)}
 .wb tr.acc td{color:var(--tvfg)}.wb tr.strong th,.wb tr.strong td{font-weight:800}.wb tr.strong th{color:var(--ink)}
 .wb tr.tline th,.wb tr.tline td{border-top:1px solid var(--line)}
+.wb tr.ytr th,.wb tr.ytr td{font-weight:600;color:var(--ink)}
 .wb tr.grp2 th{text-align:left;padding:16px 18px 6px;font:700 10px var(--f);letter-spacing:.15em;text-transform:uppercase;color:var(--ink4);background:#fff;border-bottom:0}
 .wb tr.wnr th,.wb tr.wnr td{color:var(--bad);background:#FDF3F4}.wb tr.wnr td.cw{background:#FBECEE}.wb tr.wnr td.tt{background:var(--rose);font-weight:700}
 .wb tr.ytc th,.wb tr.ytc td{color:var(--ink2);background:#F5F4F8;font-weight:500}.wb tr.ytc td.cw{background:#EFEDF4}.wb tr.ytc td.tt{background:#EAE8F0;font-weight:700}
@@ -327,13 +328,14 @@ function render(){
   const byOc=(list,oc)=>{const a=zero();list.filter(x=>x.oc===oc).forEach(x=>put(a,x.end));return a;};
   const A=[{l:'Renewals due',v:dueW,cls:'key'},{l:'Renewed – current month cohort',v:rCur},{l:"Renewed – previous months' cohorts",v:rPrev},
     {l:'Renewed – in advance',v:rAdv,opt:1},{l:'Renewed – earlier entry not found',v:rUnk,opt:1},
-    {l:'Total renewals achieved',v:ach,cls:'acc strong'},{l:'Renewal collection efficiency',v:effW,cls:'acc'},
+    {l:'Total renewals achieved',v:ach,cls:'acc strong'},{l:'Renewal collection efficiency',v:effW,cls:'acc'},{l:'Yet to renew',v:dueW.map((d,i)=>d-ach[i]),cls:'ytr'},   // renewals due − total renewals achieved
+    
     {h:(mode==='month'?'Current month cohort':'Cohort due in this period')+' · where the rest stand'},
     {l:'Pipeline',v:byOc(cohort,'pipe')},{l:'Extended',v:byOc(cohort,'ext')},{l:'Will not renew',v:byOc(cohort,'wnr'),cls:'wnr'},{l:'Yet to connect',v:byOc(cohort,'ytc'),cls:'ytc'}];
   // B and C: first-time and repeated renewals of the cohort, by the week the package expires
   const typ=tab=>{const L=cohort.filter(x=>x.tab===tab),d=zero(),r=byOc(L,'ren'),p=byOc(L,'pipe');L.forEach(x=>put(d,x.end));
     const rr=r.map((x,i)=>x+p[i]);
-    return{rows:[{l:'Due',v:d,cls:'key'},{l:'Renewed',v:r},{l:'Renewal %',v:r.map((x,i)=>pc(x,d[i])),cls:'acc'},{h:'Pipeline and run-rate'},
+    return{rows:[{l:'Due',v:d,cls:'key'},{l:'Renewed',v:r},{l:'Renewal %',v:r.map((x,i)=>pc(x,d[i])),cls:'acc'},{l:'Yet to renew',v:d.map((x,i)=>x-r[i]),cls:'ytr'},{h:'Pipeline and run-rate'},
       {l:'Pipeline',v:p},{l:'Run-rate',v:rr,cls:'acc strong'},{l:'Projected renewal %',v:rr.map((x,i)=>pc(x,d[i])),cls:'acc'},{h:'Other outcomes'},
       {l:'Extended',v:byOc(L,'ext')},{l:'Will not renew',v:byOc(L,'wnr'),cls:'wnr'},{l:'Yet to connect',v:byOc(L,'ytc'),cls:'ytc'}],
       sum:SUM(['Due',n(d[W.length])],['Renewed',n(r[W.length])],['Run-rate',n(rr[W.length])])};};
