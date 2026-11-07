@@ -124,6 +124,7 @@ button{font:inherit}
 table.calm{width:100%;min-width:760px;border-collapse:collapse;font-variant-numeric:tabular-nums}
 table.calm th,table.calm td{padding:11px 18px;text-align:right;white-space:nowrap;border-bottom:1px solid #F1EDF9;font:400 14px var(--f);color:var(--ink2);background:#fff}
 table.calm thead th{font:600 13px var(--f);color:var(--ink);border-bottom:1px solid var(--line);vertical-align:bottom}
+table.calm thead th small{display:block;font:500 11px var(--f);color:var(--ink4);margin-top:3px}
 table.calm thead th em{font:500 11px var(--f);font-style:normal;color:var(--ink4);margin-left:6px}
 table.calm th[scope=row],table.calm thead th:first-child{position:sticky;left:0;z-index:2;text-align:left;width:270px;min-width:270px;max-width:270px}
 table.calm .at{position:sticky;left:270px;z-index:2;min-width:132px}
@@ -156,7 +157,7 @@ table.calm tr.ref td{color:var(--ink2)}table.calm tr.ref td .ng{color:#B4443A}
 <div class="hr"><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div></div></div></div>
 <div class="page">
 <div class="bar"><nav class="seg" id="centre-toggle" aria-label="Centre"></nav>
-<div class="per"><div class="t" id="span" role="group" aria-label="Months shown"><button type="button" data-n="6" aria-pressed="false">6 months</button><button type="button" data-n="7" aria-pressed="true">7 months</button><button type="button" data-n="12" aria-pressed="false">12 months</button><button type="button" data-n="all" aria-pressed="false">All</button></div>
+<div class="per"><div class="t" id="span" role="group" aria-label="Period shown"><button type="button" data-n="3" aria-pressed="false">3M</button><button type="button" data-n="6" aria-pressed="true">6M</button><button type="button" data-n="12" aria-pressed="false">12M</button><button type="button" data-n="all" aria-pressed="false">All</button><button type="button" data-n="qoq" aria-pressed="false">Q-o-Q</button></div>
 <button class="m" id="prev" aria-label="Earlier">‹</button><div class="l" id="mlabel">—</div><button class="m" id="next" aria-label="Later">›</button></div></div>
 <div id="out"></div>
 </div>
@@ -178,7 +179,7 @@ const CHEV='<span class="cv" aria-hidden="true"><svg viewBox="0 0 24 24"><path d
 
 let DATA=null,TARGETS={};
 let selCentre=(()=>{try{const v=localStorage.getItem('artium_mom_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
-let span=(()=>{try{const v=localStorage.getItem('artium_mom_span');return['6','7','12','all'].includes(v)?v:'7';}catch(e){return'7';}})();
+let span=(()=>{try{const v=localStorage.getItem('artium_mom_span');return['3','6','12','all','qoq'].includes(v)?v:'6';}catch(e){return'6';}})();
 let endM=CUR;
 let FOLD=(()=>{try{return JSON.parse(localStorage.getItem('artium_mom_fold')||'{}')||{};}catch(e){return{};}})();
 const fold=(k,d=false)=>k in FOLD?FOLD[k]:d;
@@ -191,18 +192,28 @@ function merged(){
     Object.keys(M[m]).forEach(k=>{const v=M[m][k];if(Array.isArray(v)){const t=o[k]=o[k]||[0,0];t[0]+=v[0];t[1]+=v[1];}else o[k]=(o[k]||0)+v;});});});
   return out;
 }
-function months(all){
-  const known=Object.keys(all).filter(m=>m<=endM).sort();
-  if(span==='all')return known.length?(()=>{const r=[];for(let m=known[0];m<=endM;m=addM(m,1))r.push(m);return r;})():[endM];
-  const n=+span,r=[];for(let i=n-1;i>=0;i--)r.push(addM(endM,-i));return r;
+/* Indian financial year: Q1 Apr–Jun, Q2 Jul–Sep, Q3 Oct–Dec, Q4 Jan–Mar */
+const qStart=m=>{const y=+m.slice(0,4),mo=+m.slice(5);const s=mo>=4?Math.floor((mo-4)/3)*3+4:1;return y+'-'+String(s).padStart(2,'0');};
+const qEnd=q=>{const e=addM(qStart(q),2);return e<CUR?e:CUR;};
+const qName=m=>{const y=+m.slice(0,4),mo=+m.slice(5),fy=mo>=4?y:y-1;return'Q'+(mo>=4?Math.floor((mo-4)/3)+1:4)+' FY'+String(fy).slice(2)+'-'+String(fy+1).slice(2);};
+const qSpan=m=>{const e=addM(m,2);return MON[+m.slice(5)-1]+' – '+MON[+e.slice(5)-1]+' '+e.slice(0,4);};
+/* The columns shown, latest first: each is one month, or one quarter in Q-o-Q */
+function cols(all){
+  const known=Object.keys(all).filter(m=>m<=endM).sort(),first=known[0]||endM,r=[];
+  if(span==='qoq'){
+    for(let q=qStart(endM);q>=qStart(first);q=addM(q,-3)){const ms=[0,1,2].map(k=>addM(q,k)).filter(m=>m<=endM);
+      r.push({lab:qName(q),sub:qSpan(q),ms,cur:ms.indexOf(CUR)>=0,name:qName(q)});}
+    return r;}
+  const n=span==='all'?null:+span;
+  for(let m=endM,i=0;(n?i<n:m>=first);m=addM(m,-1),i++)r.push({lab:lab(m),ms:[m],cur:m===CUR,name:full(m)});
+  return r;
 }
 
 /* ── Rows of a table: [label, per-month values, total, options] ── */
-function table(ms,rows){
-  const cur=ms.indexOf(CUR);
-  let h='<div class="tw"><table class="calm"><thead><tr><th></th><th class="at">Total</th>'+ms.map((m,i)=>`<th>${lab(m)}${i===cur?'<em>So far</em>':''}</th>`).join('')+'</tr></thead><tbody>';
+function table(cs,rows){
+  let h='<div class="tw"><table class="calm"><thead><tr><th></th><th class="at">Total</th>'+cs.map(c=>`<th>${c.lab}${c.cur?'<em>So far</em>':''}${c.sub?`<small>${c.sub}</small>`:''}</th>`).join('')+'</tr></thead><tbody>';
   rows.forEach(r=>{
-    if(r.h){h+=`<tr class="grp2"><th colspan="${ms.length+2}"><span>${r.h}</span></th></tr>`;return;}
+    if(r.h){h+=`<tr class="grp2"><th colspan="${cs.length+2}"><span>${r.h}</span></th></tr>`;return;}
     if(r.hide)return;
     const tog=r.kids?`<span class="tgl${fold('k_'+r.key,true)?'':' on'}"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>`:'';
     h+=`<tr class="${r.cls||''}${r.kids?' has':''}"${r.kids?` data-k="k_${r.key}"`:''}><th scope="row">${tog}${r.l}</th><td class="at">${r.f(r.t)}</td>`+r.v.map(x=>`<td>${r.f(x)}</td>`).join('')+'</tr>';
@@ -217,34 +228,37 @@ function section(key,n,title,note,body){
 function render(){
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   document.querySelectorAll('#span button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.n===span));
-  document.getElementById('mlabel').textContent='to '+full(endM);
-  document.getElementById('next').disabled=endM>=CUR;
+  document.getElementById('mlabel').textContent='to '+(span==='qoq'?qName(endM):full(endM));
+    document.getElementById('next').disabled=endM>=CUR;
   const out=document.getElementById('out');
   if(!DATA){out.innerHTML='<section class="sec"><div class="empty big">Loading…</div></section>';return;}
-  const all=merged(),ms=months(all),get=(m,k,i)=>{const v=(all[m]||{})[k];return Array.isArray(v)?v[i]:(i==null?(v||0):0);};
-  document.getElementById('psub').textContent=ms.length>1?full(ms[0])+' to '+full(ms[ms.length-1]):full(ms[0]);
+  const all=merged(),cs0=cols(all),get=(m,k,i)=>{const v=(all[m]||{})[k];return Array.isArray(v)?v[i]:(i==null?(v||0):0);};
+  document.getElementById('psub').textContent=cs0.length>1?cs0[cs0.length-1].name+' to '+cs0[0].name:cs0[0].name;
   const allM=Object.keys(all).filter(m=>m<=CUR);
-  const series=(k,i)=>ms.map(m=>get(m,k,i)),total=(k,i)=>allM.reduce((s,m)=>s+get(m,k,i),0);
+  const series=(k,i)=>cs0.map(c=>c.ms.reduce((s,m)=>s+get(m,k,i),0)),total=(k,i)=>allM.reduce((s,m)=>s+get(m,k,i),0);
   const ratio=(a,b)=>a.map((x,i)=>b[i]?x/b[i]:null);
   const row=(l,k,i,f,cls,extra)=>Object.assign({l,v:series(k,i),t:total(k,i),f,cls},extra||{});
   const atv=(l,k,cls)=>({l,v:ratio(series(k,1),series(k,0)),t:total(k,0)?total(k,1)/total(k,0):null,f:inr,cls:cls||'mut'});
-  const sumS=(...ks)=>ms.map(m=>ks.reduce((s,k)=>s+get(m,k,1),0)),sumT=(...ks)=>ks.reduce((s,k)=>s+total(k,1),0);
+  const sumS=(...ks)=>cs0.map(c=>c.ms.reduce((s,m)=>s+ks.reduce((t,k)=>t+get(m,k,1),0),0)),sumT=(...ks)=>ks.reduce((s,k)=>s+total(k,1),0);
 
   /* At a glance: the last month in the range, against that month's targets (Targets page) */
-  const m=ms[ms.length-1],cs=selCentre==='All'?CENTRES.map(c=>c.name):[selCentre],tg=TARGETS[m]||{};
-  const T=(...keys)=>{const has=cs.filter(c=>tg[c]&&keys.every(k=>tg[c][k]!=null));return has.length?keys.map(k=>has.reduce((s,c)=>s+tg[c][k],0)):null;};
-  const netM=['fs','rn','ex','in','ot'].reduce((s,k)=>s+get(m,k,1),0)-get(m,'rf',1);
+  const m=endM,cs=selCentre==='All'?CENTRES.map(c=>c.name):[selCentre],isQ=span==='qoq';
+  /* Q-o-Q: the whole quarter so far, against the targets of all three of its months */
+  const gM=isQ?[0,1,2].map(k=>addM(qStart(m),k)).filter(x=>x<=m):[m],tM=isQ?[0,1,2].map(k=>addM(qStart(m),k)):[m];
+  const getG=(k,i)=>gM.reduce((s,x)=>s+get(x,k,i),0);
+  const T=(...keys)=>{let n=0;const r=keys.map(()=>0);cs.forEach(c=>tM.forEach(x=>{const t=(TARGETS[x]||{})[c];if(t&&keys.every(k=>t[k]!=null)){n++;keys.forEach((k,i)=>r[i]+=t[k]);}}));return n?r:null;};
+  const netM=['fs','rn','ex','in','ot'].reduce((s,k)=>s+getG(k,1),0)-getG('rf',1);
   const card=(t,v,target,f,note,inv)=>{
     if(inv&&target>0&&v!=null){const d=Math.round((v/target-1)*100);return`<div class="k"><div class="t">${t}</div><div class="v">${f(v)}</div><div class="pg"><div class="x"><span>Target – ${f(target)}</span><b>${d===0?'On target':Math.abs(d)+'% '+(d>0?'above':'below')}</b></div></div></div>`;}
     if(target&&target>0){const p=v/target*100;return`<div class="k"><div class="t">${t}</div><div class="v">${f(v)}</div><div class="pg"><div class="x"><span>Target – ${f(target)}</span><b>${Math.round(p)}%</b></div><div class="tr"><i style="width:${Math.min(100,p)}%"></i></div></div></div>`;}
     return`<div class="k"><div class="t">${t}</div><div class="v">${f(v)}</div>${note?`<div class="s">${note}</div>`:''}</div>`;};
   const tC=T('fscol','rncol'),tA=T('conv'),tR=T('renewed'),tL=T('leads'),tS=T('spend','leads');
-  const leadsM=get(m,'leads'),spendM=get(m,'spend'),dueM=get(m,'due');
+  const leadsM=getG('leads'),spendM=getG('spend'),dueM=getG('due');
   const strip=`<div class="rw"><div class="cards c6">
     ${card('Net collections',netM,tC&&tC[0]+tC[1],inr)}
-    ${card('Admissions',get(m,'fs',0),tA&&tA[0],num)}
-    ${card('Renewals',get(m,'rn',0),tR&&tR[0],num)}
-    ${card('Renewal collection efficiency',dueM?get(m,'rn',0)/dueM*100:null,null,pctf,'renewed ÷ due')}
+    ${card('Admissions',getG('fs',0),tA&&tA[0],num)}
+    ${card('Renewals',getG('rn',0),tR&&tR[0],num)}
+    ${card('Renewal collection efficiency',dueM?getG('rn',0)/dueM*100:null,null,pctf,'renewed ÷ due')}
     ${card('Leads registered',leadsM,tL&&tL[0],num)}
     ${card('Blended CPL',leadsM?spendM/leadsM:null,tS&&tS[1]?tS[0]/tS[1]:null,inr,'',1)}</div></div>`;
 
@@ -267,20 +281,19 @@ function render(){
   const missing=cs.filter(c=>!((DATA[c]||{}).tabs||[]).length);
   const note=missing.length?`<div class="fnote">${missing.join(' and ')} ${missing.length>1?'do':'does'} not record exam fees, instrument sales, other income or refunds yet${hasOther?', so those rows cover the other centres only':''}.</div>`:'';
 
-  out.innerHTML=`<section class="sec strip${fold('glance')?' closed':''}" data-s="glance"><button type="button" class="sh"><span class="st"><b>${full(m)} at a glance</b><span class="nt">${m===CUR?'so far, ':''}against this month's targets</span></span>${CHEV}</button><div class="sb">${strip}</div></section>`
-    +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(ms,C)+note);
+  out.innerHTML=`<section class="sec strip${fold('glance')?' closed':''}" data-s="glance"><button type="button" class="sh"><span class="st"><b>${isQ?qName(m):full(m)} at a glance</b><span class="nt">${gM.indexOf(CUR)>=0?'so far, ':''}against this ${isQ?'quarter':'month'}'s targets</span></span>${CHEV}</button><div class="sb">${strip}</div></section>`
+    +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(cs0,C)+note);
   out.querySelectorAll('section[data-s]>.sh').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.s;setFold(k,!fold(k));render();});
   out.querySelectorAll('tr.has').forEach(t=>t.onclick=()=>{const k=t.dataset.k;setFold(k,!fold(k,true));render();});
-  out.querySelectorAll('.tw').forEach(w=>{w.scrollLeft=w.scrollWidth;});   // latest months in view
-}
+  }
 
 /* ── Controls ── */
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
   .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
 document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_mom_centre',selCentre);}catch(e){}render();});
-document.querySelectorAll('#span button').forEach(b=>b.onclick=()=>{span=b.dataset.n;try{localStorage.setItem('artium_mom_span',span);}catch(e){}render();});
-document.getElementById('prev').onclick=()=>{endM=addM(endM,-1);render();};
-document.getElementById('next').onclick=()=>{if(endM<CUR){endM=addM(endM,1);render();}};
+document.querySelectorAll('#span button').forEach(b=>b.onclick=()=>{span=b.dataset.n;if(span==='qoq')endM=qEnd(endM);try{localStorage.setItem('artium_mom_span',span);}catch(e){}render();});
+document.getElementById('prev').onclick=()=>{endM=span==='qoq'?addM(qStart(endM),-1):addM(endM,-1);render();};
+document.getElementById('next').onclick=()=>{if(endM<CUR){endM=span==='qoq'?qEnd(addM(qStart(endM),3)):addM(endM,1);render();}};
 
 async function load(){
   render();
