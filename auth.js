@@ -197,7 +197,20 @@
   .pc-msg{min-height:18px;margin-top:10px;font-size:12.5px;color:#B42318;text-align:center}
   .pc-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
   .pc-btns button{height:40px;padding:0 18px;border-radius:11px;border:1px solid #E4E1EA;background:#fff;font:600 13px 'Poppins',sans-serif;color:#3B3742;cursor:pointer}
-  .pc-btns .go{background:#5B2A86;border-color:#5B2A86;color:#fff}.pc-btns .go:disabled{opacity:.6;cursor:default}`;
+  .pc-btns .go{background:#5B2A86;border-color:#5B2A86;color:#fff}.pc-btns .go:disabled{opacity:.6;cursor:default}
+  .um-avw{position:relative;display:inline-block}
+  .um-cam{position:absolute;right:-4px;bottom:-3px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6601fd,#4101f7);color:#fff;box-shadow:0 0 0 2px #fff;pointer-events:none}
+  .um-cam svg{width:10px;height:10px}
+  .um-bigw{position:relative;flex:none;padding:0;border:0;background:none;border-radius:50%;cursor:pointer}
+  .um-who .um-big{width:56px;height:56px;font-size:22px;box-shadow:0 0 0 3px #fff,0 0 0 4.5px #d9c9fb;cursor:pointer}
+  .um-ov{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;background:rgba(18,14,43,.45);color:#fff;opacity:0;transition:opacity .15s}
+  .um-ov svg{width:20px;height:20px}
+  .um-bigw:hover .um-ov,.um-bigw:focus-visible .um-ov{opacity:1}
+  .um-ph{flex-direction:column;gap:6px}.um-ph button{flex:none}
+  .um-ph .um-up{height:40px;border:0;background:linear-gradient(135deg,#6601fd,#4101f7);color:#fff;box-shadow:0 10px 20px -12px rgba(65,1,247,.9)}
+  .um-ph .um-up svg{width:15px;height:15px}
+  .um-ph .um-up:hover{background:linear-gradient(135deg,#7414ff,#4a0dff);color:#fff;border-color:transparent}
+  .um-ph .um-rm{flex:none;height:30px;border:0;background:none;color:#6a6488;font-size:12px}.um-ph .um-rm:hover{background:#F4F1FB;color:#4101f7}`;
   function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
 
   let gate;
@@ -243,19 +256,22 @@
     const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     const face='';
     const menu=el(`<div class="user-menu">
-      <button class="um-av" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Account">${face}</button>
+      <span class="um-avw"><button class="um-av" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Account and profile photo">${face}</button><span class="um-cam" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></span></span>
       <div class="um-pop" role="dialog" aria-label="Account">
-        <div class="um-who"><span class="um-av">${face}</span><div style="min-width:0">${session.name?`<div class="um-n">${esc(session.name)}</div>`:''}<div class="um-e">${esc(session.email)}</div></div></div>
-        <div class="um-ph"><button type="button" class="um-up">${IUP}<span>Upload a photo</span></button><button type="button" class="um-rm" hidden>Remove</button></div>
+        <div class="um-who"><button type="button" class="um-bigw" title="Change profile photo"><span class="um-av um-big">${face}</span><span class="um-ov"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg></span></button><div style="min-width:0">${session.name?`<div class="um-n">${esc(session.name)}</div>`:''}<div class="um-e">${esc(session.email)}</div></div></div>
+        <div class="um-ph"><button type="button" class="um-up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h3l2-3h8l2 3h3v11H3z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Upload a photo</span></button><button type="button" class="um-rm" hidden>Remove photo</button></div>
         <input type="file" accept="image/*" class="um-file" hidden>
         <hr><button class="um-out" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l-5-5 5-5M5 12h11"/></svg>Sign out</button>
       </div></div>`);
     const btn=menu.querySelector('.um-av'),pop=menu.querySelector('.um-pop');
     const set=open=>{pop.classList.toggle('open',open);btn.setAttribute('aria-expanded',open);};
     btn.onclick=e=>{e.stopPropagation();set(!pop.classList.contains('open'));};
+    bar.classList.add('um-bar');bar.insertAdjacentHTML('beforeend','<span class="um-chev" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></span>');
+    bar.addEventListener('click',e=>{if(pop.contains(e.target)||e.target.closest('.um-av'))return;e.stopPropagation();set(!pop.classList.contains('open'));});
     menu.querySelector('.um-out').onclick=signOut;
     const file=menu.querySelector('.um-file');
     menu.querySelector('.um-up').onclick=()=>{file.value='';file.click();};
+    menu.querySelector('.um-bigw').onclick=()=>{file.value='';file.click();};
     file.onchange=()=>{const f=file.files&&file.files[0];if(f){set(false);cropPhoto(f);}};
     menu.querySelector('.um-rm').onclick=async e=>{const b=e.currentTarget;b.disabled=true;
       try{const j=await service({action:'savePhoto',photo:''});if(j.error)throw new Error(j.error);setPhotos(j.photos);}catch(err){alert(err.message);}b.disabled=false;};
@@ -271,7 +287,7 @@
     const e=String(session.email||'').toLowerCase(),pic=photoOf(e)||session.picture;
     const initial=String(session.name||session.email||'?').trim().charAt(0).toUpperCase();
     menu.querySelectorAll('.um-av').forEach(a=>{a.textContent='';if(pic){const i=document.createElement('img');i.alt='';i.referrerPolicy='no-referrer';i.src=pic;a.appendChild(i);}else a.textContent=initial;});
-    menu.querySelector('.um-up span').textContent=UP[e]?'Change photo':'Upload a photo';
+    menu.querySelector('.um-up span').textContent=UP[e]?'Change profile photo':'Upload a profile photo';
     menu.querySelector('.um-rm').hidden=!UP[e];
   }
   /* Crop a chosen photo to a circle: drag to place the face, slide to zoom, then save a small square JPEG */

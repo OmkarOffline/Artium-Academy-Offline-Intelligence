@@ -6,7 +6,7 @@
 <title>Artium Academy — Offline Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{--plum:#2B1840;--plum2:#1F1029;--gold:#E2C48A;--bg:#F6F5F2}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -135,6 +135,72 @@
   .nit small{display:block;color:#9A96A3;font-size:11.5px;margin-top:2px}
   .nempty{padding:28px 16px;text-align:center;color:#9A96A3;font-size:13px}
   @media (prefers-reduced-motion:reduce){.sidebar,.scrim,.menu-btn{transition:none}}
+
+  /* ── Brand look (Artium Colours & Typography): light lilac menu, violet accents, Onest ── */
+  :root{--violet:#6601fd;--violet2:#4101f7;--pinkb:#dd30b1;--ink:#120e2b;--ink2:#4a4466;--ink3:#6a6488;--ink4:#7a7196;--hair:#dcd5ee;--edge:#e3d9fb}
+  .sidebar{color:var(--ink);border-right:1px solid var(--hair);
+    background:radial-gradient(140% 40% at 0% 0%,rgba(102,1,253,.10) 0%,rgba(102,1,253,0) 60%),radial-gradient(120% 30% at 100% 100%,rgba(221,48,177,.08) 0%,rgba(221,48,177,0) 70%),linear-gradient(180deg,#EFEAFB 0%,#E9E3F8 100%)}
+  body.open .sidebar{box-shadow:24px 0 60px -30px rgba(43,2,86,.45)}
+  .sidebar::before{display:none}
+  .scrim{background:rgba(18,14,43,.18)}
+  .brand{gap:12px;padding:24px 20px 20px;margin-bottom:14px;font-family:"Onest",sans-serif}
+  .brand::after{content:"";position:absolute;left:20px;right:20px;bottom:0;height:1px;background:linear-gradient(90deg,rgba(102,1,253,.35),rgba(221,48,177,.35),rgba(102,1,253,0))}
+  .brand i{position:relative;overflow:hidden;width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font:800 18px "Onest",sans-serif;font-style:normal;color:#fff;
+    background:linear-gradient(135deg,var(--violet),var(--violet2) 55%,var(--pinkb));box-shadow:0 8px 20px -8px rgba(102,1,253,.7)}
+  .brand i::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%)}
+  .brand b{display:block;font:800 16.5px "Onest",sans-serif;letter-spacing:-.01em;background:linear-gradient(90deg,var(--ink) 0%,var(--violet2) 75%,var(--pinkb) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand small{font:700 9.5px/1 "Onest",sans-serif;letter-spacing:.16em;color:var(--ink4);margin-top:5px}
+  .sb-top{padding:0 16px 12px}
+  .srch{height:38px;border-radius:12px;background:#fff;border:1px solid var(--hair);box-shadow:0 1px 2px rgba(18,14,43,.04),inset 0 1px 0 #fff}
+  .srch:focus-within{background:#fff;border-color:#b9a4f5;box-shadow:0 0 0 3px rgba(102,1,253,.12)}
+  .srch svg{stroke:var(--ink4)}
+  .srch input{color:var(--ink);font:400 13.5px "Onest",sans-serif}.srch input::placeholder{color:var(--ink4)}
+  .srch kbd{font-family:"Onest",sans-serif;color:var(--ink4);border-color:var(--hair)}
+  .dock{width:38px;height:38px;border-radius:12px;background:#fff;border:1px solid var(--hair);color:var(--ink3);box-shadow:0 1px 2px rgba(18,14,43,.04),inset 0 1px 0 #fff}
+  .dock:hover{background:#fff;color:var(--violet2)}.dock[aria-pressed="true"]{color:#fff;background:linear-gradient(135deg,var(--violet),var(--violet2));border-color:transparent}
+  .nav-t{height:42px;font:500 14px "Onest",sans-serif;color:var(--ink2);border-radius:12px}
+  .nav-t:hover{background:rgba(255,255,255,.55);color:var(--ink)}
+  .nav-t .si{border-radius:9px;background:#fff;color:#6b3fc7;border:1px solid #e9e2fb;box-shadow:0 2px 6px -3px rgba(65,1,247,.25)}
+  .nav-t .si svg{width:15px;height:15px}
+  .nav-t .cnt{background:rgba(107,63,199,.1);color:#6b3fc7;font-family:"Onest",sans-serif}
+  .nav-t .ch{stroke:var(--ink3)}
+  .nav-g.open > .nav-t,.nav-g:has(.tab[aria-selected="true"]) > .nav-t{background:rgba(255,255,255,.6);color:var(--ink);font-weight:700}
+  .nav-g:has(.tab[aria-selected="true"]) .si,.nav-g.open .si{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;border-color:transparent;box-shadow:0 6px 14px -6px rgba(65,1,247,.8)}
+  .nav-g:not(.pins):has(.nav-t)::after{background:#d3c9ef}
+  .pins-t,.lbl{display:flex;align-items:center;gap:8px;padding:10px 10px 6px;font:700 10px "Onest",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--ink4)}
+  .pins-t::after{content:"";flex:1;height:1px;background:var(--hair)}
+  .nav-g.pins,.home-g{border-bottom:1px solid var(--hair)}
+  .tab{color:var(--ink2);font:500 13.5px "Onest",sans-serif}
+  .tab:hover{color:var(--ink);background:rgba(255,255,255,.55)}
+  .tab[aria-selected="true"]{color:var(--violet2);font-weight:700;background:linear-gradient(90deg,#fff 0%,#F7F2FF 100%);box-shadow:0 8px 20px -12px rgba(65,1,247,.55),inset 0 0 0 1px var(--edge)}
+  .tab[aria-selected="true"]::before{left:-1px;width:3px;background:linear-gradient(180deg,var(--violet),var(--pinkb))}
+  .tab[aria-selected="true"] svg{color:var(--violet2)}
+  .tab:focus-visible{outline-color:var(--violet)}
+  .tab .star{color:var(--ink4)}.tab .star:hover{color:var(--pinkb);background:#fff}.tab .star.on{color:var(--pinkb)}
+  .tab mark{color:var(--violet2)}
+  .nores{color:var(--ink4)}
+  .home-g .tab svg,.nav-g.pins .tab svg{color:#6b3fc7;opacity:1}
+  /* Account card at the bottom: the whole card opens the menu (profile photo, sign out) */
+  .shell-bar{margin:10px 14px 16px;padding:11px 12px;border-radius:14px;background:#fff;border:1px solid var(--edge);box-shadow:0 10px 24px -16px rgba(65,1,247,.45);cursor:pointer;transition:box-shadow .15s,border-color .15s}
+  .shell-bar:hover{border-color:#cdbcf7;box-shadow:0 12px 28px -14px rgba(65,1,247,.55)}
+  .shell-bar .who b{font:600 13.5px "Onest",sans-serif;color:var(--ink)}
+  .shell-bar .who span{font:400 11.5px "Onest",sans-serif;color:var(--ink3)}
+  .shell-bar .um-av{width:38px;height:38px;background:linear-gradient(135deg,var(--pinkb),#7b2cf0);font-family:"Onest",sans-serif;box-shadow:0 0 0 2px #fff,0 0 0 3.5px #c9b6f7}
+  .shell-bar .um-av:hover,.shell-bar .um-av[aria-expanded="true"]{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--violet)}
+  .shell-bar .um-who .um-big{width:60px;height:60px;font-size:22px;box-shadow:0 0 0 3px #fff,0 0 0 4.5px #d9c9fb}
+  .shell-bar .um-chev{order:3;margin-left:auto;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:var(--ink3);flex:none}
+  .shell-bar .um-chev svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+  .shell-bar .um-pop{left:-12px;bottom:calc(100% + 14px);width:266px;border-color:var(--edge);border-radius:18px;box-shadow:0 30px 60px -24px rgba(43,2,86,.55);cursor:default;font-family:"Onest",sans-serif}
+  .shell-bar .um-pop::before{border-color:var(--edge)}
+  .shell-bar .um-who{flex-direction:column;text-align:center;gap:10px}
+  .shell-bar .um-n{font:700 15px "Onest",sans-serif;color:var(--ink)}.shell-bar .um-e{font:400 12px "Onest",sans-serif;color:var(--ink3)}
+  .shell-bar .um-ph button,.shell-bar .um-out{font-family:"Onest",sans-serif}
+  .shell-bar .um-out{background:#fff;border-color:var(--hair);color:#B4443A}
+  /* Buttons over the pages */
+  .menu-btn,.bell,.rf{color:var(--violet2);border-color:rgba(65,1,247,.14)}
+  .menu-btn:hover,.menu-btn:focus-visible{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff}
+  .rf .tip{background:var(--ink);font-family:"Onest",sans-serif}
+  .bell b{background:var(--violet2);font-family:"Onest",sans-serif}
 </style>
 <script src="auth.js"></script>
 </head>
@@ -172,7 +238,7 @@
   <div class="scrim" id="scrim" aria-hidden="true"></div>
 
   <aside class="sidebar" id="sidebar" aria-label="Pages">
-    <div class="brand"><i></i><div>Artium Academy<small>Offline Intelligence</small></div></div>
+    <div class="brand"><i>A</i><div><b>Artium Academy</b><small>Offline Intelligence</small></div></div>
     <div class="sb-top"><label class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="text" placeholder="Find a page" aria-label="Find a page" autocomplete="off"><kbd>/</kbd></label>
       <button class="dock" id="dock" type="button" aria-pressed="false" title="Keep the menu open beside the page"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button></div>
     <nav class="tabs" role="tablist" aria-orientation="vertical">
