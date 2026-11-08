@@ -6,16 +6,16 @@
 <title>Daily Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     --body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    --bg:#F6F5F2;--card:#fff;--border:#E4E1EA;--line:#EFEDF2;
+    --bg:#F6F3FC;--card:#fff;--border:#E4E1EA;--line:#EFEDF2;
     --ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;--ghost:#C9C5CF;
-    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;
+    --accent:#4101f7;--accent-soft:#F2ECF8;--gold:#7a7196;
     --ok:#1F7A4D;--bad:#B42318;
     --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28);
   }
@@ -46,9 +46,9 @@
   .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
   .ct-btn span{font:600 15px/1.2 var(--display);color:var(--ink2)}
   .ct-btn:hover{background:var(--accent-soft)}
-  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
+  .ct-btn[aria-pressed="true"]{background:var(--accent);box-shadow:0 6px 16px -8px rgba(65,1,247,.6)}
   .ct-btn[aria-pressed="true"] span{color:#fff}
-  .ct-btn[aria-pressed="true"] small{color:#E9CF9E}
+  .ct-btn[aria-pressed="true"] small{color:#d9ccff}
   .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   /* Grid: metrics and month figures stay put on the left; dates scroll sideways, latest first */
@@ -61,9 +61,9 @@
   .m{position:sticky;left:0;z-index:2;text-align:left;min-width:272px;width:272px;max-width:272px;white-space:normal;line-height:1.3;font-weight:400;color:var(--ink2)}
   tr.grp td.m{white-space:nowrap}
   tbody td.m{padding-top:7px;padding-bottom:7px}
-  .s{position:sticky;z-index:2;min-width:104px;width:104px;background:#FCFBF9}
+  .s{position:sticky;z-index:2;min-width:104px;width:104px;background:#FAF8FE}
   .s1{left:272px}.s2{left:376px}.s3{left:480px}.s4{left:584px;min-width:122px;width:122px;box-shadow:8px 0 12px -10px rgba(43,24,64,.25);border-right:1px solid var(--border)}
-  thead .m,thead .s{background:#F7F5F1}
+  thead .m,thead .s{background:#F5F1FC}
   thead .m{font:600 11px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
   .d{min-width:88px;color:var(--ink2)}
   td.zero{color:#D6D2DB}
@@ -71,7 +71,7 @@
   .today{background:#FAF6FE!important}thead .today{background:#F3ECFB!important;color:var(--accent)}
   thead .today small{color:var(--accent)}
   tr.grp td{height:40px;background:#F5F1F9!important;border-top:10px solid #fff;border-bottom:1px solid #E9E1F3;box-shadow:none!important}
-  tr.grp td.m{font:700 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#5B2A86}
+  tr.grp td.m{font:700 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:#4101f7}
   tbody tr.grp:first-child td{border-top:0}
   .gh{display:inline-flex;align-items:center;gap:10px}.gh i{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:#fff;color:var(--accent)}
   .gh i svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -93,7 +93,7 @@
   td.s1 b{display:inline}
   td .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-weight:600;font-size:12.5px}
   td.neg .pill{background:#FDF0EE;color:var(--bad)}td.pos .pill{background:#ECF6F0;color:var(--ok)}
-  td.d.ht{background-image:linear-gradient(rgba(91,42,134,calc(var(--h)*.11)),rgba(91,42,134,calc(var(--h)*.11)))}
+  td.d.ht{background-image:linear-gradient(rgba(65,1,247,calc(var(--h)*.11)),rgba(65,1,247,calc(var(--h)*.11)))}
   tr.has td.s2.sbar,tr.sub td.s2.sbar{text-align:left;padding:0 16px;box-shadow:8px 0 12px -10px rgba(43,24,64,.25);border-right:1px solid var(--border)}
   .stack{display:flex;gap:2px;height:10px;border-radius:6px;overflow:hidden;max-width:300px}.stack i{display:block;min-width:3px}
   .bar{display:block;height:6px;border-radius:4px;background:#F0ECF5;max-width:300px;overflow:hidden}.bar i{display:block;height:100%;border-radius:4px}
@@ -172,7 +172,7 @@
   tr.subh td.s{background:#FAF8FC}
   tr.ratio td{height:36px;font-size:12.5px;color:var(--muted);background:#fff}tr.ratio td.m{color:var(--muted);font-weight:400}tr.ratio td .pf{font-weight:500;color:var(--ink2)}
   tr.ratio td.m:before{content:"%";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:#F3F1F6;color:var(--faint);font:700 10px var(--body);margin-right:8px}
-  tr.ratio td.s{background:#FCFBF9}
+  tr.ratio td.s{background:#FAF8FE}
   tr.rp td{height:38px;padding-top:10px;vertical-align:bottom;background:#fff;border-bottom:0}tr.rp td.m{font-weight:600;color:var(--ink)}
   tr.rp td.m:before{content:"%";display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:var(--accent-soft);color:var(--accent);font:700 10px var(--body);margin-right:8px;vertical-align:-1px}
   tr.ratio.rs td.m{padding-left:46px}tr.ratio.rs td.m:before{display:none}
@@ -185,6 +185,49 @@
   .s.hide{display:none}
   .ast{color:var(--gold);font-weight:700;margin-left:1px}
   table.rng .s1{box-shadow:8px 0 12px -10px rgba(43,24,64,.25);border-right:1px solid var(--border)}
+
+  /* ── Artium brand (Colours & Typography): Onest, violet and pink on a deep-navy header band ── */
+  :root{
+    --display:'Onest',system-ui,sans-serif;--body:'Onest',system-ui,sans-serif;
+    --bg:#F6F3FC;--card:#fff;--border:#dcd5ee;--line:#ece4ff;
+    --ink:#120e2b;--ink2:#4a4466;--muted:#6a6488;--faint:#7a7196;--ghost:#b9b2cf;
+    --accent:#4101f7;--accent-soft:#f1eafe;--gold:#7a7196;
+    --shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35);
+    --violet:#6601fd;--violet2:#4101f7;--purple:#7b2cf0;--pink:#dd30b1;
+  }
+  html,body{overflow-x:hidden}
+  body{background:#F6F3FC;font-family:var(--body);font-variant-numeric:tabular-nums}
+  .page{position:relative;z-index:0;padding-top:34px}
+  .page-header{position:relative;align-items:flex-end}
+  .page-header::before{content:"";position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-34px;bottom:calc(-1 * var(--band,62px));
+    background:radial-gradient(120% 140% at 85% -20%,#4101f7 0%,rgba(65,1,247,0) 55%),linear-gradient(135deg,#2B0256 0%,#160240 55%,#01064c 100%)}
+  .page-header .eyebrow,.page-header .subtitle{display:none}
+  .page-header h1{font:800 46px/1.05 var(--display);letter-spacing:-.02em;padding-bottom:4px;
+    background:linear-gradient(90deg,#FFFFFF 0%,#F1B6FA 45%,#9BB6FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .page-header .updated{color:#cec8ea}
+  .page-header .dot{background:#4ade80}.page-header .dot.loading{background:#F1B6FA}.page-header .dot.error{background:#ff8a80}
+  /* Centre toggle and segmented buttons: brand violet */
+  .ct-btn small{color:var(--faint)}
+  .ct-btn span{font-weight:700;color:var(--ink)}
+  .ct-btn:hover{background:#F4F1FB}
+  .ct-btn[aria-pressed="true"]{background:linear-gradient(135deg,#6601fd,#4101f7);box-shadow:0 8px 18px -10px rgba(65,1,247,.8)}
+  .ct-btn[aria-pressed="true"] small{color:#d9ccff}
+  .seg button[aria-pressed="true"]{color:var(--violet2)}
+  h2,h3{font-family:var(--display)}
+  /* Daily Tracker: brand tints for the grid */
+  .grid-wrap{border-radius:24px;border-color:var(--border)}
+  th,td{border-bottom-color:#F1EDF9}
+  .s{background:#FAF8FE}tr.ratio td.s{background:#FAF8FE}
+  thead .m,thead .s{background:#F5F1FC}
+  .off{background:#F7F6FA!important}thead .off{background:#F1EFF6!important}
+  .today{background:#F6F1FF!important}thead .today{background:#EDE4FE!important;color:var(--violet2)}
+  tr.grp td{background:#F5F0FF!important;border-bottom-color:#E6DCFB}
+  tr.grp td.m{color:var(--violet2);font-weight:800}
+  .gh i{color:var(--violet2);box-shadow:0 1px 2px rgba(65,1,247,.12)}
+  td .hair i,.lgbar i{background:#9B7BF5}
+  td .trk i,td .tp i{background:linear-gradient(90deg,var(--purple),var(--pink))}
+  td.d.ht{background-image:linear-gradient(rgba(65,1,247,calc(var(--h)*.09)),rgba(65,1,247,calc(var(--h)*.09)))}
+  .sumbox{border-radius:20px}
 </style>
 </head>
 <body>
@@ -210,7 +253,7 @@
     <div class="kpis" id="kpis"></div></section>
   <div class="grid-wrap">
     <div class="scroll" id="sc"><table id="grid"></table></div>
-    <div class="legend"><span><i class="sq" style="background:#EBE0F7"></i>Today (so far)</span><span><i class="sq" style="background:#F2EEE7"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span></div>
+    <div class="legend"><span><i class="sq" style="background:#EDE4FE"></i>Today (so far)</span><span><i class="sq" style="background:#F1EFF6"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span></div>
   </div>
   <div class="notes" id="notes"></div>
 </div>
@@ -318,7 +361,7 @@ const GI={'At a glance':['<path d="M3 12h4l3-7 4 14 3-7h4"/>','the day\'s result
   'Ratios':['<path d="M19 5L5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>','this month\'s leads, and the month overall'],
   'Breakdown':['<path d="M3 6h18M7 12h14M11 18h10"/>','how the visits and conversions came about'],
   'Lead journey':['<path d="M4 6h16M7 12h10M10 18h4"/>','each lead followed by mobile number, from 1 November']};
-const SEG=['#5B2A86','#9466C9','#C7AAE8','#6E7587','#AEB3C0','#D8DBE2'];   // breakdown lines: the brand purple, then greys
+const SEG=['#4101f7','#dd30b1','#C9B5FA','#6E7587','#AEB3C0','#D8DBE2'];   // breakdown lines: the brand purple, then greys
 const ROWS=[
   {g:'At a glance'},
   {id:'leads',label:'Leads registered',kind:'count',tkey:'leads',head:1,need:'leads'},
@@ -498,7 +541,7 @@ function render(){
   // Notes, in plain words
   const msgs=[];
   if(P.month&&!TARGETS[monthKey(viewY,viewM)])msgs.push(`<b>No targets set for ${MONTH_FULL[viewM]} ${viewY}.</b> Add them on the Targets page.`);
-  else if(missing.length)msgs.push(`<sup class="ast">*</sup>Not every centre has a target for ${[...new Set(missing)].join(', ')}, so the target and surplus / deficit cover only the centres that do.`);
+  else if(missing.length)msgs.push(`<sup class="ast">*</sup>Not every centre has a target for ${[...new Set(missing)].join(', ').split('{p}').join(P.month?'this month':'this period')}, so the target and surplus / deficit cover only the centres that do.`);
   const noA=per.filter(p=>!p.S.hasAppts).map(p=>p.c.name);
   if(noA.length)msgs.push(`<b>${noA.join(', ')}:</b> no appointments sheet, so ${noA.length>1?'they are':'it is'} left out of appointments, visits expected and show-up; ${noA.length>1?'their':'its'} visits are split by the visit sheet's Visit Type.`);
   if(per.some(p=>PREP[p.c.name]&&PREP[p.c.name].fwNoDate))msgs.push('<b>Futwork appointments</b> have no booking date yet, so they count in visits expected, the visit split and the lead journey, but not in appointments scheduled; in the ratios they count on their visit date.');

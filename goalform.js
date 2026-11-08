@@ -23,7 +23,7 @@
       if(inL){out+='</ul>';inL=false;}if(l.trim())out+='<p>'+e(l)+'</p>';});
     return out+(inL?'</ul>':'');
   }
-  const TOOLS=[['h3','Heading','<span style="font:700 13px Poppins,sans-serif">H</span>'],['b','Bold (Ctrl+B)','<b>B</b>'],['i','Italics (Ctrl+I)','<i style="font-family:Georgia,serif">I</i>'],['u','Underline (Ctrl+U)','<u>U</u>'],['ul','Bullet points (type "- " at the start of a line)','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/></svg>']];
+  const TOOLS=[['h3','Heading','<span style="font:700 13px Onest,Poppins,sans-serif">H</span>'],['b','Bold (Ctrl+B)','<b>B</b>'],['i','Italics (Ctrl+I)','<i style="font-family:Georgia,serif">I</i>'],['u','Underline (Ctrl+U)','<u>U</u>'],['ul','Bullet points (type "- " at the start of a line)','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/></svg>']];
   const editorHtml=(val,ph)=>`<div class="gf-rt"><div class="gf-tb" role="toolbar" aria-label="Formatting">${TOOLS.map(([k,t,i])=>`<button type="button" data-fmt="${k}" title="${t}" aria-label="${t}" aria-pressed="false">${i}</button>`).join('')}</div>
     <div class="gf-ed" contenteditable="true" role="textbox" aria-multiline="true" data-ph="${ph}">${toHtml(val)}</div></div>`;
   function fmt(ed,k){
@@ -82,52 +82,52 @@
   const css=`
   .gf-bg{position:fixed;inset:0;z-index:60;background:rgba(29,27,34,.42);display:grid;place-items:center;padding:20px}
   .gf-bg[hidden]{display:none}
-  .gf{width:100%;max-width:860px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;background:#fff;border-radius:22px;box-shadow:inset 0 3px 0 #A8844F,0 30px 60px -20px rgba(29,27,34,.45);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#3B3742}
-  .gf-hd{display:flex;justify-content:space-between;gap:12px;padding:20px 24px 12px;border-bottom:1px solid #EFEDF2}
-  .gf-hd h2{font:600 20px 'Poppins',sans-serif;color:#1D1B22}
-  .gf-from{font-size:12.5px;color:#6B6774;margin-top:6px}.gf-from b{color:#5B2A86;font-weight:600}
-  .gf-x{border:0;background:none;font-size:26px;line-height:1;color:#6B6774;cursor:pointer}
+  .gf{width:100%;max-width:860px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;background:#fff;border-radius:22px;box-shadow:inset 0 3px 0 #6601fd,0 30px 60px -20px rgba(29,27,34,.45);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#4a4466}
+  .gf-hd{display:flex;justify-content:space-between;gap:12px;padding:20px 24px 12px;border-bottom:1px solid #ece4ff}
+  .gf-hd h2{font:600 20px 'Onest','Poppins',sans-serif;color:#120e2b}
+  .gf-from{font-size:12.5px;color:#6a6488;margin-top:6px}.gf-from b{color:#4101f7;font-weight:600}
+  .gf-x{border:0;background:none;font-size:26px;line-height:1;color:#6a6488;cursor:pointer}
   .gf-bd{padding:16px 24px;overflow:auto;display:flex;flex-direction:column;gap:16px}
-  .gf-rt{border:1px solid #E4E1EA;border-radius:11px;background:#F6F5F2;overflow:hidden}
-  .gf-rt:focus-within{border-color:#5B2A86;box-shadow:0 0 0 3px rgba(91,42,134,.12);background:#fff}
-  .gf-tb{display:flex;gap:2px;padding:5px 6px;border-bottom:1px solid #EFEDF2;background:#fff}
-  .gf-tb button{min-width:32px;height:30px;border:0;border-radius:8px;background:none;color:#3B3742;font-size:14px;cursor:pointer;display:grid;place-items:center;padding:0 8px}
-  .gf-tb button:hover{background:#F2ECF8;color:#5B2A86}.gf-tb button[aria-pressed="true"]{background:#5B2A86;color:#fff}
-  .gf-tb button:first-child{margin-right:6px;position:relative}.gf-tb button:first-child::after{content:"";position:absolute;right:-5px;top:6px;bottom:6px;width:1px;background:#E4E1EA}
-  .gf-ed{min-height:150px;max-height:360px;overflow:auto;padding:10px 14px;font:400 14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1D1B22;outline:none}
-  .gf-ed:empty::before{content:attr(data-ph);color:#9A96A3}
-  .gf-ed p{margin:0 0 8px}.gf-ed h3{font:600 18px/1.35 'Poppins',sans-serif;color:#1D1B22;margin:10px 0 6px}.gf-ed h3:first-child{margin-top:0}
+  .gf-rt{border:1px solid #dcd5ee;border-radius:11px;background:#F6F3FC;overflow:hidden}
+  .gf-rt:focus-within{border-color:#4101f7;box-shadow:0 0 0 3px rgba(65,1,247,.12);background:#fff}
+  .gf-tb{display:flex;gap:2px;padding:5px 6px;border-bottom:1px solid #ece4ff;background:#fff}
+  .gf-tb button{min-width:32px;height:30px;border:0;border-radius:8px;background:none;color:#4a4466;font-size:14px;cursor:pointer;display:grid;place-items:center;padding:0 8px}
+  .gf-tb button:hover{background:#f1eafe;color:#4101f7}.gf-tb button[aria-pressed="true"]{background:#4101f7;color:#fff}
+  .gf-tb button:first-child{margin-right:6px;position:relative}.gf-tb button:first-child::after{content:"";position:absolute;right:-5px;top:6px;bottom:6px;width:1px;background:#dcd5ee}
+  .gf-ed{min-height:150px;max-height:360px;overflow:auto;padding:10px 14px;font:400 14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#120e2b;outline:none}
+  .gf-ed:empty::before{content:attr(data-ph);color:#7a7196}
+  .gf-ed p{margin:0 0 8px}.gf-ed h3{font:600 18px/1.35 'Onest','Poppins',sans-serif;color:#120e2b;margin:10px 0 6px}.gf-ed h3:first-child{margin-top:0}
   .gf-ed ul{margin:0 0 8px;padding-left:22px}.gf-ed li{margin:2px 0}
-  .gf-l{display:block;font:700 10.5px var(--body,sans-serif);letter-spacing:.12em;text-transform:uppercase;color:#A8844F;margin-bottom:7px}
-  .gf-in{border:1px solid #E4E1EA;border-radius:11px;background:#F6F5F2;padding:10px 12px;font:400 14px/1.55 inherit;font-family:inherit;color:#1D1B22;width:100%}
-  .gf-in:focus{outline:none;border-color:#5B2A86;box-shadow:0 0 0 3px rgba(91,42,134,.12);background:#fff}
+  .gf-l{display:block;font:700 10.5px var(--body,sans-serif);letter-spacing:.12em;text-transform:uppercase;color:#7a7196;margin-bottom:7px}
+  .gf-in{border:1px solid #dcd5ee;border-radius:11px;background:#F6F3FC;padding:10px 12px;font:400 14px/1.55 inherit;font-family:inherit;color:#120e2b;width:100%}
+  .gf-in:focus{outline:none;border-color:#4101f7;box-shadow:0 0 0 3px rgba(65,1,247,.12);background:#fff}
   textarea.gf-in{resize:vertical;min-height:130px}
   .gf-tags{display:flex;flex-wrap:wrap;gap:6px}
-  .gf-tag{border:1px solid #E4E1EA;background:#fff;border-radius:999px;padding:5px 12px;font:600 12.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#3B3742;cursor:pointer}
-  .gf-tag:hover{border-color:#CDBFE0}.gf-tag[aria-pressed="true"]{background:#5B2A86;border-color:#5B2A86;color:#fff}
-  .gf-hint{font-size:12px;color:#9A96A3;margin-top:6px}
-  .gf-box{border:1px solid #E4E1EA;border-radius:14px;overflow:hidden}
-  .gf-row{display:grid;grid-template-columns:22px 150px 1fr 120px;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #EFEDF2}
+  .gf-tag{border:1px solid #dcd5ee;background:#fff;border-radius:999px;padding:5px 12px;font:600 12.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:#4a4466;cursor:pointer}
+  .gf-tag:hover{border-color:#C9B5FA}.gf-tag[aria-pressed="true"]{background:#4101f7;border-color:#4101f7;color:#fff}
+  .gf-hint{font-size:12px;color:#7a7196;margin-top:6px}
+  .gf-box{border:1px solid #dcd5ee;border-radius:14px;overflow:hidden}
+  .gf-row{display:grid;grid-template-columns:22px 150px 1fr 120px;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #ece4ff}
   .gf-row:last-child{border-bottom:0}.gf-row.off{opacity:.5}
-  .gf-row b{font:600 14px 'Poppins',sans-serif;color:#1D1B22}
-  .gf-row input[type=checkbox]{width:17px;height:17px;accent-color:#5B2A86}
+  .gf-row b{font:600 14px 'Onest','Poppins',sans-serif;color:#120e2b}
+  .gf-row input[type=checkbox]{width:17px;height:17px;accent-color:#4101f7}
   .gf-ppl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .gf-p{display:inline-flex;align-items:center;gap:5px;background:#F2ECF8;color:#5B2A86;border-radius:999px;padding:4px 5px 4px 11px;font:600 12.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
-  .gf-p button{width:18px;height:18px;border-radius:50%;border:0;background:rgba(91,42,134,.12);color:#5B2A86;cursor:pointer;font-size:10px}
-  .gf-ppl select{border:1px solid #E4E1EA;border-radius:999px;padding:4px 8px;font-size:12.5px;background:#fff;max-width:220px}
+  .gf-p{display:inline-flex;align-items:center;gap:5px;background:#f1eafe;color:#4101f7;border-radius:999px;padding:4px 5px 4px 11px;font:600 12.5px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
+  .gf-p button{width:18px;height:18px;border-radius:50%;border:0;background:rgba(65,1,247,.12);color:#4101f7;cursor:pointer;font-size:10px}
+  .gf-ppl select{border:1px solid #dcd5ee;border-radius:999px;padding:4px 8px;font-size:12.5px;background:#fff;max-width:220px}
   .gf-st{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px 4px 8px;font:600 12px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;white-space:nowrap;justify-self:start}
   .gf-st i{width:7px;height:7px;border-radius:50%;background:currentColor}
   .gf-st.tbp{background:#FDECEB;color:#B42318}.gf-st.inp{background:#FBF1DC;color:#9A6200}.gf-st.cmp{background:#E5F4EC;color:#1F7A4D}
-  .gf-task{display:grid;grid-template-columns:24px 1fr 160px 28px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid #EFEDF2}
-  .gf-task .n{width:22px;height:22px;border-radius:50%;background:#F2ECF8;color:#5B2A86;font:700 11px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;display:grid;place-items:center}
+  .gf-task{display:grid;grid-template-columns:24px 1fr 160px 28px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid #ece4ff}
+  .gf-task .n{width:22px;height:22px;border-radius:50%;background:#f1eafe;color:#4101f7;font:700 11px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;display:grid;place-items:center}
   .gf-task .gf-in{padding:7px 10px}
-  .gf-rm{width:28px;height:28px;border-radius:50%;border:0;background:none;color:#9A96A3;cursor:pointer;font-size:14px}.gf-rm:hover{background:#FDECEB;color:#B42318}
-  .gf-add{display:block;width:100%;text-align:left;border:0;background:#FCFBFD;padding:10px 12px;color:#5B2A86;font:600 13px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;cursor:pointer}
-  .gf-note{background:#F8F4FC;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55}.gf-note b{color:#5B2A86}
-  .gf-ft{display:flex;align-items:center;gap:10px;padding:14px 24px 18px;border-top:1px solid #EFEDF2}
+  .gf-rm{width:28px;height:28px;border-radius:50%;border:0;background:none;color:#7a7196;cursor:pointer;font-size:14px}.gf-rm:hover{background:#FDECEB;color:#B42318}
+  .gf-add{display:block;width:100%;text-align:left;border:0;background:#FCFBFD;padding:10px 12px;color:#4101f7;font:600 13px -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;cursor:pointer}
+  .gf-note{background:#F7F4FD;border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.55}.gf-note b{color:#4101f7}
+  .gf-ft{display:flex;align-items:center;gap:10px;padding:14px 24px 18px;border-top:1px solid #ece4ff}
   .gf-ft .sp{flex:1}.gf-msg{font-size:13px;color:#B42318}
-  .gf-btn{height:40px;padding:0 16px;border:1px solid #E4E1EA;border-radius:12px;background:#fff;color:#3B3742;font:600 13.5px 'Poppins',sans-serif;cursor:pointer;white-space:nowrap}
-  .gf-btn.pri{background:#5B2A86;border-color:#5B2A86;color:#fff}.gf-btn:disabled{opacity:.55;cursor:default}
+  .gf-btn{height:40px;padding:0 16px;border:1px solid #dcd5ee;border-radius:12px;background:#fff;color:#4a4466;font:600 13.5px 'Onest','Poppins',sans-serif;cursor:pointer;white-space:nowrap}
+  .gf-btn.pri{background:#4101f7;border-color:#4101f7;color:#fff}.gf-btn:disabled{opacity:.55;cursor:default}
   @media (max-width:700px){.gf-row{grid-template-columns:22px 1fr;}.gf-row .gf-ppl,.gf-row .gf-st{grid-column:2}}`;
   const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const uid=()=>Math.random().toString(36).slice(2,8);
@@ -160,7 +160,7 @@
       <div class="gf-bd">
         <div><span class="gf-l">Goal</span><input class="gf-in" data-f="title" value="${esc(F.title)}" maxlength="200"></div>
         <div><span class="gf-l">Goal description</span>${editorHtml(F.desc,'Why it matters, what to do, and what &quot;done&quot; looks like.')}<div class="gf-hint">This is what the owners read in their email, so write it the way you'd brief them.</div></div>
-        <div><span class="gf-l">Centres and owners</span><div class="gf-box">${CENTRES.map(c=>{const C=F.centres[c];return`<div class="gf-row${C?'':' off'}"><input type="checkbox" data-c="${esc(c)}"${C?' checked':''} aria-label="${esc(c)}"><b>${esc(c)}</b>${C?people(C.owners,c):'<span style="font-size:12.5px;color:#9A96A3">Not part of this goal</span>'}${C?`<span class="gf-st ${C.s||'tbp'}"><i></i>${ST[C.s||'tbp']}</span>`:'<span></span>'}</div>`;}).join('')}</div>
+        <div><span class="gf-l">Centres and owners</span><div class="gf-box">${CENTRES.map(c=>{const C=F.centres[c];return`<div class="gf-row${C?'':' off'}"><input type="checkbox" data-c="${esc(c)}"${C?' checked':''} aria-label="${esc(c)}"><b>${esc(c)}</b>${C?people(C.owners,c):'<span style="font-size:12.5px;color:#7a7196">Not part of this goal</span>'}${C?`<span class="gf-st ${C.s||'tbp'}"><i></i>${ST[C.s||'tbp']}</span>`:'<span></span>'}</div>`;}).join('')}</div>
           <div class="gf-hint">Untick a centre this goal doesn't apply to. Each centre has its own status, and the goal is Completed when every chosen centre is.</div></div>
         <div><span class="gf-l">Tags</span><div class="gf-tags">${TAGS.map(t=>`<button type="button" class="gf-tag" data-tag="${esc(t)}" aria-pressed="${(F.tags||[]).includes(t)}">${esc(t)}</button>`).join('')}</div></div>
         <div style="max-width:260px"><span class="gf-l">Target date</span><input class="gf-in" type="date" data-f="target" value="${esc(F.target)}"></div>
