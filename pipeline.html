@@ -113,6 +113,30 @@ button{font:inherit}
 .sec .sh span.ct{display:inline-grid}
 @media (max-width:1100px){.cards{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.hero{padding:24px 16px 80px}.hin{flex-direction:column;align-items:flex-start}.hr{align-items:flex-start}h1{font-size:32px}.page{padding:0 16px 48px}.bar{flex-direction:column;align-items:stretch;gap:12px}.seg{overflow-x:auto}.cards{grid-template-columns:1fr}.ws{display:none!important}}
+/* List view */
+.pkbars{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.pkbar{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px 8px 8px 20px;box-shadow:var(--sh);max-width:100%;overflow-x:auto}
+.pkl{font:700 10.5px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--ink4);white-space:nowrap}
+.lsub{display:inline-flex;gap:2px;background:#F4F1FB;border-radius:12px;padding:3px}
+.lsub button{border:0;background:none;padding:8px 14px;border-radius:9px;font:600 13px var(--f);color:var(--ink2);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.lsub button i{font-style:normal;font:700 11.5px var(--f);color:var(--ink4);background:#fff;border-radius:999px;padding:1px 8px}
+.lsub button[aria-pressed="true"]{background:#fff;color:var(--violet2);box-shadow:0 1px 3px rgba(18,14,43,.12)}
+.lsub button[aria-pressed="true"] i{background:var(--tvbg);color:var(--tvfg)}
+.pks button{min-width:46px;justify-content:center}
+.pks button[aria-pressed="true"]{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;box-shadow:0 6px 14px -8px rgba(65,1,247,.8)}
+.sb>.lsub{margin:16px 24px 6px}
+.lgrp{display:flex;align-items:center;gap:10px;font:800 11px var(--f);letter-spacing:.18em;text-transform:uppercase;color:var(--violet2);margin:6px 4px 12px}
+.lgrp::before{content:"";width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#6601fd,#dd30b1)}
+.lgrp::after{content:"";flex:1;height:1px;background:var(--line)}
+.ct.v{background:var(--tvbg);color:var(--tvfg)}
+table.lt td.pk{font-weight:700;color:var(--ink)}
+table.lt td.ex small{color:var(--ink4);font-weight:400}
+.pl{display:inline-block;padding:3px 10px;border-radius:999px;font:700 12px var(--f);white-space:nowrap}
+.pl.ok{background:var(--okbg);color:var(--ok)}.pl.vi{background:var(--tvbg);color:var(--tvfg)}.pl.rd{background:var(--rose);color:var(--bad)}
+.pl.bl{background:var(--tbbg);color:var(--tbfg)}.pl.gy{background:#EFEDF4;color:#6a6488}
+table.lt td.c{text-align:right}table.lt th:first-child,table.lt td.who{position:sticky;left:0;z-index:1;background:#fff;box-shadow:8px 0 10px -8px rgba(18,14,43,.12)}table.lt th:first-child{background:#FBFAFE}
+.more{display:block;width:100%;border:0;border-top:1px solid var(--edge);background:#FAF8FE;padding:13px;font:700 13px var(--f);color:var(--violet2);cursor:pointer}.more:hover{background:#F4EFFE}
+table.lt th,table.lt td{padding-left:16px;padding-right:16px}table.lt td.ds{max-width:320px;min-width:240px}
 </style>
 </head>
 <body>
@@ -190,7 +214,7 @@ function buildDue(){
   return ALL.filter(t=>t.end).map(t=>{const r=t.r,later=(byId.get(t.id)||[]).filter(x=>x!==t&&x.tab==='rn'&&x.date>t.date).sort((a,b)=>a.date-b.date)[0];
     let st='due';if(later||/^renewed$/i.test(t.status))st='paid';else if(/will not renew|won'?t renew|discontinu|refund/i.test(t.status))st='lost';else if(t.end<TODAY)st='late';
     return{...t,st,paidOn:later?later.date:null,name:String(r[4]||'').trim(),phone:String(r[7]||'').replace(/\D/g,'').slice(-10),age:String(r[6]||'').trim(),course:String(r[8]||'').trim(),
-      level:String(r[9]||'').trim(),pack:t.m?Math.round(t.m)+'M':'',start:valid(parseDate(r[22])),teacher:String(r[29]||'').trim()};});
+      level:String(r[9]||'').trim(),pack:t.m?Math.round(t.m)+'M':'',start:valid(parseDate(r[22])),teacher:String(r[29]||'').trim(),reason:String(r[28]||'').trim(),comp:parseNum(r[38])||0};});
 }
 
 function period(){
@@ -278,10 +302,10 @@ function render(){
   const P=period();document.getElementById('mlabel').textContent=P.label;document.getElementById('psub').textContent=P.label;   // the selected period, under the title
   if(mode==='range'){document.getElementById('from').value=iso(P.a);document.getElementById('to').value=iso(P.b);}
   const out=document.getElementById('out');
-  if(view==='list'){out.innerHTML='<section class="sec"><div class="empty big">The list view is being redesigned. Switch to Glance for now.</div></section>';return;}
   if(!DUE){out.innerHTML='<section class="sec"><div class="empty big">Loading…</div></section>';return;}
   const mine=x=>!sel||x.centre===sel.name;
   const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
+  if(view==='list'){out.innerHTML=listView(P,mine,sel);bindList(out);return;}
 
   /* At a glance (as on Monthly Performance Analysis): due = memberships whose package expires in the period;
      achieved = every renewal paid in the period, whenever it was due; pipeline = promised payments in the period not paid yet */
@@ -360,6 +384,83 @@ function render(){
     +section('wow','Week on Week view','',wow,'wowsec')
     +section('wnr','Will not renew',`<span class="ct r">${wnr.length}</span><span>${coh}</span>`,learnerList(wnr,false))
     +section('ext','Extended',`<span class="ct b">${ext.length}</span><span>${coh}</span>`,learnerList(ext,true));
+  out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
+}
+
+
+/* ── List view ── Package filter (the length of the membership that falls due, or the latest one) applies to every list. */
+const PKGS=['all','1','3','6','9','12','15'];
+let pkg=(()=>{try{const v=localStorage.getItem('artium_rp_pkg');return PKGS.includes(v)?v:'all';}catch(e){return'all';}})();
+let LSUB=(()=>{try{return Object.assign({due:'all',one:'act'},JSON.parse(localStorage.getItem('artium_rp_lsub')||'{}'));}catch(e){return{due:'all',one:'act'};}})();
+let RENV=(()=>{try{const v=localStorage.getItem('artium_rp_ren');return['all','not','ren'].includes(v)?v:'all';}catch(e){return'all';}})();
+const OC={ren:['Renewed','ok'],pipe:['Pipeline','vi'],wnr:['Will not renew','rd'],ext:['Extended','bl'],ytc:['Yet to connect','gy']};
+const pill=(t,c)=>`<span class="pl ${c}">${t}</span>`;
+function subT(key,opts){return`<div class="lsub" role="group">${opts.map(([v,l,c])=>`<button type="button" data-sub="${key}" data-v="${v}" aria-pressed="${LSUB[key]===v}">${l}<i>${c}</i></button>`).join('')}</div>`;}
+function who(x,sel){return`<td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}${x.course?' · '+esc(x.course):''}</small></td>`;}
+/* Where a learner stands now (the All time lists): renewed, will not renew, extended or paused, a promised payment, or yet to connect */
+function nowOc(x){if(x.st==='paid')return'ren';if(x.st==='lost')return'wnr';if(x.ext>0||/extend|pause/i.test(x.status))return'ext';if(x.ncd&&x.exp>0)return'pipe';return'ytc';}
+const LSHOW={};   // lists opened in full (the first 10 learners show otherwise)
+function ltable(list,cols,sel,key){
+  if(!list.length)return'<div class="empty">No learners here.</div>';
+  const all=LSHOW[key]||list.length<=12,rows=all?list:list.slice(0,10);
+  return`<div class="tw"><table class="lt"><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>`+rows.map(x=>'<tr>'+cols.map(c=>c[1](x)).join('')+'</tr>').join('')+'</tbody></table></div>'
+    +(list.length>12?`<button type="button" class="more" data-more="${key}">${all?'Show fewer':'Show all '+list.length+' learners'}</button>`:'');
+}
+function listView(P,mine,sel){
+  const okP=x=>pkg==='all'||Math.round(x.m)===+pkg;
+  // Each learner's memberships in order; the latest one says where they stand now
+  const byId=new Map();DUE.filter(mine).forEach(x=>{if(x.id)(byId.get(x.id)||byId.set(x.id,[]).get(x.id)).push(x);});
+  const latest=[];byId.forEach(l=>{l.sort((a,b)=>a.date-b.date);latest.push(Object.assign(l[l.length-1],{hist:l}));});
+  const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
+  const stat=(x,oc)=>`<td>${pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
+  /* The columns every list shows, after the learner and any column of its own */
+  const STD=(ocf,own)=>[['Learner',x=>who(x,sel)],['Course level',x=>tdc(esc(x.level))],['Age group',x=>tdc(esc(x.age))],['Teacher',x=>tdc(esc(x.teacher))],
+    ['Package',x=>tdc(x.pack,'pk')],...(own||[]),['Status',x=>stat(x,ocf(x))],
+    ['Package expiry',x=>tdc(fmtD(x.end))],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c')],['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex')],
+    ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):'')],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):'')],['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c')],
+    ['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`]];
+  const okR=(x,ocf)=>RENV==='all'||(RENV==='ren')===(ocf(x)==='ren');
+  const dueOc=x=>outcome(x,P);
+
+  /* Due in the period: every membership whose package expires in it */
+  const due=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x)&&okR(x,dueOc)).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
+  const dFT=due.filter(x=>x.tab==='fs'),dRR=due.filter(x=>x.tab==='rn'),dL=LSUB.due==='ft'?dFT:LSUB.due==='rr'?dRR:due;
+  const sDue=subT('due',[['all','All renewals due',due.length],['ft','First-time renewals',dFT.length],['rr','Repeated renewals',dRR.length]])
+    +ltable(dL,STD(dueOc),sel,'due');
+
+  /* Learners with at least two 1-month renewals */
+  const one=latest.filter(x=>x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length>=2&&okP(x)).map(x=>Object.assign(x,{n1:x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length}));
+  // Active: the membership of theirs that falls due in the period (renewed or not)
+  const oAct=one.map(x=>{const d=x.hist.find(h=>inP(h.end,P));return d?Object.assign(d,{n1:x.n1}):null;}).filter(x=>x&&okR(x,dueOc)).sort((a,b)=>a.end-b.end);
+  const oIn=one.filter(x=>x.st!=='paid'&&x.end<TODAY&&okR(x,nowOc)).sort((a,b)=>b.end-a.end);
+  const n1=['1-month renewals',x=>`<td class="pk">${x.n1}</td>`],why=['Reason for discontinuing',x=>tdc(esc(x.reason))];
+  const sOne=subT('one',[['act','Active · due in '+P.label,oAct.length],['in','Inactive',oIn.length]])
+    +(LSUB.one==='in'?ltable(oIn,STD(nowOc,[n1,why]),sel,'oin'):ltable(oAct,STD(dueOc,[n1]),sel,'oact'));
+
+  /* Left because of affordability */
+  const aff=latest.filter(x=>x.st!=='paid'&&/afford/i.test(x.reason||'')&&okP(x)&&okR(x,nowOc)).sort((a,b)=>b.end-a.end);
+  const sAff=ltable(aff,STD(nowOc,[['Renewals',x=>`<td class="pk">${x.hist.filter(h=>h.tab==='rn').length}</td>`]]),sel,'aff');
+
+  /* Extended or paused, not renewed yet */
+  const ext=latest.filter(x=>x.st!=='paid'&&/extend|pause/i.test(x.status)&&okP(x)&&okR(x,nowOc)).sort((a,b)=>(a.newEnd||a.end)-(b.newEnd||b.end));
+  const sExt=ltable(ext,STD(nowOc),sel,'ext');
+
+  const bar=`<div class="pkbars"><div class="pkbar"><span class="pkl">Previous package</span><div class="lsub pks" role="group">${PKGS.map(v=>`<button type="button" data-pkg="${v}" aria-pressed="${pkg===v}">${v==='all'?'All':v+'M'}</button>`).join('')}</div></div>`
+    +`<div class="pkbar"><span class="pkl">Show</span><div class="lsub pks" role="group">${[['all','All'],['not','Not renewed'],['ren','Renewed']].map(([v,l])=>`<button type="button" data-ren="${v}" aria-pressed="${RENV===v}">${l}</button>`).join('')}</div></div></div>`;
+  const cnt=(n,c='')=>`<span class="ct ${c}">${n}</span>`;
+  return bar
+    +`<div class="lgrp">Due in ${esc(P.label)}</div>`
+    +section('l_due','Renewals due',cnt(due.length,'v')+`<span>${esc(P.label)}</span>`,sDue)
+    +`<div class="lgrp">All time</div>`
+    +section('l_one','Repeated 1-month renewers',cnt(one.length,'v')+'<span>at least two 1-month renewals</span>',sOne)
+    +section('l_aff','Left because of affordability',cnt(aff.length,'r')+'<span>latest departures first</span>',sAff)
+    +section('l_ext','Extended or paused, not renewed yet',cnt(ext.length,'b'),sExt);
+}
+function bindList(out){
+  out.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{LSHOW[b.dataset.more]=!LSHOW[b.dataset.more];render();});
+  out.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>{pkg=b.dataset.pkg;try{localStorage.setItem('artium_rp_pkg',pkg);}catch(e){}render();});
+  out.querySelectorAll('[data-ren]').forEach(b=>b.onclick=()=>{RENV=b.dataset.ren;try{localStorage.setItem('artium_rp_ren',RENV);}catch(e){}render();});
+  out.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{LSUB[b.dataset.sub]=b.dataset.v;try{localStorage.setItem('artium_rp_lsub',JSON.stringify(LSUB));}catch(e){}render();});
   out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
 }
 
