@@ -135,8 +135,48 @@ table.lt td.ex small{color:var(--ink4);font-weight:400}
 .pl.ok{background:var(--okbg);color:var(--ok)}.pl.vi{background:var(--tvbg);color:var(--tvfg)}.pl.rd{background:var(--rose);color:var(--bad)}
 .pl.bl{background:var(--tbbg);color:var(--tbfg)}.pl.gy{background:#EFEDF4;color:#6a6488}
 table.lt td.c{text-align:right}table.lt th:first-child,table.lt td.who{position:sticky;left:0;z-index:1;background:#fff;box-shadow:8px 0 10px -8px rgba(18,14,43,.12)}table.lt th:first-child{background:#FBFAFE}
-.more{display:block;width:100%;border:0;border-top:1px solid var(--edge);background:#FAF8FE;padding:13px;font:700 13px var(--f);color:var(--violet2);cursor:pointer}.more:hover{background:#F4EFFE}
 table.lt th,table.lt td{padding-left:16px;padding-right:16px}table.lt td.ds{max-width:320px;min-width:240px}
+/* Counts in the list toggles: easier to read */
+.lsub button i{font:800 13px var(--f);padding:2px 10px;background:#E9E3F8;color:var(--ink)}
+.lsub button[aria-pressed="true"] i{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff}
+.sec .sh .ct{min-width:30px;height:26px;padding:0 10px;font-size:13.5px}
+/* Each list's own filters, top right */
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 24px 10px}
+.sb>.lrow .lsub{margin:0}
+.ltools{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto}
+.ltools .lsub button{padding:7px 11px;font-size:12.5px}.ltools .pks button{min-width:40px}
+.ltools .tl{align-self:center;font:700 10px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);padding:0 8px 0 10px}
+/* About this list */
+.ib{position:relative;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid #B9AEDB;color:var(--tvfg);font:800 11.5px/1 Georgia,serif;font-style:italic;cursor:pointer;flex:none}
+.ib:hover,.ib.open,.ib:focus-visible{background:var(--tvbg);border-color:var(--tvfg);outline:none}
+.sh span.ib .ipop{display:none;position:absolute;left:-12px;top:30px;z-index:20;width:380px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 20px 40px -18px rgba(18,14,43,.35);font:400 13.5px/1.55 var(--f);font-style:normal;color:var(--ink2);text-align:left;cursor:default;white-space:normal}
+.ib:hover .ipop,.ib.open .ipop,.ib:focus-visible .ipop{display:block!important}
+.sec:has(.ib){overflow:visible}.sec:has(.ib)>.sb{border-radius:0 0 24px 24px;overflow:hidden}.sec:has(.ib)>.sh{border-radius:24px 24px 0 0}.sec.closed:has(.ib)>.sh{border-radius:24px}
+/* Filters (as on the Goals page) */
+.filters{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);margin-bottom:22px}
+.filters:not(.closed){position:relative;z-index:5}
+.filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;cursor:pointer;user-select:none}
+.filters-head .t{display:flex;align-items:center;gap:10px;font:700 16px var(--f);color:var(--ink)}.filters-head .t svg{color:var(--violet2)}
+.f-badge{background:var(--tvbg);color:var(--violet2);font:600 12px var(--f);border-radius:999px;padding:3px 10px}.f-badge.on{background:var(--violet2);color:#fff}
+.f-chev{width:32px;height:32px;border-radius:999px;border:1px solid var(--line);color:var(--ink3);display:grid;place-items:center;transition:transform .2s}
+.filters.closed .f-chev{transform:rotate(-90deg)}.filters.closed .filters-body{display:none}
+.filters-body{border-top:1px solid var(--edge);padding:18px 22px 20px}
+.f-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+@media (max-width:1100px){.f-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (max-width:700px){.f-grid{grid-template-columns:1fr}}
+.f-clear{margin-top:14px;border:0;background:none;color:var(--violet2);font:600 13px var(--f);cursor:pointer;padding:0}.f-clear:disabled{color:#C9C3DD;cursor:default}
+.ms{position:relative;display:flex;flex-direction:column;gap:6px}
+.ms>label{font:600 12px var(--f);color:var(--ink2)}
+.ms>button{display:flex;align-items:center;justify-content:space-between;gap:8px;height:42px;border:1px solid var(--line);border-radius:12px;background:#F6F3FC;padding:0 12px;font:500 14px var(--f);color:var(--ink);cursor:pointer;text-align:left;width:100%}
+.ms>button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ms>button svg{flex:none;color:var(--ink3)}
+.ms.set>button{background:var(--tvbg);border-color:#DCCFFB;color:var(--violet2);font-weight:600}
+.ms .pop{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px -18px rgba(18,14,43,.35);padding:6px;max-height:320px;overflow:auto}
+.ms .pop label{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;font-size:13.5px;color:var(--ink2);cursor:pointer}
+.ms .pop label:hover{background:var(--tvbg)}.ms .pop label .n{margin-left:auto;font-size:12px;color:var(--ink4)}.ms .pop .nil{color:var(--ink4)}
+.ms .pop input{width:16px;height:16px;accent-color:#4101f7}
+.ms .pop .pf{display:flex;justify-content:space-between;border-top:1px solid var(--edge);margin-top:4px;padding:6px 6px 2px}
+.ms .pop .pf button{border:0;background:none;color:var(--violet2);font:600 12.5px var(--f);cursor:pointer}
+table.lt td.ph{font-variant-numeric:tabular-nums}
+.more{display:block;width:100%;border:0;border-top:1px solid var(--edge);background:#FAF8FE;padding:13px;font:700 13px var(--f);color:var(--violet2);cursor:pointer}.more:hover{background:#F4EFFE}
 </style>
 </head>
 <body>
@@ -390,13 +430,34 @@ function render(){
 
 /* ── List view ── Package filter (the length of the membership that falls due, or the latest one) applies to every list. */
 const PKGS=['all','1','3','6','9','12','15'];
-let pkg=(()=>{try{const v=localStorage.getItem('artium_rp_pkg');return PKGS.includes(v)?v:'all';}catch(e){return'all';}})();
+// Each list keeps its own package and renewed filters: FL.due = {pkg:'all', ren:'all'}, …
+let FL=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_lf')||'{}')||{};}catch(e){return{};}})();
+/* Filters for every list (as on the Goals page): course, course level, age group, teacher, reason for discontinuing */
+const FDEF=[['course','Course name','All courses'],['level','Course level','All levels'],['age','Age group','All age groups'],['teacher','Teacher name','All teachers'],['reason','Reason for discontinuing','All reasons']];
+let FSEL=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_fsel')||'{}')||{};}catch(e){return{};}})();
+let FOPEN=(()=>{try{return localStorage.getItem('artium_rp_fopen')==='1';}catch(e){return false;}})(),OPEN_F=null;
+const fsel=k=>FSEL[k]||[];
+const okF=x=>FDEF.every(([k])=>!fsel(k).length||fsel(k).includes(String(x[k]||'').trim()));
+function filterPanel(pool){
+  const FCH='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
+  const k=FDEF.filter(([id])=>fsel(id).length).length;
+  const grid=FDEF.map(([id,label,all])=>{const cnt=new Map();pool.forEach(x=>{const v=String(x[id]||'').trim();if(v)cnt.set(v,(cnt.get(v)||0)+1);});
+    const opts=[...cnt].sort((a,b)=>a[0].localeCompare(b[0])),sel=fsel(id),txt=!sel.length?all:sel.length<=2?sel.join(', '):sel.length+' selected';
+    return`<div class="ms${sel.length?' set':''}" data-f="${id}"><label>${label}</label><button type="button" aria-haspopup="true" aria-expanded="${OPEN_F===id}"><span>${esc(txt)}</span>${FCH}</button>
+      ${OPEN_F===id?`<div class="pop">${opts.length?opts.map(([v,c])=>`<label><input type="checkbox" value="${esc(v)}"${sel.includes(v)?' checked':''}>${esc(v)}<span class="n">${c}</span></label>`).join(''):'<label class="nil">Nothing to choose</label>'}
+        <div class="pf"><button type="button" data-all>Select all</button><button type="button" data-none>Clear</button></div></div>`:''}</div>`;}).join('');
+  return`<section class="filters${FOPEN?'':' closed'}" id="fbox"><div class="filters-head" id="fhead"><div class="t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="f-badge${k?' on':''}">${k?k+' active':'All optional'}</span></div><span class="f-chev" aria-hidden="true">${FCH}</span></div>
+    <div class="filters-body"><div class="f-grid">${grid}</div><button class="f-clear" id="fclr" type="button"${k?'':' disabled'}>Clear filters</button></div></section>`;
+}
+const fl=k=>Object.assign({pkg:'all',ren:'all'},FL[k]);
+function tools(k){const f=fl(k);
+  return`<div class="ltools"><div class="lsub pks" role="group" aria-label="Previous package"><span class="tl">Package</span>${PKGS.map(v=>`<button type="button" data-lk="${k}" data-pkg="${v}" aria-pressed="${f.pkg===v}">${v==='all'?'All':v+'M'}</button>`).join('')}</div>`
+    +`<div class="lsub pks" role="group" aria-label="Show">${[['all','All'],['not','Not renewed'],['ren','Renewed']].map(([v,l])=>`<button type="button" data-lk="${k}" data-ren="${v}" aria-pressed="${f.ren===v}">${l}</button>`).join('')}</div></div>`;}
 let LSUB=(()=>{try{return Object.assign({due:'all',one:'act'},JSON.parse(localStorage.getItem('artium_rp_lsub')||'{}'));}catch(e){return{due:'all',one:'act'};}})();
-let RENV=(()=>{try{const v=localStorage.getItem('artium_rp_ren');return['all','not','ren'].includes(v)?v:'all';}catch(e){return'all';}})();
 const OC={ren:['Renewed','ok'],pipe:['Pipeline','vi'],wnr:['Will not renew','rd'],ext:['Extended','bl'],ytc:['Yet to connect','gy']};
 const pill=(t,c)=>`<span class="pl ${c}">${t}</span>`;
 function subT(key,opts){return`<div class="lsub" role="group">${opts.map(([v,l,c])=>`<button type="button" data-sub="${key}" data-v="${v}" aria-pressed="${LSUB[key]===v}">${l}<i>${c}</i></button>`).join('')}</div>`;}
-function who(x,sel){return`<td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}${x.course?' · '+esc(x.course):''}</small></td>`;}
+function who(x,sel){return`<td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>`;}
 /* Where a learner stands now (the All time lists): renewed, will not renew, extended or paused, a promised payment, or yet to connect */
 function nowOc(x){if(x.st==='paid')return'ren';if(x.st==='lost')return'wnr';if(x.ext>0||/extend|pause/i.test(x.status))return'ext';if(x.ncd&&x.exp>0)return'pipe';return'ytc';}
 const LSHOW={};   // lists opened in full (the first 10 learners show otherwise)
@@ -407,62 +468,79 @@ function ltable(list,cols,sel,key){
     +(list.length>12?`<button type="button" class="more" data-more="${key}">${all?'Show fewer':'Show all '+list.length+' learners'}</button>`:'');
 }
 function listView(P,mine,sel){
-  const okP=x=>pkg==='all'||Math.round(x.m)===+pkg;
+  const okP=(x,k)=>{const p=fl(k).pkg;return okF(x)&&(p==='all'||Math.round(x.m)===+p);};
   // Each learner's memberships in order; the latest one says where they stand now
   const byId=new Map();DUE.filter(mine).forEach(x=>{if(x.id)(byId.get(x.id)||byId.set(x.id,[]).get(x.id)).push(x);});
   const latest=[];byId.forEach(l=>{l.sort((a,b)=>a.date-b.date);latest.push(Object.assign(l[l.length-1],{hist:l}));});
   const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
   const stat=(x,oc)=>`<td>${pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
   /* The columns every list shows, after the learner and any column of its own */
-  const STD=(ocf,own)=>[['Learner',x=>who(x,sel)],['Course level',x=>tdc(esc(x.level))],['Age group',x=>tdc(esc(x.age))],['Teacher',x=>tdc(esc(x.teacher))],
+  const STD=(ocf,own)=>[['Learner',x=>who(x,sel)],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph')],['Course',x=>tdc(esc(x.course))],['Course level',x=>tdc(esc(x.level))],['Age group',x=>tdc(esc(x.age))],['Teacher',x=>tdc(esc(x.teacher))],
     ['Package',x=>tdc(x.pack,'pk')],...(own||[]),['Status',x=>stat(x,ocf(x))],
     ['Package expiry',x=>tdc(fmtD(x.end))],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c')],['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex')],
     ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):'')],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):'')],['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c')],
     ['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`]];
-  const okR=(x,ocf)=>RENV==='all'||(RENV==='ren')===(ocf(x)==='ren');
+  const okR=(x,ocf,k)=>{const r=fl(k).ren;return r==='all'||(r==='ren')===(ocf(x)==='ren');};
   const dueOc=x=>outcome(x,P);
 
   /* Due in the period: every membership whose package expires in it */
-  const due=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x)&&okR(x,dueOc)).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
+  const due=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x,'due')&&okR(x,dueOc,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
   const dFT=due.filter(x=>x.tab==='fs'),dRR=due.filter(x=>x.tab==='rn'),dL=LSUB.due==='ft'?dFT:LSUB.due==='rr'?dRR:due;
-  const sDue=subT('due',[['all','All renewals due',due.length],['ft','First-time renewals',dFT.length],['rr','Repeated renewals',dRR.length]])
+  const sDue=row2(subT('due',[['all','All renewals due',due.length],['ft','First-time renewals',dFT.length],['rr','Repeated renewals',dRR.length]]),'due')
     +ltable(dL,STD(dueOc),sel,'due');
 
   /* Learners with at least two 1-month renewals */
-  const one=latest.filter(x=>x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length>=2&&okP(x)).map(x=>Object.assign(x,{n1:x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length}));
+  const one=latest.filter(x=>x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length>=2&&okP(x,'one')).map(x=>Object.assign(x,{n1:x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length}));
   // Active: the membership of theirs that falls due in the period (renewed or not)
-  const oAct=one.map(x=>{const d=x.hist.find(h=>inP(h.end,P));return d?Object.assign(d,{n1:x.n1}):null;}).filter(x=>x&&okR(x,dueOc)).sort((a,b)=>a.end-b.end);
-  const oIn=one.filter(x=>x.st!=='paid'&&x.end<TODAY&&okR(x,nowOc)).sort((a,b)=>b.end-a.end);
+  const oAct=one.map(x=>{const d=x.hist.find(h=>inP(h.end,P));return d?Object.assign(d,{n1:x.n1}):null;}).filter(x=>x&&okR(x,dueOc,'one')).sort((a,b)=>a.end-b.end);
+  const oIn=one.filter(x=>x.st!=='paid'&&x.end<TODAY&&okR(x,nowOc,'one')).sort((a,b)=>b.end-a.end);
   const n1=['1-month renewals',x=>`<td class="pk">${x.n1}</td>`],why=['Reason for discontinuing',x=>tdc(esc(x.reason))];
-  const sOne=subT('one',[['act','Active · due in '+P.label,oAct.length],['in','Inactive',oIn.length]])
+  const sOne=row2(subT('one',[['act','Active · due in '+P.label,oAct.length],['in','Inactive',oIn.length]]),'one')
     +(LSUB.one==='in'?ltable(oIn,STD(nowOc,[n1,why]),sel,'oin'):ltable(oAct,STD(dueOc,[n1]),sel,'oact'));
 
   /* Left because of affordability */
-  const aff=latest.filter(x=>x.st!=='paid'&&/afford/i.test(x.reason||'')&&okP(x)&&okR(x,nowOc)).sort((a,b)=>b.end-a.end);
-  const sAff=ltable(aff,STD(nowOc,[['Renewals',x=>`<td class="pk">${x.hist.filter(h=>h.tab==='rn').length}</td>`]]),sel,'aff');
+  const aff=latest.filter(x=>x.st!=='paid'&&/afford/i.test(x.reason||'')&&okP(x,'aff')&&okR(x,nowOc,'aff')).sort((a,b)=>b.end-a.end);
+  const sAff=row2('','aff')+ltable(aff,STD(nowOc,[['Renewals',x=>`<td class="pk">${x.hist.filter(h=>h.tab==='rn').length}</td>`]]),sel,'aff');
 
   /* Extended or paused, not renewed yet */
-  const ext=latest.filter(x=>x.st!=='paid'&&/extend|pause/i.test(x.status)&&okP(x)&&okR(x,nowOc)).sort((a,b)=>(a.newEnd||a.end)-(b.newEnd||b.end));
-  const sExt=ltable(ext,STD(nowOc),sel,'ext');
+  const ext=latest.filter(x=>x.st!=='paid'&&/extend|pause/i.test(x.status)&&okP(x,'ext')&&okR(x,nowOc,'ext')).sort((a,b)=>(a.newEnd||a.end)-(b.newEnd||b.end));
+  const sExt=row2('','ext')+ltable(ext,STD(nowOc),sel,'ext');
 
-  const bar=`<div class="pkbars"><div class="pkbar"><span class="pkl">Previous package</span><div class="lsub pks" role="group">${PKGS.map(v=>`<button type="button" data-pkg="${v}" aria-pressed="${pkg===v}">${v==='all'?'All':v+'M'}</button>`).join('')}</div></div>`
-    +`<div class="pkbar"><span class="pkl">Show</span><div class="lsub pks" role="group">${[['all','All'],['not','Not renewed'],['ren','Renewed']].map(([v,l])=>`<button type="button" data-ren="${v}" aria-pressed="${RENV===v}">${l}</button>`).join('')}</div></div></div>`;
   const cnt=(n,c='')=>`<span class="ct ${c}">${n}</span>`;
-  return bar
+  const info=t=>`<span class="ib" role="button" tabindex="0" aria-label="About this list" data-info>i<span class="ipop">${t}</span></span>`;
+  return filterPanel(DUE.filter(mine))
     +`<div class="lgrp">Due in ${esc(P.label)}</div>`
     +section('l_due','Renewals due',cnt(due.length,'v')+`<span>${esc(P.label)}</span>`,sDue)
     +`<div class="lgrp">All time</div>`
-    +section('l_one','Repeated 1-month renewers',cnt(one.length,'v')+'<span>at least two 1-month renewals</span>',sOne)
+    +section('l_one','Repeated 1-month renewers',info('This is a list of learners who have made at least two 1-month renewal transactions in the past. It includes both active and inactive learners. It helps us focus on 1-month renewers, ensuring they continue with us. It also helps us narrow down inactive 1-month renewers who may have quit due to affordability issues.')+cnt(one.length,'v'),sOne)
     +section('l_aff','Left because of affordability',cnt(aff.length,'r')+'<span>latest departures first</span>',sAff)
     +section('l_ext','Extended or paused, not renewed yet',cnt(ext.length,'b'),sExt);
 }
+function row2(left,k){return`<div class="lrow">${left||'<span></span>'}${tools(k)}</div>`;}
 function bindList(out){
+  const saveF=()=>{try{localStorage.setItem('artium_rp_fsel',JSON.stringify(FSEL));}catch(e){}};
+  const box=out.querySelector('#fbox');
+  if(box){
+    box.querySelector('#fhead').onclick=()=>{FOPEN=!FOPEN;OPEN_F=null;try{localStorage.setItem('artium_rp_fopen',FOPEN?'1':'0');}catch(e){}render();};
+    box.addEventListener('click',e=>{
+      if(e.target.id==='fclr'){FSEL={};OPEN_F=null;saveF();render();return;}
+      const ms=e.target.closest('.ms');if(!ms)return;const id=ms.dataset.f;
+      if(e.target.closest('.ms>button')){OPEN_F=OPEN_F===id?null:id;render();return;}
+      if(e.target.closest('[data-all]')){FSEL[id]=[...ms.querySelectorAll('.pop input')].map(i=>i.value);saveF();render();return;}
+      if(e.target.closest('[data-none]')){FSEL[id]=[];saveF();render();return;}
+    });
+    box.addEventListener('change',e=>{const ms=e.target.closest('.ms');if(!ms)return;FSEL[ms.dataset.f]=[...ms.querySelectorAll('.pop input:checked')].map(i=>i.value);saveF();render();});
+  }
+  out.querySelectorAll('[data-info]').forEach(b=>{b.onclick=e=>{e.stopPropagation();b.classList.toggle('open');};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();b.classList.toggle('open');}};});
   out.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{LSHOW[b.dataset.more]=!LSHOW[b.dataset.more];render();});
-  out.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>{pkg=b.dataset.pkg;try{localStorage.setItem('artium_rp_pkg',pkg);}catch(e){}render();});
-  out.querySelectorAll('[data-ren]').forEach(b=>b.onclick=()=>{RENV=b.dataset.ren;try{localStorage.setItem('artium_rp_ren',RENV);}catch(e){}render();});
+  const setF=(k,f)=>{FL[k]=Object.assign(fl(k),f);try{localStorage.setItem('artium_rp_lf',JSON.stringify(FL));}catch(e){}render();};
+  out.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>setF(b.dataset.lk,{pkg:b.dataset.pkg}));
+  out.querySelectorAll('[data-ren]').forEach(b=>b.onclick=()=>setF(b.dataset.lk,{ren:b.dataset.ren}));
   out.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{LSUB[b.dataset.sub]=b.dataset.v;try{localStorage.setItem('artium_rp_lsub',JSON.stringify(LSUB));}catch(e){}render();});
   out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
 }
+document.addEventListener('click',e=>{if(OPEN_F&&!e.target.closest('.ms')){OPEN_F=null;render();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN_F){OPEN_F=null;render();}});
 
 /* ── Controls ── */
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
