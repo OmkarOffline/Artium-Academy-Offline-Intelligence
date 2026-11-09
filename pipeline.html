@@ -176,6 +176,39 @@ table.lt th,table.lt td{padding-left:16px;padding-right:16px}table.lt td.ds{max-
 .ms .pop .pf{display:flex;justify-content:space-between;border-top:1px solid var(--edge);margin-top:4px;padding:6px 6px 2px}
 .ms .pop .pf button{border:0;background:none;color:var(--violet2);font:600 12.5px var(--f);cursor:pointer}
 table.lt td.ph{font-variant-numeric:tabular-nums}
+/* Due · Renewed · % renewal, at the right of a list's title */
+.sh .kst{margin-left:auto;display:inline-flex;align-items:center;gap:0;background:#FAF8FE;border:1px solid var(--edge);border-radius:12px;padding:4px}
+.sh .kst>span{font:500 12.5px var(--f);color:var(--ink3);padding:5px 12px;border-right:1px solid var(--edge);white-space:nowrap}
+.sh .kst>span:last-child{border-right:0}
+.sh .kst b{font:800 15px var(--f);color:var(--ink);margin-left:6px}
+.sh .kst .kp{background:var(--okbg);border-radius:9px;color:var(--ok);border-right:0}.sh .kst .kp b{color:var(--ok)}
+.sh .kst+.cv{margin-left:12px}
+/* Column menus (sort and filter, as in Google Sheets) */
+table.lt th.hc{cursor:pointer;user-select:none}
+table.lt th.hc>span{display:inline-flex;align-items:center;gap:5px}
+table.lt th.hc .hcv{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;opacity:0;transition:opacity .15s}
+table.lt th.hc:hover{color:var(--violet2)}table.lt th.hc:hover .hcv,table.lt th.hc.open .hcv,table.lt th.hc.act .hcv{opacity:1}
+table.lt th.hc.act,table.lt th.hc.open{color:var(--violet2)}
+table.lt th .sa{font:800 12px var(--f);letter-spacing:0}
+table.lt th .fa{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:5px;background:var(--violet2)}table.lt th .fa svg{width:10px;height:10px;fill:#fff}
+.cmenu{position:fixed;z-index:60;width:280px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 24px 48px -20px rgba(18,14,43,.4);padding:8px;font-family:var(--f)}
+.cm-h{font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4);padding:6px 8px 8px}
+.cm-s{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:9px 8px;border-radius:9px;font:600 13.5px var(--f);color:var(--ink);cursor:pointer;text-align:left}
+.cm-s svg{width:15px;height:15px;fill:none;stroke:var(--ink3);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.cm-s:hover{background:var(--tvbg)}.cm-s.on{background:var(--tvbg);color:var(--violet2)}.cm-s.on svg{stroke:var(--violet2)}
+.cm-f{border-top:1px solid var(--edge);margin-top:6px;padding:10px 8px 6px;font:700 12.5px var(--f);color:var(--ink)}
+.cm-q{width:calc(100% - 16px);margin:0 8px 6px;height:36px;border:1px solid var(--line);border-radius:10px;background:#F6F3FC;padding:0 10px;font:500 13.5px var(--f);color:var(--ink)}
+.cm-q:focus{outline:none;border-color:var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12)}
+.cm-a{display:flex;gap:14px;padding:2px 8px 6px}.cm-a button{border:0;background:none;padding:0;color:var(--violet2);font:600 12.5px var(--f);cursor:pointer}
+.cm-l{max-height:240px;overflow:auto;padding:0 2px}
+.cm-l label{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;font-size:13.5px;color:var(--ink2);cursor:pointer}
+.cm-l label:hover{background:var(--tvbg)}.cm-l label span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cm-l label i{font-style:normal;font-size:12px;color:var(--ink4)}
+.cm-l input{width:16px;height:16px;accent-color:#4101f7;flex:none}.cm-n{padding:10px 8px;color:var(--ink4);font-size:13px}
+.lrow>.ltools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-left:auto}.lrow>.ltools>.ltools{margin-left:0}
+.clr{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--violet2);flex:none}
+.clr svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.clr:hover:not(:disabled){background:var(--tvbg);border-color:#DCCFFB}
+.clr:disabled{color:#C9C3DD;cursor:default;background:#FAF8FE}
 .more{display:block;width:100%;border:0;border-top:1px solid var(--edge);background:#FAF8FE;padding:13px;font:700 13px var(--f);color:var(--violet2);cursor:pointer}.more:hover{background:#F4EFFE}
 </style>
 </head>
@@ -461,10 +494,43 @@ function who(x,sel){return`<td class="who"><b>${esc(x.name)||'—'}</b><span cla
 /* Where a learner stands now (the All time lists): renewed, will not renew, extended or paused, a promised payment, or yet to connect */
 function nowOc(x){if(x.st==='paid')return'ren';if(x.st==='lost')return'wnr';if(x.ext>0||/extend|pause/i.test(x.status))return'ext';if(x.ncd&&x.exp>0)return'pipe';return'ytc';}
 const LSHOW={};   // lists opened in full (the first 10 learners show otherwise)
-function ltable(list,cols,sel,key){
-  if(!list.length)return'<div class="empty">No learners here.</div>';
+/* Column menus, as in Google Sheets: sort and filter by values. CF[table] = {sort:{c,dir}, f:{column:[values]}} */
+let CF=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_cf')||'{}')||{};}catch(e){return{};}})(),MENU=null;   // MENU = {t, c, q}
+const saveCF=()=>{try{localStorage.setItem('artium_rp_cf',JSON.stringify(CF));}catch(e){}};
+const cf=t=>(CF[t]=CF[t]||{f:{}},CF[t].f=CF[t].f||{},CF[t]);
+const cKey=(c,x)=>{const v=c[2]?c[2](x):'';return v instanceof Date?fmtD(v):v==null||v===''?'':String(v);};
+function colFilter(list,cols,t){const F=cf(t).f;return list.filter(x=>cols.every(c=>!(F[c[0]]&&F[c[0]].length)||F[c[0]].includes(cKey(c,x))));}
+function colSort(list,cols,t){const S=cf(t).sort,c=S&&cols.find(c=>c[0]===S.c);if(!c)return list;
+  const v=x=>{const y=c[2](x);return y instanceof Date?y.getTime():y;},d=S.dir==='desc'?-1:1;
+  return list.slice().sort((a,b)=>{const p=v(a),q=v(b),pe=p==null||p==='',qe=q==null||q==='';if(pe||qe)return pe&&qe?0:pe?1:-1;
+    return (typeof p==='number'&&typeof q==='number'?p-q:String(p).localeCompare(String(q),undefined,{numeric:true}))*d;});}
+const SORTL={t:['Sort A → Z','Sort Z → A'],d:['Sort oldest to latest','Sort latest to oldest'],n:['Sort smallest to largest','Sort largest to smallest']};
+function colMenu(cols,list,t){
+  const c=cols.find(c=>c[0]===MENU.c);if(!c||!c[2])return'';
+  const others=colFilter(list,cols.filter(o=>o!==c),t),cnt=new Map();others.forEach(x=>{const k=cKey(c,x);cnt.set(k,(cnt.get(k)||0)+1);});
+  let vals=[...cnt.keys()];
+  if(c[3]==='d'){const ts=new Map();others.forEach(x=>{const y=c[2](x);ts.set(cKey(c,x),y instanceof Date?y.getTime():Infinity);});vals.sort((a,b)=>ts.get(a)-ts.get(b));}
+  else if(c[3]==='n')vals.sort((a,b)=>(a===''?Infinity:+a)-(b===''?Infinity:+b));else vals.sort((a,b)=>a===''?1:b===''?-1:a.localeCompare(b));
+  const sel=cf(t).f[c[0]]||[],q=(MENU.q||'').toLowerCase(),S=cf(t).sort||{},L=SORTL[c[3]||'t'];
+  const shown=vals.filter(v=>!q||v.toLowerCase().includes(q));
+  return`<div class="cmenu" data-t="${t}" data-c="${esc(c[0])}" data-all="${esc(JSON.stringify(vals))}"><div class="cm-h">${esc(c[0])}</div>
+    <button type="button" class="cm-s${S.c===c[0]&&S.dir==='asc'?' on':''}" data-dir="asc"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>${L[0]}</button>
+    <button type="button" class="cm-s${S.c===c[0]&&S.dir==='desc'?' on':''}" data-dir="desc"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>${L[1]}</button>
+    <div class="cm-f">Filter by values</div><input class="cm-q" type="search" placeholder="Search" value="${esc(MENU.q||'')}">
+    <div class="cm-a"><button type="button" data-ca="all">Select all</button><button type="button" data-ca="none">Clear</button></div>
+    <div class="cm-l">${shown.map(v=>`<label><input type="checkbox" value="${esc(v)}"${!sel.length||sel.includes(v)?' checked':''}><span>${v===''?'(Blanks)':esc(v)}</span><i>${cnt.get(v)}</i></label>`).join('')||'<div class="cm-n">No matches.</div>'}</div></div>`;
+}
+const FUN='<svg viewBox="0 0 24 24"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg>';
+function ltable(list,cols,sel,key,full){
+  // full: the list before column filters (for the menus); list: what to show
+  const S=cf(key).sort||{},F=cf(key).f;
+  const head=cols.map(c=>{if(!c[2])return`<th>${c[0]}</th>`;const on=MENU&&MENU.t===key&&MENU.c===c[0],f=F[c[0]]&&F[c[0]].length,srt=S.c===c[0];
+    return`<th class="hc${on?' open':''}${f||srt?' act':''}" data-t="${key}" data-c="${esc(c[0])}"><span>${c[0]}${srt?`<b class="sa">${S.dir==='desc'?'↓':'↑'}</b>`:''}${f?`<b class="fa">${FUN}</b>`:''}<svg class="hcv" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></th>`;}).join('');
+  const menu=MENU&&MENU.t===key?colMenu(cols,full||list,key):'';
+  if(!list.length)return`<div class="tw"><table class="lt"><thead><tr>${head}</tr></thead></table></div>${menu}<div class="empty">No learners here.</div>`;
+  list=colSort(list,cols,key);
   const all=LSHOW[key]||list.length<=12,rows=all?list:list.slice(0,10);
-  return`<div class="tw"><table class="lt"><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>`+rows.map(x=>'<tr>'+cols.map(c=>c[1](x)).join('')+'</tr>').join('')+'</tbody></table></div>'
+  return`<div class="tw"><table class="lt"><thead><tr>${head}</tr></thead><tbody>`+rows.map(x=>'<tr>'+cols.map(c=>c[1](x)).join('')+'</tr>').join('')+'</tbody></table></div>'+menu
     +(list.length>12?`<button type="button" class="more" data-more="${key}">${all?'Show fewer':'Show all '+list.length+' learners'}</button>`:'');
 }
 function listView(P,mine,sel){
@@ -475,49 +541,81 @@ function listView(P,mine,sel){
   const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
   const stat=(x,oc)=>`<td>${pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
   /* The columns every list shows, after the learner and any column of its own */
-  const STD=(ocf,own)=>[['Learner',x=>who(x,sel)],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph')],['Course',x=>tdc(esc(x.course))],['Course level',x=>tdc(esc(x.level))],['Age group',x=>tdc(esc(x.age))],['Teacher',x=>tdc(esc(x.teacher))],
-    ['Package',x=>tdc(x.pack,'pk')],...(own||[]),['Status',x=>stat(x,ocf(x))],
-    ['Package expiry',x=>tdc(fmtD(x.end))],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c')],['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex')],
-    ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):'')],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):'')],['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c')],
-    ['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`]];
+  const ocL=(x,oc)=>oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
+  /* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
+  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
+    ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
+    ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],
+    ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
+    ['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex'),x=>x.ext?Math.round(x.ext):'','n'],
+    ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
+    ['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c'),x=>x.exp>0?x.exp:'','n'],
+    ['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t']];
   const okR=(x,ocf,k)=>{const r=fl(k).ren;return r==='all'||(r==='ren')===(ocf(x)==='ren');};
   const dueOc=x=>outcome(x,P);
 
   /* Due in the period: every membership whose package expires in it */
-  const due=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x,'due')&&okR(x,dueOc,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
-  const dFT=due.filter(x=>x.tab==='fs'),dRR=due.filter(x=>x.tab==='rn'),dL=LSUB.due==='ft'?dFT:LSUB.due==='rr'?dRR:due;
-  const sDue=row2(subT('due',[['all','All renewals due',due.length],['ft','First-time renewals',dFT.length],['rr','Repeated renewals',dRR.length]]),'due')
-    +ltable(dL,STD(dueOc),sel,'due');
+  /* Due, Renewed and % renewal for the list in view (its tab, package and filters; the Show toggle only hides rows) */
+  const kst=(L,ocf)=>{const r=L.filter(x=>ocf(x)==='ren').length;
+    return`<span class="kst"><span>Due <b>${n(L.length)}</b></span><span>Renewed <b>${n(r)}</b></span><span class="kp">Renewal <b>${L.length?Math.round(r/L.length*100)+'%':'–'}</b></span></span>`;};
+  const kn=L=>`<span class="kst"><span>Learners <b>${n(L.length)}</b></span></span>`;
+  const byR=(L,ocf,k)=>L.filter(x=>okR(x,ocf,k));
+  // Each table: its rows before the Show toggle → column filters → counts → Show toggle → table
+  const T=(base,cols,key,ocf,showK)=>{const cfd=colFilter(base,cols,key);return{cols,base,cfd,rows:byR(cfd,ocf,showK),key};};
+  const tbl=o=>ltable(o.rows,o.cols,sel,o.key,o.base);
+  const dueA=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
+  const dSub=LSUB.due==='ft'?dueA.filter(x=>x.tab==='fs'):LSUB.due==='rr'?dueA.filter(x=>x.tab==='rn'):dueA;
+  const dC=STD(dueOc),tD=T(dSub,dC,'due',dueOc,'due'),cAll=byR(colFilter(dueA,dC,'due'),dueOc,'due');
+  const sDue=row2(subT('due',[['all','All renewals due',cAll.length],['ft','First-time renewals',cAll.filter(x=>x.tab==='fs').length],['rr','Repeated renewals',cAll.filter(x=>x.tab==='rn').length]]),'due')+tbl(tD);
 
   /* Learners with at least two 1-month renewals */
   const one=latest.filter(x=>x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length>=2&&okP(x,'one')).map(x=>Object.assign(x,{n1:x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length}));
   // Active: the membership of theirs that falls due in the period (renewed or not)
-  const oAct=one.map(x=>{const d=x.hist.find(h=>inP(h.end,P));return d?Object.assign(d,{n1:x.n1}):null;}).filter(x=>x&&okR(x,dueOc,'one')).sort((a,b)=>a.end-b.end);
-  const oIn=one.filter(x=>x.st!=='paid'&&x.end<TODAY&&okR(x,nowOc,'one')).sort((a,b)=>b.end-a.end);
-  const n1=['1-month renewals',x=>`<td class="pk">${x.n1}</td>`],why=['Reason for discontinuing',x=>tdc(esc(x.reason))];
-  const sOne=row2(subT('one',[['act','Active · due in '+P.label,oAct.length],['in','Inactive',oIn.length]]),'one')
-    +(LSUB.one==='in'?ltable(oIn,STD(nowOc,[n1,why]),sel,'oin'):ltable(oAct,STD(dueOc,[n1]),sel,'oact'));
+  const oActA=one.map(x=>{const d=x.hist.find(h=>inP(h.end,P));return d?Object.assign(d,{n1:x.n1}):null;}).filter(Boolean).sort((a,b)=>a.end-b.end);
+  const oInA=one.filter(x=>x.st!=='paid'&&x.end<TODAY).sort((a,b)=>b.end-a.end);
+  const n1=['1-month renewals',x=>`<td class="pk">${x.n1}</td>`,x=>x.n1,'n'],why=['Reason for discontinuing',x=>tdc(esc(x.reason)),x=>x.reason,'t'];
+  const tA=T(oActA,STD(dueOc,[n1]),'oact',dueOc,'one'),tI=T(oInA,STD(nowOc,[n1,why]),'oin',nowOc,'one');
+  const sOne=row2(subT('one',[['act','Active · due in '+P.label,tA.rows.length],['in','Inactive',tI.rows.length]]),'one')+tbl(LSUB.one==='in'?tI:tA);
 
   /* Left because of affordability */
-  const aff=latest.filter(x=>x.st!=='paid'&&/afford/i.test(x.reason||'')&&okP(x,'aff')&&okR(x,nowOc,'aff')).sort((a,b)=>b.end-a.end);
-  const sAff=row2('','aff')+ltable(aff,STD(nowOc,[['Renewals',x=>`<td class="pk">${x.hist.filter(h=>h.tab==='rn').length}</td>`]]),sel,'aff');
+  const tF=T(latest.filter(x=>x.st!=='paid'&&/afford/i.test(x.reason||'')&&okP(x,'aff')).sort((a,b)=>b.end-a.end),
+    STD(nowOc,[['Renewals',x=>`<td class="pk">${x.hist.filter(h=>h.tab==='rn').length}</td>`,x=>x.hist.filter(h=>h.tab==='rn').length,'n']]),'aff',nowOc,'aff');
+  const sAff=row2('','aff')+tbl(tF);
 
   /* Extended or paused, not renewed yet */
-  const ext=latest.filter(x=>x.st!=='paid'&&/extend|pause/i.test(x.status)&&okP(x,'ext')&&okR(x,nowOc,'ext')).sort((a,b)=>(a.newEnd||a.end)-(b.newEnd||b.end));
-  const sExt=row2('','ext')+ltable(ext,STD(nowOc),sel,'ext');
+  const tE=T(latest.filter(x=>x.st!=='paid'&&/extend|pause/i.test(x.status)&&okP(x,'ext')).sort((a,b)=>(a.newEnd||a.end)-(b.newEnd||b.end)),STD(nowOc),'ext',nowOc,'ext');
+  const sExt=row2('','ext')+tbl(tE);
 
   const cnt=(n,c='')=>`<span class="ct ${c}">${n}</span>`;
   const info=t=>`<span class="ib" role="button" tabindex="0" aria-label="About this list" data-info>i<span class="ipop">${t}</span></span>`;
   return filterPanel(DUE.filter(mine))
     +`<div class="lgrp">Due in ${esc(P.label)}</div>`
-    +section('l_due','Renewals due',cnt(due.length,'v')+`<span>${esc(P.label)}</span>`,sDue)
+    +section('l_due','Renewals due',`<span>${esc(P.label)}</span>`+kst(tD.cfd,dueOc),sDue)
     +`<div class="lgrp">All time</div>`
-    +section('l_one','Repeated 1-month renewers',info('This is a list of learners who have made at least two 1-month renewal transactions in the past. It includes both active and inactive learners. It helps us focus on 1-month renewers, ensuring they continue with us. It also helps us narrow down inactive 1-month renewers who may have quit due to affordability issues.')+cnt(one.length,'v'),sOne)
-    +section('l_aff','Left because of affordability',cnt(aff.length,'r')+'<span>latest departures first</span>',sAff)
-    +section('l_ext','Extended or paused, not renewed yet',cnt(ext.length,'b'),sExt);
+    +section('l_one','Repeated 1-month renewers',info('This is a list of learners who have made at least two 1-month renewal transactions in the past. It includes both active and inactive learners. It helps us focus on 1-month renewers, ensuring they continue with us. It also helps us narrow down inactive 1-month renewers who may have quit due to affordability issues.')+cnt(one.length,'v')+(LSUB.one==='in'?kn(tI.rows):kst(tA.cfd,dueOc)),sOne)
+    +section('l_aff','Left because of affordability','<span>latest departures first</span>'+kn(tF.rows),sAff)
+    +section('l_ext','Extended or paused, not renewed yet',kn(tE.rows),sExt);
 }
-function row2(left,k){return`<div class="lrow">${left||'<span></span>'}${tools(k)}</div>`;}
+/* One icon button per list: clears its package and Show choices and its column filters and sorting */
+const TBL={due:['due'],one:['oact','oin'],aff:['aff'],ext:['ext']};
+const busy=k=>{const f=fl(k);return f.pkg!=='all'||f.ren!=='all'||TBL[k].some(t=>CF[t]&&(CF[t].sort||Object.keys(CF[t].f||{}).length));};
+function row2(left,k){const on=busy(k);
+  return`<div class="lrow">${left||'<span></span>'}<div class="ltools">${tools(k)}<button type="button" class="clr" data-clr="${k}"${on?'':' disabled'} title="Clear this list's filters and sorting" aria-label="Clear this list's filters and sorting"><svg viewBox="0 0 24 24"><path d="M3 5h14l-5.5 6.5V18l-3 1.5v-8z"/><path d="M16 14l5 5M21 14l-5 5"/></svg></button></div></div>`;}
 function bindList(out){
+  out.querySelectorAll('[data-clr]').forEach(b=>b.onclick=()=>{const k=b.dataset.clr;delete FL[k];TBL[k].forEach(t=>delete CF[t]);MENU=null;saveCF();try{localStorage.setItem('artium_rp_lf',JSON.stringify(FL));}catch(e){}render();});
+  out.querySelectorAll('th.hc').forEach(th=>th.onclick=e=>{e.stopPropagation();const t=th.dataset.t,c=th.dataset.c;MENU=MENU&&MENU.t===t&&MENU.c===c?null:{t,c,q:''};render();});
+  const m=out.querySelector('.cmenu');
+  if(m){const th=out.querySelector(`th.hc.open`);if(th){const r=th.getBoundingClientRect(),w=280;m.style.left=Math.max(12,Math.min(r.left,innerWidth-w-12))+'px';m.style.top=(r.bottom+6)+'px';}
+    const t=m.dataset.t,c=m.dataset.c,C=cf(t);
+    m.onclick=e=>e.stopPropagation();
+    m.querySelectorAll('[data-dir]').forEach(b=>b.onclick=()=>{C.sort=C.sort&&C.sort.c===c&&C.sort.dir===b.dataset.dir?null:{c,dir:b.dataset.dir};saveCF();MENU=null;render();});
+    const boxes=()=>[...m.querySelectorAll('.cm-l input')];
+    m.querySelectorAll('[data-ca]').forEach(b=>b.onclick=()=>{if(b.dataset.ca==='all')delete C.f[c];else C.f[c]=['\u0000none'];saveCF();render();});
+    m.querySelectorAll('.cm-l input').forEach(i=>i.onchange=()=>{const all=JSON.parse(m.dataset.all),sel=(C.f[c]||[]).filter(v=>v!=='\u0000none');
+      const cur=new Set(C.f[c]&&C.f[c].length?sel:all);if(i.checked)cur.add(i.value);else cur.delete(i.value);
+      if(all.every(v=>cur.has(v)))delete C.f[c];else C.f[c]=cur.size?[...cur]:['\u0000none'];saveCF();render();});
+    const q=m.querySelector('.cm-q');q.oninput=()=>{MENU.q=q.value;const pos=q.selectionStart;render();const n=document.querySelector('.cmenu .cm-q');if(n){n.focus();n.setSelectionRange(pos,pos);}};
+  }
   const saveF=()=>{try{localStorage.setItem('artium_rp_fsel',JSON.stringify(FSEL));}catch(e){}};
   const box=out.querySelector('#fbox');
   if(box){
@@ -539,8 +637,9 @@ function bindList(out){
   out.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{LSUB[b.dataset.sub]=b.dataset.v;try{localStorage.setItem('artium_rp_lsub',JSON.stringify(LSUB));}catch(e){}render();});
   out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
 }
-document.addEventListener('click',e=>{if(OPEN_F&&!e.target.closest('.ms')){OPEN_F=null;render();}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN_F){OPEN_F=null;render();}});
+document.addEventListener('click',e=>{if(OPEN_F&&!e.target.closest('.ms')){OPEN_F=null;render();}if(MENU&&!e.target.closest('.cmenu,th.hc')){MENU=null;render();}});
+window.addEventListener('scroll',()=>{if(MENU){MENU=null;render();}},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(OPEN_F||MENU)){OPEN_F=null;MENU=null;render();}});
 
 /* ── Controls ── */
 document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
