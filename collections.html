@@ -296,15 +296,24 @@ document.getElementById('prev').onclick=()=>move(-1);
 document.getElementById('next').onclick=()=>move(1);
 
 /* Full screen */
+/* Presenting runs the Execs Call pages as one deck, through the site (Collections Overview, then Key Updates, then Spotlight) */
+const DECK=()=>{try{return window.parent!==window&&window.parent.artiumPresent;}catch(e){return null;}};
+let GROUP=false;
+window.artiumPresentStart=()=>{GROUP=true;document.body.classList.add('fs');document.documentElement.classList.add('fs');document.getElementById('exit').hidden=false;if(VIEW==='edit'){VIEW='show';render();}fit();};
+window.artiumPresentStop=()=>{GROUP=false;leaveFs();};
+document.addEventListener('keydown',e=>{if(!GROUP)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();DECK()&&DECK().next(1);}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();DECK()&&DECK().next(-1);}});
 document.getElementById('present').onclick=async()=>{
+  if(DECK()){DECK().start('collections');return;}
   try{await document.documentElement.requestFullscreen();}catch(e){}
   document.body.classList.add('fs');document.documentElement.classList.add('fs');document.getElementById('exit').hidden=false;
   if(VIEW==='edit'){VIEW='show';render();}fit();
 };
 function leaveFs(){document.body.classList.remove('fs');document.documentElement.classList.remove('fs');document.getElementById('exit').hidden=true;fit();}
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)leaveFs();});
-document.getElementById('exit').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else leaveFs();};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('fs')&&!document.fullscreenElement)leaveFs();});
+document.addEventListener('fullscreenchange',()=>{if(!GROUP&&!document.fullscreenElement)leaveFs();});
+document.getElementById('exit').onclick=()=>{if(GROUP&&DECK()){DECK().stop();return;}if(document.fullscreenElement)document.exitFullscreen();else leaveFs();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('fs')&&!document.fullscreenElement){if(GROUP&&DECK())DECK().stop();else leaveFs();}});
 
 function stamp(){const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
 async function load(){
@@ -315,7 +324,7 @@ async function load(){
   if(k===dk())render();
 }
 // the site's refresh button and automatic refresh: wait while the edit view is open
-window.artiumBusy=()=>VIEW==='edit';
+window.artiumBusy=()=>VIEW==='edit'||GROUP;
 document.fonts&&document.fonts.ready.then(fit);
 load();
 </script>

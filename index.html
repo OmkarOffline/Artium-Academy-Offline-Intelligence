@@ -17,6 +17,7 @@
   .frames{position:fixed;inset:0}
   .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
   .frames iframe[hidden]{display:none}
+  body.presenting .frames{left:0}
 
   /* Menu button, top left */
   .menu-btn{position:fixed;top:10px;left:10px;z-index:30;display:grid;place-items:center;width:34px;height:34px;border-radius:11px;border:1px solid rgba(91,42,134,.14);
@@ -210,6 +211,7 @@
     <iframe id="frame-collections" data-src="collections.html" title="Collections Overview" allow="fullscreen" allowfullscreen hidden></iframe>
     <iframe id="frame-updates" data-src="updates.html" title="Key Updates" allow="fullscreen" allowfullscreen hidden></iframe>
     <iframe id="frame-spotlight" data-src="spotlight.html" title="Spotlight" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
+    <iframe id="frame-review" data-src="review.html" title="Weekly Offline Review" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
     <iframe id="frame-texp" data-src="texp.html" title="Teacher Experience" hidden></iframe>
     <iframe id="frame-home" data-src="home.html" title="Business Pulse" hidden></iframe>
     <iframe id="frame-daily" data-src="daily.html" title="Daily Tracker" hidden></iframe>
@@ -252,6 +254,10 @@
       <button class="tab" role="tab" data-tab="collections" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 13l3-3 2 2 5-5"/></svg>Collections Overview</button>
       <button class="tab" role="tab" data-tab="updates" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg>Key Updates</button>
       <button class="tab" role="tab" data-tab="spotlight" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="11" height="14" rx="2"/><path d="M16 8.5l5.5-3v13l-5.5-3"/></svg>Spotlight</button>
+     </div>
+     <div class="nav-g">
+      <button type="button" class="nav-t">Reviews<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button class="tab" role="tab" data-tab="review" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><path d="M7 8h6M7 11h4"/></svg>Weekly Offline Review</button>
      </div>
      <div class="nav-g">
       <button type="button" class="nav-t">Daily Operations<span class="cnt"></span><svg class="ch" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
@@ -320,6 +326,46 @@
     if(name === "goals" && tm){ try{ const f = document.getElementById("frame-goals"); if(f.contentWindow && f.contentWindow.openTask) f.contentWindow.openTask(tm[1]); }catch(e){} }
   }
 
+  /* Execs Call presenting: Collections Overview, Key Updates and Spotlight run as one full-screen deck. The site holds the full screen,
+     shows each page in turn and tells it to present; a page hands back here when you go past its last slide (or before its first). */
+  const DECK = ["collections", "updates", "spotlight"];
+  let PRES = null;   // { list, i }
+  function presEnter(i, atEnd){
+    const name = PRES.list[i], f = document.getElementById("frame-" + name);
+    PRES.i = i; show(name);
+    let tries = 0;
+    (function go(){
+      if(!PRES) return;
+      const w = f.contentWindow;
+      if(w && typeof w.artiumPresentStart === "function" && w.document.readyState !== "loading"){ w.artiumPresentStart(!!atEnd); try{ w.focus(); }catch(e){} return; }
+      if(++tries < 100) setTimeout(go, 100);
+    })();
+  }
+  function presCur(){ return PRES ? document.getElementById("frame-" + PRES.list[PRES.i]).contentWindow : null; }
+  window.artiumPresent = {
+    async start(name){
+      const list = DECK.filter(n => ArtiumAuth.pages.includes(n));
+      PRES = { list, i: Math.max(0, list.indexOf(name)) };
+      try{ await document.querySelector(".frames").requestFullscreen(); }catch(e){}
+      document.body.classList.add("presenting");
+      presEnter(PRES.i, false);
+    },
+    next(d){
+      if(!PRES) return;
+      const j = PRES.i + d;
+      if(j < 0 || j >= PRES.list.length) return;   // already at the very first or last slide
+      const w = presCur(); try{ w && w.artiumPresentStop && w.artiumPresentStop(); }catch(e){}
+      presEnter(j, d < 0);
+    },
+    stop(){ if(document.fullscreenElement) document.exitFullscreen(); else presEnd(); }
+  };
+  function presEnd(){
+    if(!PRES) return;
+    const w = presCur(); try{ w && w.artiumPresentStop && w.artiumPresentStop(); }catch(e){}
+    PRES = null; document.body.classList.remove("presenting");
+  }
+  document.addEventListener("fullscreenchange", () => { if(!document.fullscreenElement) presEnd(); });
+
   /* Sidebar: opens when the mouse reaches the menu button or the left edge, closes when it leaves; a click or tap also toggles it */
   const body = document.body, side = document.getElementById("sidebar"), btn = document.getElementById("menu-btn");
   let closeTimer = null;
@@ -355,7 +401,7 @@
   }
   function togglePin(k){ PINS = PINS.includes(k) ? PINS.filter(x => x !== k) : PINS.concat(k); ls("artium_nav_pins", PINS); renderPins(); }
   // section icons
-  const SI = {"Execs Call":'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',"Daily Operations":'<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  const SI = {"Execs Call":'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',"Daily Operations":'<path d="M3 12h4l3-7 4 14 3-7h4"/>',"Reviews":'<rect x="3" y="3" width="18" height="14" rx="2"/><path d="M7 21h10"/><path d="M7 8h6M7 12h10"/>',
     "Pipeline":'<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',"Performance Tracking":'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',"Learners":'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
     "Experience":'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',"Funnel & Centres":'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
     "Planner":'<rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M16 3v4M8 3v4M3 10h18"/>'};

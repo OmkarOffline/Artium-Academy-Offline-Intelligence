@@ -351,14 +351,20 @@ const move=d=>{if(DIRTY&&!confirm('You have changes that aren\'t saved. Leave th
   viewM+=d;if(viewM<0){viewM=11;viewY--;}if(viewM>11){viewM=0;viewY++;}try{localStorage.setItem('artium_execs_period',JSON.stringify({y:viewY,m:viewM,d:new Date(viewY,viewM+1,0).getDate()}));}catch(e){}SLIDE=0;load();};
 document.getElementById('prev').onclick=()=>move(-1);
 document.getElementById('next').onclick=()=>move(1);
-const step=d=>{SLIDE+=d;renderSlide();};
+/* Presenting runs the Execs Call pages as one deck, through the site: past the last slide it moves on to the next page, before the first back to the one before */
+const DECK=()=>{try{return window.parent!==window&&window.parent.artiumPresent;}catch(e){return null;}};
+let GROUP=false;
+const step=d=>{const n=slides().length;if(GROUP&&(SLIDE+d<0||SLIDE+d>=n)){DECK()&&DECK().next(d);return;}SLIDE=Math.max(0,Math.min(n-1,SLIDE+d));renderSlide();};
+window.artiumPresentStart=atEnd=>{GROUP=true;document.body.classList.add('fs');document.documentElement.classList.add('fs');document.getElementById('fsnav').hidden=false;
+  if(VIEW==='edit'){VIEW='show';render();}SLIDE=atEnd?slides().length-1:0;renderSlide();fit();};
+window.artiumPresentStop=()=>{GROUP=false;leaveFs();};
 document.getElementById('sprev').onclick=()=>step(-1);document.getElementById('snext').onclick=()=>step(1);
 document.getElementById('fprev').onclick=()=>step(-1);document.getElementById('fnext').onclick=()=>step(1);
 document.addEventListener('keydown',e=>{
   if(/INPUT|TEXTAREA|SELECT/.test((e.target.tagName||'')))return;
   if(e.key==='ArrowRight'||e.key==='PageDown'||(e.key===' '&&document.body.classList.contains('fs'))){e.preventDefault();step(1);}
   if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();step(-1);}
-  if(e.key==='Escape'&&document.body.classList.contains('fs')&&!document.fullscreenElement)leaveFs();
+  if(e.key==='Escape'&&document.body.classList.contains('fs')&&!document.fullscreenElement){if(GROUP&&DECK())DECK().stop();else leaveFs();}
 });
 
 /* Scale the 1600 × 900 slide to the space it has */
@@ -374,13 +380,14 @@ function fit(){
 }
 addEventListener('resize',fit);
 document.getElementById('present').onclick=async()=>{
+  if(DECK()){DECK().start(KIND==='spot'?'spotlight':'updates');return;}
   try{await document.documentElement.requestFullscreen();}catch(e){}
   document.body.classList.add('fs');document.documentElement.classList.add('fs');document.getElementById('fsnav').hidden=false;
   if(VIEW==='edit'){VIEW='show';render();}fit();
 };
 function leaveFs(){document.body.classList.remove('fs');document.documentElement.classList.remove('fs');document.getElementById('fsnav').hidden=true;fit();}
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)leaveFs();});
-document.getElementById('exit').onclick=()=>{if(document.fullscreenElement)document.exitFullscreen();else leaveFs();};
+document.addEventListener('fullscreenchange',()=>{if(!GROUP&&!document.fullscreenElement)leaveFs();});
+document.getElementById('exit').onclick=()=>{if(GROUP&&DECK()){DECK().stop();return;}if(document.fullscreenElement)document.exitFullscreen();else leaveFs();};
 
 function stamp(){const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
 async function load(){
@@ -392,7 +399,7 @@ async function load(){
   render();
 }
 // the site's refresh button and automatic refresh: wait while editing, with unsaved changes, or while a file uploads
-window.artiumBusy=()=>VIEW==='edit'||DIRTY||UPLOADING>0;
+window.artiumBusy=()=>VIEW==='edit'||DIRTY||UPLOADING>0||GROUP;
 addEventListener('beforeunload',e=>{if(DIRTY||UPLOADING){e.preventDefault();e.returnValue='';}});
 document.fonts&&document.fonts.ready.then(fit);
 load();
