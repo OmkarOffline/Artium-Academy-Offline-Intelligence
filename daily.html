@@ -330,16 +330,19 @@ function prep(name){
 function series(name,days){
   const P=PREP[name];if(!P)return null;
   const idx=new Map(days.map((k,i)=>[k,i])),z=()=>days.map(()=>0),S={};
-  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG'].forEach(k=>S[k]=z());
+  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG','ldA','ldAin','ldAout','expIn','expPrev','expNd'].forEach(k=>S[k]=z());
   const put=(k,d,n=1)=>{const i=idx.get(d);if(i!=null)S[k][i]+=n;};
   const end=days[days.length-1];
+  const PP=period(),pEnd=PP.month?ymd(PP.full):end,pStart=days[0];   // the month (or period) the expected visit dates are judged against
   if(P.leads){P.leads.forEach(l=>{put('L',l.d);if(l.appt)put('LA',l.d);if(l.visit)put('LV',l.d);if(l.paid)put('LC',l.d);
     // cohort: of the leads that came in that day, who booked, visited and paid by the end of the period
     const kA=l.appt&&(!l.apptD||l.apptD<=end),kV=l.visitD&&l.visitD<=end,kC=l.paidD&&l.paidD<=end;
-    if(kA)put('kA',l.d);if(kV)put('kV',l.d);if(kC)put('kC',l.d);if(kA&&kV)put('kAV',l.d);});}
+    if(kA)put('kA',l.d);if(kV)put('kV',l.d);if(kC)put('kC',l.d);if(kA&&kV)put('kAV',l.d);
+    // appointments through the period's leads: on the day they booked; for this month (or period) or later, by the expected visit date
+    if(kA&&idx.has(l.d)){const on=l.apptD&&idx.has(l.apptD)?l.apptD:l.d;put('ldA',on);put(!l.apptE||l.apptE<=pEnd?'ldAin':'ldAout',on);}});}
   P.t.leads.forEach(([d,n])=>{if(!(P.leads&&d>=LEAD_FROM))put('leads',d,n);});   // ads tracker before the lead list starts
   if(P.leads)P.leads.forEach(l=>{if(l.d>=LEAD_FROM)put('leads',l.d);});
-  if(P.hasAppts){P.appts.forEach(a=>{if(a[1])put('exp',a[1]);put('apR',a[0]||a[1]);if(!a[0])return;put('appts',a[0]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
+  if(P.hasAppts){P.appts.forEach(a=>{if(a[1]){put('exp',a[1]);put(!a[0]?'expNd':a[0]>=pStart?'expIn':'expPrev',a[1]);}put('apR',a[0]||a[1]);if(!a[0])return;put('appts',a[0]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
   const VK={today:'vToday',earlier:'vEarlier',later:'vLater',walk:'vWalk',booked:'vBooked',unknown:'vUnknown'};
   P.visits.forEach(v=>{put('vis',v.d);put(VK[v.kind],v.d);if(v.paid)put('vPaid',v.d);if(['today','earlier','later'].includes(v.kind))put('apptVis',v.d);});
   P.fresh.forEach(f=>{put('conv',f.d);put('fs',f.d);put('fc',f.d,f.amt);put({appt:'cAppt',walk:'cWalk',unknown:'cUnknown',nolog:'cNolog'}[f.journey],f.d);if(f.when==='same')put('cSame',f.d);else if(f.when==='earlier')put('cEarlier',f.d);});
@@ -365,8 +368,10 @@ const SEG=['#4101f7','#dd30b1','#C9B5FA','#6E7587','#AEB3C0','#D8DBE2'];   // br
 const ROWS=[
   {g:'At a glance'},
   {id:'leads',label:'Leads registered',kind:'count',tkey:'leads',head:1,need:'leads'},
-  {id:'appts',label:'Appointments scheduled in {p}',kind:'count',tkey:'appts',head:1,need:'booked',tip:'Booked during the period, for a visit on any date'},
-  {id:'exp',label:'Appointments scheduled for {p}',kind:'count',head:1,need:'appts',tip:'Visits due during the period, whenever they were booked'},
+  {id:'exp',label:'Appointments booked for {p}',kind:'count',tkey:'appts',head:1,need:'appts',open:'af',tip:'Appointments whose expected visit date falls in the period, counted on that date',subs:[
+    {id:'expIn',label:'Booked in {p}'},{id:'expPrev',label:'Booked in {earlier}'},{id:'expNd',label:'Booking date not recorded',opt:1},{total:['expIn','expPrev','expNd']}]},
+  {id:'ldA',label:'Appointments – through leads registered in {p}',kind:'count',head:1,need:'list',open:'la',tip:'Leads registered during the period who have booked an appointment, counted on the day they booked',subs:[
+    {id:'ldAin',label:'Booked for {p}'},{id:'ldAout',label:'Booked for {later}'},{total:['ldAin','ldAout']}]},
   {id:'vis',label:'Centre visits',kind:'count',tkey:'visits',head:1},
   {id:'conv',label:'Conversions',kind:'count',tkey:'conv',head:1},
   {id:'sp',label:'Marketing spend',kind:'money',tkey:'spend',head:1,open:'m',subs:[{id:'spM',label:'Meta'},{id:'spG',label:'Google'},{total:['spM','spG']}]},
@@ -528,13 +533,13 @@ function render(){
   const kc=(l,id,keys,need,money)=>{const ps=ok(need);if(!ps.length)return card(l,'–','Not recorded',null);const v=tot(add(id,ps)),T=P.month&&keys?tgt(keys):null;
     return card(l,money?fmtR(v):fmtN(v),T?`${Math.round(v/T.v*100)}% of ${money?fmtR(T.v):fmtN(T.v)} target`:sp,T?v/T.v*100:null);};
   const rnN=tot(add('rn',per)),dueN=tot(add('due',per)),eff=dueN?rnN/dueN*100:null,colT=tot(add('tc',per));
-  document.getElementById('kpis').innerHTML=[kc('Leads registered','leads',['leads'],'leads'),kc('Appointments scheduled in '+(P.month?'this month':'this period'),'appts',['appts'],'booked'),kc('Centre visits','vis',['visits']),kc('Conversions','conv',['conv']),kc('Collections – Fresh Sales','fc',['fscol'],null,1),
+  document.getElementById('kpis').innerHTML=[kc('Leads registered','leads',['leads'],'leads'),kc('Appointments booked for '+(P.month?'this month':'this period'),'exp',['appts'],'appts'),kc('Centre visits','vis',['visits']),kc('Conversions','conv',['conv']),kc('Collections – Fresh Sales','fc',['fscol'],null,1),
     card('Renewals',`${fmtN(rnN)}<em> of ${fmtN(dueN)} due</em>`,'renewals paid · memberships ending',null),
     card('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%','renewed ÷ due',eff),
     kc('Collections – Renewals','rc',['rncol'],null,1),kc('Total collections','tc',['fscol','rncol'],null,1)].join('')+'<div class="kpi"></div>';
   document.getElementById('sumline').innerHTML=[['Leads',fmtN(tot(add('leads',ok('leads'))))],['Visits',fmtN(tot(add('vis',per)))],['Conversions',fmtN(tot(add('conv',per)))],['Renewals',fmtN(rnN)+(dueN?' of '+fmtN(dueN):'')],['Collected',fmtR(colT)]].map(([l,v])=>`<span>${l}<b>${v}</b></span>`).join('');
   grid.className=P.month?'':'rng';
-  grid.innerHTML=h.split('{p}').join(P.month?'this month':'this period')+'</tbody>';
+  grid.innerHTML=h.split('{p}').join(P.month?'this month':'this period').split('{later}').join(P.month?'future months':'after this period').split('{earlier}').join(P.month?'previous months':'before this period')+'</tbody>';
   document.getElementById('sc').scrollLeft=0;
   const jb=document.getElementById('jbtn');if(jb)jb.onclick=()=>journeyDialog(P,list.map(c=>c.name));
   grid.querySelectorAll('tr[data-open]').forEach(tr=>tr.onclick=()=>{const k=tr.dataset.open;OPEN=OPEN.includes(k)?OPEN.filter(x=>x!==k):OPEN.concat(k);try{localStorage.setItem('artium_daily_open',JSON.stringify(OPEN));}catch(e){}render();});
