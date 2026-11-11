@@ -238,6 +238,23 @@
   .tdlg .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tdlg .df{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--line)}
   .tdlg .x{border:0;background:none;font-size:24px;color:var(--muted);cursor:pointer}
+  /* Subtasks of a task */
+  .sbt{display:inline-flex;align-items:center;gap:8px;margin-top:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:3px 10px 3px 8px;font:600 12px var(--body);color:var(--ink2);cursor:pointer}
+  .sbt .sbar{width:46px;height:5px;border-radius:5px;background:#EEE8FB;overflow:hidden}.sbt .sbar i{display:block;height:100%;background:linear-gradient(90deg,#7b2cf0,#dd30b1)}
+  .sbt svg{transition:transform .15s}.sbt.on svg{transform:rotate(180deg)}
+  .sbl{list-style:none;margin:8px 0 2px;display:flex;flex-direction:column;gap:2px}
+  .sbl li{display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:8px;font-size:13.5px;color:var(--ink2)}
+  .sbl li:hover{background:#F7F4FD}.sbl li.dn span{text-decoration:line-through;color:var(--faint)}
+  .sbl input{width:16px;height:16px;accent-color:#4101f7;flex:none;cursor:pointer}.sbl input:disabled{cursor:default}
+  .sbl small{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap}.sbl small.bad{color:var(--bad)}
+  .bc .sbt{margin:8px 0 0 25px;align-self:flex-start;width:auto;max-width:max-content}.bc .sbl{margin-left:19px}
+  .tdlg .subs{display:flex;flex-direction:column;gap:8px}
+  .tdlg .sr{display:grid;grid-template-columns:22px minmax(0,1fr) 150px 30px;gap:8px;align-items:center}
+  .tdlg .sr .n{font:700 12px var(--body);color:var(--faint);text-align:center}
+  .tdlg .sr .in{padding:8px 10px}
+  .tdlg .sr button{border:0;background:none;color:var(--faint);font-size:15px;cursor:pointer}
+  .tdlg .addsub{align-self:flex-start;border:1.5px dashed #CDBDF7;background:none;border-radius:10px;padding:8px 14px;font:700 13px var(--body);color:var(--accent);cursor:pointer}
+  .tk-row .sl{display:block;font-size:12px;color:var(--faint);margin-top:2px}.tk-row .sl.warn{color:#9A6200}
   @media (max-width:1000px){.tk-row{grid-template-columns:1fr}}
   .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
   /* Goal details */
@@ -581,7 +598,7 @@ function renderTasks(){
     .sort((a,b)=>(tDue(a)||9e15)-(tDue(b)||9e15));
   const cnt=k=>list.filter(t=>tGroup(t)===k).length;
   document.getElementById('chips').hidden=false;
-  document.getElementById('chips').innerHTML=[['Open tasks',list.filter(t=>t.status!=='cmp').length],['Past due',cnt('late')],['To be picked',list.filter(t=>t.status==='tbp').length],['In progress',list.filter(t=>t.status==='inp').length],['Yet to email',list.filter(t=>t.draft).length],['Completed',cnt('cmp')]]
+  document.getElementById('chips').innerHTML=[['Open tasks',list.filter(t=>t.status!=='cmp').length],['Past due',cnt('late')],['To be picked',list.filter(t=>t.status==='tbp').length],['In progress',list.filter(t=>t.status==='inp').length],['Yet to send',list.filter(t=>t.draft).length],['Completed',cnt('cmp')]]
     .map(([l,v])=>`<div class="k"><small>${l}</small><b>${v}</b></div>`).join('');
   const el=document.getElementById('tasksv');
   const sw=`<div class="vbar" style="margin:0 0 12px"><div class="vgrp"><span class="vl">View</span><div class="seg" id="tview"><button type="button" data-tv="list" aria-pressed="${TVIEW==='list'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>List</button><button type="button" data-tv="board" aria-pressed="${TVIEW==='board'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>Board</button></div></div><div class="vgrp"><span class="vl">Group by</span><div class="seg" id="tgroup"><button type="button" data-tg="status" aria-pressed="${TGROUP==='status'}" title="${TVIEW==='board'?'The board\'s columns are the statuses':''}">Status</button><button type="button" data-tg="tag" aria-pressed="${TGROUP==='tag'}">Tag</button><button type="button" data-tg="none" aria-pressed="${TGROUP==='none'}">None</button></div></div></div>`;
@@ -590,12 +607,22 @@ function renderTasks(){
   if(TVIEW==='board'){
     if(TGROUP!=='tag'){el.innerHTML=sw+boardHtml([['',list]]);return;}
     el.innerHTML=sw+boardHtml(TAGS.map(x=>[x,list.filter(t=>(t.tags||[]).includes(x))]).concat([['No tag',list.filter(t=>!(t.tags||[]).length)]]).filter(l=>l[1].length));return;}
-  el.innerHTML=sw+`<div class="card" style="overflow:hidden"><div class="tk-row tk-cols"><span>Task</span><span>Owner</span><span>Due</span><span>Status</span><span>Email</span><span></span></div>${TGROUP==='none'?list.map(taskRow).join(''):(TGROUP==='tag'?TAGS.map(x=>[x,x,'#7a7196']).concat([['','No tag','#B3AFBB']]):G2).map(([k,l,c])=>{const xs=TGROUP==='tag'?list.filter(t=>k?(t.tags||[]).includes(k):!(t.tags||[]).length):list.filter(t=>tGroup(t)===k);if(!xs.length)return'';
+  el.innerHTML=sw+`<div class="card" style="overflow:hidden"><div class="tk-row tk-cols"><span>Task</span><span>Owner</span><span>Due</span><span>Status</span><span>Sent</span><span></span></div>${TGROUP==='none'?list.map(taskRow).join(''):(TGROUP==='tag'?TAGS.map(x=>[x,x,'#7a7196']).concat([['','No tag','#B3AFBB']]):G2).map(([k,l,c])=>{const xs=TGROUP==='tag'?list.filter(t=>k?(t.tags||[]).includes(k):!(t.tags||[]).length):list.filter(t=>tGroup(t)===k);if(!xs.length)return'';
     return`<div class="tk-h"><i style="background:${c}"></i>${l} · ${xs.length}</div>`+xs.map(taskRow).join('');}).join('')}</div>`;
 }
 const tOwners=t=>t.owners&&t.owners.length?t.owners:t.owner?[t.owner]:[];
+/* Subtasks: a chip with how many are done; it opens the checklist (owners and editors tick them) */
+let SOPEN=new Set();
+function subsHtml(t){const xs=t.subs||[];if(!xs.length)return'';const d=xs.filter(x=>x.done).length,on=SOPEN.has(t.id),can=canT(t);
+  return`<button type="button" class="sbt${on?' on':''}" data-sopen="${t.id}"><span class="sbar"><i style="width:${Math.round(d/xs.length*100)}%"></i></span>${d} of ${xs.length} subtasks${ICHEV}</button>`
+    +(on?`<ul class="sbl">${xs.map(x=>{const dd=x.due?fromIso(x.due):null,late=dd&&dd<TODAY&&!x.done;
+      return`<li class="${x.done?'dn':''}"><input type="checkbox" data-sub="${t.id}|${x.id}"${x.done?' checked':''}${can?'':' disabled'} aria-label="Done"><span>${esc(x.title)}</span>${x.due?`<small class="${late?'bad':''}">${x.done?'':late?'Past due · ':'By '}${fmtD(dd)}</small>`:''}</li>`;}).join('')}</ul>`:'');}
+// The Slack message sent with the email: to whom it went, and who wasn't found on Slack
+function slackNote(t){const s=t.slack;if(!s)return'';const nm=e=>{const o=tOwners(t).find(x=>x.email===e);return o?(o.name||e).split(' ')[0]:e;};
+  if(s.missing&&s.missing.length)return`<span class="sl warn" title="${esc(s.error||'')}">Slack: not sent to ${esc(s.missing.map(nm).join(', '))}</span>`;
+  return s.sent&&s.sent.length?`<span class="sl">Slack message sent</span>`:'';}
 const canT=t=>CAN||tOwners(t).some(o=>o.email===ME);
-const emailLabel=t=>{const o=tOwners(t);return o.length===1?'Email '+(o[0].name||'').split(' ')[0]:'Email '+o.length+' owners';};
+const emailLabel=t=>{const o=tOwners(t);return o.length===1?'Send to '+(o[0].name||'').split(' ')[0]:'Send to '+o.length+' owners';};
 function dueText(t){const d=tDue(t),late=d&&d<TODAY&&t.status!=='cmp',left=d?days(TODAY,d):0;
   return[t.status==='cmp'?(t.completed?'Done '+fmtD(day(new Date(t.completed))):'Done'):d?(late?(-left)+' day'+(-left===1?'':'s')+' past due':'Due '+fmtD(d)+(left===0?' · today':left===1?' · tomorrow':left<=7?' · in '+left+' days':'')):'No due date',late];}
 /* Board: a column for each status; drag a card to another column, or use its status menu */
@@ -620,7 +647,8 @@ function cardHtml(t){const [due,late]=dueText(t),os=tOwners(t),can=canT(t),k=t.s
   return`<article class="bc${k==='cmp'?' done':''}${TSEL===t.id?' hl':''}" id="task-${t.id}" data-card="${t.id}"${can?' draggable="true"':''}>
     <div class="bct"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><h4>${esc(t.title)}</h4></div>
     ${t.desc&&t.desc!==t.title?`<p class="bd">${esc(t.desc)}</p>`:''}
-    <div class="bp">${(t.tags||[]).map(x=>`<span class="pill" style="--tc:${(TAGC[x]||['#9A96A3'])[0]}"><i></i>${esc(x)}</span>`).join('')}${t.draft?`<span class="pill mail" title="Not emailed to the owners yet">${IMAIL.replace(/14/g,'12')}Yet to email</span>`:''}${t.source&&t.source.kind==='texp'?`<a class="pill src" href="#" data-tsrc="1">↳ Teacher conversation</a>`:''}</div>
+    <div class="bp">${(t.tags||[]).map(x=>`<span class="pill" style="--tc:${(TAGC[x]||['#9A96A3'])[0]}"><i></i>${esc(x)}</span>`).join('')}${t.draft?`<span class="pill mail" title="Not sent to the owners yet">${IMAIL.replace(/14/g,'12')}Yet to send</span>`:''}${t.source&&t.source.kind==='texp'?`<a class="pill src" href="#" data-tsrc="1">↳ Teacher conversation</a>`:''}</div>
+    ${subsHtml(t)}
     <div class="bf"><span class="bdue${late?' bad':''}">${ICAL.replace(/13/g,'12')}${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span class="bctr">· ${esc(t.centre)}</span>`:''}
       <span class="bav" title="${esc(os.map(o=>o.name||o.email).join(', '))}">${os.slice(0,3).map(o=>`<i style="background:${avc(o.email)}">${phImg(o.email)||esc(initials(o.name||o.email))}</i>`).join('')}${os.length>3?`<i class="more">+${os.length-3}</i>`:''}</span></div>
     ${CAN?`<div class="bx">${t.draft?`<button class="bib" data-temail="${t.id}" title="${esc(emailLabel(t))}">${IMAIL}</button>`:''}<button class="bib" data-tedit="${t.id}" title="Edit">${IEDIT}</button></div>`:''}
@@ -641,17 +669,17 @@ function taskRow(t){
   const src=t.source&&t.source.kind==='texp'?`<a class="src" href="#" data-tsrc="1">From a teacher's request ›</a>`:'';
   // the status can be changed straight from the list, whether or not the task has been emailed
   const st=can?`<select class="gl ${t.status}" data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(k=>`<option value="${k}"${k===t.status?' selected':''}>${TST[k]}</option>`).join('')}</select>`:`<span class="gl ${t.status}"><i></i>${TST[t.status]}</span>`;
-  return`<div class="tk-row${TSEL===t.id?' hl':''}" id="task-${t.id}"><div><b>${esc(t.title)}</b>${(t.tags||[]).length?`<div class="gt-m" style="margin-top:4px">${tagChips(t)}</div>`:''}${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}${src}</div>
+  return`<div class="tk-row${TSEL===t.id?' hl':''}" id="task-${t.id}"><div><b>${esc(t.title)}</b>${(t.tags||[]).length?`<div class="gt-m" style="margin-top:4px">${tagChips(t)}</div>`:''}${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}${src}${subsHtml(t)}</div>
     <div class="who wav">${mav(tOwners(t))}<div style="min-width:0">${esc(tOwners(t).map(o=>o.name||o.email).join(', '))}<small>${esc(t.centre||'')}</small></div></div><div class="who" style="color:${late?'var(--bad)':'inherit'}">${due}</div><div>${st}</div>
-    <div style="display:flex;gap:8px;align-items:center">${t.draft?(CAN?`<button class="btn" style="height:32px" data-temail="${t.id}">${esc(emailLabel(t))}</button>`:'')+`<span class="gl draft"><i></i>Yet to email</span>`
-      :`<span class="em">Emailed${t.emailedAt?' '+fmtD(day(new Date(t.emailedAt))):''}</span>`}</div>
+    <div style="display:flex;gap:8px;align-items:center">${t.draft?(CAN?`<button class="btn" style="height:32px" data-temail="${t.id}">${esc(emailLabel(t))}</button>`:'')+`<span class="gl draft"><i></i>Yet to send</span>`
+      :`<span class="em">Sent${t.emailedAt?' '+fmtD(day(new Date(t.emailedAt))):''}${slackNote(t)}</span>`}</div>
     <div style="display:flex;justify-content:flex-end">${CAN?`<button class="btn" style="height:32px" data-tedit="${t.id}">Edit</button>`:''}</div></div>`;
 }
 // a profile photo was added or changed: redraw the owner pictures
 window.addEventListener('artium-photos',()=>{try{render();}catch(e){}});
 document.getElementById('kind').onclick=e=>{const b=e.target.closest('button');if(!b)return;KIND=b.dataset.k;try{localStorage.setItem('artium_goals_kind',KIND);}catch(err){}SEL=null;render();};
 document.getElementById('tasksv').addEventListener('click',async e=>{
-  const m=e.target.closest('[data-temail]');if(m){if(!confirm('Email this task now? You\'ll be copied.'))return;await tcall('emailTask',{id:m.dataset.temail});return;}
+  const m=e.target.closest('[data-temail]');if(m){if(!confirm('Send this task now, by email and on Slack? You\'ll be copied on the email.'))return;await tcall('emailTask',{id:m.dataset.temail});return;}
   const ed=e.target.closest('[data-tedit]');if(ed){taskWin(TASKS.find(t=>t.id===ed.dataset.tedit));return;}
   const s=e.target.closest('[data-tsrc]');if(s){e.preventDefault();try{window.top.location.hash='texp';}catch(err){}}
 });
@@ -664,7 +692,9 @@ document.getElementById('tasksv').addEventListener('dragover',e=>{const col=e.ta
 document.getElementById('tasksv').addEventListener('drop',e=>{const col=e.target.closest('[data-col]');if(!col||!DRAG)return;e.preventDefault();const t=TASKS.find(x=>x.id===DRAG);DRAG=null;col.classList.remove('over');
   if(t&&t.status!==col.dataset.col){t.status=col.dataset.col;render();tcall('taskStatus',{id:t.id,s:col.dataset.col});}});
 document.getElementById('tasksv').addEventListener('click',e=>{if(e.target.closest('[data-badd]')){taskWin(null);return;}const l=e.target.closest('[data-lane]');if(l)l.parentNode.classList.toggle('shut');});
-document.getElementById('tasksv').addEventListener('change',e=>{const s=e.target.closest('[data-tst]');if(s)tcall('taskStatus',{id:s.dataset.tst,s:s.value});});
+document.getElementById('tasksv').addEventListener('change',e=>{const s=e.target.closest('[data-tst]');if(s)tcall('taskStatus',{id:s.dataset.tst,s:s.value});
+  const b=e.target.closest('[data-sub]');if(b){const [id,sub]=b.dataset.sub.split('|'),t=TASKS.find(x=>x.id===id),x=t&&(t.subs||[]).find(y=>y.id===sub);if(x){x.done=b.checked;render();}tcall('taskSub',{id,sub,done:b.checked});}});
+document.getElementById('tasksv').addEventListener('click',e=>{const o=e.target.closest('[data-sopen]');if(!o)return;e.stopPropagation();const id=o.dataset.sopen;if(SOPEN.has(id))SOPEN.delete(id);else SOPEN.add(id);render();},true);
 document.getElementById('newgoal').addEventListener('click',e=>{if(KIND!=='tasks')return;e.stopImmediatePropagation();taskWin(null);},true);
 async function tcall(action,body,msg){
   document.getElementById('dot').className='dot loading';
@@ -678,24 +708,33 @@ function taskWin(t){
       <div class="f"><label for="xd">Details</label><textarea class="in" id="xd" placeholder="Anything the owners need to know.">${esc(t?t.desc:'')}</textarea></div>
       <div class="f"><label>For</label><div class="opp" id="xo"></div></div>
       <div class="f"><label>Tags</label><div class="ttags">${TAGS.map(x=>`<button type="button" class="ttag" data-ttag="${esc(x)}" aria-pressed="${!!(t&&(t.tags||[]).includes(x))}">${esc(x)}</button>`).join('')}</div></div>
-      <div class="f" style="max-width:240px"><label for="xdue">Due</label><input class="in" type="date" id="xdue" value="${t&&t.due?t.due:''}"></div></div>
-    <div class="df"><span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span><div style="display:flex;gap:8px"><button class="btn" data-x>Cancel</button>${t&&!t.draft?'':`<button class="btn" id="xnow">Save and email now</button>`}<button class="btn pri" id="xsave">${t&&!t.draft?'Save':'Save task — email later'}</button></div></div></div></div>`;
+      <div class="f" style="max-width:240px"><label for="xdue">Due</label><input class="in" type="date" id="xdue" value="${t&&t.due?t.due:''}"></div>
+      <div class="f"><label>Subtasks</label><div class="subs" id="xs"></div></div></div>
+    <div class="df"><span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span><div style="display:flex;gap:8px"><button class="btn" data-x>Cancel</button>${t&&!t.draft?'':`<button class="btn" id="xnow">Save and send now</button>`}<button class="btn pri" id="xsave">${t&&!t.draft?'Save':'Save task — send later'}</button></div></div></div></div>`;
   // owners: as many as needed, each removable
   let OW=t?tOwners(t).map(o=>o.email):[];
   const drawOw=()=>{w.querySelector('#xo').innerHTML=OW.map(e=>{const s=staff.find(x=>x.email===e)||{name:e};return`<span class="p">${esc(s.name)}<button type="button" data-rmo="${esc(e)}" aria-label="Remove">✕</button></span>`;}).join('')+
     `<select id="xadd" aria-label="Add an owner"><option value="">+ ${OW.length?'Add another owner':'Choose an owner'}</option>${staff.filter(s=>!OW.includes(s.email)).map(s=>`<option value="${esc(s.email)}">${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}</select>`;};
   drawOw();
+  // subtasks: a title and an optional date each; the ones kept keep whether they are done
+  let SB=t&&t.subs?t.subs.map(x=>({id:x.id,title:x.title,due:x.due||''})):[];
+  const drawSb=()=>{w.querySelector('#xs').innerHTML=SB.map((x,i)=>`<div class="sr" data-si="${i}"><span class="n">${i+1}</span><input class="in" data-sf="title" value="${esc(x.title)}" placeholder="e.g. Call the vendor"><input class="in" type="date" data-sf="due" value="${x.due}" aria-label="By"><button type="button" data-rms="${i}" aria-label="Remove">✕</button></div>`).join('')
+    +`<button type="button" class="addsub" id="xaddsub">${IPLUS} Add a subtask</button>`;};
+  drawSb();
+  w.oninput=e=>{const r=e.target.closest('[data-si]');if(r&&e.target.dataset.sf)SB[+r.dataset.si][e.target.dataset.sf]=e.target.value;};
   w.onchange=e=>{if(e.target.id==='xadd'&&e.target.value){OW.push(e.target.value);drawOw();}};
   w.onclick=async e=>{
     if(e.target.closest('[data-x]')){if(!tbusy)w.innerHTML='';return;}
     const rm=e.target.closest('[data-rmo]');if(rm){OW=OW.filter(x=>x!==rm.dataset.rmo);drawOw();return;}
+    if(e.target.closest('#xaddsub')){SB.push({id:'s'+Date.now().toString(36),title:'',due:''});drawSb();const ins=w.querySelectorAll('[data-sf=title]');ins[ins.length-1].focus();return;}
+    const rs=e.target.closest('[data-rms]');if(rs){SB.splice(+rs.dataset.rms,1);drawSb();return;}
     const tb=e.target.closest('[data-ttag]');if(tb){tb.setAttribute('aria-pressed',tb.getAttribute('aria-pressed')!=='true');return;}
     if(e.target.id!=='xsave'&&e.target.id!=='xnow')return;
     const msg=w.querySelector('#xmsg');
     if(!w.querySelector('#xt').value.trim()){msg.textContent='Give the task a title.';return;}if(!OW.length){msg.textContent='Choose who the task is for.';return;}
-    if(e.target.id==='xnow'&&!confirm('Email this task now? You\'ll be copied.'))return;
+    if(e.target.id==='xnow'&&!confirm('Send this task now, by email and on Slack? You\'ll be copied on the email.'))return;
     tbusy=true;e.target.disabled=true;
-    const ok=await tcall('saveTask',{task:{id:t?t.id:'',title:w.querySelector('#xt').value,desc:w.querySelector('#xd').value,owners:OW.map(e=>({email:e})),tags:[...w.querySelectorAll('[data-ttag][aria-pressed=true]')].map(b=>b.dataset.ttag),due:w.querySelector('#xdue').value,emailNow:e.target.id==='xnow'}},msg);
+    const ok=await tcall('saveTask',{task:{id:t?t.id:'',title:w.querySelector('#xt').value,desc:w.querySelector('#xd').value,owners:OW.map(e=>({email:e})),tags:[...w.querySelectorAll('[data-ttag][aria-pressed=true]')].map(b=>b.dataset.ttag),due:w.querySelector('#xdue').value,subs:SB.filter(x=>x.title.trim()),emailNow:e.target.id==='xnow'}},msg);
     tbusy=false;if(ok)w.innerHTML='';else e.target.disabled=false;
   };
 }
