@@ -255,6 +255,15 @@
   .tdlg .sr button{border:0;background:none;color:var(--faint);font-size:15px;cursor:pointer}
   .tdlg .addsub{align-self:flex-start;border:1.5px dashed #CDBDF7;background:none;border-radius:10px;padding:8px 14px;font:700 13px var(--body);color:var(--accent);cursor:pointer}
   .tk-row .sl{display:block;font-size:12px;color:var(--faint);margin-top:2px}.tk-row .sl.warn{color:#9A6200}
+  /* A task opened: details, subtasks and its updates */
+  .tvw{width:680px;max-width:100%;max-height:calc(100vh - 40px);display:flex;flex-direction:column}
+  .tvw .db{overflow:auto;gap:16px}
+  .tvw .meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted)}.tvw .meta b{color:var(--ink2);font-weight:600}
+  .tvw .dsc{font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-wrap}
+  .tvw .lab{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .tvw .sbl{margin:0}
+  .tk-row b.tt,.bc h4.tt{cursor:pointer}.tk-row b.tt:hover,.bc h4.tt:hover{color:var(--accent)}
+  .sbt.upc{margin-left:6px}.bc .sbt.upc{margin-left:25px}
   @media (max-width:1000px){.tk-row{grid-template-columns:1fr}}
   .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px}
   /* Goal details */
@@ -356,6 +365,7 @@
   <div class="card det" id="det" hidden></div>
   <div id="tasksv" hidden></div>
   <div id="twin"></div>
+  <div id="tvwin"></div>
 </div>
 
 <script>
@@ -614,6 +624,9 @@ const tOwners=t=>t.owners&&t.owners.length?t.owners:t.owner?[t.owner]:[];
 /* Subtasks: a chip with how many are done; it opens the checklist (owners and editors tick them) */
 let SOPEN=new Set();
 const sst=x=>x.s||(x.done?'cmp':'tbp');
+const tUpd=t=>ACT.filter(a=>a.goal===t.id&&a.kind==='update');
+function updChip(t){const n=tUpd(t).length;if(!n&&!canT(t))return'';
+  return`<button type="button" class="sbt upc" data-tview="${t.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>${n?n+' update'+(n===1?'':'s'):'Add an update'}</button>`;}
 function subsHtml(t){const xs=t.subs||[];if(!xs.length)return'';const d=xs.filter(x=>sst(x)==='cmp').length,on=SOPEN.has(t.id),can=canT(t);
   return`<button type="button" class="sbt${on?' on':''}" data-sopen="${t.id}"><span class="sbar"><i style="width:${Math.round(d/xs.length*100)}%"></i></span>${d} of ${xs.length} subtasks${ICHEV}</button>`
     +(on?`<ul class="sbl">${xs.map(x=>{const dd=x.due?fromIso(x.due):null,late=dd&&dd<TODAY&&sst(x)!=='cmp';
@@ -638,6 +651,7 @@ const initials=n=>String(n).split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).to
 const ICAL='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>';
 const IMAIL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6 8.5-6"/></svg>';
 const IEDIT='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+const IUPD='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 12h7M12 8.5v7"/></svg>';
 const IPLUS='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
 const ICHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
 const SICON={tbp:'<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2" fill="none" stroke="#9A96A3" stroke-width="1.6" stroke-dasharray="2.6 2.1"/></svg>',
@@ -646,13 +660,13 @@ const SICON={tbp:'<svg width="15" height="15" viewBox="0 0 16 16"><circle cx="8"
 const BCOLS=[['tbp','To be picked'],['inp','In progress'],['cmp','Completed']];
 function cardHtml(t){const [due,late]=dueText(t),os=tOwners(t),can=canT(t),k=t.status;
   return`<article class="bc${k==='cmp'?' done':''}${TSEL===t.id?' hl':''}" id="task-${t.id}" data-card="${t.id}"${can?' draggable="true"':''}>
-    <div class="bct"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><h4>${esc(t.title)}</h4></div>
+    <div class="bct"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><h4 class="tt" data-tview="${t.id}">${esc(t.title)}</h4></div>
     ${t.desc&&t.desc!==t.title?`<p class="bd">${esc(t.desc)}</p>`:''}
     <div class="bp">${(t.tags||[]).map(x=>`<span class="pill" style="--tc:${(TAGC[x]||['#9A96A3'])[0]}"><i></i>${esc(x)}</span>`).join('')}${t.draft?`<span class="pill mail" title="Not sent to the owners yet">${IMAIL.replace(/14/g,'12')}Yet to send</span>`:''}${t.source&&t.source.kind==='texp'?`<a class="pill src" href="#" data-tsrc="1">↳ Teacher conversation</a>`:''}</div>
-    ${subsHtml(t)}
+    ${subsHtml(t)}${updChip(t)?`<div>${updChip(t)}</div>`:''}
     <div class="bf"><span class="bdue${late?' bad':''}">${ICAL.replace(/13/g,'12')}${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span class="bctr">· ${esc(t.centre)}</span>`:''}
       <span class="bav" title="${esc(os.map(o=>o.name||o.email).join(', '))}">${os.slice(0,3).map(o=>`<i style="background:${avc(o.email)}">${phImg(o.email)||esc(initials(o.name||o.email))}</i>`).join('')}${os.length>3?`<i class="more">+${os.length-3}</i>`:''}</span></div>
-    ${CAN?`<div class="bx">${t.draft?`<button class="bib" data-temail="${t.id}" title="${esc(emailLabel(t))}">${IMAIL}</button>`:''}<button class="bib" data-tedit="${t.id}" title="Edit">${IEDIT}</button></div>`:''}
+    ${can?`<div class="bx">${!t.draft?`<button class="bib" data-tquick="${t.id}" title="Write an update">${IUPD}</button>`:''}${CAN&&t.draft?`<button class="bib" data-temail="${t.id}" title="${esc(emailLabel(t))}">${IMAIL}</button>`:''}${CAN?`<button class="bib" data-tedit="${t.id}" title="Edit">${IEDIT}</button>`:''}</div>`:''}
   </article>`;}
 // lanes: [[name, tasks]]; a name of '' means no lanes
 function boardHtml(lanes){
@@ -670,7 +684,7 @@ function taskRow(t){
   const src=t.source&&t.source.kind==='texp'?`<a class="src" href="#" data-tsrc="1">From a teacher's request ›</a>`:'';
   // the status can be changed straight from the list, whether or not the task has been emailed
   const st=can?`<select class="gl ${t.status}" data-tst="${t.id}" aria-label="Status">${Object.keys(TST).map(k=>`<option value="${k}"${k===t.status?' selected':''}>${TST[k]}</option>`).join('')}</select>`:`<span class="gl ${t.status}"><i></i>${TST[t.status]}</span>`;
-  return`<div class="tk-row${TSEL===t.id?' hl':''}" id="task-${t.id}"><div><b>${esc(t.title)}</b>${(t.tags||[]).length?`<div class="gt-m" style="margin-top:4px">${tagChips(t)}</div>`:''}${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}${src}${subsHtml(t)}</div>
+  return`<div class="tk-row${TSEL===t.id?' hl':''}" id="task-${t.id}"><div><b class="tt" data-tview="${t.id}">${esc(t.title)}</b>${(t.tags||[]).length?`<div class="gt-m" style="margin-top:4px">${tagChips(t)}</div>`:''}${t.desc&&t.desc!==t.title?`<div class="ds">${esc(t.desc)}</div>`:''}${src}<div>${subsHtml(t).replace(/<ul class="sbl">[\s\S]*<\/ul>$/,'')}${updChip(t)}</div>${(subsHtml(t).match(/<ul class="sbl">[\s\S]*<\/ul>$/)||[''])[0]}</div>
     <div class="who wav">${mav(tOwners(t))}<div style="min-width:0">${esc(tOwners(t).map(o=>o.name||o.email).join(', '))}<small>${esc(t.centre||'')}</small></div></div><div class="who" style="color:${late?'var(--bad)':'inherit'}">${due}</div><div>${st}</div>
     <div style="display:flex;gap:8px;align-items:center">${t.draft?(CAN?`<button class="btn" style="height:32px" data-temail="${t.id}">${esc(emailLabel(t))}</button>`:'')+`<span class="gl draft"><i></i>Yet to send</span>`
       :`<span class="em">Sent${t.emailedAt?' '+fmtD(day(new Date(t.emailedAt))):''}${slackNote(t)}</span>`}</div>
@@ -695,7 +709,7 @@ document.getElementById('tasksv').addEventListener('drop',e=>{const col=e.target
 document.getElementById('tasksv').addEventListener('click',e=>{if(e.target.closest('[data-badd]')){taskWin(null);return;}const l=e.target.closest('[data-lane]');if(l)l.parentNode.classList.toggle('shut');});
 document.getElementById('tasksv').addEventListener('change',e=>{const s=e.target.closest('[data-tst]');if(s)tcall('taskStatus',{id:s.dataset.tst,s:s.value});
   const b=e.target.closest('[data-sub]');if(b){const [id,sub]=b.dataset.sub.split('|'),t=TASKS.find(x=>x.id===id),x=t&&(t.subs||[]).find(y=>y.id===sub);if(x){x.s=b.value;x.done=b.value==='cmp';render();}tcall('taskSub',{id,sub,s:b.value});}});
-document.getElementById('tasksv').addEventListener('click',e=>{const o=e.target.closest('[data-sopen]');if(!o)return;e.stopPropagation();const id=o.dataset.sopen;if(SOPEN.has(id))SOPEN.delete(id);else SOPEN.add(id);render();},true);
+document.getElementById('tasksv').addEventListener('click',e=>{const q=e.target.closest('[data-tquick]');if(q){e.stopPropagation();quickUpd(q.dataset.tquick);return;}const v=e.target.closest('[data-tview]');if(v){e.stopPropagation();taskView(v.dataset.tview);return;}const o=e.target.closest('[data-sopen]');if(!o)return;e.stopPropagation();const id=o.dataset.sopen;if(SOPEN.has(id))SOPEN.delete(id);else SOPEN.add(id);render();},true);
 document.getElementById('newgoal').addEventListener('click',e=>{if(KIND!=='tasks')return;e.stopImmediatePropagation();taskWin(null);},true);
 async function tcall(action,body,msg){
   document.getElementById('dot').className='dot loading';
@@ -739,7 +753,53 @@ function taskWin(t){
     tbusy=false;if(ok)w.innerHTML='';else e.target.disabled=false;
   };
 }
-window.openTask=id=>{KIND='tasks';TSEL=id;CSEL=[];PSEL=[];render();setTimeout(()=>{const r=document.getElementById('task-'+id);if(r)r.scrollIntoView({behavior:'smooth',block:'center'});},80);};
+/* A task opened: its details, subtasks and updates; owners and editors post updates (with photos or files) */
+let TV=null,TFILES=[];
+function taskView(id){TV=id;TFILES=[];drawTV();}
+function drawTV(){
+  const w=document.getElementById('tvwin'),t=TASKS.find(x=>x.id===TV);if(!t){w.innerHTML='';TV=null;return;}
+  const keep=document.getElementById('ttext'),draft=keep?keep.value:'';
+  const [due,late]=dueText(t),can=canT(t),os=tOwners(t);
+  const feed=tUpd(t).slice().reverse().map(a=>{const who=esc(a.name||a.by.split('@')[0]);
+    return`<div class="upd"><span class="av">${phImg(a.by)||esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;}).join('');
+  const subs=(t.subs||[]).length?(()=>{const on=SOPEN.has(t.id);SOPEN.add(t.id);const h=subsHtml(t).replace(/^<button[\s\S]*?<\/button>/,'');if(!on)SOPEN.delete(t.id);return h;})():'';
+  w.innerHTML=`<div class="tscrim" data-tvx><div class="tdlg tvw" role="dialog" aria-label="Task"><div class="dh"><h2>${esc(t.title)}</h2><button class="x" data-tvc>×</button></div>
+    <div class="db"><div class="meta"><span class="gl ${t.status}"><i></i>${TST[t.status]}</span><span><b>For</b> ${esc(os.map(o=>o.name||o.email).join(', '))}</span><span style="${late?'color:var(--bad)':''}"><b>Due</b> ${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span><b>Centre</b> ${esc(t.centre)}</span>`:''}</div>
+      ${(t.tags||[]).length?`<div class="gt-m">${tagChips(t)}</div>`:''}
+      ${t.desc&&t.desc!==t.title?`<div class="dsc">${esc(t.desc)}</div>`:''}
+      ${subs?`<div id="tvsubs"><div class="lab">Subtasks</div>${subs}</div>`:''}
+      <div><div class="lab">Updates</div><div class="feed">${feed||'<div class="sys" style="padding-left:0">No updates yet.</div>'}</div>
+      ${can?`<div class="post"><textarea id="ttext" placeholder="Write an update, e.g. what was discussed or decided…"></textarea><div class="att" id="tatt"></div>
+        <div class="row"><label class="btn" style="height:32px">📎 Add photos or files<input type="file" id="tfile" multiple hidden></label><span class="msg" id="tmsg"></span><span class="sp"></span><button class="btn pri" type="button" id="tpost" style="height:32px">Post update</button></div></div>`:''}</div></div></div></div>`;
+  const ta=document.getElementById('ttext');if(ta&&draft){ta.value=draft;}
+  drawTatt();
+}
+/* Write an update straight from the board: a small window, the update goes into the task */
+function quickUpd(id){const t=TASKS.find(x=>x.id===id);if(!t)return;TV=id;TFILES=[];
+  document.getElementById('tvwin').innerHTML=`<div class="tscrim" data-tvx><div class="tdlg" role="dialog" aria-label="Write an update"><div class="dh"><h2>Write an update</h2><button class="x" data-tvc>×</button></div>
+    <div class="db"><div class="sys" style="padding:0;font-size:13.5px">On <b>${esc(t.title)}</b></div>
+      <div class="post" style="margin-top:0"><textarea id="ttext" placeholder="What was discussed or decided…" style="min-height:120px"></textarea><div class="att" id="tatt"></div>
+        <div class="row"><label class="btn" style="height:32px">📎 Add photos or files<input type="file" id="tfile" multiple hidden></label><span class="msg" id="tmsg"></span><span class="sp"></span><button class="btn pri" type="button" id="tpost" data-quick="1" style="height:32px">Post update</button></div></div></div></div></div>`;
+  setTimeout(()=>{const a=document.getElementById('ttext');if(a)a.focus();},30);}
+function drawTatt(){const a=document.getElementById('tatt');if(a)a.innerHTML=TFILES.map((f,i)=>`<span class="chip">${esc(f.name)}<button type="button" data-trf="${i}">✕</button></span>`).join('');}
+document.getElementById('tvwin').addEventListener('click',async e=>{
+  if(e.target.closest('[data-tvc]')||e.target.matches('[data-tvx]')){TV=null;document.getElementById('tvwin').innerHTML='';return;}
+  const r=e.target.closest('[data-trf]');if(r){TFILES.splice(+r.dataset.trf,1);drawTatt();return;}
+  const b=e.target.closest('#tpost');if(!b)return;
+  const text=document.getElementById('ttext').value.trim(),m=document.getElementById('tmsg');
+  if(!text&&!TFILES.length){m.textContent='Write an update or add a file.';return;}
+  b.disabled=true;m.textContent=TFILES.length?'Uploading…':'';
+  try{const files=await Promise.all(TFILES.map(readFile));await ArtiumAuth.call('taskUpdate',{id:TV,text,files});document.getElementById('ttext').value='';TFILES=[];await load(true);
+    if(b.dataset.quick){TV=null;document.getElementById('tvwin').innerHTML='';}else drawTV();}
+  catch(err){m.textContent='Couldn\'t post: '+err.message+'.';b.disabled=false;}
+});
+document.getElementById('tvwin').addEventListener('change',e=>{
+  if(e.target.id==='tfile'){const m=document.getElementById('tmsg');for(const f of e.target.files){if(f.size>8*1024*1024){m.textContent=f.name+' is over 8 MB.';continue;}if(TFILES.length<6)TFILES.push(f);}e.target.value='';drawTatt();return;}
+  const b=e.target.closest('[data-sub]');if(b){const [id,sub]=b.dataset.sub.split('|'),t=TASKS.find(x=>x.id===id),x=t&&(t.subs||[]).find(y=>y.id===sub);if(x){x.s=b.value;x.done=b.value==='cmp';render();drawTV();}
+    tcall('taskSub',{id,sub,s:b.value}).then(drawTV);}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&TV){TV=null;document.getElementById('tvwin').innerHTML='';}});
+window.openTask=id=>{KIND='tasks';TSEL=id;CSEL=[];PSEL=[];render();setTimeout(()=>{const r=document.getElementById('task-'+id);if(r)r.scrollIntoView({behavior:'smooth',block:'center'});if(TASKS.some(x=>x.id===id))taskView(id);},80);};
 load();
 </script>
 </body>

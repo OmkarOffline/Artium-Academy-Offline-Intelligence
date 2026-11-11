@@ -561,11 +561,11 @@
     const n = j.unread || 0, b = document.getElementById("bell-n"); b.hidden = !n; b.textContent = n > 9 ? "9+" : n;
     document.getElementById("nlist").innerHTML = (j.items || []).length ? j.items.map(a => {
       const who = esc(a.name || a.by.split("@")[0]); let t = "";
-      if(a.kind === "update") t = `<b>${who}</b> posted an update on <b>${esc(a.title)}</b>: “${esc(a.text.slice(0, 90))}${a.text.length > 90 ? "…" : ""}”${a.files && a.files.length ? " 📎" : ""}`;
+      if(a.kind === "update") t = `<b>${who}</b> posted an update on ${a.task ? "the task " : ""}<b>${esc(a.title)}</b>: “${esc(a.text.slice(0, 90))}${a.text.length > 90 ? "…" : ""}”${a.files && a.files.length ? " 📎" : ""}`;
       else if(a.kind === "status"){ let x = {}; try{ x = JSON.parse(a.text); }catch(e){} t = `<b>${who}</b> set <b>${esc(x.what || a.title)}</b> to <b>${ST[x.s] || ""}</b> for ${esc(x.centre || "")}`; }
       else if(a.kind === "completed") t = `<b>${esc(a.title)}</b> is completed at every centre`;
       else t = `<b>${who}</b> created the goal <b>${esc(a.title)}</b>`;
-      return `<button type="button" class="nit${a.unread ? " new" : ""}" data-g="${esc(a.goal)}"><i></i><span>${t}<small>${ago(a.at)}</small></span></button>`; }).join("") : '<div class="nempty">Nothing yet. Updates and status changes on goals show up here.</div>';
+      return `<button type="button" class="nit${a.unread ? " new" : ""}" data-g="${esc(a.goal)}"${a.task ? ' data-t="1"' : ""}><i></i><span>${t}<small>${ago(a.at)}</small></span></button>`; }).join("") : '<div class="nempty">Nothing yet. Updates and status changes on goals, and updates on tasks, show up here.</div>';
   }
   async function bellLoad(){ try{ bellRender(await ArtiumAuth.call("notifications", {})); }catch(e){} }
   function startBell(){
@@ -574,7 +574,7 @@
   }
   bell.addEventListener("click", e => { e.stopPropagation(); pop.hidden = !pop.hidden; if(!pop.hidden) bellLoad(); });
   document.getElementById("nread").addEventListener("click", async e => { e.stopPropagation(); try{ bellRender(await ArtiumAuth.call("notifRead", {})); }catch(err){} });
-  document.getElementById("nlist").addEventListener("click", e => { const b = e.target.closest(".nit"); if(!b) return; pop.hidden = true; show("goals&g=" + b.dataset.g); });
+  document.getElementById("nlist").addEventListener("click", e => { const b = e.target.closest(".nit"); if(!b) return; pop.hidden = true; show((b.dataset.t ? "goals&t=" : "goals&g=") + b.dataset.g); });
   document.addEventListener("click", e => { if(!pop.hidden && !pop.contains(e.target)) pop.hidden = true; });
   window.addEventListener("blur", () => { pop.hidden = true; });
 })();
