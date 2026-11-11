@@ -221,9 +221,18 @@
   .links:empty{display:none}
   .links button{background:rgba(255,255,255,.8);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
   .links button:hover{border-color:#cdb9ff;color:var(--accent);background:#fff}
-  .pay{position:relative;min-height:440px;background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
+  .pay{position:relative;min-height:500px;background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
   .pin{position:absolute;inset:0;display:flex;flex-direction:column;padding:22px 8px 8px 22px;min-height:0}
   #pl{flex:1;min-height:0;overflow-y:auto;padding-right:14px;outline:0;scrollbar-width:thin;scrollbar-color:#cdb9ff transparent}
+  .ptg{display:flex;flex-wrap:wrap;gap:6px;margin:0 14px 12px 0}
+  .ptg button{font:600 12.5px var(--display);border:1px solid var(--border);border-radius:999px;padding:6px 12px;color:var(--ink2);background:#fff;cursor:pointer}
+  .ptg button:hover{border-color:#cdb9ff;color:var(--accent)}
+  .ptg button[aria-pressed="true"]{background:linear-gradient(135deg,#6601fd,#4101f7);border-color:transparent;color:#fff}
+  .psum{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin:0 14px 8px 0}
+  .psum .k{border:1px solid var(--line);border-radius:14px;padding:11px 14px;background:linear-gradient(180deg,#fcfbff,#f6f1ff)}
+  .psum small{display:block;font:700 10.5px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+  .psum b{display:block;font:800 25px var(--display);color:var(--ink);margin-top:4px;letter-spacing:-.01em}
+  .psum .m b{color:var(--accent)}
   .pd{position:sticky;top:0;z-index:1;background:#fff;padding:12px 0 6px;font:700 10.5px var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);border-top:1px solid var(--line)}
   .pd:first-child{border-top:0;padding-top:2px}
   .pay h2{font:800 20px var(--display);color:var(--ink);letter-spacing:-.01em}
@@ -279,9 +288,11 @@
     <div class="tmore" id="tmore"></div>
     <div class="cheer" id="cheer"></div>
   </section>
-  <section class="pay" id="pay" aria-label="Latest payments"><div class="pin">
-    <h2>Latest payments</h2><p class="ps">From all centres, newest first.</p>
-    <div id="pl" tabindex="0"><div class="tempty">Loading the latest payments…</div></div>
+  <section class="pay" id="pay" aria-label="Today's collections"><div class="pin">
+    <h2>Today's collections</h2><p class="ps">Payments recorded today.</p>
+    <div class="ptg" id="ptg" role="group" aria-label="Centre" hidden></div>
+    <div class="psum" id="psum" hidden></div>
+    <div id="pl" tabindex="0"><div class="tempty">Loading today's payments…</div></div>
   </div></section>
   </div>
   <nav class="links" id="links" aria-label="Your pinned pages"></nav>
@@ -811,18 +822,25 @@ function collectPays(res){
         out.push({d,n,centre:c.name,kind,name:val(r[4])||'Learner',age:val(r[6]),level:val(r[9]),dur:m,amt});});});});
   return out.sort((a,b)=>b.d-a.d||b.n-a.n).slice(0,80);
 }
+let PAYS=null,PCEN=(()=>{try{return localStorage.getItem('artium_home_pay_centre')||'All';}catch(e){return'All';}})();
 function drawPays(L,failed){
   const el=document.getElementById('pl');if(!el)return;
-  if(!L){if(failed||!el.dataset.ok)el.innerHTML='<div class="tempty">The latest payments are not available right now.</div>';return;}
-  const day=d=>{const n=Math.round((new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
-    return n<=0?'Today':n===1?'Yesterday':d.getDate()+' '+MON[d.getMonth()];};
-  el.dataset.ok='1';
-  let last='';
-  el.innerHTML=L.length?L.map(x=>{const dl=day(x.d),h=dl!==last?`<div class="pd">${dl}</div>`:'';last=dl;
-    return h+`<div class="pi"><div class="pr"><span class="pn">${esc(x.name)}</span><span class="pa">₹${Math.round(x.amt).toLocaleString('en-IN')}</span></div>
-    <div class="pm">${[x.age,x.level,x.dur].filter(Boolean).map(esc).join(' · ')}</div>
-    <div class="pw"><span class="tg${x.kind==='Renewal'?' r':''}">${x.kind}</span><span>${esc(x.centre)}</span></div></div>`;}).join(''):'<div class="tempty">No payments recorded yet.</div>';
+  if(!L){if(failed||!PAYS){el.innerHTML='<div class="tempty">Today\'s payments are not available right now.</div>';}return;}
+  PAYS=L;paintPays();
 }
+function paintPays(){
+  const el=document.getElementById('pl'),tg=document.getElementById('ptg'),sm=document.getElementById('psum');if(!el||!PAYS)return;
+  const names=CENTRES.map(c=>c.name);if(PCEN!=='All'&&!names.includes(PCEN))PCEN='All';
+  const same=d=>d.getFullYear()===TODAY.getFullYear()&&d.getMonth()===TODAY.getMonth()&&d.getDate()===TODAY.getDate();
+  const T=PAYS.filter(x=>same(x.d)),V=T.filter(x=>PCEN==='All'||x.centre===PCEN);
+  tg.hidden=false;tg.innerHTML=['All'].concat(names).map(n=>`<button type="button" data-pc="${esc(n)}" aria-pressed="${n===PCEN}">${n==='All'?'All centres':esc(n)}</button>`).join('');
+  const sum=V.reduce((a,x)=>a+x.amt,0);
+  sm.hidden=false;sm.innerHTML=`<div class="k m"><small>Collected</small><b>₹${Math.round(sum).toLocaleString('en-IN')}</b></div><div class="k"><small>Transactions</small><b>${V.length}</b></div>`;
+  el.innerHTML=V.length?V.map(x=>`<div class="pi"><div class="pr"><span class="pn">${esc(x.name)}</span><span class="pa">₹${Math.round(x.amt).toLocaleString('en-IN')}</span></div>
+    <div class="pm">${[x.age,x.level,x.dur].filter(Boolean).map(esc).join(' · ')}</div>
+    <div class="pw"><span class="tg${x.kind==='Renewal'?' r':''}">${x.kind}</span><span>${esc(x.centre)}</span></div></div>`).join(''):'<div class="tempty">No payments recorded yet today.</div>';
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-pc]');if(!b)return;PCEN=b.dataset.pc;try{localStorage.setItem('artium_home_pay_centre',PCEN);}catch(x){}paintPays();});
 // next 60 days from the Calendar page: public holidays (by city), festivals, special days and our own entries
 function upcoming(j){
   if(!j||!j.events)return[];
