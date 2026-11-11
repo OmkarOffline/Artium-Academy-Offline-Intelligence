@@ -210,6 +210,24 @@ table.lt th .fa{display:inline-grid;place-items:center;width:17px;height:17px;bo
 .clr:hover:not(:disabled){background:var(--tvbg);border-color:#DCCFFB}
 .clr:disabled{color:#C9C3DD;cursor:default;background:#FAF8FE}
 .more{display:block;width:100%;border:0;border-top:1px solid var(--edge);background:#FAF8FE;padding:13px;font:700 13px var(--f);color:var(--violet2);cursor:pointer}.more:hover{background:#F4EFFE}
+.wb .op{display:inline-block;width:18px;font:800 13px var(--f);font-style:normal;color:var(--ink4)}
+.wb tr.res th,.wb tr.res td{font-weight:700;color:var(--ink);background:#FAF8FE}
+.wb tr.res.ytc th,.wb tr.res.ytc td{background:#F5F4F8}.wb tr.res td.tt{background:#F1ECFC}
+.wb tr.note th,.wb tr.note td{color:var(--ink4);font-size:12.5px;font-style:italic;border-top:1px dashed var(--edge)}
+.wb tr.note th{padding-left:18px}
+.wb tr.big th,.wb tr.big td{font-size:15px;font-weight:800}
+.wb tr.grp2 th{padding:40px 18px 10px;border-top:0;background:linear-gradient(#F6F3FC,#F6F3FC) top/100% 22px no-repeat,#fff;color:var(--violet2);font-size:10.5px}
+.wb tr.grp2+tr th,.wb tr.grp2+tr td{border-top:1px solid var(--line)}
+.wb tr.inl td{padding:6px 12px 18px;text-align:left;background:#FBF9FF}
+.wb tr.inl .tw{margin:0}
+.lk{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.lk .cv{width:20px;height:20px;margin-left:2px;border:1px solid var(--line)}.lk[aria-expanded="true"] .cv{transform:rotate(180deg)}
+.lk:hover{color:var(--violet2)}
+.lk.sm{margin-top:10px;font:700 12.5px var(--f);color:var(--violet2)}.lk.sm .cv{width:18px;height:18px}
+.wb .mb{font-weight:500;color:var(--ink4)}
+.rw.pl2{border-top:1px solid var(--edge)}
+.wb>.tw+.tw,.wb>.tw+.empty{border-top:1px solid var(--edge)}
+.wb table.lt th,.wb table.lt td{text-align:left;padding:13px 16px}.wb table.lt td{padding:14px 16px}.wb table.lt th:first-child,.wb table.lt td.who{position:sticky;left:0;background:#fff;z-index:1}
 </style>
 </head>
 <body>
@@ -321,7 +339,7 @@ const span=w=>w.a.getMonth()===w.b.getMonth()?(w.a.getDate()===w.b.getDate()?`${
 
 /* The current month cohort: every membership whose Package Expiry Date falls in the period. Each learner lands in one outcome only,
    in this order: renewed, pipeline (promised date in the period and an expected amount), will not renew, extended (extension days above 0),
-   and anyone left is yet to connect. First-time = a Fresh Sales membership, repeated = a Renewals one. */
+   and anyone left is yet to commit. First-time = a Fresh Sales membership, repeated = a Renewals one. */
 function outcome(x,P){
   if(x.st==='paid')return'ren';
   if(x.ncd&&x.exp>0&&inP(x.ncd,P))return'pipe';
@@ -344,7 +362,10 @@ function wtable(W,P,rows){
     if(r.h){h+=`<tr class="grp2"><th colspan="${W.length+2}">${r.h}</th></tr>`;return;}
     if(r.opt&&!r.v[r.v.length-1])return;
     const dot=r.cls&&/wnr/.test(r.cls)?'<i class="dt r"></i>':r.cls&&/ytc/.test(r.cls)?'<i class="dt g"></i>':'';
-    h+=`<tr class="${r.cls||''}"><th scope="row">${dot}${r.l}</th>`+r.v.map((x,i)=>`<td class="${cc(i)}">${x}</td>`).join('')+'</tr>';
+    const op=r.op?`<i class="op">${r.op}</i>`:'';
+    const lab=r.list?`<button type="button" class="lk" data-ol="${r.list}" aria-expanded="${!!OPENL[r.list]}">${r.l}${CHEV}</button>`:r.l;
+    const inl=r.list&&OPENL[r.list]&&r.inner?`<tr class="inl"><td colspan="${W.length+2}">${r.inner()}</td></tr>`:'';
+    h+=`<tr class="${r.cls||''}${r.op?' hasop':''}"${r.tip?` title="${esc(r.tip)}"`:''}><th scope="row">${op}${dot}${lab}</th>`+r.v.map((x,i)=>`<td class="${cc(i)}">${x}</td>`).join('')+'</tr>'+inl;
   });
   return h+'</tbody></table></div>';
 }
@@ -407,10 +428,10 @@ function render(){
       ${card('Collections – Renewals',inr(col),prog(Ta,act(Ta,x=>x.paid),true))}
       ${card('ATV – Renewals',atv==null?'–':inr(atv),Tatv?prog({v:Tatv.v},Tatv.act,true):'')}</div></div>
     <div class="rw"><div class="rl">Pipeline and run-rate</div><div class="cards">
-      ${card('Expected payments',n(pipe.length),`<div class="s"><b>${n(pipe.length-late.length)}</b> yet to pay${late.length?` · <span class="bd">${n(late.length)} overdue</span>`:''}</div>`)}
+      ${card('Expected payments',n(pipe.length),`<div class="s"><b>${n(pipe.length-late.length)}</b> yet to pay${late.length?` · <span class="bd">${n(late.length)} overdue</span>`:''}</div>${pipe.length?`<button type="button" class="lk sm" data-ol="pipe" aria-expanded="${!!OPENL.pipe}">${OPENL.pipe?'Hide':'Show'} the learners${CHEV}</button>`:''}`)}
       ${card('Expected collections',inr(expAmt),lateAmt?`<div class="s"><span class="bd">${inr(lateAmt)} overdue</span></div>`:'')}
       ${card('Run-rate · renewals',n(rrN),prog(Tn,act(Tn,()=>1)+pip(Tn,()=>1)),'rr')}
-      ${card('Run-rate · collections',inr(rrAmt),prog(Ta,act(Ta,x=>x.paid)+pip(Ta,x=>x.exp),true),'rr')}</div></div>`;
+      ${card('Run-rate · collections',inr(rrAmt),prog(Ta,act(Ta,x=>x.paid)+pip(Ta,x=>x.exp),true),'rr')}</div></div>${OPENL.pipe?`<div class="rw pl2"><div class="rl">Expected payments · ${n(pipe.length)} learner${pipe.length===1?'':'s'}</div>${plist(pipe,'pipe')}</div>`:''}`;
 
   /* Week on Week view */
   const W=weeksOf(P),wi=d=>W.findIndex(w=>d>=w.a&&d<=w.b);
@@ -423,30 +444,48 @@ function render(){
   rnl.forEach(x=>put(inP(x.prevEnd,P)?rCur:x.prevEnd&&x.prevEnd<P.a?rPrev:x.prevEnd&&x.prevEnd>P.b?rAdv:rUnk,x.date));
   const ach=dueW.map((_,i)=>rCur[i]+rPrev[i]+rAdv[i]+rUnk[i]),effW=ach.map((a,i)=>pc(a,dueW[i]));
   const byOc=(list,oc)=>{const a=zero();list.filter(x=>x.oc===oc).forEach(x=>put(a,x.end));return a;};
-  const A=[{l:'Renewals due',v:dueW,cls:'key'},{l:'Renewed – current month cohort',v:rCur},{l:"Renewed – previous months' cohorts",v:rPrev},
+  /* A: the current month cohort, step by step. Memberships due to end in the period, less those extended past it, less those who will not renew,
+     less those already renewed, less the pipeline; what is left is yet to commit. Each step is counted by the week the membership falls due. */
+  const MN=mode==='month'?MONTH_FULL[viewM]:'this period',NXT=mode==='month'?MONTH_FULL[(viewM+1)%12]:'after this period';
+  const endNow=x=>x.newEnd||(x.ext>0?new Date(x.end.getFullYear(),x.end.getMonth(),x.end.getDate()+Math.round(x.ext)):x.end);
+  const catA=x=>x.st==='paid'?'ren':x.ext>0&&endNow(x)>P.b?'xout':x.st==='lost'?'wnr':x.ncd&&x.exp>0&&inP(x.ncd,P)?'pipe':'ytc';
+  const cA=cohort.map(x=>({...x,ca:catA(x)})),cntA=f=>{const a=zero();cA.filter(f).forEach(x=>put(a,x.end));return a;},less=(a,b)=>a.map((x,i)=>x-b[i]);
+  const aDue=cntA(()=>true),aX=cntA(x=>x.ca==='xout'),aEnd=less(aDue,aX),aW=cntA(x=>x.ca==='wnr'),aExp=less(aEnd,aW),aR=cntA(x=>x.ca==='ren'),aY=less(aExp,aR),aP=cntA(x=>x.ca==='pipe'),aC=less(aY,aP);
+  const aXin=cntA(x=>x.ext>0&&x.ca!=='xout');
+  // the pipeline from earlier months' cohorts: promised for this period, not paid yet; the pipeline rows go by the week of the promised date
+  const prevPipe=pipe.filter(x=>x.end&&x.end<P.a),cohPipe=cA.filter(x=>x.ca==='pipe');
+  const byNcd=(L,f)=>{const a=zero();L.forEach(x=>{const i=wi(x.ncd);if(i>=0){a[i]+=f?f(x):1;a[W.length]+=f?f(x):1;}});return a;};
+  const pPrev=byNcd(prevPipe),pAll=byNcd(cohPipe.concat(prevPipe)),pAmt=byNcd(cohPipe.concat(prevPipe),x=>x.exp||0);
+  const aEff=aDue.map((d,i)=>{const t=aR[i]+rPrev[i]+rAdv[i]+rUnk[i];return pc(t,d);}),aTot=aR.map((x,i)=>x+rPrev[i]+rAdv[i]+rUnk[i]);
+  const A=[{l:'Memberships expiring in '+MN,v:aDue,cls:'key'},{l:mode==='month'?'Extended – rolling over to '+NXT:'Extended – rolling over beyond this period',v:aX,op:'−'},
+    {l:'Will not renew',v:aW,op:'−',cls:'wnr'},{l:'Expected to renew in '+MN,v:aExp,op:'=',cls:'res'},{l:'Renewed',v:aR,op:'−'},
+    {l:'Yet to renew',v:aY,op:'=',cls:'res ytr big',list:'ytr',inner:()=>plist(ytrList,'ytr')},{l:'Pipeline – due in '+MN,v:aP,op:'−'},{l:'Yet to commit',v:aC,op:'=',cls:'res ytc'},
+    {h:'Pipeline · by the week of the promised payment'},{l:mode==='month'?'Pipeline – due in previous months':'Pipeline – due before this period',v:pPrev},
+    {l:'Pipeline – total',v:pAll,cls:'key'},{l:'Expected collections',v:pAmt.map(x=>x?inr(x):'0')},{l:'ATV – pipeline',v:pAmt.map((x,i)=>pAll[i]?inr(Math.round(x/pAll[i])):'–'),cls:'acc'},
+    {h:'For information'},{l:'Extensions – memberships still expiring in '+MN,v:aXin,cls:'note',tip:'Already counted above: their extension ends within '+MN+'.'},
+    {h:'Renewal collection efficiency'},{l:'Renewals due in '+MN,v:aDue},{l:mode==='month'?'Renewed – '+MN+' cohort':'Renewed – this period\'s cohort',v:aR},{l:"Renewed – previous months' cohorts",v:rPrev},
     {l:'Renewed – in advance',v:rAdv,opt:1},{l:'Renewed – earlier entry not found',v:rUnk,opt:1},
-    {l:'Total renewals achieved',v:ach,cls:'acc strong'},{l:'Renewal collection efficiency',v:effW,cls:'acc'},{l:'Yet to renew',v:dueW.map((d,i)=>d-ach[i]),cls:'ytr'},   // renewals due − total renewals achieved
-    
-    {h:(mode==='month'?'Current month cohort':'Cohort due in this period')+' · where the rest stand'},
-    {l:'Pipeline',v:byOc(cohort,'pipe')},{l:'Extended',v:byOc(cohort,'ext')},{l:'Will not renew',v:byOc(cohort,'wnr'),cls:'wnr'},{l:'Yet to connect',v:byOc(cohort,'ytc'),cls:'ytc'}];
+    {l:'Renewed – total',v:aTot,cls:'key tline'},{l:'Renewal collection efficiency',v:aEff,cls:'acc strong'}];
+  const ytrList=cA.filter(x=>x.ca==='pipe'||x.ca==='ytc');
   // B and C: first-time and repeated renewals of the cohort, by the week the package expires
   const typ=tab=>{const L=cohort.filter(x=>x.tab===tab),d=zero(),r=byOc(L,'ren'),p=byOc(L,'pipe');L.forEach(x=>put(d,x.end));
     const rr=r.map((x,i)=>x+p[i]);
     return{rows:[{l:'Due',v:d,cls:'key'},{l:'Renewed',v:r},{l:'Renewal %',v:r.map((x,i)=>pc(x,d[i])),cls:'acc'},{l:'Yet to renew',v:d.map((x,i)=>x-r[i]),cls:'ytr'},{h:'Pipeline and run-rate'},
       {l:'Pipeline',v:p},{l:'Run-rate',v:rr,cls:'acc strong'},{l:'Projected renewal %',v:rr.map((x,i)=>pc(x,d[i])),cls:'acc'},{h:'Other outcomes'},
-      {l:'Extended',v:byOc(L,'ext')},{l:'Will not renew',v:byOc(L,'wnr'),cls:'wnr'},{l:'Yet to connect',v:byOc(L,'ytc'),cls:'ytc'}],
+      {l:'Extended',v:byOc(L,'ext')},{l:'Will not renew',v:byOc(L,'wnr'),cls:'wnr'},{l:'Yet to commit',v:byOc(L,'ytc'),cls:'ytc'}],
       sum:SUM(['Due',n(d[W.length])],['Renewed',n(r[W.length])],['Run-rate',n(rr[W.length])])};};
   const B=typ('fs'),C=typ('rn');
   // D: the pipeline (promised payments in the period, not paid yet), by the week of the promised date, split by when the membership fell due
   const pm=new Date(P.a.getFullYear(),P.a.getMonth()-1,1);
-  const DK=[['xprev','Extended from previous month'],['cur',mode==='month'?'Due in current month':'Due in this period'],['prev','Due in previous month',1],
-    ['past','Due in past months'],['xpast','Extended in past months'],['fut','Due in future months',1],['none','Package expiry not recorded',1]];
+  const mb=k=>mode==='month'?` <span class="mb">[${k}]</span>`:'',M3=k=>MON[((viewM+k)%12+12)%12];
+  const DK=[['xprev','Extended from previous month'+mb(M3(-1))],['cur',(mode==='month'?'Due in current month':'Due in this period')+mb(M3(0))],['prev','Due in previous month'+mb(M3(-1)),1],
+    ['past','Due in past months'+mb(M3(-2)+' and earlier')],['xpast','Extended in past months'+mb(M3(-2)+' and earlier')],['fut','Due in future months'+mb(M3(1)+' and later'),1],['none','Package expiry not recorded',1]];
   const dv={};DK.forEach(([k])=>dv[k]=zero());
   pipe.forEach(x=>{const e=x.end;const k=!e?'none':inP(e,P)?'cur':e>P.b?'fut':e>=pm?(x.ext>0?'xprev':'prev'):(x.ext>0?'xpast':'past');put(dv[k],x.ncd);});
   const dt=zero();Object.values(dv).forEach(a=>a.forEach((x,i)=>dt[i]+=x));
   const D=DK.map(([k,l,o])=>({l,v:dv[k],opt:o})).concat([{l:'Total pipeline',v:dt,cls:'acc strong tline'}]);
   const wow=`<div class="wvb">
-    ${part('wA','A','Renewal breakdown',SUM(['Due',n(due.length)],['Achieved',n(rnl.length)],['Efficiency',pc(rnl.length,due.length)]),wtable(W,P,A))}
+    ${part('wA','A','Renewal breakdown',SUM(['Due',n(due.length)],['Yet to renew',n(aY[W.length])],['Yet to commit',n(aC[W.length])]),wtable(W,P,A))}
     ${part('wB','B','First-time renewals',B.sum,wtable(W,P,B.rows))}
     ${part('wC','C','Repeated renewals',C.sum,wtable(W,P,C.rows))}
     ${part('wD','D','Pipeline breakdown',SUM(['Total pipeline',n(pipe.length)]),wtable(W,P,D))}</div>`;
@@ -458,6 +497,20 @@ function render(){
     +section('wnr','Will not renew',`<span class="ct r">${wnr.length}</span><span>${coh}</span>`,learnerList(wnr,false))
     +section('ext','Extended',`<span class="ct b">${ext.length}</span><span>${coh}</span>`,learnerList(ext,true));
   out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
+  out.querySelectorAll('[data-ol]').forEach(b=>b.onclick=e=>{e.stopPropagation();OPENL[b.dataset.ol]=!OPENL[b.dataset.ol];try{localStorage.setItem('artium_rp_lists',JSON.stringify(OPENL));}catch(err){}render();});
+}
+/* The learners behind a number: the pipeline (Expected payments), or those yet to renew in section A */
+let OPENL=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_lists')||'{}')||{};}catch(e){return{};}})();
+function plist(list,kind){
+  if(!list.length)return'<div class="empty">No learners here.</div>';
+  const sel=selCentre!=='All',td=v=>`<td>${v||'<span class="mut">—</span>'}</td>`;
+  const st=x=>{if(kind==='pipe'){const late=x.ncd&&x.ncd<TODAY;return late?`<span class="pl rd">Overdue</span>`:`<span class="pl vi">Promised</span>`;}
+    return x.ca==='pipe'?`<span class="pl vi">Pipeline</span>`:`<span class="pl gy">Yet to commit</span>`;};
+  const rows=list.slice().sort((a,b)=>(a.ncd||9e15)-(b.ncd||9e15)||a.end-b.end);
+  return`<div class="tw"><table class="lt pl3"><thead><tr><th>Learner</th><th>Phone</th><th>Course</th><th>Teacher</th><th>Package expiry</th><th>Expected payment date</th><th>Expected collections</th><th>Status</th><th>Latest discussion</th></tr></thead><tbody>`
+    +rows.map(x=>`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>`
+      +td(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'')+td(esc(x.course))+td(esc(x.teacher))+td(x.end?fmtD(x.end):'')+td(x.ncd?fmtD(x.ncd):'')+td(x.exp>0?inr(x.exp):'')+`<td>${st(x)}</td>`
+      +`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td></tr>`).join('')+'</tbody></table></div>';
 }
 
 
@@ -487,11 +540,11 @@ function tools(k){const f=fl(k);
   return`<div class="ltools"><div class="lsub pks" role="group" aria-label="Previous package"><span class="tl">Package</span>${PKGS.map(v=>`<button type="button" data-lk="${k}" data-pkg="${v}" aria-pressed="${f.pkg===v}">${v==='all'?'All':v+'M'}</button>`).join('')}</div>`
     +`<div class="lsub pks" role="group" aria-label="Show">${[['all','All'],['not','Not renewed'],['ren','Renewed']].map(([v,l])=>`<button type="button" data-lk="${k}" data-ren="${v}" aria-pressed="${f.ren===v}">${l}</button>`).join('')}</div></div>`;}
 let LSUB=(()=>{try{return Object.assign({due:'all',one:'act'},JSON.parse(localStorage.getItem('artium_rp_lsub')||'{}'));}catch(e){return{due:'all',one:'act'};}})();
-const OC={ren:['Renewed','ok'],pipe:['Pipeline','vi'],wnr:['Will not renew','rd'],ext:['Extended','bl'],ytc:['Yet to connect','gy']};
+const OC={ren:['Renewed','ok'],pipe:['Pipeline','vi'],wnr:['Will not renew','rd'],ext:['Extended','bl'],ytc:['Yet to commit','gy']};
 const pill=(t,c)=>`<span class="pl ${c}">${t}</span>`;
 function subT(key,opts){return`<div class="lsub" role="group">${opts.map(([v,l,c])=>`<button type="button" data-sub="${key}" data-v="${v}" aria-pressed="${LSUB[key]===v}">${l}<i>${c}</i></button>`).join('')}</div>`;}
 function who(x,sel){return`<td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>`;}
-/* Where a learner stands now (the All time lists): renewed, will not renew, extended or paused, a promised payment, or yet to connect */
+/* Where a learner stands now (the All time lists): renewed, will not renew, extended or paused, a promised payment, or yet to commit */
 function nowOc(x){if(x.st==='paid')return'ren';if(x.st==='lost')return'wnr';if(x.ext>0||/extend|pause/i.test(x.status))return'ext';if(x.ncd&&x.exp>0)return'pipe';return'ytc';}
 const LSHOW={};   // lists opened in full (the first 10 learners show otherwise)
 /* Column menus, as in Google Sheets: sort and filter by values. CF[table] = {sort:{c,dir}, f:{column:[values]}} */
