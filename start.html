@@ -150,7 +150,7 @@
   body{background:#F6F3FC;font-variant-numeric:tabular-nums}
   .bg{background:radial-gradient(520px 520px at 0% 52%,rgba(205,187,255,.6),rgba(205,187,255,0) 70%),radial-gradient(460px 460px at 100% 68%,rgba(246,196,236,.55),rgba(246,196,236,0) 70%),radial-gradient(520px 380px at 45% 100%,rgba(198,212,255,.6),rgba(198,212,255,0) 70%),#F6F3FC}
   .bg svg,.bg::after{display:none}
-  .page{max-width:820px;padding:56px 28px 72px}
+  .page{max-width:1160px;padding:56px 28px 72px}
   .stage{padding:18px 0 0}
   .stage::before{content:"";position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-56px;bottom:-150px;border-radius:0 0 50% 50%/0 0 90px 90px;
     background:radial-gradient(70% 120% at 50% -30%,#5a1bff 0%,rgba(65,1,247,0) 60%),radial-gradient(40% 60% at 12% 80%,rgba(221,48,177,.35),rgba(221,48,177,0) 70%),linear-gradient(160deg,#2B0256 0%,#160240 55%,#01064c 100%)}
@@ -180,7 +180,9 @@
   .a-head::before{background:linear-gradient(180deg,#6601fd,#dd30b1)}
   .a-sec li::before{background:var(--v2)}
   .chip:hover{border-color:#cdb9ff}
-  .todo{position:relative;z-index:1;max-width:780px;margin:56px auto 0;background:#fff;border:1px solid var(--border);border-radius:22px;padding:24px 26px 22px;
+  .wrap{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:24px;align-items:stretch;margin-top:56px}
+  .wrap:has(.todo[hidden]){grid-template-columns:minmax(0,520px);justify-content:center}
+  .todo{position:relative;z-index:1;margin:0;background:#fff;border:1px solid var(--border);border-radius:22px;padding:24px 26px 22px;
     box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
   .todo[hidden]{display:none}
   .th{display:flex;align-items:center;justify-content:space-between;gap:16px}
@@ -219,6 +221,23 @@
   .links:empty{display:none}
   .links button{background:rgba(255,255,255,.8);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
   .links button:hover{border-color:#cdb9ff;color:var(--accent);background:#fff}
+  .pay{position:relative;min-height:440px;background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
+  .pin{position:absolute;inset:0;display:flex;flex-direction:column;padding:22px 8px 8px 22px;min-height:0}
+  #pl{flex:1;min-height:0;overflow-y:auto;padding-right:14px;outline:0;scrollbar-width:thin;scrollbar-color:#cdb9ff transparent}
+  .pd{position:sticky;top:0;z-index:1;background:#fff;padding:12px 0 6px;font:700 10.5px var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--faint);border-top:1px solid var(--line)}
+  .pd:first-child{border-top:0;padding-top:2px}
+  .pay h2{font:800 20px var(--display);color:var(--ink);letter-spacing:-.01em}
+  .pay .ps{font-size:13px;color:var(--muted);margin:3px 0 10px}
+  .pi{padding:12px 0;border-top:1px solid var(--line)}
+  .pd+.pi{border-top:0}
+  .pr{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .pn{font:700 14.5px var(--display);color:var(--ink);min-width:0;overflow-wrap:anywhere}
+  .pa{font:800 15px var(--display);color:var(--accent);white-space:nowrap}
+  .pm{margin-top:4px;font-size:12.5px;color:var(--muted);line-height:1.5}
+  .pw{margin-top:4px;font-size:12px;color:var(--faint);display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px}
+  .tg{display:inline-block;font:700 10.5px var(--display);letter-spacing:.04em;border-radius:999px;padding:2px 8px;background:#f1eafe;color:var(--v2)}
+  .tg.r{background:#fdeaf9;color:#a3217f}
+  .pay .tempty{padding:10px 0 14px}
   .tmsg{color:var(--bad);font-size:12.5px;margin-top:8px}
   /* the answer panel, in the brand colours */
   .recs{background:linear-gradient(180deg,#F8F4FF 0%,#FCF3FD 100%);border-color:#e3d6fb}
@@ -231,6 +250,7 @@
   .bars i{background:linear-gradient(180deg,#6601fd,#dd30b1)}
   .dot.loading{background:var(--v2)}
   .loc{border-color:var(--border)}
+  @media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.pay{min-height:0;height:460px}}
   @media (max-width:760px){.stage h1{font-size:34px}.todo{padding:18px 16px}.it{flex-wrap:wrap}.st{margin-left:40px}}
 </style>
 </head>
@@ -252,12 +272,18 @@
 
   <section class="answer" id="answer" hidden aria-live="polite"></section>
 
+  <div class="wrap">
   <section class="todo" id="todo" hidden aria-label="My to-do list">
     <div class="th"><div><h2>My to-do list</h2><p>Most urgent first, including tasks you share with others.</p></div><div class="ring" id="ring"></div></div>
     <div class="tl" id="tl"></div>
     <div class="tmore" id="tmore"></div>
     <div class="cheer" id="cheer"></div>
   </section>
+  <section class="pay" id="pay" aria-label="Latest payments"><div class="pin">
+    <h2>Latest payments</h2><p class="ps">From all centres, newest first.</p>
+    <div id="pl" tabindex="0"><div class="tempty">Loading the latest payments…</div></div>
+  </div></section>
+  </div>
   <nav class="links" id="links" aria-label="Your pinned pages"></nav>
 
   <div class="recent" id="recent" hidden><div class="recent-t">Recent questions</div><div class="chips" id="recent-list"></div></div>
@@ -765,13 +791,37 @@ async function load(){
       const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);
       const ms=memberships(c.name,mine(res[i][0]),mine(res[i][1]));
       DATA[c.name]={ms,first:ms.length?Math.min(...ms.filter(m=>m.kind==='ft').map(m=>mi(m.d))):null};});
+    try{drawPays(collectPays(res));}catch(e){drawPays(null);}
     [FUN,CAL]=await Promise.all([fun,cal]);
     if(!Object.keys(DATA).length)throw new Error('no data you can see yet');
     ENGINE.prepare();READY=true;
     dot.className='dot';st.textContent='Data up to '+TODAY.getDate()+' '+MON[TODAY.getMonth()];
     document.getElementById('go').disabled=false;
     if(pending){const q=pending;pending=null;ask(q);}
-  }catch(e){dot.className='dot error';st.textContent='Could not load the numbers: '+e.message;}
+  }catch(e){dot.className='dot error';st.textContent='Could not load the numbers: '+e.message;drawPays(null,true);}
+}
+/* ── Latest payments: the newest Fresh Sales and Renewals entries across all centres, whoever is signed in ── */
+function collectPays(res){
+  const out=[],val=v=>{const t=String(v||'').trim();return t&&t.toLowerCase()!=='not mentioned'?t:'';};
+  CENTRES.forEach((c,i)=>{if(!res[i])return;
+    [[res[i][0],'Fresh sale',17],[res[i][1],'Renewal',16]].forEach(([rows,kind,col])=>{
+      rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name).forEach((r,n)=>{
+        const d=parseDate(r[0]),amt=parseNum(r[col]);if(!d||!(amt>0))return;
+        let m=val(r[12]);const mm=parseFloat(m);if(m&&isFinite(mm)&&/^[\d.\s]*(m|months?)?$/i.test(m))m=(+mm)+(mm===1?' month':' months');
+        out.push({d,n,centre:c.name,kind,name:val(r[4])||'Learner',age:val(r[6]),level:val(r[9]),dur:m,amt});});});});
+  return out.sort((a,b)=>b.d-a.d||b.n-a.n).slice(0,80);
+}
+function drawPays(L,failed){
+  const el=document.getElementById('pl');if(!el)return;
+  if(!L){if(failed||!el.dataset.ok)el.innerHTML='<div class="tempty">The latest payments are not available right now.</div>';return;}
+  const day=d=>{const n=Math.round((new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
+    return n<=0?'Today':n===1?'Yesterday':d.getDate()+' '+MON[d.getMonth()];};
+  el.dataset.ok='1';
+  let last='';
+  el.innerHTML=L.length?L.map(x=>{const dl=day(x.d),h=dl!==last?`<div class="pd">${dl}</div>`:'';last=dl;
+    return h+`<div class="pi"><div class="pr"><span class="pn">${esc(x.name)}</span><span class="pa">₹${Math.round(x.amt).toLocaleString('en-IN')}</span></div>
+    <div class="pm">${[x.age,x.level,x.dur].filter(Boolean).map(esc).join(' · ')}</div>
+    <div class="pw"><span class="tg${x.kind==='Renewal'?' r':''}">${x.kind}</span><span>${esc(x.centre)}</span></div></div>`;}).join(''):'<div class="tempty">No payments recorded yet.</div>';
 }
 // next 60 days from the Calendar page: public holidays (by city), festivals, special days and our own entries
 function upcoming(j){
