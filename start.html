@@ -935,9 +935,14 @@ document.getElementById('go').disabled=true;
     if(n<0)return{t:'Overdue by '+(-n)+(n===-1?' day':' days'),c:'late'};if(n===0)return{t:'Due today',c:''};if(n===1)return{t:'Due tomorrow',c:''};
     const p=d.split('-');return{t:'Due '+(+p[2])+' '+MON[+p[1]-1],c:''};}
   function ago(iso){const d=(iso||'').slice(0,10);if(!d)return'';const n=days(T,d);return n<=0?'today':n===1?'yesterday':n+' days ago';}
-  function rows(j){const r=[];j.tasks.forEach(t=>{
-    if(t.subs&&t.subs.length)t.subs.forEach(x=>r.push({k:t.id+'|'+x.id,id:t.id,sub:x.id,title:x.title,parent:t.title,due:x.due||t.due,s:x.s,centre:t.centre,others:t.others,upd:t.upd}));
-    else r.push({k:t.id,id:t.id,title:t.title,due:t.due,s:t.s,centre:t.centre,others:t.others,upd:t.upd});});return r;}
+  function rows(j){const r=[],me=j.me||'';j.tasks.forEach(t=>{
+    const subs=t.subs||[];
+    if(subs.length){
+      // my subtasks and the ones nobody owns yet; the others stay inside the task
+      const vis=subs.filter(x=>!x.owner||x.owner===me);
+      if(vis.length)vis.forEach(x=>r.push({k:t.id+'|'+x.id,id:t.id,sub:x.id,title:x.title,parent:x.sec?t.title+' · '+x.sec:t.title,due:x.due||t.due,s:x.s,centre:t.centre,others:t.others,upd:t.upd}));
+      else if(!t.viaMe)r.push({k:t.id,id:t.id,title:t.title,due:t.due,s:t.s,centre:t.centre,others:t.others,upd:t.upd});
+    }else r.push({k:t.id,id:t.id,title:t.title,due:t.due,s:t.s,centre:t.centre,others:t.others,upd:t.upd});});return r;}
   const open=r=>r.s!=='cmp';
   const cmp=(a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||((a.s==='inp'?0:1)-(b.s==='inp'?0:1))||a.title.localeCompare(b.title);
   function pick(){const done=ROWS.filter(r=>!open(r)).sort(cmp).slice(0,3),op=ROWS.filter(open).sort(cmp);return done.concat(op.slice(0,SL-done.length));}

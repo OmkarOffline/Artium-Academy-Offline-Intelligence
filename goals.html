@@ -249,8 +249,34 @@
   .sbl small{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap}.sbl small.bad{color:var(--bad)}
   .bc .sbt{margin:8px 0 0 25px;align-self:flex-start;width:auto;max-width:max-content}.bc .sbl{margin-left:19px}
   .tdlg .subs{display:flex;flex-direction:column;gap:8px}
-  .tdlg .sr{display:grid;grid-template-columns:22px minmax(0,1fr) 150px 30px;gap:8px;align-items:center}
-  .tdlg .sr .n{font:700 12px var(--body);color:var(--faint);text-align:center}
+  .tdlg.tedit{width:780px}
+  .tdlg .sr{display:grid;grid-template-columns:16px minmax(0,1fr) 150px 140px 24px;gap:8px;align-items:center;border-radius:10px;position:relative}
+  .tdlg .sr .dg{cursor:grab;color:#b9b2cf;font-size:15px;letter-spacing:-3px;text-align:center;user-select:none;line-height:1}.tdlg .sr .dg:hover{color:var(--accent)}
+  .tdlg .sr.dragging{opacity:.4}
+  .tdlg .sr.dro-t::before,.tdlg .sr.dro-b::after{content:"";position:absolute;left:0;right:0;height:3px;border-radius:3px;background:var(--accent)}
+  .tdlg .sr.dro-t::before{top:-5px}.tdlg .sr.dro-b::after{bottom:-5px}
+  .tdlg .sec,.tdlg .plain{border:1px solid #e3d6fb;background:#faf7ff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .tdlg .plain.solo{border:0;background:none;padding:0}
+  .tdlg [data-sk].dro-in{outline:2px dashed var(--accent);outline-offset:2px}
+  .tdlg .sh{display:flex;align-items:center;gap:10px}
+  .tdlg .sh .tag{font:700 10px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);flex:none}
+  .tdlg .sh .in{font-weight:700;border-color:transparent;background:transparent;padding:6px 8px}.tdlg .sh .in:focus{background:#fff;border-color:var(--border)}
+  .tdlg .sh .ct{font-size:12px;color:var(--faint);white-space:nowrap;margin-left:auto}
+  .tdlg .sh button,.tdlg .sr button{border:0;background:none;color:var(--faint);font-size:15px;cursor:pointer}
+  .tdlg .sh.del{font-size:13px;color:var(--ink2);flex-wrap:wrap}.tdlg .sh.del button{border:1px solid var(--border);background:#fff;border-radius:8px;padding:5px 10px;font:600 12.5px var(--body);color:var(--ink2)}
+  .tdlg .sempty{font-size:12.5px;color:var(--faint);padding:2px 4px}
+  .tdlg .own{display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:10px;background:#fff;padding:0 6px 0 8px;height:37px}
+  .tdlg .own i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 10px var(--body);color:#fff;font-style:normal;overflow:hidden}.tdlg .own i img{width:100%;height:100%;object-fit:cover}
+  .tdlg .own select{flex:1;min-width:0;border:0;background:transparent;font:600 13px var(--body);color:var(--ink);outline:0;cursor:pointer}
+  .tdlg .note{font-size:12.5px;color:var(--muted);background:#f1eafe;border-radius:10px;padding:9px 12px}
+  .tdlg .adds{display:flex;gap:10px;flex-wrap:wrap}
+  .via{font-style:normal;font-size:11.5px;color:var(--faint);font-weight:500}
+  .sbl li.sgh{padding:10px 6px 4px;gap:10px;background:none!important}.sbl li.sgh b{font:800 13.5px var(--body);color:var(--ink)}.sbl li.sgh small{margin-left:0}
+  .sbl li.sgh .sg-bar{width:90px;height:5px;border-radius:5px;background:#ece4ff;overflow:hidden}.sbl li.sgh .sg-bar i{display:block;height:100%;background:linear-gradient(90deg,#6601fd,#dd30b1)}
+  .sbl .so{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font:600 12px var(--body);color:var(--ink2);white-space:nowrap}
+  .sbl .so i{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font:700 9px var(--body);color:#fff;font-style:normal;overflow:hidden}.sbl .so i img{width:100%;height:100%;object-fit:cover}
+  .sbl .so+small{margin-left:0}
+
   .tdlg .sr .in{padding:8px 10px}
   .tdlg .sr button{border:0;background:none;color:var(--faint);font-size:15px;cursor:pointer}
   .tdlg .addsub{align-self:flex-start;border:1.5px dashed #CDBDF7;background:none;border-radius:10px;padding:8px 14px;font:700 13px var(--body);color:var(--accent);cursor:pointer}
@@ -628,9 +654,13 @@ const tUpd=t=>ACT.filter(a=>a.goal===t.id&&a.kind==='update');
 function updChip(t){const n=tUpd(t).length;if(!n&&!canT(t))return'';
   return`<button type="button" class="sbt upc" data-tview="${t.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>${n?n+' update'+(n===1?'':'s'):'Add an update'}</button>`;}
 function subsHtml(t){const xs=t.subs||[];if(!xs.length)return'';const d=xs.filter(x=>sst(x)==='cmp').length,on=SOPEN.has(t.id),can=canT(t);
+  const own=x=>{if(!x.owner)return'';const o=STAFF.find(p=>p.email===x.owner),n=o?o.name:x.owner;return`<span class="so" title="${esc(n)}"><i style="background:${avc(x.owner)}">${phImg(x.owner)||esc(initials(n))}</i>${esc(String(n).split(' ')[0])}</span>`;};
+  const li=x=>{const dd=x.due?fromIso(x.due):null,late=dd&&dd<TODAY&&sst(x)!=='cmp',k=sst(x);
+    return`<li class="${k==='cmp'?'dn':''}"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-sub="${t.id}|${x.id}" aria-label="Status of this subtask">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><span>${esc(x.title)}</span>${own(x)}${x.due?`<small class="${late?'bad':''}">${k==='cmp'?'':late?'Past due · ':'By '}${fmtD(dd)}</small>`:''}</li>`;};
+  const gs=[''].concat(t.secs||[]).map(sc=>({sc,it:xs.filter(x=>(x.sec||'')===sc)})).filter(g=>g.it.length);
   return`<button type="button" class="sbt${on?' on':''}" data-sopen="${t.id}"><span class="sbar"><i style="width:${Math.round(d/xs.length*100)}%"></i></span>${d} of ${xs.length} subtasks${ICHEV}</button>`
-    +(on?`<ul class="sbl">${xs.map(x=>{const dd=x.due?fromIso(x.due):null,late=dd&&dd<TODAY&&sst(x)!=='cmp';
-      const k=sst(x);return`<li class="${k==='cmp'?'dn':''}"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-sub="${t.id}|${x.id}" aria-label="Status of this subtask">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><span>${esc(x.title)}</span>${x.due?`<small class="${late?'bad':''}">${k==='cmp'?'':late?'Past due · ':'By '}${fmtD(dd)}</small>`:''}</li>`;}).join('')}</ul>`:'');}
+    +(on?`<ul class="sbl">${gs.map(g=>{const gd=g.it.filter(x=>sst(x)==='cmp').length;
+      return(g.sc?`<li class="sgh"><b>${esc(g.sc)}</b><span class="sg-bar"><i style="width:${Math.round(gd/g.it.length*100)}%"></i></span><small>${gd} of ${g.it.length} done</small></li>`:'')+g.it.map(li).join('');}).join('')}</ul>`:'');}
 // The Slack message sent with the email: to whom it went, and who wasn't found on Slack
 function slackNote(t){const s=t.slack;if(!s)return'';const nm=e=>{const o=tOwners(t).find(x=>x.email===e);return o?(o.name||e).split(' ')[0]:e;};
   if(s.missing&&s.missing.length)return`<span class="sl warn" title="${esc(s.error||'')}">Slack: not sent to ${esc(s.missing.map(nm).join(', '))}</span>`;
@@ -718,7 +748,7 @@ async function tcall(action,body,msg){
 }
 function taskWin(t){
   const staff=STAFF.filter(s=>s.email),w=document.getElementById('twin');
-  w.innerHTML=`<div class="tscrim"><div class="tdlg" role="dialog" aria-label="Task"><div class="dh"><h2>${t?'Edit the task':'New task'}</h2><button class="x" data-x>×</button></div>
+  w.innerHTML=`<div class="tscrim"><div class="tdlg tedit" role="dialog" aria-label="Task"><div class="dh"><h2>${t?'Edit the task':'New task'}</h2><button class="x" data-x>×</button></div>
     <div class="db"><div class="f"><label for="xt">Task</label><input class="in" id="xt" value="${esc(t?t.title:'')}" placeholder="What needs doing?"></div>
       <div class="f"><label for="xd">Details</label><textarea class="in" id="xd" placeholder="Anything the owners need to know.">${esc(t?t.desc:'')}</textarea></div>
       <div class="f"><label>For</label><div class="opp" id="xo"></div></div>
@@ -727,29 +757,63 @@ function taskWin(t){
       <div class="f"><label>Subtasks</label><div class="subs" id="xs"></div></div></div>
     <div class="df"><span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span><div style="display:flex;gap:8px"><button class="btn" data-x>Cancel</button>${t&&!t.draft?'':`<button class="btn" id="xnow">Save and send now</button>`}<button class="btn pri" id="xsave">${t&&!t.draft?'Save':'Save task — send later'}</button></div></div></div></div>`;
   // owners: as many as needed, each removable
-  let OW=t?tOwners(t).map(o=>o.email):[];
-  const drawOw=()=>{w.querySelector('#xo').innerHTML=OW.map(e=>{const s=staff.find(x=>x.email===e)||{name:e};return`<span class="p">${esc(s.name)}<button type="button" data-rmo="${esc(e)}" aria-label="Remove">✕</button></span>`;}).join('')+
+  let OW=t?tOwners(t).map(o=>o.email):[];let VIA=new Set(t?tOwners(t).filter(o=>o.via).map(o=>o.email):[]);
+  const drawOw=()=>{w.querySelector('#xo').innerHTML=OW.map(e=>{const s=staff.find(x=>x.email===e)||{name:e};return`<span class="p">${esc(s.name)}${VIA.has(e)?' <em class="via">via a subtask</em>':''}<button type="button" data-rmo="${esc(e)}" aria-label="Remove">✕</button></span>`;}).join('')+
     `<select id="xadd" aria-label="Add an owner"><option value="">+ ${OW.length?'Add another owner':'Choose an owner'}</option>${staff.filter(s=>!OW.includes(s.email)).map(s=>`<option value="${esc(s.email)}">${esc(s.name)} · ${esc(s.role)}${s.centre?', '+esc(s.centre):''}</option>`).join('')}</select>`;};
   drawOw();
-  // subtasks: a title and an optional date each; the ones kept keep whether they are done
-  let SB=t&&t.subs?t.subs.map(x=>({id:x.id,title:x.title,due:x.due||''})):[];
-  const drawSb=()=>{w.querySelector('#xs').innerHTML=SB.map((x,i)=>`<div class="sr" data-si="${i}"><span class="n">${i+1}</span><input class="in" data-sf="title" value="${esc(x.title)}" placeholder="e.g. Call the vendor"><input class="in" type="date" data-sf="due" value="${x.due}" aria-label="By"><button type="button" data-rms="${i}" aria-label="Remove">✕</button></div>`).join('')
-    +`<button type="button" class="addsub" id="xaddsub">${IPLUS} Add a subtask</button>`;};
+  // subtasks: a title, an owner and a date each, grouped in sections; drag the handle to move one to another place or section
+  const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  let SECS=((t&&t.secs)||[]).map(n=>({k:uid('c'),name:n}));
+  ((t&&t.subs)||[]).forEach(x=>{if(x.sec&&!SECS.some(c=>c.name===x.sec))SECS.push({k:uid('c'),name:x.sec});});
+  let SB=t&&t.subs?t.subs.map(x=>({id:x.id,title:x.title,due:x.due||'',owner:x.owner||'',sk:(SECS.find(c=>c.name===x.sec)||{}).k||''})):[];
+  let SECDEL=null,DR=null;
+  const ownSel=x=>{const o=staff.find(p=>p.email===x.owner);
+    return`<label class="own">${x.owner?`<i style="background:${avc(x.owner)}">${phImg(x.owner)||esc(initials(o?o.name:x.owner))}</i>`:''}<select data-sf="owner" aria-label="Owner of this subtask"><option value="">Owner</option>${staff.map(p=>`<option value="${esc(p.email)}"${p.email===x.owner?' selected':''}>${esc(p.name)}</option>`).join('')}${x.owner&&!o?`<option value="${esc(x.owner)}" selected>${esc(x.owner)}</option>`:''}</select></label>`;};
+  const sRow=(x,i)=>`<div class="sr" data-si="${i}"><span class="dg" draggable="true" data-drag="${i}" title="Drag to move this subtask" aria-label="Drag to move this subtask">⋮⋮</span><input class="in" data-sf="title" value="${esc(x.title)}" placeholder="e.g. Call the vendor">${ownSel(x)}<input class="in" type="date" data-sf="due" value="${x.due}" aria-label="By"><button type="button" data-rms="${i}" aria-label="Remove">✕</button></div>`;
+  const grp=c=>{const sk=c?c.k:'',items=SB.map((x,i)=>[x,i]).filter(([x])=>(x.sk||'')===sk),nm=c?(c.name.trim()||'this section'):'';
+    const head=!c?(SECS.length?'<div class="sh"><span class="tag">No section</span></div>':''):SECDEL===c.k
+      ?`<div class="sh del"><span>Remove “${esc(c.name)}”?</span><button type="button" data-secdel="${c.k}|keep">Keep its subtasks</button><button type="button" data-secdel="${c.k}|drop">Delete them too</button><button type="button" data-secdel="${c.k}|no">Cancel</button></div>`
+      :`<div class="sh"><span class="tag">Section</span><input class="in" data-secname="${c.k}" value="${esc(c.name)}" placeholder="Section name, e.g. Hosting" aria-label="Section name"><span class="ct">${items.length} subtask${items.length===1?'':'s'}</span><button type="button" data-rsec="${c.k}" aria-label="Remove the section">✕</button></div>`;
+    return`<div class="${c?'sec':'plain'+(SECS.length?'':' solo')}" data-sk="${sk}">${head}${items.map(([x,i])=>sRow(x,i)).join('')}${!items.length&&c?'<div class="sempty">Drag a subtask here, or add one.</div>':''}<button type="button" class="addsub" data-addsub="${sk}">${IPLUS} Add a subtask${c?' to '+esc(nm):''}</button></div>`;};
+  const drawSb=()=>{w.querySelector('#xs').innerHTML=grp(null)+SECS.map(grp).join('')+`<div class="adds"><button type="button" class="addsub" id="xaddsec">${IPLUS} Add a section</button></div><div class="note">Anyone you choose as a subtask owner is added as an owner of the task as well.</div>`;};
   drawSb();
-  w.oninput=e=>{const r=e.target.closest('[data-si]');if(r&&e.target.dataset.sf)SB[+r.dataset.si][e.target.dataset.sf]=e.target.value;};
-  w.onchange=e=>{if(e.target.id==='xadd'&&e.target.value){OW.push(e.target.value);drawOw();}};
+  const clearDrop=()=>w.querySelectorAll('.dro-t,.dro-b,.dro-in').forEach(r=>r.classList.remove('dro-t','dro-b','dro-in'));
+  w.ondragstart=e=>{const d=e.target.closest&&e.target.closest('[data-drag]');if(!d)return;DR=+d.dataset.drag;e.dataTransfer.effectAllowed='move';
+    try{e.dataTransfer.setData('text/plain','subtask');const r=d.closest('.sr');e.dataTransfer.setDragImage(r,20,16);setTimeout(()=>r.classList.add('dragging'),0);}catch(x){}};
+  w.ondragend=()=>{DR=null;clearDrop();w.querySelectorAll('.dragging').forEach(r=>r.classList.remove('dragging'));};
+  w.ondragover=e=>{if(DR===null)return;const box=e.target.closest('[data-sk]');if(!box)return;e.preventDefault();clearDrop();
+    const row=e.target.closest('.sr');if(row){if(+row.dataset.si!==DR){const r=row.getBoundingClientRect();row.classList.add(e.clientY<r.top+r.height/2?'dro-t':'dro-b');}}else box.classList.add('dro-in');};
+  w.ondrop=e=>{if(DR===null)return;const box=e.target.closest('[data-sk]');if(!box)return;e.preventDefault();clearDrop();
+    const row=e.target.closest('.sr');if(row&&+row.dataset.si===DR){DR=null;drawSb();return;}
+    const mv=SB[DR],sk=box.dataset.sk;let before=null,after=false;
+    if(row){const r=row.getBoundingClientRect();after=e.clientY>=r.top+r.height/2;before=SB[+row.dataset.si];}
+    SB.splice(DR,1);mv.sk=sk;
+    if(before){const j=SB.indexOf(before);SB.splice(after?j+1:j,0,mv);}
+    else{const last=SB.map((x,i)=>[x,i]).filter(([x])=>(x.sk||'')===sk).pop();SB.splice(last?last[1]+1:SB.length,0,mv);}
+    DR=null;drawSb();};
+  w.oninput=e=>{const sc=e.target.dataset.secname;if(sc){const c=SECS.find(x=>x.k===sc);if(c)c.name=e.target.value;return;}
+    const r=e.target.closest('[data-si]');if(r&&e.target.dataset.sf)SB[+r.dataset.si][e.target.dataset.sf]=e.target.value;};
+  w.onchange=e=>{if(e.target.id==='xadd'&&e.target.value){OW.push(e.target.value);VIA.delete(e.target.value);drawOw();return;}
+    if(e.target.dataset.sf==='owner'){const r=e.target.closest('[data-si]'),x=SB[+r.dataset.si];x.owner=e.target.value;
+      if(x.owner&&!OW.includes(x.owner)){OW.push(x.owner);VIA.add(x.owner);drawOw();}drawSb();}};
   w.onclick=async e=>{
     if(e.target.closest('[data-x]')){if(!tbusy)w.innerHTML='';return;}
-    const rm=e.target.closest('[data-rmo]');if(rm){OW=OW.filter(x=>x!==rm.dataset.rmo);drawOw();return;}
-    if(e.target.closest('#xaddsub')){SB.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:'',due:''});drawSb();const ins=w.querySelectorAll('[data-sf=title]');ins[ins.length-1].focus();return;}
+    const rm=e.target.closest('[data-rmo]');if(rm){const em=rm.dataset.rmo;if(SB.some(x=>x.owner===em)){w.querySelector('#xmsg').textContent='They own a subtask. Change that subtask\'s owner first.';return;}OW=OW.filter(x=>x!==em);VIA.delete(em);drawOw();return;}
+    const as=e.target.closest('[data-addsub]');if(as){const sk=as.dataset.addsub;SB.push({id:uid('s'),title:'',due:'',owner:'',sk});drawSb();const ins=w.querySelectorAll('[data-sk="'+sk+'"] [data-sf=title]');if(ins.length)ins[ins.length-1].focus();return;}
+    if(e.target.closest('#xaddsec')){SECS.push({k:uid('c'),name:''});drawSb();const ins=w.querySelectorAll('[data-secname]');if(ins.length)ins[ins.length-1].focus();return;}
+    const rsec=e.target.closest('[data-rsec]');if(rsec){const k=rsec.dataset.rsec;if(SB.some(x=>x.sk===k)){SECDEL=k;}else SECS=SECS.filter(c=>c.k!==k);drawSb();return;}
+    const sd=e.target.closest('[data-secdel]');if(sd){const [k,act]=sd.dataset.secdel.split('|');SECDEL=null;
+      if(act==='keep'){SB.forEach(x=>{if(x.sk===k)x.sk='';});SECS=SECS.filter(c=>c.k!==k);}else if(act==='drop'){SB=SB.filter(x=>x.sk!==k);SECS=SECS.filter(c=>c.k!==k);}drawSb();return;}
     const rs=e.target.closest('[data-rms]');if(rs){SB.splice(+rs.dataset.rms,1);drawSb();return;}
     const tb=e.target.closest('[data-ttag]');if(tb){tb.setAttribute('aria-pressed',tb.getAttribute('aria-pressed')!=='true');return;}
     if(e.target.id!=='xsave'&&e.target.id!=='xnow')return;
     const msg=w.querySelector('#xmsg');
     if(!w.querySelector('#xt').value.trim()){msg.textContent='Give the task a title.';return;}if(!OW.length){msg.textContent='Choose who the task is for.';return;}
+    if(SECS.some(c=>!c.name.trim())){msg.textContent='Give every section a name.';return;}
+    if(new Set(SECS.map(c=>c.name.trim().toLowerCase())).size<SECS.length){msg.textContent='Section names must be different.';return;}
     if(e.target.id==='xnow'&&!confirm('Send this task now, by email and on Slack? You\'ll be copied on the email.'))return;
     tbusy=true;e.target.disabled=true;
-    const ok=await tcall('saveTask',{task:{id:t?t.id:'',title:w.querySelector('#xt').value,desc:w.querySelector('#xd').value,owners:OW.map(e=>({email:e})),tags:[...w.querySelectorAll('[data-ttag][aria-pressed=true]')].map(b=>b.dataset.ttag),due:w.querySelector('#xdue').value,subs:SB.filter(x=>x.title.trim()),emailNow:e.target.id==='xnow'}},msg);
+    const ok=await tcall('saveTask',{task:{id:t?t.id:'',title:w.querySelector('#xt').value,desc:w.querySelector('#xd').value,owners:OW.map(e=>({email:e,via:VIA.has(e)})),tags:[...w.querySelectorAll('[data-ttag][aria-pressed=true]')].map(b=>b.dataset.ttag),due:w.querySelector('#xdue').value,secs:SECS.map(c=>c.name.trim()),subs:SB.filter(x=>x.title.trim()).map(x=>({id:x.id,title:x.title,due:x.due,owner:x.owner,sec:((SECS.find(c=>c.k===x.sk)||{}).name||'').trim()})),emailNow:e.target.id==='xnow'}},msg);
     tbusy=false;if(ok)w.innerHTML='';else e.target.disabled=false;
   };
 }
@@ -764,7 +828,7 @@ function drawTV(){
     return`<div class="upd"><span class="av">${phImg(a.by)||esc((a.name||a.by).charAt(0).toUpperCase())}</span><div class="tx">${esc(a.text)}<small>${who} · ${ago(a.at)}</small>${a.files&&a.files.length?`<div class="files">${a.files.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">${f.image?'🖼':'📎'} ${esc(f.name)}</a>`).join('')}</div>`:''}</div></div>`;}).join('');
   const subs=(t.subs||[]).length?(()=>{const on=SOPEN.has(t.id);SOPEN.add(t.id);const h=subsHtml(t).replace(/^<button[\s\S]*?<\/button>/,'');if(!on)SOPEN.delete(t.id);return h;})():'';
   w.innerHTML=`<div class="tscrim" data-tvx><div class="tdlg tvw" role="dialog" aria-label="Task"><div class="dh"><h2>${esc(t.title)}</h2><button class="x" data-tvc>×</button></div>
-    <div class="db"><div class="meta"><span class="gl ${t.status}"><i></i>${TST[t.status]}</span><span><b>For</b> ${esc(os.map(o=>o.name||o.email).join(', '))}</span><span style="${late?'color:var(--bad)':''}"><b>Due</b> ${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span><b>Centre</b> ${esc(t.centre)}</span>`:''}</div>
+    <div class="db"><div class="meta"><span class="gl ${t.status}"><i></i>${TST[t.status]}</span><span><b>For</b> ${os.map(o=>esc(o.name||o.email)+(o.via?' <em class="via">via a subtask</em>':'')).join(', ')}</span><span style="${late?'color:var(--bad)':''}"><b>Due</b> ${esc(due.replace(/^Due /,''))}</span>${t.centre?`<span><b>Centre</b> ${esc(t.centre)}</span>`:''}</div>
       ${(t.tags||[]).length?`<div class="gt-m">${tagChips(t)}</div>`:''}
       ${t.desc&&t.desc!==t.title?`<div class="dsc">${esc(t.desc)}</div>`:''}
       ${subs?`<div id="tvsubs"><div class="lab">Subtasks</div>${subs}</div>`:''}
