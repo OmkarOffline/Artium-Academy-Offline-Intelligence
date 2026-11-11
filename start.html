@@ -6,7 +6,7 @@
 <title>Home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -142,15 +142,105 @@
   .page>.answer,.recent{max-width:1000px;margin-left:auto;margin-right:auto}
   .answer{background:rgba(255,255,255,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
   @media (max-width:760px){.page{padding:28px 14px 48px}.stage h1{font-size:30px}}
+
+  /* ── Home: brand look, a welcome first, then my to-do list ── */
+  :root{--display:'Onest',system-ui,sans-serif;--body:'Onest',system-ui,sans-serif;--bg:#F6F3FC;--border:#dcd5ee;--line:#ece4ff;--ink:#120e2b;--ink2:#4a4466;--muted:#6a6488;--faint:#7a7196;--ghost:#b9b2cf;
+    --accent:#4101f7;--accent-soft:#f1eafe;--gold:#7a7196;--v2:#6601fd;--ok:#1f7a4d;--bad:#c0281c}
+  html,body{overflow-x:hidden}
+  body{background:#F6F3FC;font-variant-numeric:tabular-nums}
+  .bg{background:radial-gradient(520px 520px at 0% 52%,rgba(205,187,255,.6),rgba(205,187,255,0) 70%),radial-gradient(460px 460px at 100% 68%,rgba(246,196,236,.55),rgba(246,196,236,0) 70%),radial-gradient(520px 380px at 45% 100%,rgba(198,212,255,.6),rgba(198,212,255,0) 70%),#F6F3FC}
+  .bg svg,.bg::after{display:none}
+  .page{max-width:820px;padding:56px 28px 72px}
+  .stage{padding:18px 0 0}
+  .stage::before{content:"";position:absolute;z-index:-1;left:calc(50% - 50vw);width:100vw;top:-56px;bottom:-150px;border-radius:0 0 50% 50%/0 0 90px 90px;
+    background:radial-gradient(70% 120% at 50% -30%,#5a1bff 0%,rgba(65,1,247,0) 60%),radial-gradient(40% 60% at 12% 80%,rgba(221,48,177,.35),rgba(221,48,177,0) 70%),linear-gradient(160deg,#2B0256 0%,#160240 55%,#01064c 100%)}
+  .kicker{color:#cec8ea;font-size:11px;letter-spacing:.18em;margin-bottom:14px}
+  .kicker::before,.kicker::after{display:none}
+  .stage h1{font:800 54px/1.05 var(--display);letter-spacing:-.02em;padding-bottom:6px;background:linear-gradient(90deg,#FFFFFF 0%,#F1B6FA 45%,#9BB6FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stage h1 .nm{background:none;-webkit-background-clip:initial;background-clip:initial}
+  .stage .sub{color:#cec8ea;font-size:18px;margin:10px 0 26px}
+  .stage .ask{max-width:460px;border-radius:14px;padding:4px 6px 4px 12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);box-shadow:none}
+  .stage .ask:focus-within{max-width:640px;background:#fff;border-color:#cdb9ff;box-shadow:0 0 0 4px rgba(255,255,255,.18)}
+  .stage .ask{transition:max-width .2s}
+  .spark{color:#e5deff;width:28px}
+  .stage .ask:focus-within .spark{color:var(--accent)}
+  .stage .ask textarea{font-size:15px;padding:9px 2px;color:#fff}
+  .stage .ask textarea::placeholder{color:#e5deff;opacity:.85}
+  .stage .ask:focus-within textarea{color:var(--ink)}
+  .stage .ask:focus-within textarea::placeholder{color:var(--faint)}
+  .stage .go{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#6601fd,#4101f7)}
+  .stage .try{display:none;margin-top:14px}
+  .stage:focus-within .try{display:flex}
+  .stage .try button{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff}
+  .stage .try button:hover{background:#fff;color:var(--accent)}
+  .stage .try{color:#cec8ea}
+  .stage .data-state{color:#cec8ea;margin-top:12px}
+  .answer{border-color:var(--border)}
+  .a-lead{background:var(--accent-soft)}
+  .a-head::before{background:linear-gradient(180deg,#6601fd,#dd30b1)}
+  .a-sec li::before{background:var(--v2)}
+  .chip:hover{border-color:#cdb9ff}
+  .todo{position:relative;z-index:1;max-width:780px;margin:56px auto 0;background:#fff;border:1px solid var(--border);border-radius:22px;padding:24px 26px 22px;
+    box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
+  .todo[hidden]{display:none}
+  .th{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .th h2{font:800 20px var(--display);color:var(--ink);letter-spacing:-.01em}
+  .th p{font-size:13px;color:var(--muted);margin-top:3px}
+  .ring{position:relative;width:60px;height:60px;flex:none}
+  .ring svg{transform:rotate(-90deg)}
+  .ring circle{transition:stroke-dashoffset .5s}
+  .ring b{position:absolute;inset:0;display:grid;place-items:center;font:800 14px var(--display);color:var(--accent)}
+  .tl{margin-top:14px}
+  .it{display:flex;align-items:center;gap:14px;padding:13px 2px;border-top:1px solid var(--line)}
+  .ck{flex:none;width:26px;height:26px;border-radius:9px;border:2px solid #c3b6ea;background:#fff;display:grid;place-items:center;cursor:pointer;padding:0;transition:background .15s,border-color .15s}
+  .ck:hover{border-color:var(--accent)}
+  .ck svg{opacity:0;transition:opacity .15s}
+  .it.done .ck{background:var(--ok);border-color:var(--ok)}.it.done .ck svg{opacity:1}
+  .tx{flex:1;min-width:0}
+  .tt{font:600 15px/1.3 var(--display);color:var(--ink)}
+  .it.done .tt{color:#9a94b4;text-decoration:line-through;text-decoration-color:#c3b6ea}
+  .mt{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:5px;font-size:12.5px;color:var(--faint)}
+  .sbt{font-weight:600;color:var(--v2);background:#f1eafe;border-radius:999px;padding:2px 9px;font-size:11.5px}
+  .du{font-weight:600;color:var(--muted)}.du.late{color:var(--bad)}
+  .upd{margin-top:8px;background:#faf7ff;border-left:3px solid #b9a0f5;border-radius:0 10px 10px 0;padding:8px 12px;font-size:12.5px;line-height:1.5;color:var(--ink2)}
+  .upd b{color:var(--ink);font-weight:700}.upd em{font-style:normal;color:var(--faint);margin-left:6px}
+  .st{position:relative;flex:none;display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;background:#fff}
+  .st i{position:absolute;left:11px;width:7px;height:7px;border-radius:50%;background:#b9b2cf;pointer-events:none}
+  .st.inp i{background:var(--accent)}
+  .st select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:600 12.5px var(--display);color:var(--ink2);padding:7px 28px 7px 26px;cursor:pointer;outline:0;border-radius:999px}
+  .st::after{content:"";position:absolute;right:11px;width:6px;height:6px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);transform:translateY(-2px) rotate(45deg);pointer-events:none}
+  .st:focus-within{border-color:var(--accent)}
+  .it.done .st select{color:#9a94b4}
+  .tmore{display:flex;justify-content:space-between;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:14px;font-size:13px;color:var(--muted)}
+  .tmore button{border:0;background:none;font:700 13px var(--body);color:var(--accent);cursor:pointer}
+  .cheer{margin-top:14px;border-radius:14px;padding:13px 18px;background:linear-gradient(90deg,#f1eafe,#fdeaf9);font:600 15px var(--display);color:#3a0fb0}
+  .tempty{padding:18px 2px 6px;color:var(--muted);font-size:14px}
+  .links{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;max-width:780px;margin:28px auto 0}
+  .links:empty{display:none}
+  .links button{background:rgba(255,255,255,.8);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
+  .links button:hover{border-color:#cdb9ff;color:var(--accent);background:#fff}
+  .tmsg{color:var(--bad);font-size:12.5px;margin-top:8px}
+  /* the answer panel, in the brand colours */
+  .recs{background:linear-gradient(180deg,#F8F4FF 0%,#FCF3FD 100%);border-color:#e3d6fb}
+  .recs h3 svg{color:var(--v2)}
+  .recs h3{color:var(--ink)}
+  .recs li::before{border-color:#cdb9ff;color:var(--accent)}
+  .answer{background:#fff}
+  .fig{box-shadow:inset 0 3px 0 var(--v2),var(--shadow)}
+  .where-t{color:var(--accent)}
+  .bars i{background:linear-gradient(180deg,#6601fd,#dd30b1)}
+  .dot.loading{background:var(--v2)}
+  .loc{border-color:var(--border)}
+  @media (max-width:760px){.stage h1{font-size:34px}.todo{padding:18px 16px}.it{flex-wrap:wrap}.st{margin-left:40px}}
 </style>
 </head>
 <body>
 <div class="bg" id="bg" aria-hidden="true"></div>
 <div class="page">
   <header class="stage">
-    <div class="kicker">Artium Offline Intelligence</div>
+    <div class="kicker" id="today"></div>
     <h1 id="greet">Good afternoon</h1>
-    <div class="sub">What would you like to know today?</div>
+    <div class="sub">Welcome back. Here is what needs you today.</div>
     <form class="ask" id="ask">
       <span class="spark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.6L19.5 9.5l-5.7 1.9L12 17l-1.8-5.6L4.5 9.5l5.7-1.9z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" opacity=".7"/></svg></span>
       <textarea id="q" rows="1" placeholder="Ask anything about the offline business…" aria-label="Your question"></textarea>
@@ -161,6 +251,14 @@
   </header>
 
   <section class="answer" id="answer" hidden aria-live="polite"></section>
+
+  <section class="todo" id="todo" hidden aria-label="My to-do list">
+    <div class="th"><div><h2>My to-do list</h2><p>Most urgent first, including tasks you share with others.</p></div><div class="ring" id="ring"></div></div>
+    <div class="tl" id="tl"></div>
+    <div class="tmore" id="tmore"></div>
+    <div class="cheer" id="cheer"></div>
+  </section>
+  <nav class="links" id="links" aria-label="Your pinned pages"></nav>
 
   <div class="recent" id="recent" hidden><div class="recent-t">Recent questions</div><div class="chips" id="recent-list"></div></div>
 </div>
@@ -755,8 +853,8 @@ showRecent();
 /* ── Greeting: Good morning / afternoon / evening, with salutation and first name from the team list ── */
 (function greet(){
   const h=new Date().getHours(),part=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  const el=document.getElementById('greet');el.textContent=part;
-  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.innerHTML=esc(part)+', <span class="nm">'+esc((j.salutation?j.salutation+' ':'')+j.first)+'</span>';}).catch(()=>{});
+  const el=document.getElementById('greet');el.textContent=part+'.';
+  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.innerHTML=esc(part)+', <span class="nm">'+esc((j.salutation?j.salutation+' ':'')+j.first)+'</span>.';}).catch(()=>{});
 })();
 document.getElementById('go').disabled=true;
 
@@ -769,6 +867,69 @@ document.getElementById('go').disabled=true;
     if(!del&&j===t.length){del=true;setTimeout(tick,2200);return;}
     if(del&&j===0){del=false;i=(i+1)%ex.length;}
     setTimeout(tick,del?22:48);})();
+})();
+
+
+/* ── Today's date in the hero ── */
+(function(){const d=new Date(),W=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];document.getElementById('today').textContent=W[d.getDay()]+', '+d.getDate()+' '+MONTH_FULL[d.getMonth()];})();
+
+/* ── My to-do list: tasks where I am one of the owners (shared ones too), subtasks as their own lines, the newest update under each ──
+   Most urgent first. Ticking a line (or choosing a status) saves straight away. */
+(function todo(){
+  const SL=5,ST={tbp:'To be picked',inp:'In progress',cmp:'Completed'};
+  const CH=[[0,'A fresh list. Start with the first one.'],[1,'Good start. Keep the momentum going.'],[34,'Halfway there. Nicely done.'],[67,'Nearly there. Just a few left.'],[100,'All clear for today. Well done.']];
+  let T='',ROWS=[],VIS=[],BUSY=false;
+  const $=id=>document.getElementById(id),box2=$('todo');
+  const days=(a,b)=>Math.round((Date.parse(a)-Date.parse(b))/864e5);
+  function due(d){if(!d)return{t:'No due date',c:''};const n=days(d,T);
+    if(n<0)return{t:'Overdue by '+(-n)+(n===-1?' day':' days'),c:'late'};if(n===0)return{t:'Due today',c:''};if(n===1)return{t:'Due tomorrow',c:''};
+    const p=d.split('-');return{t:'Due '+(+p[2])+' '+MON[+p[1]-1],c:''};}
+  function ago(iso){const d=(iso||'').slice(0,10);if(!d)return'';const n=days(T,d);return n<=0?'today':n===1?'yesterday':n+' days ago';}
+  function rows(j){const r=[];j.tasks.forEach(t=>{
+    if(t.subs&&t.subs.length)t.subs.forEach(x=>r.push({k:t.id+'|'+x.id,id:t.id,sub:x.id,title:x.title,parent:t.title,due:x.due||t.due,s:x.s,centre:t.centre,others:t.others,upd:t.upd}));
+    else r.push({k:t.id,id:t.id,title:t.title,due:t.due,s:t.s,centre:t.centre,others:t.others,upd:t.upd});});return r;}
+  const open=r=>r.s!=='cmp';
+  const cmp=(a,b)=>(a.due||'9999').localeCompare(b.due||'9999')||((a.s==='inp'?0:1)-(b.s==='inp'?0:1))||a.title.localeCompare(b.title);
+  function pick(){const done=ROWS.filter(r=>!open(r)).sort(cmp).slice(0,3),op=ROWS.filter(open).sort(cmp);return done.concat(op.slice(0,SL-done.length));}
+  function pct(){const sc=ROWS.filter(r=>!open(r)||(r.due&&r.due<=T));return sc.length?Math.round(sc.filter(r=>!open(r)).length/sc.length*100):null;}
+  function ring(p){const C=163.4;return`<svg width="60" height="60" aria-hidden="true"><circle cx="30" cy="30" r="26" fill="none" stroke="#ece4ff" stroke-width="7"/><circle cx="30" cy="30" r="26" fill="none" stroke="url(#rg)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p/100)}"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#6601fd"/><stop offset="1" stop-color="#dd30b1"/></linearGradient></defs></svg><b>${p}%</b>`;}
+  function draw(){
+    const p=pct(),seenU={},nOpen=ROWS.filter(open).length;
+    $('ring').innerHTML=p===null?'':ring(p);$('ring').hidden=p===null;
+    $('tl').innerHTML=VIS.length?VIS.map(r=>{const d=due(r.due),done=!open(r),showU=r.upd&&!seenU[r.id]&&(seenU[r.id]=1);
+      const who=r.upd?(r.upd.mine?'You':(r.upd.name||'').split(' ')[0]):'',tx=r.upd?String(r.upd.text||'').trim():'';
+      return`<div class="it${done?' done':''}" data-k="${esc(r.k)}"><button type="button" class="ck" aria-label="${done?'Mark as not done':'Mark as done'}" aria-pressed="${done}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></button>
+        <div class="tx"><div class="tt">${esc(r.title)}</div><div class="mt">${r.parent?`<span class="sbt">Subtask</span><span>${esc(r.parent)}</span>`:''}<span class="du ${d.c}">${d.t}</span>${r.centre?`<span>· ${esc(r.centre)}</span>`:''}${r.others.length?`<span>· You and ${esc(r.others.join(', '))}</span>`:''}</div>
+        ${showU&&tx?`<div class="upd"><b>${esc(who)}</b><em>Latest update · ${ago(r.upd.at)}</em><br>${esc(tx.length>170?tx.slice(0,167)+'…':tx)}</div>`:''}</div>
+        <label class="st ${r.s}"><i></i><select aria-label="Status">${Object.keys(ST).map(k=>`<option value="${k}"${k===r.s?' selected':''}>${ST[k]}</option>`).join('')}</select></label></div>`;}).join('')
+      :'<div class="tempty">Nothing is waiting on you. Enjoy the clear day.</div>';
+    const can=(window.ArtiumAuth&&ArtiumAuth.pages||[]).includes('goals');
+    $('tmore').innerHTML=nOpen?`<span>${Math.min(VIS.filter(open).length,nOpen)} of ${nOpen} open task${nOpen===1?'':'s'} shown.</span>${can?'<button type="button" id="seeall">See all my tasks →</button>':''}`:'';
+    $('tmore').hidden=!nOpen;
+    let m=p===null?(nOpen?'Nothing is due today. A good day to get ahead.':''):CH.filter(c=>p>=c[0]).pop()[1];
+    if(p===0)m=CH[0][1];$('cheer').textContent=m;$('cheer').hidden=!m;
+  }
+  async function save(r,s){const was=r.s;r.s=s;draw();BUSY=true;
+    try{const j=await ArtiumAuth.call('homeTask',{id:r.id,sub:r.sub||'',s});
+      // keep what is on screen; just bring the other facts (such as the newest updates) up to date
+      const f=rows(j);f.forEach(n=>{const o=ROWS.find(x=>x.k===n.k);if(o){o.upd=n.upd;}});
+      T=j.today||T;}
+    catch(e){r.s=was;draw();const m=document.createElement('div');m.className='tmsg';m.textContent='Could not save that. '+(e&&e.message?e.message.replace(/\.?$/,'.'):'Try again.');$('tl').appendChild(m);setTimeout(()=>m.remove(),5000);}
+    BUSY=false;}
+  box2.addEventListener('click',e=>{
+    if(e.target.closest('#seeall')){try{window.parent.location.hash='goals';}catch(x){}return;}
+    const b=e.target.closest('.ck');if(!b||BUSY)return;const r=ROWS.find(x=>x.k===b.closest('.it').dataset.k);if(!r)return;
+    save(r,open(r)?'cmp':(r.was&&r.was!=='cmp'?r.was:'tbp'));});
+  box2.addEventListener('change',e=>{const sel=e.target.closest('select');if(!sel||BUSY)return;const r=ROWS.find(x=>x.k===sel.closest('.it').dataset.k);if(!r)return;if(open(r))r.was=r.s;save(r,sel.value);});
+  ArtiumAuth.call('myTasks',{}).then(j=>{T=j.today;ROWS=rows(j);VIS=pick();draw();box2.hidden=false;}).catch(()=>{});
+
+  // The pinned pages, as quiet shortcuts
+  (function links(){let pins=[];try{pins=JSON.parse(localStorage.getItem('artium_nav_pins')||'[]')||[];}catch(e){}
+    const mine=(window.ArtiumAuth&&ArtiumAuth.pages)||[],name={};Object.keys(PAGES).forEach(n=>{if(!name[PAGES[n]])name[PAGES[n]]=n;});
+    pins.forEach(k=>{try{const t=window.parent.document.querySelector('.tab[data-tab="'+k+'"]');if(t&&t.textContent.trim())name[k]=t.textContent.trim();}catch(e){}});
+    const L=pins.filter(k=>name[k]&&mine.includes(k)).slice(0,5);
+    $('links').innerHTML=L.map(k=>`<button type="button" data-tab="${k}">${esc(name[k])}</button>`).join('');
+    $('links').addEventListener('click',e=>{const b=e.target.closest('button');if(b)try{window.parent.location.hash=b.dataset.tab;}catch(x){}});})();
 })();
 
 /* Backdrop: a hand-composed line-art frame around the page (data, money, intelligence, education, music),
@@ -874,7 +1035,7 @@ document.getElementById('go').disabled=true;
       <linearGradient id="bar1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CDB9EA"/><stop offset="1" stop-color="#CDB9EA" stop-opacity=".15"/></linearGradient>
       <linearGradient id="bar2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9A0E0"/><stop offset="1" stop-color="#B9A0E0" stop-opacity=".2"/></linearGradient></defs>
     ${o.join('')}</svg>`;
-  document.getElementById('bg').innerHTML=svg;
+  /* the line-art backdrop is retired: the page now uses the brand backdrop in the stylesheet */
 })();
 
 load();
