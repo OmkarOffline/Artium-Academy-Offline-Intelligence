@@ -17,6 +17,8 @@
   .frames{position:fixed;inset:0}
   .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
   .frames iframe[hidden]{display:none}
+  .frames iframe.bg[hidden]{display:block;visibility:hidden;pointer-events:none;z-index:-1}   /* loaded ahead in the background, laid out at full size */
+  body.nopin .tab .star{display:none!important}
   body.presenting .frames{left:0}
 
   /* Menu button, top left */
@@ -399,7 +401,25 @@
     box.hidden = !ok.length;
     document.querySelectorAll(".nav-g:not(.pins) .star").forEach(s => { const on = PINS.includes(s.closest(".tab").dataset.tab); s.classList.toggle("on", on); s.title = on ? "Unpin" : "Pin to the top"; });
   }
-  function togglePin(k){ PINS = PINS.includes(k) ? PINS.filter(x => x !== k) : PINS.concat(k); ls("artium_nav_pins", PINS); renderPins(); }
+  // The pinned pages are the same for everyone: set by the site's editors, kept by the data service (and in this browser, to show them at once)
+  let PIN_EDIT = false;
+  function togglePin(k){
+    if(!PIN_EDIT) return;
+    PINS = PINS.includes(k) ? PINS.filter(x => x !== k) : PINS.concat(k); ls("artium_nav_pins", PINS); renderPins();
+    ArtiumAuth.call("saveNavPins", {pins: PINS}).catch(() => {});
+  }
+  async function loadPins(){
+    try{
+      const j = await ArtiumAuth.call("navPins", {});
+      PIN_EDIT = !!j.canEdit;
+      if(Array.isArray(j.pins)) PINS = j.pins;
+      else if(PIN_EDIT && PINS.length) ArtiumAuth.call("saveNavPins", {pins: PINS}).catch(() => {});   // first time: this editor's pins become everyone's
+      else PINS = [];
+      ls("artium_nav_pins", PINS);
+    }catch(e){}
+    body.classList.toggle("nopin", !PIN_EDIT);
+    renderPins();
+  }
   // section icons
   const SI = {"Execs Call":'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',"Daily Operations":'<path d="M3 12h4l3-7 4 14 3-7h4"/>',"Reviews":'<rect x="3" y="3" width="18" height="14" rx="2"/><path d="M7 21h10"/><path d="M7 8h6M7 12h10"/>',
     "Pipeline":'<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',"Performance Tracking":'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',"Learners":'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
@@ -449,9 +469,10 @@
     const u = s || ArtiumAuth.user || {};
     document.getElementById("who").innerHTML = (u.name ? `<b>${esc(u.name)}</b>` : "") + `<span>${esc(u.email)}</span>`;
     const h = location.hash.slice(1);
-    rf.hidden = false; renderPins(); counts();
+    rf.hidden = false; body.classList.add("nopin"); renderPins(); counts();
     show(/^goals&[gt]=/.test(h) ? h : "start");   // an email link to a goal opens it; otherwise every visit starts on Home
     startBell();
+    loadPins().then(ahead);
   });
 
   /* ── Refresh: the button fetches the latest data for the page on screen (skipping the data service's short-term copy);
@@ -495,6 +516,39 @@
     LAST.set(f, Date.now()); refreshing = false; rf.classList.remove("spin"); tip();
   }
   rf.addEventListener("click", () => refresh(true));
+
+  /* ── Loading ahead, so moving between pages is quick: once the page on screen has its data, the pinned pages load one by one
+     in the background, then every other page this person may open, one at a time over about 10 minutes.
+     The page on screen always goes first: a background page waits until it has finished. ── */
+  const pause = ms => new Promise(r => setTimeout(r, ms));
+  function settled(f){   // the page has loaded and fetched its data (its status dot has stopped pulsing), or 45 seconds have passed
+    return new Promise(res => {
+      const t0 = Date.now();
+      (function chk(){
+        let done = false;
+        try{ const d = f.contentDocument; done = !!d && d.URL !== "about:blank" && d.readyState === "complete" && !d.querySelector("#dot.loading, .dot.loading"); }catch(e){ done = true; }
+        if(done || Date.now() - t0 > 45000) return res();
+        setTimeout(chk, 400);
+      })();
+    });
+  }
+  async function warm(f){
+    const c = cur(); if(c && c !== f) await settled(c);
+    if(!f.getAttribute("src")){ f.classList.add("bg"); f.src = f.dataset.src + "?v=" + Date.now(); }
+    await settled(f);
+  }
+  let AHEAD = false;
+  async function ahead(){
+    if(AHEAD) return; AHEAD = true;
+    await pause(1000);
+    const c = cur(); if(c) await settled(c);
+    const mine = k => ArtiumAuth.pages.includes(k) && document.getElementById("frame-" + k);
+    const all = [...document.querySelectorAll(".nav-g:not(.pins) .tab[data-tab]")].map(t => t.dataset.tab).filter((k, i, a) => a.indexOf(k) === i && mine(k));
+    for(const k of PINS.filter(mine)) await warm(document.getElementById("frame-" + k));
+    const rest = all.filter(k => !PINS.includes(k)).map(k => document.getElementById("frame-" + k));
+    const gap = Math.max(10000, Math.min(45000, 600000 / Math.max(1, rest.length)));
+    for(const f of rest){ if(f.getAttribute("src")) continue; await pause(gap); if(!f.getAttribute("src")) await warm(f); }
+  }
   rf.addEventListener("mouseenter", tip);
   setInterval(() => { if(document.visibilityState === "visible" && stale(cur(), 10)) refresh(false); }, 30000);
   document.addEventListener("visibilitychange", () => { if(document.visibilityState === "visible" && stale(cur(), 2)) refresh(false); });
