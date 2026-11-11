@@ -245,7 +245,7 @@
   .sbl{list-style:none;margin:8px 0 2px;display:flex;flex-direction:column;gap:2px}
   .sbl li{display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:8px;font-size:13.5px;color:var(--ink2)}
   .sbl li:hover{background:#F7F4FD}.sbl li.dn span{text-decoration:line-through;color:var(--faint)}
-  .sbl input{width:16px;height:16px;accent-color:#4101f7;flex:none;cursor:pointer}.sbl input:disabled{cursor:default}
+  .sbl .bsi{margin-top:0}
   .sbl small{margin-left:auto;font-size:12px;color:var(--faint);white-space:nowrap}.sbl small.bad{color:var(--bad)}
   .bc .sbt{margin:8px 0 0 25px;align-self:flex-start;width:auto;max-width:max-content}.bc .sbl{margin-left:19px}
   .tdlg .subs{display:flex;flex-direction:column;gap:8px}
@@ -613,10 +613,11 @@ function renderTasks(){
 const tOwners=t=>t.owners&&t.owners.length?t.owners:t.owner?[t.owner]:[];
 /* Subtasks: a chip with how many are done; it opens the checklist (owners and editors tick them) */
 let SOPEN=new Set();
-function subsHtml(t){const xs=t.subs||[];if(!xs.length)return'';const d=xs.filter(x=>x.done).length,on=SOPEN.has(t.id),can=canT(t);
+const sst=x=>x.s||(x.done?'cmp':'tbp');
+function subsHtml(t){const xs=t.subs||[];if(!xs.length)return'';const d=xs.filter(x=>sst(x)==='cmp').length,on=SOPEN.has(t.id),can=canT(t);
   return`<button type="button" class="sbt${on?' on':''}" data-sopen="${t.id}"><span class="sbar"><i style="width:${Math.round(d/xs.length*100)}%"></i></span>${d} of ${xs.length} subtasks${ICHEV}</button>`
-    +(on?`<ul class="sbl">${xs.map(x=>{const dd=x.due?fromIso(x.due):null,late=dd&&dd<TODAY&&!x.done;
-      return`<li class="${x.done?'dn':''}"><input type="checkbox" data-sub="${t.id}|${x.id}"${x.done?' checked':''}${can?'':' disabled'} aria-label="Done"><span>${esc(x.title)}</span>${x.due?`<small class="${late?'bad':''}">${x.done?'':late?'Past due · ':'By '}${fmtD(dd)}</small>`:''}</li>`;}).join('')}</ul>`:'');}
+    +(on?`<ul class="sbl">${xs.map(x=>{const dd=x.due?fromIso(x.due):null,late=dd&&dd<TODAY&&sst(x)!=='cmp';
+      const k=sst(x);return`<li class="${k==='cmp'?'dn':''}"><span class="bsi" title="${TST[k]}">${SICON[k]}${can?`<select data-sub="${t.id}|${x.id}" aria-label="Status of this subtask">${Object.keys(TST).map(s=>`<option value="${s}"${s===k?' selected':''}>${TST[s]}</option>`).join('')}</select>`:''}</span><span>${esc(x.title)}</span>${x.due?`<small class="${late?'bad':''}">${k==='cmp'?'':late?'Past due · ':'By '}${fmtD(dd)}</small>`:''}</li>`;}).join('')}</ul>`:'');}
 // The Slack message sent with the email: to whom it went, and who wasn't found on Slack
 function slackNote(t){const s=t.slack;if(!s)return'';const nm=e=>{const o=tOwners(t).find(x=>x.email===e);return o?(o.name||e).split(' ')[0]:e;};
   if(s.missing&&s.missing.length)return`<span class="sl warn" title="${esc(s.error||'')}">Slack: not sent to ${esc(s.missing.map(nm).join(', '))}</span>`;
@@ -693,7 +694,7 @@ document.getElementById('tasksv').addEventListener('drop',e=>{const col=e.target
   if(t&&t.status!==col.dataset.col){t.status=col.dataset.col;render();tcall('taskStatus',{id:t.id,s:col.dataset.col});}});
 document.getElementById('tasksv').addEventListener('click',e=>{if(e.target.closest('[data-badd]')){taskWin(null);return;}const l=e.target.closest('[data-lane]');if(l)l.parentNode.classList.toggle('shut');});
 document.getElementById('tasksv').addEventListener('change',e=>{const s=e.target.closest('[data-tst]');if(s)tcall('taskStatus',{id:s.dataset.tst,s:s.value});
-  const b=e.target.closest('[data-sub]');if(b){const [id,sub]=b.dataset.sub.split('|'),t=TASKS.find(x=>x.id===id),x=t&&(t.subs||[]).find(y=>y.id===sub);if(x){x.done=b.checked;render();}tcall('taskSub',{id,sub,done:b.checked});}});
+  const b=e.target.closest('[data-sub]');if(b){const [id,sub]=b.dataset.sub.split('|'),t=TASKS.find(x=>x.id===id),x=t&&(t.subs||[]).find(y=>y.id===sub);if(x){x.s=b.value;x.done=b.value==='cmp';render();}tcall('taskSub',{id,sub,s:b.value});}});
 document.getElementById('tasksv').addEventListener('click',e=>{const o=e.target.closest('[data-sopen]');if(!o)return;e.stopPropagation();const id=o.dataset.sopen;if(SOPEN.has(id))SOPEN.delete(id);else SOPEN.add(id);render();},true);
 document.getElementById('newgoal').addEventListener('click',e=>{if(KIND!=='tasks')return;e.stopImmediatePropagation();taskWin(null);},true);
 async function tcall(action,body,msg){
@@ -726,7 +727,7 @@ function taskWin(t){
   w.onclick=async e=>{
     if(e.target.closest('[data-x]')){if(!tbusy)w.innerHTML='';return;}
     const rm=e.target.closest('[data-rmo]');if(rm){OW=OW.filter(x=>x!==rm.dataset.rmo);drawOw();return;}
-    if(e.target.closest('#xaddsub')){SB.push({id:'s'+Date.now().toString(36),title:'',due:''});drawSb();const ins=w.querySelectorAll('[data-sf=title]');ins[ins.length-1].focus();return;}
+    if(e.target.closest('#xaddsub')){SB.push({id:'s'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:'',due:''});drawSb();const ins=w.querySelectorAll('[data-sf=title]');ins[ins.length-1].focus();return;}
     const rs=e.target.closest('[data-rms]');if(rs){SB.splice(+rs.dataset.rms,1);drawSb();return;}
     const tb=e.target.closest('[data-ttag]');if(tb){tb.setAttribute('aria-pressed',tb.getAttribute('aria-pressed')!=='true');return;}
     if(e.target.id!=='xsave'&&e.target.id!=='xnow')return;
