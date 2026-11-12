@@ -113,6 +113,10 @@
   .st.on{background:#E5F4EC;color:var(--ok)}.st.off{background:#F3F1F6;color:var(--muted)}
   .st i{width:6px;height:6px;border-radius:50%;background:currentColor}
   .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .fam{display:block;margin-top:6px;font-size:11.5px;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:4px 8px;line-height:1.4;max-width:260px}
+  .fam b{color:var(--ink);font-weight:600}
+  .fam em{font-style:normal;font-weight:700;color:#8A5A00;background:#FBF1DC;border-radius:6px;padding:1px 6px;margin-left:6px;white-space:nowrap}
+  #ins-fam{margin-top:8px}#ins-fam .fam{max-width:none;display:inline-block;margin:0 6px 4px 0}
   .conv.hl{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
   .conv-top .lnk{padding:0;margin:0 0 0 4px;font-size:12px}
   .ins .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
@@ -161,12 +165,40 @@ const daysBetween=(a,b)=>Math.round((midnight(b)-midnight(a))/864e5);
 const fmt=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
 const fmtS=d=>d.getDate()+' '+MON[d.getMonth()];
 const TODAY=midnight(new Date());
-let ITEMS=[],NODATE=[],DONE={},INS=[],STAFF=[],ME={name:'',email:'',centre:'',canEdit:false};
+let ITEMS=[],NODATE=[],FAM=new Map(),BYJ=new Map(),BYP=new Map(),DONE={},INS=[],STAFF=[],ME={name:'',email:'',centre:'',canEdit:false};
 let CEN='All',TAB='due',MONTH=TODAY.getFullYear()*12+TODAY.getMonth();
 const KEEP=new Set();   // KEEP: rows marked done in this visit stay on the list, in green, until you change tab   // notes typed but not saved yet
 
 const pack=v=>{const t=String(v||'').trim();if(!t||t.toLowerCase()==='not mentioned')return '';const n=parseFloat(t);return isFinite(n)&&/^[\d.\s]*(m|months?)?$/i.test(t)?n+(n===1?' month':' months'):t;};
+const relOf=v=>{const t=String(v||'').trim();return /^(none|na|n\/a|-|)$/i.test(t)?'':t;};
+const last10=v=>String(v||'').replace(/\D/g,'').slice(-10);
+function buildFamilies(rowsByCentre){   // every admission, any date, any centre: who is linked to whom (Relationship + Learner ID of the 1st Joinee), or shares a phone number
+  FAM=new Map();BYJ=new Map();BYP=new Map();
+  CENTRES.forEach(c=>(rowsByCentre[c]||[]).forEach(r=>{
+    const own=(r[2]||'').trim();if(own&&own!==c)return;
+    const id=(r[3]||'').trim().toUpperCase(),name=(r[4]||'').trim();if(!id||!name)return;
+    const j=(r[31]||'').trim().toUpperCase(),x={id,name,centre:c,phone:(r[7]||'').trim(),p10:last10(r[7]),rel:relOf(r[30]),joinee:/^[A-Z]{2,4}-\d+$/.test(j)?j:''};
+    FAM.set(id,x);if(x.joinee){if(!BYJ.has(x.joinee))BYJ.set(x.joinee,[]);BYJ.get(x.joinee).push(x);}
+    if(x.p10.length===10){if(!BYP.has(x.p10))BYP.set(x.p10,[]);BYP.get(x.p10).push(x);}
+  }));
+}
+const cap1=t=>t?t.charAt(0).toUpperCase()+t.slice(1):'';
+function relatives(id){
+  const me=FAM.get(String(id||'').toUpperCase());if(!me)return[];
+  const out=new Map(),add=(x,label)=>{if(!x||x.id===me.id||x.name.toLowerCase()===me.name.toLowerCase()||out.has(x.id))return;out.set(x.id,{x,label:cap1(label)||'Family'});};
+  if(me.joinee)add(FAM.get(me.joinee),me.rel);                                   // the 1st joinee I am linked to
+  (BYJ.get(me.id)||[]).forEach(x=>add(x,x.rel));                                  // learners linked to me as their 1st joinee
+  if(me.joinee)(BYJ.get(me.joinee)||[]).forEach(x=>add(x,x.rel||me.rel));         // others linked to the same 1st joinee
+  if(me.p10.length===10)(BYP.get(me.p10)||[]).forEach(x=>add(x,'Same phone'));
+  return [...out.values()].slice(0,4);
+}
+let OPENIDS=null;
+function famHTML(id){
+  const open=OPENIDS||(OPENIDS=new Set(ITEMS.filter(dueNow).map(x=>String(x.id).toUpperCase())));
+  return relatives(id).map(({x,label})=>`<span class="fam">${esc(label)}: <b>${esc(x.name)}</b>${x.phone&&x.p10!==last10((FAM.get(String(id).toUpperCase())||{}).phone)?' · '+esc(x.phone):''}${x.centre!==(FAM.get(String(id).toUpperCase())||{}).centre?' · '+esc(x.centre):''}${open.has(x.id)?'<em>Check-in due too</em>':''}</span>`).join('');
+}
 function build(rowsByCentre){
+  buildFamilies(rowsByCentre);
   ITEMS=[];NODATE=[];
   CENTRES.forEach(c=>{
     (rowsByCentre[c]||[]).forEach(r=>{
@@ -220,7 +252,7 @@ function dueText(it){
 }
 function cells(it){
   const cen=CEN==='All'?`<div class="due">${esc(it.centre)}</div>`:'';
-  return `<td>${fmt(it.adm)}</td><td>${it.fc?fmt(it.fc):'—'}</td><td class="nm"><b>${esc(it.name)}</b>${cen}</td><td>${it.phone?`<a href="tel:${esc(it.phone.replace(/[^0-9+]/g,''))}">${esc(it.phone)}</a>`:'—'}</td><td>${esc(it.age)||'—'}</td><td>${esc(it.course)||'—'}</td><td>${esc(it.level)||'—'}</td><td>${esc(it.pack)||'—'}</td><td>${esc(it.teacher)||'—'}</td>`;
+  return `<td>${fmt(it.adm)}</td><td>${it.fc?fmt(it.fc):'—'}</td><td class="nm"><b>${esc(it.name)}</b>${cen}${famHTML(it.id)}</td><td>${it.phone?`<a href="tel:${esc(it.phone.replace(/[^0-9+]/g,''))}">${esc(it.phone)}</a>`:'—'}</td><td>${esc(it.age)||'—'}</td><td>${esc(it.course)||'—'}</td><td>${esc(it.level)||'—'}</td><td>${esc(it.pack)||'—'}</td><td>${esc(it.teacher)||'—'}</td>`;
 }
 const TYC={Positive:'pos',Concern:'neg',Request:'req',Reason:'rsn'};
 const entriesOf=id=>{id=String(id||'').toUpperCase();return id?INS.filter(e=>e.ids.some(i=>String(i).toUpperCase()===id)):[];};
@@ -243,13 +275,13 @@ function row(it){
   return `<tr>${cells(it)}<td><span class="day">Day ${it.day}</span>${dueText(it)}</td><td><button type="button" class="rb" data-rec="${esc(it.key)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Record insights</button>${hint(it)}</td><td>—</td></tr>`;
 }
 function draw(){
-  summary();drawTabs();
+  OPENIDS=null;summary();drawTabs();
   const head=document.getElementById('thead'),body=document.getElementById('rows'),empty=document.getElementById('empty');
   let list=[],html='';
   if(TAB==='nodate'){
     head.innerHTML='<tr><th>Admission</th><th>Learner</th><th>Phone</th><th>Age group</th><th>Course</th><th>Level</th><th>Package</th><th>Teacher</th><th>Centre</th></tr>';
     list=NODATE.filter(inCen).sort((a,b)=>b.adm-a.adm);
-    html=list.map(L=>`<tr><td>${fmt(L.adm)}</td><td class="nm"><b>${esc(L.name)}</b></td><td>${L.phone?`<a href="tel:${esc(L.phone.replace(/[^0-9+]/g,''))}">${esc(L.phone)}</a>`:'—'}</td><td>${esc(L.age)||'—'}</td><td>${esc(L.course)||'—'}</td><td>${esc(L.level)||'—'}</td><td>${esc(L.pack)||'—'}</td><td>${esc(L.teacher)||'—'}</td><td>${esc(L.centre)}</td></tr>`).join('');
+    html=list.map(L=>`<tr><td>${fmt(L.adm)}</td><td class="nm"><b>${esc(L.name)}</b>${famHTML(L.id)}</td><td>${L.phone?`<a href="tel:${esc(L.phone.replace(/[^0-9+]/g,''))}">${esc(L.phone)}</a>`:'—'}</td><td>${esc(L.age)||'—'}</td><td>${esc(L.course)||'—'}</td><td>${esc(L.level)||'—'}</td><td>${esc(L.pack)||'—'}</td><td>${esc(L.teacher)||'—'}</td><td>${esc(L.centre)}</td></tr>`).join('');
   }else{
     head.innerHTML='<tr>'+HEAD+'<th>Check-in</th><th>Insights</th><th>Check-in by</th></tr>';
     const c=ITEMS.filter(inCen);
@@ -283,7 +315,7 @@ const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communicati
 const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
 const itemHTML=i=>`<li><span class="ty ${TYC[i.type]||'neg'}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`;
 document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidden><div class="ins" role="dialog" aria-modal="true" aria-labelledby="ins-name">
-  <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div></div>
+  <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div><div id="ins-fam"></div></div>
     <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="ins-body"><div id="ins-hist"></div><div id="ins-form"></div></div></div></div>`);
 let cur=null,draft=null,viewOnly=false,editId='',hl='';
@@ -294,6 +326,7 @@ function openRec(it,view){
   document.getElementById('ins-eye').textContent=(it.day?'Check-in · Day '+it.day+' · ':'')+'Learner insights';
   document.getElementById('ins-name').textContent=it.name;
   document.getElementById('ins-meta').innerHTML=[esc(it.id),esc(it.centre),it.phone?esc(it.phone):'',esc(it.age),esc(it.course)].filter(Boolean).join('<span class="sep">·</span>');
+  document.getElementById('ins-fam').innerHTML=famHTML(it.id);
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
 function closeIns(){if(draft&&draft.items.some(i=>i.note.trim())&&!editId&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
