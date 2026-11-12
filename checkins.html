@@ -290,7 +290,7 @@ function draw(){
     else if(/^d\d+$/.test(TAB))list=c.filter(shown).filter(x=>'d'+x.day===TAB);
     else if(TAB==='done')list=c.filter(it=>isDone(it)&&moIdx(it.due)===MONTH);
     else list=c.filter(missed);
-    list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>(isDone(a)-isDone(b))||a.due-b.due||a.name.localeCompare(b.name));
+    list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>a.due-b.due||a.name.localeCompare(b.name));
     html=list.map(row).join('');
   }
   body.innerHTML=html;
