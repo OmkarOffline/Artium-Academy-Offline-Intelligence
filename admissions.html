@@ -512,9 +512,11 @@ function render(){
   const rate=vis.length?admF.length/vis.length*100:null,coh=F.filter(f=>mine(f)&&f.visit&&inP(f.visit.date)),cohCol=sum(coh,f=>f.amt);
   const col=sum(admF,f=>f.amt),atv=admF.length?col/admF.length:null;
   // Pipeline: promised (probability Yes, with a date and amount) for this period, not converted yet
-  // Only this period's visitors and the immediate previous month's count: older visitors stay out even if a Yes was never changed
+  // Visitors from this period and the month before count. A visitor from any earlier month counts too once their expected date falls in this period,
+  // whenever they visited; older visitors with no expected date in this period stay out, even if a Yes was never changed
   const from=new Date(P.a.getFullYear(),P.a.getMonth()-1,1),recent=x=>x.date>=from&&x.date<=P.b;
-  const all=V.filter(x=>mine(x)&&recent(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
+  const inPer=x=>x.date<=P.b&&(recent(x)||(!!x.ed&&inP(x.ed)));
+  const all=V.filter(x=>mine(x)&&inPer(x)&&x.inPipe&&inP(x.ed)),by=s=>all.filter(x=>x.state===s);
   const paid=by('paid'),wait=by('wait'),late=by('late'),lost=by('lost'),pipe=wait.concat(late);
   const expN=pipe.length,expAmt=sum(pipe,x=>x.ea),expAtv=expN?expAmt/expN:null,rrN=admF.length+expN,rrAmt=col+expAmt;
   // Targets (Targets page), in Month view only: fresh sales and fresh sales collections
@@ -535,10 +537,10 @@ function render(){
   // ── Pipeline by when the visitor came: this period, the month before, and earlier (they can still convert in this period) ──
   const ym=d=>d.getFullYear()*12+d.getMonth(),pm=ym(P.a);
   const prevLbl=mode==='month'?MONTH_FULL[(viewM+11)%12]:'Previous month\'s';
-  const rowsP=mode==='month'?[[MONTH_FULL[viewM]+' visitors',x=>ym(x.date)===pm],[prevLbl+' visitors',x=>ym(x.date)===pm-1]]
-    :[['Visited in this range',x=>x.date>=P.a],['Visited the month before',x=>x.date<P.a]];
+  const rowsP=mode==='month'?[[MONTH_FULL[viewM]+' visitors',x=>ym(x.date)===pm],[prevLbl+' visitors',x=>ym(x.date)===pm-1],[MONTH_FULL[(viewM+10)%12]+' and earlier visitors',x=>ym(x.date)<pm-1]]
+    :[['Visited in this range',x=>x.date>=P.a],['Visited the month before',x=>x.date<P.a&&x.date>=from],['Visited earlier',x=>x.date<from]];
   const prow=(l,xs,cls='')=>`<tr class="${cls}"><th>${l}</th><td>${n(xs.length)}</td><td>${inr(sum(xs,x=>x.ea))}</td><td>${xs.filter(x=>x.state==='late').length?`<span class="od">${xs.filter(x=>x.state==='late').length} overdue</span>`:'<span class="mut">—</span>'}</td></tr>`;
-  const pRows=rowsP.map(([l,f])=>[l,pipe.filter(f)]).filter(([,xs],i)=>i<2||xs.length);
+  const pRows=rowsP.map(([l,f])=>[l,pipe.filter(f)]).filter(([,xs],i)=>i<2||xs.length);   // the earlier-visitors row appears once there is someone in it
   // Where the period could land: what is in hand plus what is promised, against the target
   const land=(label,done,exp,t,fmt)=>{const tot=done+exp,max=Math.max(tot,t?t.v:0)||1;
     return`<div class="ld"><div class="ld-t"><b>${label}</b><span>${fmt(done)} done <i>+</i> ${fmt(exp)} expected <i>=</i> <b>${fmt(tot)}</b>${t?` <em>of ${fmt(t.v)} target${t.all?'':'*'} · ${Math.round(tot/t.v*100)}%</em>`:''}</span></div>
@@ -575,7 +577,7 @@ function render(){
   // Needs attention: visitors from this period whose promise is missing or incomplete, and promises from earlier that have passed unpaid
   const Y=new Date(TODAY);Y.setDate(Y.getDate()-1);
   // Who to look at: visitors not converted and not ruled out who visited in this period, or the month before, or whose expected date is in this period
-  const open=V.filter(x=>mine(x)&&!x.conv&&x.state!=='lost'&&recent(x));
+  const open=V.filter(x=>mine(x)&&!x.conv&&x.state!=='lost'&&inPer(x));
   const gc={none:open.filter(x=>!x.prob&&((inP(x.date)&&x.date<=Y)||inP(x.ed))),   // Yes / No not chosen (including those with a date or amount but no Yes)
     noamt:open.filter(x=>x.yes&&x.ed&&!(x.ea>0)),                                 // Yes and a date, but no amount
     nodate:open.filter(x=>x.yes&&!x.ed),                                          // Yes, but no date (and maybe no amount)
