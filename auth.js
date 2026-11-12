@@ -178,6 +178,7 @@
   .um-pop hr{border:0;border-top:1px solid #EFEDF2;margin:14px 0}
   .um-out{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:40px;border-radius:11px;border:1px solid #E4E1EA;background:#FAF9F7;
     font:600 13px 'Poppins',sans-serif;color:#B42318;cursor:pointer;transition:background .15s,border-color .15s}
+  .ag-logo{display:block;height:52px;width:auto;margin:0 auto 14px}
   .um-out:hover{background:#FDECEB;border-color:#F5C6C2}
   .um-ph{display:flex;gap:8px;margin-top:14px}
   .um-ph button{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;height:36px;border-radius:10px;border:1px solid #E4E1EA;background:#fff;font:600 12.5px 'Poppins',sans-serif;color:#3B3742;cursor:pointer;transition:background .15s,color .15s,border-color .15s}
@@ -219,7 +220,7 @@
       if(!document.querySelector('link[href*="Poppins"]'))document.head.appendChild(el('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap">'));
       gate=el(`<div class="ag" role="dialog" aria-labelledby="ag-title">
         <div class="ag-card">
-          <div class="ag-eyebrow">Artium Academy</div>
+          <img class="ag-logo" src="brand/lockup-violet.png" alt="Artium Academy" width="147" height="52">
           <h1 class="ag-title" id="ag-title">Offline Intelligence</h1>
           <p class="ag-sub">Sign in to view the centre dashboards.</p>
           <button class="ag-btn" id="ag-btn">${G}<span>Sign in with Google</span></button>

@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Artium Academy — Offline Intelligence</title>
+<link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
+<link rel="apple-touch-icon" href="brand/emblem-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -153,6 +156,9 @@
   .brand i::after{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,0) 45%)}
   .brand b{display:block;font:800 16.5px "Onest",sans-serif;letter-spacing:-.01em;background:linear-gradient(90deg,var(--ink) 0%,var(--violet2) 75%,var(--pinkb) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
   .brand small{font:700 9.5px/1 "Onest",sans-serif;letter-spacing:.16em;color:var(--ink4);margin-top:5px}
+  .brand.logo{flex-direction:column;align-items:flex-start;gap:8px;padding:24px 20px 18px}
+  .brand.logo img{display:block;height:40px;width:auto}
+  .brand.logo small{margin:0 0 0 2px;text-transform:uppercase}
   .sb-top{padding:0 16px 12px}
   .srch{height:38px;border-radius:12px;background:#fff;border:1px solid var(--hair);box-shadow:0 1px 2px rgba(18,14,43,.04),inset 0 1px 0 #fff}
   .srch:focus-within{background:#fff;border-color:#b9a4f5;box-shadow:0 0 0 3px rgba(102,1,253,.12)}
@@ -244,7 +250,7 @@
   <div class="scrim" id="scrim" aria-hidden="true"></div>
 
   <aside class="sidebar" id="sidebar" aria-label="Pages">
-    <div class="brand"><i>A</i><div><b>Artium Academy</b><small>Offline Intelligence</small></div></div>
+    <div class="brand logo"><img src="brand/lockup-violet.png" alt="Artium Academy" width="113" height="40"><small>Offline Intelligence</small></div>
     <div class="sb-top"><label class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" type="text" placeholder="Find a page" aria-label="Find a page" autocomplete="off"><kbd>/</kbd></label>
       <button class="dock" id="dock" type="button" aria-pressed="false" title="Keep the menu open beside the page"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button></div>
     <nav class="tabs" role="tablist" aria-orientation="vertical">
