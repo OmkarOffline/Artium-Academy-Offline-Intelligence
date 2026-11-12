@@ -846,6 +846,7 @@ function collectPays(res){
   return out.sort((a,b)=>b.d-a.d||b.n-a.n).slice(0,80);
 }
 /* ── Upcoming check-ins: calls due in the next 3 days (and any overdue), for people with the Check-ins page. Done ones are left out. ── */
+const CK_START=new Date(2026,9,1);   // only admissions from 1 October 2026 are followed
 const CK_DAYS=[20,45,80],CK_AHEAD=3,CK_MISSED=30;
 async function drawCk(res){
   const card=document.getElementById('ckc');
@@ -857,7 +858,7 @@ async function drawCk(res){
     const done=meta.done||{},own=meta.centre||'',out=[],t0=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
     CENTRES.forEach((c,i)=>{if(!res[i]||(own&&c.name!==own))return;
       res[i][0].filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name).forEach(r=>{
-        const name=(r[4]||'').trim(),fc=parseDate(r[22]);if(!name||!fc)return;const id=(r[3]||'').trim();
+        const name=(r[4]||'').trim(),fc=parseDate(r[22]),adm=parseDate(r[0]);if(!name||!fc||!adm||adm<CK_START)return;const id=(r[3]||'').trim();
         CK_DAYS.forEach(n=>{
           const due=new Date(fc.getFullYear(),fc.getMonth(),fc.getDate()+n),g=Math.round((due-t0)/864e5);
           if(g>CK_AHEAD||g<-CK_MISSED||done[c.name+'|'+(id||name.toLowerCase())+'|'+n])return;
