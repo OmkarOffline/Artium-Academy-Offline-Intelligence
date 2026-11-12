@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check-ins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  :root{--display:'Poppins',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;--body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --bg:#F6F5F2;--border:#E4E1EA;--line:#EFEDF2;--ink:#1D1B22;--ink2:#3B3742;--muted:#6B6774;--faint:#9A96A3;
+    --accent:#5B2A86;--accent-soft:#F2ECF8;--gold:#A8844F;--ok:#1F7A4D;--bad:#B42318;--done:#F1FAF4;
+    --shadow:0 1px 2px rgba(31,26,36,.04),0 12px 28px -18px rgba(75,31,111,.28)}
+  html,body{background:var(--bg)}
+  body{font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased;font-size:13.5px}
+  .page{max-width:1700px;margin:0 auto;padding:22px 32px 48px}
+  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+  .eb{font:700 11px var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+  h1{font:600 28px/1.15 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .sub{font-size:14px;color:var(--muted);margin-top:4px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.dot.loading{background:var(--gold);animation:pulse 1s infinite}.dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+  .btn{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 14px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--ink2);font:600 12.5px var(--display);cursor:pointer;white-space:nowrap}
+  .btn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}.btn:disabled{opacity:.5;cursor:default}
+  .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}.btn.pri:hover:not(:disabled){background:#4A2170;color:#fff}
+  /* Month summary: small on purpose, the list is the page */
+  .mo{background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+  .mh{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px}
+  .mn{display:flex;align-items:center;gap:6px}.mn b{font:600 14px var(--display);color:var(--ink);min-width:118px;text-align:center}
+  .mbtn{width:26px;height:26px;border:0;border-radius:8px;background:var(--bg);color:var(--ink2);font-size:15px;cursor:pointer}.mbtn:hover:not(:disabled){background:var(--accent-soft);color:var(--accent)}
+  .mt{font-size:12.5px;color:var(--muted)}.mt b{color:var(--ink)}
+  .trk{height:5px;background:#EEE8F6;border-radius:9px;margin:8px 0}.trk i{display:block;height:100%;background:var(--accent);border-radius:9px;transition:width .3s}
+  .mini{display:flex;gap:18px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}.mini b{color:var(--ink)}.mini .late b{color:var(--bad)}.mini .sep{flex:1}
+  /* Tabs and centres */
+  .bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .pill{border:1px solid var(--border);background:#fff;border-radius:99px;padding:7px 14px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
+  .pill:hover{background:var(--accent-soft)}.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  .sp{flex:1}
+  .card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:6px 14px 10px;box-shadow:var(--shadow);overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1180px}
+  th{text-align:left;font:700 10px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  tr.done td{background:var(--done)}
+  td.nm b{color:var(--ink);font-weight:600}
+  td a{color:inherit;text-decoration:none}td a:hover{color:var(--accent);text-decoration:underline}
+  .day{display:inline-block;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:11.5px}
+  .due{color:var(--muted);font-size:11px;margin-top:3px}.late{color:var(--bad);font-weight:600}
+  textarea{display:block;width:280px;min-height:62px;max-height:340px;resize:vertical;border:1px solid var(--border);border-radius:8px;padding:7px 9px;font:13px/1.45 var(--body);color:var(--ink);background:#fff;overflow:hidden}
+  textarea:focus{outline:2px solid #D8C9EA;border-color:var(--accent)}
+  .tx{width:280px;line-height:1.45;color:var(--ink2);white-space:pre-wrap;word-break:break-word}
+  .by{color:var(--ok);font-weight:700}.by small{display:block;color:var(--muted);font-weight:500;font-size:11px;margin-top:2px}
+  .lnk{border:0;background:none;color:var(--accent);font:600 11px var(--body);cursor:pointer;padding:0;margin-top:3px}.lnk:hover{text-decoration:underline}
+  .empty{padding:36px 8px;text-align:center;color:var(--muted)}
+  .err{color:var(--bad);font-size:11px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div><div class="eb">Check-ins</div><h1>Check-ins.</h1><div class="sub">Day 20, 45 and 80 calls to new learners.</div></div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="state">Loading.</span><button class="btn" type="button" id="refresh">Refresh</button></div>
+  </div>
+  <div class="mo">
+    <div class="mh"><div class="mn"><button class="mbtn" id="mprev" aria-label="Previous month">‹</button><b id="mlabel">—</b><button class="mbtn" id="mnext" aria-label="Next month">›</button></div><div class="mt" id="mtot"></div></div>
+    <div class="trk"><i id="mbar" style="width:0"></i></div>
+    <div class="mini" id="mini"></div>
+  </div>
+  <div class="bar" id="tabs"></div>
+  <div class="card"><table><thead id="thead"></thead><tbody id="rows"></tbody></table><div class="empty" id="empty" hidden></div></div>
+</div>
+<script>
+const CENTRES=['Alwarpet','Thoraipakkam','Borewell Road'];
+const DAYS=[20,45,80],LEAD=5,MISSED_AFTER=30,NODATE_WITHIN=100;
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MFULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const midnight=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const daysBetween=(a,b)=>Math.round((midnight(b)-midnight(a))/864e5);
+const fmt=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
+const fmtS=d=>d.getDate()+' '+MON[d.getMonth()];
+const TODAY=midnight(new Date());
+let ITEMS=[],NODATE=[],DONE={},ME={name:'',email:'',centre:'',canEdit:false};
+let CEN='All',TAB='due',MONTH=TODAY.getFullYear()*12+TODAY.getMonth();
+const DRAFT={},KEEP=new Set();   // KEEP: rows marked done in this visit stay on the list, in green, until you change tab   // notes typed but not saved yet
+
+function build(rowsByCentre){
+  ITEMS=[];NODATE=[];
+  CENTRES.forEach(c=>{
+    (rowsByCentre[c]||[]).forEach(r=>{
+      const own=(r[2]||'').trim();if(own&&own!==c)return;
+      const name=(r[4]||'').trim(),adm=parseDate(r[0]);if(!name||!adm)return;
+      const L={centre:c,id:(r[3]||'').trim(),name,adm,fc:parseDate(r[22]),phone:(r[7]||'').trim(),age:(r[6]||'').trim(),course:(r[8]||'').trim(),level:(r[9]||'').trim(),teacher:(r[29]||'').trim()};
+      if(!L.fc){if(daysBetween(adm,TODAY)<=NODATE_WITHIN&&daysBetween(adm,TODAY)>=0)NODATE.push(L);return;}
+      DAYS.forEach(n=>{
+        const due=addDays(L.fc,n);
+        ITEMS.push(Object.assign({day:n,due,key:c+'|'+(L.id||L.name.toLowerCase())+'|'+n},L));
+      });
+    });
+  });
+}
+const isDone=it=>!!DONE[it.key];
+const appears=it=>daysBetween(TODAY,it.due)<=LEAD;                 // 5 days before the checkpoint
+const missed=it=>!isDone(it)&&daysBetween(it.due,TODAY)>MISSED_AFTER;
+const dueNow=it=>!isDone(it)&&appears(it)&&!missed(it);
+const inCen=it=>CEN==='All'||it.centre===CEN;
+const moIdx=d=>d.getFullYear()*12+d.getMonth();
+
+function summary(){
+  const mi=MONTH,mine=ITEMS.filter(it=>inCen(it)&&moIdx(it.due)===mi);
+  const pct=(d,t)=>t?Math.round(d/t*100):0;
+  const tot=mine.length,dn=mine.filter(isDone).length;
+  document.getElementById('mlabel').textContent=MFULL[mi%12]+' '+Math.floor(mi/12);
+  document.getElementById('mtot').innerHTML=`<b>${tot}</b> scheduled &nbsp;·&nbsp; <b>${dn}</b> done &nbsp;·&nbsp; <b>${pct(dn,tot)}%</b> complete`;
+  document.getElementById('mbar').style.width=pct(dn,tot)+'%';
+  const per=DAYS.map(n=>{const a=mine.filter(x=>x.day===n),d=a.filter(isDone).length;return `<span>Day ${n} <b>${d} of ${a.length}</b> · ${pct(d,a.length)}%</span>`;}).join('');
+  const due=ITEMS.filter(it=>inCen(it)&&dueNow(it)),over=due.filter(it=>daysBetween(it.due,TODAY)>0).length;
+  document.getElementById('mini').innerHTML=per+`<span class="sep"></span><span>Due now <b>${due.length}</b></span><span class="late">Overdue <b>${over}</b></span><span>No first class date <b>${NODATE.filter(inCen).length}</b></span>`;
+}
+function tabsDef(){
+  const c=ITEMS.filter(inCen),due=c.filter(dueNow);
+  const mine=c.filter(it=>moIdx(it.due)===MONTH);
+  return [['due','Due',due.length],...DAYS.map(n=>['d'+n,'Day '+n,due.filter(x=>x.day===n).length]),
+    ['done','Done',mine.filter(isDone).length],['missed','Missed',c.filter(missed).length],['nodate','No first class date',NODATE.filter(inCen).length]];
+}
+function drawTabs(){
+  const el=document.getElementById('tabs');
+  el.innerHTML=tabsDef().map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'<span class="sp"></span>'+
+    ['All'].concat(CENTRES).map(c=>`<button type="button" class="pill" data-c="${esc(c)}" aria-pressed="${CEN===c}">${c==='All'?'All centres':esc(c)}</button>`).join('');
+}
+const HEAD='<th>Admission</th><th>First class</th><th>Learner</th><th>Phone</th><th>Age group</th><th>Course</th><th>Level</th><th>Teacher</th>';
+function dueText(it){
+  const g=daysBetween(it.due,TODAY);
+  return g>0?`<div class="due late">Overdue by ${g} ${g===1?'day':'days'}</div>`:g===0?`<div class="due">Due today</div>`:`<div class="due">Due ${fmtS(it.due)}</div>`;
+}
+function cells(it){
+  const cen=CEN==='All'?`<div class="due">${esc(it.centre)}</div>`:'';
+  return `<td>${fmt(it.adm)}</td><td>${it.fc?fmt(it.fc):'—'}</td><td class="nm"><b>${esc(it.name)}</b>${cen}</td><td>${it.phone?`<a href="tel:${esc(it.phone.replace(/[^0-9+]/g,''))}">${esc(it.phone)}</a>`:'—'}</td><td>${esc(it.age)||'—'}</td><td>${esc(it.course)||'—'}</td><td>${esc(it.level)||'—'}</td><td>${esc(it.teacher)||'—'}</td>`;
+}
+function row(it){
+  const d=DONE[it.key];
+  if(d){
+    const at=d.at?new Date(d.at):null,when=at?fmtS(at)+', '+at.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):'';
+    return `<tr class="done">${cells(it)}<td><span class="day">Day ${it.day}</span><div class="due">Done ${esc(when)}</div></td><td><div class="tx">${esc(d.note)||'<span class="due">No notes.</span>'}</div></td><td class="by">${esc(d.by)}<small>${esc(when)}</small><button class="lnk" data-reopen="${esc(it.key)}">Reopen</button></td></tr>`;
+  }
+  const v=DRAFT[it.key]||'';
+  return `<tr>${cells(it)}<td><span class="day">Day ${it.day}</span>${dueText(it)}</td><td><textarea data-k="${esc(it.key)}" placeholder="Type the insights from the call.">${esc(v)}</textarea></td><td><button class="btn pri" data-done="${esc(it.key)}">Mark done</button><div class="err" data-e="${esc(it.key)}"></div></td></tr>`;
+}
+function draw(){
+  summary();drawTabs();
+  const head=document.getElementById('thead'),body=document.getElementById('rows'),empty=document.getElementById('empty');
+  let list=[],html='';
+  if(TAB==='nodate'){
+    head.innerHTML='<tr><th>Admission</th><th>Learner</th><th>Phone</th><th>Age group</th><th>Course</th><th>Level</th><th>Teacher</th><th>Centre</th></tr>';
+    list=NODATE.filter(inCen).sort((a,b)=>b.adm-a.adm);
+    html=list.map(L=>`<tr><td>${fmt(L.adm)}</td><td class="nm"><b>${esc(L.name)}</b></td><td>${L.phone?`<a href="tel:${esc(L.phone.replace(/[^0-9+]/g,''))}">${esc(L.phone)}</a>`:'—'}</td><td>${esc(L.age)||'—'}</td><td>${esc(L.course)||'—'}</td><td>${esc(L.level)||'—'}</td><td>${esc(L.teacher)||'—'}</td><td>${esc(L.centre)}</td></tr>`).join('');
+  }else{
+    head.innerHTML='<tr>'+HEAD+'<th>Check-in</th><th>Insights from the call</th><th>Check-in by</th></tr>';
+    const c=ITEMS.filter(inCen);
+    const shown=it=>dueNow(it)||(KEEP.has(it.key)&&isDone(it));
+    if(TAB==='due')list=c.filter(shown);
+    else if(/^d\d+$/.test(TAB))list=c.filter(shown).filter(x=>'d'+x.day===TAB);
+    else if(TAB==='done')list=c.filter(it=>isDone(it)&&moIdx(it.due)===MONTH);
+    else list=c.filter(missed);
+    list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>a.due-b.due||a.name.localeCompare(b.name));
+    html=list.map(row).join('');
+  }
+  body.innerHTML=html;
+  empty.hidden=!!list.length;
+  empty.textContent={due:'Nothing is due right now.',done:'No check-ins are done for this month yet.',missed:'No missed check-ins.',nodate:'Everyone has a first class date.'}[TAB]||'Nothing is due for this checkpoint right now.';
+  document.querySelectorAll('textarea').forEach(grow);
+}
+function grow(t){t.style.height='auto';t.style.height=Math.min(Math.max(t.scrollHeight+2,62),340)+'px';t.style.overflow=t.scrollHeight>340?'auto':'hidden';}
+async function save(it,btn,reopen){
+  const err=document.querySelector(`[data-e="${CSS.escape(it.key)}"]`);btn.disabled=true;if(err)err.textContent='';
+  try{
+    const j=await ArtiumAuth.call('checkinSave',{centre:it.centre,id:it.id,learner:it.name,day:it.day,note:DRAFT[it.key]||'',reopen:!!reopen});
+    if(j.error)throw new Error(j.error==='not-allowed'?'Only the person who made this check-in can reopen it.':j.error);
+    DONE=j.done||{};if(!reopen){delete DRAFT[it.key];KEEP.add(it.key);}else KEEP.delete(it.key);draw();
+  }catch(e){btn.disabled=false;if(err)err.textContent=(e.message||'Could not save')+'.';else alert((e.message||'Could not save')+'.');}
+}
+document.addEventListener('input',e=>{const t=e.target;if(t.matches&&t.matches('textarea[data-k]')){DRAFT[t.dataset.k]=t.value;grow(t);}});
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.t){TAB=b.dataset.t;KEEP.clear();draw();}
+  else if(b.dataset.c){CEN=b.dataset.c;KEEP.clear();try{localStorage.setItem('artium_ck_centre',CEN);}catch(x){}draw();}
+  else if(b.dataset.done){const it=ITEMS.find(x=>x.key===b.dataset.done);if(it)save(it,b,false);}
+  else if(b.dataset.reopen){const it=ITEMS.find(x=>x.key===b.dataset.reopen);if(it)save(it,b,true);}
+});
+document.getElementById('mprev').onclick=()=>{MONTH--;draw();};
+document.getElementById('mnext').onclick=()=>{MONTH++;draw();};
+document.getElementById('refresh').onclick=()=>{ArtiumAuth.freshUntil=Date.now()+15000;load();};
+async function load(){
+  const dot=document.getElementById('dot'),st=document.getElementById('state');dot.className='dot loading';st.textContent='Loading.';
+  try{
+    const [meta,...rows]=await Promise.all([ArtiumAuth.call('checkinsData',{})].concat(CENTRES.map(c=>ArtiumAuth.fetchRows(c,'Fresh Sales').then(r=>r.slice(2).filter(x=>x[0]&&x[0].toLowerCase()!=='date')).catch(()=>[]))));
+    if(meta.error)throw new Error(meta.error==='not-allowed'?"You don't have access to this page":meta.error);
+    DONE=meta.done||{};ME=meta;
+    const by={};CENTRES.forEach((c,i)=>by[c]=rows[i]);build(by);
+    if(!draw.once){draw.once=1;let s='';try{s=localStorage.getItem('artium_ck_centre')||'';}catch(x){}CEN=ME.centre||(CENTRES.concat('All').includes(s)?s:'All');}
+    draw();dot.className='dot';st.textContent='Up to date.';
+  }catch(e){dot.className='dot error';st.textContent='Could not load: '+e.message+'.';}
+}
+load();
+</script>
+</body>
+</html>

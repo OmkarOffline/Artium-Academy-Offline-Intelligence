@@ -221,6 +221,21 @@
   .links:empty{display:none}
   .links button{background:rgba(255,255,255,.8);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
   .links button:hover{border-color:#cdb9ff;color:var(--accent);background:#fff}
+  .rc{display:flex;flex-direction:column;gap:16px;min-width:0}
+  .rc .pay{flex:3 1 0;min-height:320px}
+  .rc .ckc{flex:2 1 0;min-height:210px}
+  .rc.solo .pay{min-height:500px}
+  .ckc{position:relative;background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
+  .ckc h2{font:800 20px var(--display);color:var(--ink);letter-spacing:-.01em}
+  .ckc .ps{font-size:13px;color:var(--muted);margin:3px 0 8px}
+  #cl{flex:1;min-height:0;overflow-y:auto;padding-right:14px;outline:0;scrollbar-width:thin;scrollbar-color:#cdb9ff transparent}
+  .ci{padding:9px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .ci:first-child{border-top:0}
+  .cn{font:700 14px var(--display);color:var(--ink);min-width:0;overflow-wrap:anywhere}
+  .cn small{display:block;font:500 12px var(--body);color:var(--faint);margin-top:2px}
+  .cw{font:600 12px var(--body);color:var(--muted);white-space:nowrap;text-align:right}.cw.late{color:var(--bad)}
+  .ckc .more{margin:6px 14px 0 0;border:0;background:none;color:var(--accent);font:700 12.5px var(--display);cursor:pointer;text-align:left;padding:0}
+  .ckc .more:hover{text-decoration:underline}
   .pay{position:relative;min-height:500px;background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
   .pin{position:absolute;inset:0;display:flex;flex-direction:column;padding:22px 8px 8px 22px;min-height:0}
   #pl{flex:1;min-height:0;overflow-y:auto;padding-right:14px;outline:0;scrollbar-width:thin;scrollbar-color:#cdb9ff transparent}
@@ -259,7 +274,7 @@
   .bars i{background:linear-gradient(180deg,#6601fd,#dd30b1)}
   .dot.loading{background:var(--v2)}
   .loc{border-color:var(--border)}
-  @media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.pay{min-height:0;height:460px}}
+  @media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.pay,.rc .pay{min-height:0;height:460px;flex:none}.rc .ckc{min-height:0;height:360px;flex:none}}
   @media (max-width:760px){.stage h1{font-size:34px}.todo{padding:18px 16px}.it{flex-wrap:wrap}.st{margin-left:40px}}
 </style>
 </head>
@@ -288,12 +303,19 @@
     <div class="tmore" id="tmore"></div>
     <div class="cheer" id="cheer"></div>
   </section>
+  <div class="rc solo" id="rc">
   <section class="pay" id="pay" aria-label="Today's collections"><div class="pin">
     <h2>Today's collections</h2><p class="ps">Payments recorded today.</p>
     <div class="ptg" id="ptg" role="group" aria-label="Centre" hidden></div>
     <div class="psum" id="psum" hidden></div>
     <div id="pl" tabindex="0"><div class="tempty">Loading today's payments…</div></div>
   </div></section>
+  <section class="ckc" id="ckc" aria-label="Upcoming check-ins" hidden><div class="pin">
+    <h2>Upcoming check-ins</h2><p class="ps" id="cks">Next 3 days.</p>
+    <div id="cl" tabindex="0"><div class="tempty">Loading check-ins…</div></div>
+    <button type="button" class="more" id="cmore">Open Check-ins</button>
+  </div></section>
+  </div>
   </div>
   <nav class="links" id="links" aria-label="Your pinned pages"></nav>
 
@@ -803,6 +825,7 @@ async function load(){
       const ms=memberships(c.name,mine(res[i][0]),mine(res[i][1]));
       DATA[c.name]={ms,first:ms.length?Math.min(...ms.filter(m=>m.kind==='ft').map(m=>mi(m.d))):null};});
     try{drawPays(collectPays(res));}catch(e){drawPays(null);}
+    try{drawCk(res);}catch(e){}
     [FUN,CAL]=await Promise.all([fun,cal]);
     if(!Object.keys(DATA).length)throw new Error('no data you can see yet');
     ENGINE.prepare();READY=true;
@@ -822,6 +845,29 @@ function collectPays(res){
         out.push({d,n,centre:c.name,kind,name:val(r[4])||'Learner',age:val(r[6]),level:val(r[9]),dur:m,amt});});});});
   return out.sort((a,b)=>b.d-a.d||b.n-a.n).slice(0,80);
 }
+/* ── Upcoming check-ins: calls due in the next 3 days (and any overdue), for people with the Check-ins page. Done ones are left out. ── */
+const CK_DAYS=[20,45,80],CK_AHEAD=3,CK_MISSED=30;
+async function drawCk(res){
+  const card=document.getElementById('ckc');
+  if(!card||!ArtiumAuth.pages.includes('checkins'))return;
+  card.hidden=false;document.getElementById('rc').classList.remove('solo');
+  const el=document.getElementById('cl'),ps=document.getElementById('cks');
+  try{
+    const meta=await ArtiumAuth.call('checkinsData',{});if(meta.error)throw new Error(meta.error);
+    const done=meta.done||{},own=meta.centre||'',out=[],t0=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
+    CENTRES.forEach((c,i)=>{if(!res[i]||(own&&c.name!==own))return;
+      res[i][0].filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name).forEach(r=>{
+        const name=(r[4]||'').trim(),fc=parseDate(r[22]);if(!name||!fc)return;const id=(r[3]||'').trim();
+        CK_DAYS.forEach(n=>{
+          const due=new Date(fc.getFullYear(),fc.getMonth(),fc.getDate()+n),g=Math.round((due-t0)/864e5);
+          if(g>CK_AHEAD||g<-CK_MISSED||done[c.name+'|'+(id||name.toLowerCase())+'|'+n])return;
+          out.push({name,centre:c.name,day:n,g,course:(r[8]||'').trim()});});});});
+    out.sort((a,b)=>a.g-b.g||a.name.localeCompare(b.name));
+    ps.textContent=out.length?(out.length===1?'1 call':out.length+' calls')+' in the next 3 days or overdue.':'Next 3 days.';
+    el.innerHTML=out.length?out.map(x=>`<div class="ci"><div class="cn">${esc(x.name)}<small>${[own?'':x.centre,x.course].filter(Boolean).map(esc).join(' · ')}</small></div><div class="cw${x.g<0?' late':''}"><span class="tg">Day ${x.day}</span><br>${x.g<0?'Overdue by '+(-x.g)+(x.g===-1?' day':' days'):x.g===0?'Today':x.g===1?'Tomorrow':'In '+x.g+' days'}</div></div>`).join(''):'<div class="tempty">No check-ins due in the next 3 days.</div>';
+  }catch(e){el.innerHTML='<div class="tempty">Check-ins are not available right now.</div>';}
+}
+document.getElementById('cmore').addEventListener('click',()=>{try{window.parent.location.hash='checkins';}catch(x){}});
 let PAYS=null,PCEN=(()=>{try{return localStorage.getItem('artium_home_pay_centre')||'All';}catch(e){return'All';}})();
 function drawPays(L,failed){
   const el=document.getElementById('pl');if(!el)return;
