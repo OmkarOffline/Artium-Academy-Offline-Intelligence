@@ -250,6 +250,8 @@
   .bc .sbt{margin:8px 0 0 25px;align-self:flex-start;width:auto;max-width:max-content}.bc .sbl{margin-left:19px}
   .tdlg .subs{display:flex;flex-direction:column;gap:8px}
   .tdlg.tedit{width:780px}
+  .btn.dng{border-color:#F0C4BF;color:var(--bad)}.btn.dng:hover:not(:disabled){background:#FDECEB;color:var(--bad)}.btn.dng.sure{background:var(--bad);border-color:var(--bad);color:#fff}.btn.dng.sure:hover:not(:disabled){background:#9A1D12;color:#fff}
+  .dq{font-size:13px;color:var(--bad);font-weight:600;line-height:1.4;max-width:430px}
   .tdlg .sr{display:grid;grid-template-columns:16px minmax(0,1fr) 150px 140px 24px;gap:8px;align-items:center;border-radius:10px;position:relative}
   .tdlg .sr .dg{cursor:grab;color:#b9b2cf;font-size:15px;letter-spacing:-3px;text-align:center;user-select:none;line-height:1}.tdlg .sr .dg:hover{color:var(--accent)}
   .tdlg .sr.dragging{opacity:.4}
@@ -746,6 +748,7 @@ async function tcall(action,body,msg){
   try{const j=await ArtiumAuth.call(action,body);G=j.goals||G;TASKS=j.tasks||[];document.getElementById('dot').className='dot';render();return true;}
   catch(err){if(msg)msg.textContent='Couldn\'t save: '+err.message+'.';else alert('Couldn\'t save: '+err.message+'.');document.getElementById('dot').className='dot';return false;}
 }
+let DFHTML='';
 function taskWin(t){
   const staff=STAFF.filter(s=>s.email),w=document.getElementById('twin');
   w.innerHTML=`<div class="tscrim"><div class="tdlg tedit" role="dialog" aria-label="Task"><div class="dh"><h2>${t?'Edit the task':'New task'}</h2><button class="x" data-x>×</button></div>
@@ -755,7 +758,7 @@ function taskWin(t){
       <div class="f"><label>Tags</label><div class="ttags">${TAGS.map(x=>`<button type="button" class="ttag" data-ttag="${esc(x)}" aria-pressed="${!!(t&&(t.tags||[]).includes(x))}">${esc(x)}</button>`).join('')}</div></div>
       <div class="f" style="max-width:240px"><label for="xdue">Due</label><input class="in" type="date" id="xdue" value="${t&&t.due?t.due:''}"></div>
       <div class="f"><label>Subtasks</label><div class="subs" id="xs"></div></div></div>
-    <div class="df"><span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span><div style="display:flex;gap:8px"><button class="btn" data-x>Cancel</button>${t&&!t.draft?'':`<button class="btn" id="xnow">Save and send now</button>`}<button class="btn pri" id="xsave">${t&&!t.draft?'Save':'Save task — send later'}</button></div></div></div></div>`;
+    <div class="df"><div class="dl" style="display:flex;align-items:center;gap:12px">${t?'<button class="btn dng" type="button" id="xdel">Delete task</button>':''}<span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span></div><div class="dr" style="display:flex;gap:8px"><button class="btn" data-x>Cancel</button>${t&&!t.draft?'':`<button class="btn" id="xnow">Save and send now</button>`}<button class="btn pri" id="xsave">${t&&!t.draft?'Save':'Save task — send later'}</button></div></div></div></div>`;
   // owners: as many as needed, each removable
   let OW=t?tOwners(t).map(o=>o.email):[];let VIA=new Set(t?tOwners(t).filter(o=>o.via).map(o=>o.email):[]);
   const drawOw=()=>{w.querySelector('#xo').innerHTML=OW.map(e=>{const s=staff.find(x=>x.email===e)||{name:e};return`<span class="p">${esc(s.name)}${VIA.has(e)?' <em class="via">via a subtask</em>':''}<button type="button" data-rmo="${esc(e)}" aria-label="Remove">✕</button></span>`;}).join('')+
@@ -806,6 +809,14 @@ function taskWin(t){
       if(act==='keep'){SB.forEach(x=>{if(x.sk===k)x.sk='';});SECS=SECS.filter(c=>c.k!==k);}else if(act==='drop'){SB=SB.filter(x=>x.sk!==k);SECS=SECS.filter(c=>c.k!==k);}drawSb();return;}
     const rs=e.target.closest('[data-rms]');if(rs){SB.splice(+rs.dataset.rms,1);drawSb();return;}
     const tb=e.target.closest('[data-ttag]');if(tb){tb.setAttribute('aria-pressed',tb.getAttribute('aria-pressed')!=='true');return;}
+    if(e.target.id==='xdel'){   // ask first: this removes the task, its subtasks and its updates for good
+      const df=w.querySelector('.df');DFHTML=df.innerHTML;
+      df.innerHTML='<span class="dq">Delete this task for good? Its subtasks and updates go with it, and this cannot be undone.</span><div style="display:flex;gap:8px;align-items:center"><span class="msg" id="xmsg" style="font-size:13px;color:var(--bad)"></span><button class="btn" type="button" id="xdelno">Keep it</button><button class="btn dng sure" type="button" id="xdelyes">Yes, delete it</button></div>';return;}
+    if(e.target.id==='xdelno'){w.querySelector('.df').innerHTML=DFHTML;return;}
+    if(e.target.id==='xdelyes'){
+      tbusy=true;e.target.disabled=true;
+      const ok=await tcall('deleteTask',{id:t.id},w.querySelector('#xmsg'));
+      tbusy=false;if(ok){if(typeof TV!=='undefined'&&TV===t.id)TV=null;w.innerHTML='';}else e.target.disabled=false;return;}
     if(e.target.id!=='xsave'&&e.target.id!=='xnow')return;
     const msg=w.querySelector('#xmsg');
     if(!w.querySelector('#xt').value.trim()){msg.textContent='Give the task a title.';return;}if(!OW.length){msg.textContent='Choose who the task is for.';return;}

@@ -201,6 +201,7 @@ function build(rowsByCentre){
   buildFamilies(rowsByCentre);
   ITEMS=[];NODATE=[];
   CENTRES.forEach(c=>{
+    if(ME.scoped&&c!==ME.centre)return;   // a centre's own team sees its own centre only
     (rowsByCentre[c]||[]).forEach(r=>{
       const own=(r[2]||'').trim();if(own&&own!==c)return;
       const name=(r[4]||'').trim(),adm=parseDate(r[0]);if(!name||!adm||adm<START)return;
@@ -241,9 +242,9 @@ function drawTabs(){
   const el=document.getElementById('tabs'),T=tabsDef(),cnt=Object.fromEntries(T.map(t=>[t[0],t[2]])),main=T.filter(t=>/^(due|d\d+)$/.test(t[0]));
   const more=[['done','Done'],['missed','Missed'],['nodate','No first class date']];
   el.innerHTML=main.map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'<span class="sp"></span>'+
-    `<select class="sel" id="cen" aria-label="Centre"><option value="All">All centres</option>${CENTRES.map(c=>`<option${c===CEN?' selected':''}>${esc(c)}</option>`).join('')}</select>`+
+    (ME.scoped?'':`<select class="sel" id="cen" aria-label="Centre"><option value="All">All centres</option>${CENTRES.map(c=>`<option${c===CEN?' selected':''}>${esc(c)}</option>`).join('')}</select>`)+
     `<select class="sel${/^(done|missed|nodate)$/.test(TAB)?' on':''}" id="more" aria-label="More lists"><option value="">More lists</option>${more.map(m=>`<option value="${m[0]}"${TAB===m[0]?' selected':''}>${m[1]} (${cnt[m[0]]})</option>`).join('')}</select>`;
-  document.getElementById('cen').value=CEN;
+  if(document.getElementById('cen'))document.getElementById('cen').value=CEN;
 }
 const HEAD='<th>Admission</th><th>First class</th><th>Learner</th><th>Phone</th><th>Age group</th><th>Course</th><th>Level</th><th>Package</th><th>Teacher</th>';
 function dueText(it){
@@ -407,7 +408,7 @@ async function load(){
     if(meta.error)throw new Error(meta.error==='not-allowed'?"You don't have access to this page":meta.error);
     DONE=meta.done||{};ME=meta;INS=meta.ins||[];STAFF=meta.staff||[];
     const by={};CENTRES.forEach((c,i)=>by[c]=rows[i]);build(by);
-    if(!draw.once){draw.once=1;let s='';try{s=localStorage.getItem('artium_ck_centre')||'';}catch(x){}CEN=ME.centre||(CENTRES.concat('All').includes(s)?s:'All');}
+    if(!draw.once){draw.once=1;let s='';try{s=localStorage.getItem('artium_ck_centre')||'';}catch(x){}CEN=ME.scoped?ME.centre:(CENTRES.concat('All').includes(s)?s:'All');}
     draw();dot.className='dot';st.textContent='Up to date.';
     try{const p=sessionStorage.getItem('artium_open_insight');if(p){sessionStorage.removeItem('artium_open_insight');window.openInsight(p);}}catch(x){}
   }catch(e){dot.className='dot error';st.textContent='Could not load: '+e.message+'.';}
