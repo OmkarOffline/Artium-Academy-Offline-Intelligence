@@ -285,12 +285,12 @@ function draw(){
   }else{
     head.innerHTML='<tr>'+HEAD+'<th>Check-in</th><th>Insights</th><th>Check-in by</th></tr>';
     const c=ITEMS.filter(inCen);
-    const shown=it=>dueNow(it)||(KEEP.has(it.key)&&isDone(it));
+    const shown=it=>appears(it)&&(isDone(it)?daysBetween(it.due,TODAY)<=MISSED_AFTER:!missed(it));   // recorded check-ins stay in the list, in green
     if(TAB==='due')list=c.filter(shown);
     else if(/^d\d+$/.test(TAB))list=c.filter(shown).filter(x=>'d'+x.day===TAB);
     else if(TAB==='done')list=c.filter(it=>isDone(it)&&moIdx(it.due)===MONTH);
     else list=c.filter(missed);
-    list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>a.due-b.due||a.name.localeCompare(b.name));
+    list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>(isDone(a)-isDone(b))||a.due-b.due||a.name.localeCompare(b.name));
     html=list.map(row).join('');
   }
   body.innerHTML=html;
