@@ -228,6 +228,59 @@
   td .trk i,td .tp i{background:linear-gradient(90deg,var(--purple),var(--pink))}
   td.d.ht{background-image:linear-gradient(rgba(65,1,247,calc(var(--h)*.09)),rgba(65,1,247,calc(var(--h)*.09)))}
   .sumbox{border-radius:20px}
+
+  /* ── Main table: the rows most people read. Weight carries the hierarchy; colour only marks the collections. ── */
+  .mx-cap{margin:4px 4px 12px;font-size:13px;color:#6F6A79}
+  .mx-card{background:#fff;border:1px solid #ECE9F0;border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(28,26,33,.04),0 28px 56px -36px rgba(28,20,52,.22)}
+  table.mx{border-collapse:separate;border-spacing:0;width:100%;min-width:100%;font-family:"Onest",sans-serif;font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1;color:#1C1A21}
+  table.mx th,table.mx td{background:#fff;height:46px;padding:0 14px;text-align:right;white-space:nowrap;font-size:14px;font-weight:400;color:#1C1A21;border-bottom:1px solid #F3F1F6;box-shadow:none}
+  table.mx thead th{height:auto;padding:20px 14px 14px;font:500 10.5px/1.2 "Onest",sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#4F4A59;background:#FCFBFE;border-bottom:1px solid #1C1A21;vertical-align:bottom}
+  table.mx thead th.d{text-transform:none;letter-spacing:0;font-size:12px;min-width:92px}
+  table.mx thead th small{display:block;font:400 10.5px "Onest",sans-serif;color:#7C7786;margin-top:3px;letter-spacing:.04em;text-transform:uppercase}
+  table.mx thead th.xn{color:#1C1A21;font-weight:700;position:relative}table.mx thead th.xn small{color:#1C1A21;font-weight:600}
+  table.mx thead th.xn:after{content:"";position:absolute;left:14px;right:14px;top:0;height:3px;border-radius:0 0 3px 3px;background:#4A1FB8}
+  table.mx .xm{text-align:left;padding-left:28px;min-width:300px;width:300px}
+  table.mx .xa,table.mx .xt,table.mx .xr{min-width:116px}
+  table.mx .xs{min-width:140px}
+  table.mx th.d,table.mx td.d{border-left:1px solid #F1EFF4}
+  table.mx th:last-child,table.mx td:last-child{padding-right:28px}
+  table.mx .xg{width:12px;min-width:12px;max-width:12px;padding:0;border-bottom:0;border-left:1px solid #E4E0EA;border-right:1px solid #E4E0EA;background:repeating-linear-gradient(135deg,#FAF9FB 0 5px,#E2DEE8 5px 6px)!important}
+  table.mx thead th.xg{border-bottom:1px solid #1C1A21}
+  table.mx .xg+.d{border-left:0}
+  table.mx td.z{color:#C9C5D0}
+  table.mx tr.sb td{font-weight:600}
+  table.mx tr.der td.xm{padding-left:46px}
+  table.mx tr.pct td.xm{color:#5E4F8C}
+  table.mx td.pos{color:#1F7A4D}table.mx td.neg{color:#B42318}
+  table.mx td .na{color:#9A96A3;font-weight:400;font-size:12.5px}
+  table.mx sup{font-size:10px;color:#9A96A3;margin-left:2px}
+  table.mx tr.sec td{height:auto;padding:26px 14px 8px;border-bottom:1px solid #E9E6EE;text-align:left}
+  table.mx tr.sec td.xm{padding-left:28px;font:600 10.5px "Onest",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#4A1FB8}
+  table.mx tr.sec td.xg{padding:0}
+  table.mx tbody tr.sec:first-child td{padding-top:16px}
+  table.mx tr.col td{background:#F6F2FF}table.mx tr.col td.xm{color:#3A139E}
+  table.mx tr.total td{height:60px;font-size:15.5px;background:#2F0E96;color:#fff;font-weight:600;border-bottom:0}
+  table.mx tr.total td.d{border-left-color:rgba(255,255,255,.12)}
+  table.mx tr.total td.xm{font-weight:700;letter-spacing:.01em}table.mx tr.total td.xa{font-size:17px;font-weight:700}
+  table.mx tr.total td.neg{color:#FFB4A8}table.mx tr.total td.pos{color:#8CE6B4}
+  table.mx tr.total td.z{color:rgba(255,255,255,.4)}
+  table.mx tbody tr:last-child td{border-bottom:0}
+  table.mx td.empty{text-align:center;color:#7C7786;padding:40px}
+  @media (min-width:901px){
+    table.mx .xm{position:sticky;left:0;z-index:2}
+    table.mx .xa{position:sticky;left:300px;z-index:2}table.mx .xt{position:sticky;left:416px;z-index:2}table.mx .xr{position:sticky;left:532px;z-index:2}
+    table.mx .xs{position:sticky;left:648px;z-index:2}table.mx .xg{position:sticky;left:788px;z-index:2}
+    table.mx.rng .xg{left:416px}
+  }
+  @media (max-width:900px){table.mx .xm{position:sticky;left:0;z-index:2;min-width:190px;width:190px;padding-left:16px}table.mx tr.der td.xm{padding-left:28px}}
+  .mx-note{margin:10px 4px 0;font-size:12px;color:#7C7786}
+  .more{margin-top:28px}
+  .more>summary{list-style:none;display:flex;align-items:center;gap:10px;border:1px solid #E4DFF0;background:#fff;border-radius:14px;padding:14px 18px;cursor:pointer;font-family:"Onest",sans-serif}
+  .more>summary::-webkit-details-marker{display:none}
+  .more>summary svg{width:16px;height:16px;fill:none;stroke:#4A1FB8;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s;flex:none}
+  .more[open]>summary svg{transform:rotate(90deg)}
+  .more>summary b{font-size:14px;font-weight:600;color:#4A1FB8}.more>summary span{font-size:13px;color:#6F6A79}
+  .more[open]>summary{margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -249,13 +302,18 @@
     </div>
   </header>
   <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <p class="mx-cap" id="mxcap"></p>
+  <div class="mx-card"><div class="scroll" id="mxsc"><table class="mx" id="mx"></table></div></div>
+  <p class="mx-note" id="mxnote" hidden></p>
+  <details class="more" id="more"><summary><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><b>More detail</b><span>The summary, the breakdowns of appointments, visits and conversions, each lead's journey and the notes.</span></summary>
   <section class="sumbox" id="sumbox"><button type="button" class="sumhead" id="sumhead" aria-expanded="false"><span class="st">Summary</span><span class="sumline" id="sumline"></span><svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
-    <div class="kpis" id="kpis"></div></section>
-  <div class="grid-wrap">
-    <div class="scroll" id="sc"><table id="grid"></table></div>
-    <div class="legend"><span><i class="sq" style="background:#EDE4FE"></i>Today (so far)</span><span><i class="sq" style="background:#F1EFF6"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span></div>
-  </div>
-  <div class="notes" id="notes"></div>
+      <div class="kpis" id="kpis"></div></section>
+    <div class="grid-wrap">
+      <div class="scroll" id="sc"><table id="grid"></table></div>
+      <div class="legend"><span><i class="sq" style="background:#EDE4FE"></i>Today (so far)</span><span><i class="sq" style="background:#F1EFF6"></i>Monday (weekly off)</span><span>Latest date first · scroll right for earlier dates</span><span>% rows: that day's figure, with the numbers under it</span></div>
+    </div>
+    <div class="notes" id="notes"></div>
+  </details>
 </div>
 
 <script>
@@ -349,7 +407,7 @@ function series(name,days){
   (P.t.spend||[]).forEach(([d,m,g])=>{put('sp',d,m+g);put('spM',d,m);put('spG',d,g);});   // marketing spend: Meta + Google
   P.t.renew.forEach(([d,a,end])=>{put('rn',d);put('rc',d,a);if(end)put('due',end);});
   P.t.fresh.forEach(f=>{if(f[3])put('due',f[3]);});   // memberships ending that day: renewals due
-  S.tc=S.fc.map((v,i)=>v+S.rc[i]);
+  S.tc=S.fc.map((v,i)=>v+S.rc[i]);S.cr=S.conv.map((v,i)=>v+S.rn[i]);
   S.hasAppts=P.hasAppts;S.hasBooked=P.hasBooked;S.hasLeads=P.t.leads.length>0||!!P.leads;S.hasList=!!P.leads;
   return S;
 }
@@ -415,6 +473,76 @@ const ROWS=[
   {id:'LC',label:'… of them paid',kind:'count',need:'list'}
 ];
 
+/* ── The main table: the rows most people read, in this order ── */
+const MX=[
+  {sec:'Funnel'},
+  {id:'leads',label:'Leads registered {p}',k:'n',t:['leads'],need:'leads'},
+  {id:'exp',label:'Appointments booked for {p}',k:'n',t:['appts'],need:'appts'},
+  {label:'Leads to Appointments %',k:'pct',num:'exp',den:'leads',tn:['appts'],td:['leads'],need:'both'},
+  {id:'vis',label:'Visits',k:'n',t:['visits'],sb:1},
+  {label:'Leads to Visits %',k:'pct',num:'vis',den:'leads',tn:['visits'],td:['leads'],need:'leads'},
+  {id:'conv',label:'Conversions',k:'n',t:['conv'],sb:1},
+  {label:'Visit to Conversion %',k:'pct',num:'conv',den:'vis',tn:['conv'],td:['visits']},
+  {label:'Lead to Conversion %',k:'pct',num:'conv',den:'leads',tn:['conv'],td:['leads'],need:'leads'},
+  {sec:'Fresh sales and marketing'},
+  {id:'fc',label:'Collections – Fresh Sales',k:'r',t:['fscol'],sb:1,col:1},
+  {label:'ATV – Fresh Sales',k:'inr',num:'fc',den:'conv',tn:['fscol'],td:['conv']},
+  {id:'sp',label:'Marketing Spends',k:'r',t:['spend'],sb:1},
+  {label:'Overall CPL',k:'inr',num:'sp',den:'leads',tn:['spend'],td:['leads'],need:'leads',inv:1},
+  {label:'CAC',k:'inr',num:'sp',den:'conv',tn:['spend'],td:['conv'],inv:1},
+  {label:'ROAS',k:'x',num:'fc',den:'sp',tn:['fscol'],td:['spend']},
+  {sec:'Renewals'},
+  {id:'due',label:'Renewals Due',k:'n',due:1},
+  {id:'rn',label:'Renewals Achieved',k:'n',t:['renewed'],sb:1},
+  {id:'rc',label:'Collections – Renewals',k:'r',t:['rncol'],sb:1,col:1},
+  {label:'ATV – Renewals',k:'inr',num:'rc',den:'rn',tn:['rncol'],td:['renewed']},
+  {sec:'Overall'},
+  {id:'tc',label:'Collections – Total',k:'r',t:['fscol','rncol'],sb:1,total:1},
+  {label:'ATV – Blended',k:'inr',num:'tc',den:'cr',tn:['fscol','rncol'],td:['conv','renewed']}
+];
+const MXF={n:fmtN,r:fmtR,inr:fmtR,pct:v=>v.toFixed(1)+'%',x:v=>v.toFixed(2)+'×'};
+function mainTable(c){
+  const {P,days,ORD,per,ok,add,tot,tgt,cur,gone,all,isOff,isToday,list}=c;
+  const M=P.month,wp=M?'this month':'this period',star=[];
+  const dcls=i=>'d'+(isOff(i)?' xo':'')+(isToday(i)?' xn':'');
+  const gapTd=(g,k,inv)=>{if(g==null)return '<td class="xs"></td>';const f=MXF[k],good=inv?g<=0:g>=0,txt=(g>0?'+':g<0?'−':'')+(k==='pct'?Math.abs(g).toFixed(1)+' pts':f(Math.abs(g)));return `<td class="xs ${good?'pos':'neg'}">${txt}</td>`;};
+  const summ=(a,t,r,g)=>`<td class="xa">${a}</td>`+(M?`<td class="xt">${t}</td><td class="xr">${r}</td>${g}`:'')+'<td class="xg"></td>';
+  let h='<thead><tr><th class="xm">Metric</th><th class="xa">'+(M?'Actual':'Period total')+'</th>'+(M?'<th class="xt">Target</th><th class="xr">Run-rate</th><th class="xs">Surplus / Deficit</th>':'')+'<th class="xg"></th>';
+  for(const i of ORD){const dt=fromYmd(days[i]);h+=`<th class="${dcls(i)}">${dt.getDate()} ${MON[dt.getMonth()]}<small>${isToday(i)?'Today':WD[dt.getDay()]}</small></th>`;}
+  h+='</tr></thead><tbody>';
+  // renewals due: memberships ending in the whole month, not only the days so far
+  let dueAll=null;
+  if(M){const fd=[];for(let d=new Date(P.a);d<=P.full;d.setDate(d.getDate()+1))fd.push(ymd(d));
+    dueAll=list.reduce((s,x)=>{const S=series(x.name,fd);return s+(S?S.due.reduce((a,b)=>a+b,0):0);},0);}
+  MX.forEach(r=>{
+    if(r.sec){h+=`<tr class="sec"><td class="xm" colspan="${M?5:2}">${r.sec}</td><td class="xg"></td><td colspan="${days.length}"></td></tr>`;return;}
+    const label=r.label.split('{p}').join(wp),f=MXF[r.k],ps=ok(r.need);
+    const cls=r.num?'der'+(r.k==='pct'?' pct':''):(r.sb?'sb':'')+(r.col?' col':'')+(r.total?' total':'');
+    if(!ps.length){h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ('<span class="na">Not recorded</span>','','',M?'<td class="xs"></td>':'')+ORD.map(i=>`<td class="${dcls(i)} z">–</td>`).join('')+'</tr>';return;}
+    if(!r.num){   // a count or an amount, added up
+      const a=add(r.id,ps);let so=tot(a),t='',rr='',g=null;
+      if(r.due&&M)so=dueAll;
+      if(M&&r.t){const T=tgt(r.t);if(T){t=f(T.v)+(T.all?'':'<sup>*</sup>');if(!T.all)star.push(1);
+        const mine=tot(add(r.id,T.has.filter(p=>ps.includes(p))));g=mine-T.v;}
+        if(cur&&gone)rr=f(so/gone*all);}
+      h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(f(so),t,rr,M?gapTd(g,r.k,0):'')
+        +ORD.map(i=>`<td class="${dcls(i)}${a[i]?'':' z'}">${a[i]?f(a[i]):'–'}</td>`).join('')+'</tr>';
+      return;}
+    // a rate or an average: numerator ÷ denominator
+    const m=r.k==='pct'?100:1,an=add(r.num,ps),ad=add(r.den,ps),N=tot(an),D=tot(ad),so=D?N/D*m:null;let t='',g=null;
+    if(M){const both=per.filter(p=>r.tn.concat(r.td).every(k=>p.T[k]!=null)),tn=both.reduce((s,p)=>s+r.tn.reduce((x,k)=>x+p.T[k],0),0),td=both.reduce((s,p)=>s+r.td.reduce((x,k)=>x+p.T[k],0),0);
+      if(both.length&&td){const tv=tn/td*m;t=f(tv)+(both.length===per.length?'':'<sup>*</sup>');if(both.length!==per.length)star.push(1);if(so!=null)g=so-tv;}}
+    h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(so==null?'–':f(so),t,'',M?gapTd(g,r.k,r.inv):'')
+      +ORD.map(i=>`<td class="${dcls(i)}${ad[i]?'':' z'}">${ad[i]?f(an[i]/ad[i]*m):'–'}</td>`).join('')+'</tr>';
+  });
+  const mx=document.getElementById('mx');mx.className='mx'+(M?'':' rng');mx.innerHTML=h+'</tbody>';
+  document.getElementById('mxsc').scrollLeft=0;
+  const who=selCentre==='All'?'All centres':selCentre;
+  const fd=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
+  document.getElementById('mxcap').textContent=M?(cur?`${who} · ${gone} of ${all} working days gone`:`${who} · ${all} working days`):`${who} · ${fd(P.a)} to ${fd(P.b)}`;
+  const nt=document.getElementById('mxnote');nt.hidden=!star.length;nt.innerHTML='<sup>*</sup> Not every centre has a target for this, so the target and surplus or deficit cover only the centres that do.';
+}
+
 function period(){
   if(mode==='month'){const a=new Date(viewY,viewM,1),last=new Date(viewY,viewM+1,0);const b=ymd(last)>TODAY?now:last;return{a,b,label:MONTH_FULL[viewM]+' '+viewY,month:true,full:last};}
   const a=rFrom||new Date(now.getFullYear(),now.getMonth(),now.getDate()-13),b=rTo||now;return{a,b:b>now?now:b,label:'',month:false};
@@ -429,8 +557,9 @@ function render(){
   document.getElementById('eyebrow').textContent=selCentre==='All'?'All centres':selCentre+' · '+CENTRES.find(c=>c.name===selCentre).city;
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   const grid=document.getElementById('grid'),notes=document.getElementById('notes');
-  if(!loaded){grid.innerHTML='<tr><td class="empty">Loading…</td></tr>';notes.innerHTML='';return;}
-  if(P.a>now){grid.innerHTML='<tr><td class="empty">This month hasn\'t started yet.</td></tr>';notes.innerHTML='';return;}
+  const mx=document.getElementById('mx');
+  if(!loaded){grid.innerHTML='<tr><td class="empty">Loading…</td></tr>';mx.innerHTML='<tbody><tr><td class="empty">Loading.</td></tr></tbody>';notes.innerHTML='';return;}
+  if(P.a>now){grid.innerHTML='<tr><td class="empty">This month hasn\'t started yet.</td></tr>';mx.innerHTML='<tbody><tr><td class="empty">This month hasn\'t started yet.</td></tr></tbody>';notes.innerHTML='';return;}
   // days, oldest first (for running figures); shown newest first
   const days=[];for(let d=new Date(P.a);d<=P.b;d.setDate(d.getDate()+1))days.push(ymd(d));
   const ORD=days.map((_,i)=>i).reverse();
@@ -538,6 +667,7 @@ function render(){
     card('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%','renewed ÷ due',eff),
     kc('Collections – Renewals','rc',['rncol'],null,1),kc('Total collections','tc',['fscol','rncol'],null,1)].join('')+'<div class="kpi"></div>';
   document.getElementById('sumline').innerHTML=[['Leads',fmtN(tot(add('leads',ok('leads'))))],['Visits',fmtN(tot(add('vis',per)))],['Conversions',fmtN(tot(add('conv',per)))],['Renewals',fmtN(rnN)+(dueN?' of '+fmtN(dueN):'')],['Collected',fmtR(colT)]].map(([l,v])=>`<span>${l}<b>${v}</b></span>`).join('');
+  mainTable({P,days,ORD,per,ok,add,tot,tgt,cur,gone,all,isOff,isToday,list});
   grid.className=P.month?'':'rng';
   grid.innerHTML=h.split('{p}').join(P.month?'this month':'this period').split('{later}').join(P.month?'future months':'after this period').split('{earlier}').join(P.month?'previous months':'before this period')+'</tbody>';
   document.getElementById('sc').scrollLeft=0;
@@ -592,6 +722,9 @@ document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY+
 document.querySelectorAll('.quick button').forEach(b=>b.onclick=()=>{const q=b.dataset.q;rTo=new Date(now);
   if(q==='month')rFrom=new Date(now.getFullYear(),now.getMonth(),1);else rFrom=new Date(now.getFullYear(),now.getMonth(),now.getDate()-(+q-1));render();});
 
+const MORE=document.getElementById('more');
+try{MORE.open=localStorage.getItem('artium_daily_more')==='open';}catch(e){}
+MORE.addEventListener('toggle',()=>{try{localStorage.setItem('artium_daily_more',MORE.open?'open':'closed');}catch(e){}});
 async function load(){
   render();
   try{
