@@ -848,10 +848,13 @@ function collectPays(res){
 /* ── Upcoming check-ins: calls due in the next 3 days (and any overdue), for people with the Check-ins page. Done ones are left out. ── */
 const CK_START=new Date(2026,9,1);   // only admissions from 1 October 2026 are followed
 const CK_DAYS=[20,45,80],CK_AHEAD=3,CK_MISSED=30;
-async function drawCk(res){
+function showCk(){   // shown as soon as the page opens, for anyone who may open Check-ins
   const card=document.getElementById('ckc');
-  if(!card||!ArtiumAuth.pages.includes('checkins'))return;
-  card.hidden=false;document.getElementById('rc').classList.remove('solo');
+  if(!card||!ArtiumAuth.pages.includes('checkins'))return false;
+  card.hidden=false;document.getElementById('rc').classList.remove('solo');return true;
+}
+async function drawCk(res){
+  if(!showCk())return;
   const el=document.getElementById('cl'),ps=document.getElementById('cks');
   try{
     const meta=await ArtiumAuth.call('checkinsData',{});if(meta.error)throw new Error(meta.error);
@@ -868,6 +871,7 @@ async function drawCk(res){
     el.innerHTML=out.length?out.map(x=>`<div class="ci"><div class="cn">${esc(x.name)}<small>${[own?'':x.centre,x.course].filter(Boolean).map(esc).join(' · ')}</small></div><div class="cw${x.g<0?' late':''}"><span class="tg">Day ${x.day}</span><br>${x.g<0?'Overdue by '+(-x.g)+(x.g===-1?' day':' days'):x.g===0?'Today':x.g===1?'Tomorrow':'In '+x.g+' days'}</div></div>`).join(''):'<div class="tempty">No check-ins due in the next 3 days.</div>';
   }catch(e){el.innerHTML='<div class="tempty">Check-ins are not available right now.</div>';}
 }
+showCk();
 document.getElementById('cmore').addEventListener('click',()=>{try{window.parent.location.hash='checkins';}catch(x){}});
 let PAYS=null,PCEN=(()=>{try{return localStorage.getItem('artium_home_pay_centre')||'All';}catch(e){return'All';}})();
 function drawPays(L,failed){

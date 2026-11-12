@@ -496,7 +496,7 @@ function readPanel(g,list){
     <div class="rip-themes">${rows.map(r=>`<button type="button" class="thm" data-th="${esc(r.t)}" aria-pressed="${th===r.t}"><b>${esc(r.t)}</b><span class="cnts">${r.c.map((k,i)=>k?`<i class="ty ${TY[i][1]}">${k} ${TY[i][0]==='Reason'?(k>1?'learners':'learner'):TY[i][0].toLowerCase()}</i>`:'').join('')}</span></button>`).join('')}</div>
     ${th||ty?`<div class="rip-f">Showing ${[th,ty&&(ty==='Reason'?'reasons for leaving':ty.toLowerCase()+'s')].filter(Boolean).map(esc).join(' · ')} <button type="button" class="link sm" data-clear="1">Show everything</button></div>`:''}
     <div class="rip-list">${conv.map(({e,p})=>{const its=e.items.filter(keep);if(!its.length)return'';
-      return `<article class="conv"><div class="conv-top"><span class="who-l">${lname(p)}</span><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span><span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
+      return `<article class="conv"><div class="conv-top"><span class="who-l">${lname(p)}</span><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
         <ul>${its.slice().sort((a,b)=>(b.type==='Reason')-(a.type==='Reason')).map(i=>itemHTML(i,T)).join('')}</ul>
         ${e.follow&&!th&&!ty?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}</article>`;}).join('')}</div>`;
   panel.querySelectorAll('[data-ty]').forEach(b=>b.onclick=()=>{rType[g.id]=b.dataset.ty;render();});
@@ -527,7 +527,7 @@ function paintIns(){
   const list=entriesOf(cur).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
   const T=t=>(ALLTYPES.find(x=>x[0]===t)||['','neg'])[1];
   document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv">
-      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span><span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
+      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
       <ul>${e.items.slice().sort((a,b)=>(b.type==='Reason')-(a.type==='Reason')).map(i=>itemHTML(i,T)).join('')}</ul>
       ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
     </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
