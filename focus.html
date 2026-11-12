@@ -174,6 +174,7 @@
   .rip-types button span{font-size:11px;color:var(--muted)}
   .rip-types button[aria-pressed="true"]{background:var(--accent);color:#fff}.rip-types button[aria-pressed="true"] span{color:#fff}
   .rip-types button.pos[aria-pressed="true"]{background:var(--ok)}.rip-types button.neg[aria-pressed="true"]{background:var(--bad)}.rip-types button.req[aria-pressed="true"]{background:#8A5A00}
+  .conv.hl{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
   .rip-themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:14px}
   .thm{display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit}
   .thm b{font:600 13px var(--body);color:var(--ink)}
@@ -282,7 +283,7 @@ function build(names){
 }
 
 /* ── Insights from conversations: click a learner's name to read past conversations and log a new one ── */
-let PEOPLE=new Map(),INS=[],STAFF=[],ME='',insReady=false;
+let PEOPLE=new Map(),INS=[],STAFF=[],ME='',MYEMAIL='',CANEDIT=false,insReady=false;
 const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Other'];
 const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
 /* Reasons for discontinuing (One-Month Drop-offs). Saved as one insight of type "Reason"; several reasons are kept together, separated by "; " */
@@ -509,11 +510,12 @@ document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidde
   <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div></div>
     <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="ins-body"><div id="ins-hist"></div><div id="ins-form"></div></div></div></div>`);
-let cur=null,draft=null,ctx='';
+let cur=null,draft=null,ctx='',editId='',hl='';
+const canEdit=e=>(e.by===MYEMAIL||CANEDIT)&&!e.items.some(i=>i.type==='Reason');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 const dShow=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(+m[3])+' '+MON[+m[2]-1]+' '+m[1]:esc(s);};
 function openIns(key,from){
-  const p=PEOPLE.get(key);if(!p)return;cur=p;ctx=from||'';
+  const p=PEOPLE.get(key);if(!p)return;cur=p;ctx=from||'';editId='';hl=window.__hl||'';window.__hl='';
   document.getElementById('ins-eye').textContent=ctx==='drop'?'Why they left · Learner insights':'Learner insights';
   document.getElementById('ins-name').textContent=p.name||'—';
   const crs=[...new Set(p.ids.map(x=>x.course).filter(Boolean))].join(', ');
@@ -522,19 +524,24 @@ function openIns(key,from){
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
 const blank=()=>({date:today(),with:'Parent',how:'Call',reasons:[],why:'',items:ctx==='drop'?[]:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
-function closeIns(){if(draft&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>i.note.trim()))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;}
+function closeIns(){if(draft&&!editId&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>i.note.trim()))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
+function startEdit(id){
+  const e=INS.find(x=>x.id===id);if(!e||!cur)return;ctx='';
+  draft={date:e.date,with:e.with,how:e.how,reasons:[],why:'',items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
+  editId=id;paintIns();const f=document.getElementById('ins-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function paintIns(){
   const list=entriesOf(cur).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
   const T=t=>(ALLTYPES.find(x=>x[0]===t)||['','neg'])[1];
-  document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv">
-      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
+  document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv${e.id===hl?' hl':''}">
+      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span>${canEdit(e)?`<button type="button" class="link sm" data-edit="${esc(e.id)}">Edit</button>`:''}</div>
       <ul>${e.items.slice().sort((a,b)=>(b.type==='Reason')-(a.type==='Reason')).map(i=>itemHTML(i,T)).join('')}</ul>
       ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
     </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
   const f=document.getElementById('ins-form');
   if(!draft){f.innerHTML=`<button type="button" class="btn-add" id="ins-new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log a conversation</button>`;document.getElementById('ins-new').onclick=()=>{draft=blank();paintIns();};return;}
   const seg=(name,opts,val)=>`<div class="seg" data-f="${name}">${opts.map(o=>`<button type="button" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}</div>`;
-  f.innerHTML=`<div class="ins-h">New conversation</div>
+  f.innerHTML=`<div class="ins-h">${editId?'Edit conversation':'New conversation'}</div>
     <div class="frow"><label>Date<input type="date" id="f-date" value="${draft.date}" max="${today()}"></label>
       <label>Spoke with${seg('with',['Parent','Learner','Both'],draft.with)}</label><label>How${seg('how',['Call','In centre','WhatsApp'],draft.how)}</label></div>
     ${ctx==='drop'?`<div class="why"><div class="why-h">Reason for discontinuing <small>Pick one or more</small></div>
@@ -552,7 +559,7 @@ function paintIns(){
         <label>Owner<input id="f-own" list="staff-list" value="${esc(draft.follow.owner)}" placeholder="Name"></label><label>Due<input type="date" id="f-due" value="${draft.follow.due}"></label></div>
         <datalist id="staff-list">${STAFF.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:''}</div>
     <div class="ins-msg" id="ins-msg"></div>
-    <div class="ins-actions"><button type="button" class="btn" id="f-cancel">Cancel</button><button type="button" class="btn primary" id="f-save">Save conversation</button></div>`;
+    <div class="ins-actions"><button type="button" class="btn" id="f-cancel">Cancel</button><button type="button" class="btn primary" id="f-save">${editId?'Save changes':'Save conversation'}</button></div>`;
   // keep the draft in step with the form
   f.querySelectorAll('.seg[data-f]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{draft[g.dataset.f]=b.dataset.v;paintIns();}));
   f.querySelectorAll('.item').forEach(el=>{const it=draft.items[+el.dataset.i];
@@ -566,7 +573,7 @@ function paintIns(){
   document.getElementById('f-more').onclick=()=>{draft.items.push({theme:'',type:'',note:''});paintIns();const t=f.querySelectorAll('textarea');t[t.length-1].focus();};
   document.getElementById('f-fu').onclick=()=>{draft.showFollow=true;paintIns();};
   ['f-act','f-own','f-due'].forEach((id,k)=>{const el=document.getElementById(id);if(el)el.oninput=el.onchange=e=>draft.follow[['action','owner','due'][k]]=e.target.value;});
-  document.getElementById('f-cancel').onclick=()=>{draft=entriesOf(cur).length?null:blank();if(!entriesOf(cur).length)closeIns();else paintIns();};
+  document.getElementById('f-cancel').onclick=()=>{if(editId){editId='';draft=null;paintIns();return;}draft=entriesOf(cur).length?null:blank();if(!entriesOf(cur).length)closeIns();else paintIns();};
   document.getElementById('f-save').onclick=saveIns;
 }
 async function saveIns(){
@@ -577,15 +584,26 @@ async function saveIns(){
   if(items.some(i=>i.type!=='Reason'&&(!i.theme||!i.type))){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
   const b=document.getElementById('f-save');b.disabled=true;b.textContent='Saving…';
   try{
+    if(editId){
+      const old=INS.find(x=>x.id===editId)||{ids:cur.ids.map(x=>x.id)};
+      const j=await ArtiumAuth.call('editInsight',{entry:{id:editId,ids:old.ids,name:old.name||cur.name,centre:old.centre||cur.centres.join(', '),date:draft.date,with:draft.with,how:draft.how,items,follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
+      if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
+      INS=j.insights||INS;editId='';draft=null;paintIns();render();return;
+    }
     const j=await ArtiumAuth.call('saveInsight',{entry:{ids:cur.ids.map(x=>x.id),name:cur.name,centre:cur.centres.join(', '),date:draft.date,with:draft.with,how:draft.how,items,
       follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
     if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
     INS=j.insights||INS;draft=null;paintIns();render();
-  }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"you don't have permission to add insights":e.message);b.disabled=false;b.textContent='Save conversation';}
+  }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"you don't have permission to add insights":e.message);b.disabled=false;b.textContent=editId?'Save changes':'Save conversation';}
 }
-document.addEventListener('click',e=>{const n=e.target.closest('.lname');if(n){const sec=n.closest('section.tray');openIns(n.dataset.p,sec?sec.id.replace('sec-',''):'');return;}if(e.target.id==='ins'||e.target.closest('#ins-x'))closeIns();});
+window.openInsight=function(id,tries){   // from the notification bell: open the learner's conversations, with this one marked
+  const e=INS.find(x=>x.id===id),ids=e?e.ids.map(x=>String(x).toUpperCase()):[],p=e&&[...PEOPLE.values()].find(q=>q.ids.some(x=>ids.includes(String(x.id).toUpperCase())));
+  if(!p){if((tries||0)<40)setTimeout(()=>window.openInsight(id,(tries||0)+1),500);return;}
+  window.__hl=id;openIns(p.key,'');
+};
+document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit]');if(ed){startEdit(ed.dataset.edit);return;}const n=e.target.closest('.lname');if(n){const sec=n.closest('section.tray');openIns(n.dataset.p,sec?sec.id.replace('sec-',''):'');return;}if(e.target.id==='ins'||e.target.closest('#ins-x'))closeIns();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('ins').hidden)closeIns();});
-function loadInsights(){ArtiumAuth.call('insights',{}).then(j=>{if(j&&!j.error){INS=j.insights||[];STAFF=j.staff||[];ME=j.me||'';}insReady=true;render();if(cur)paintIns();}).catch(()=>{insReady=true;});}
+function loadInsights(){ArtiumAuth.call('insights',{}).then(j=>{if(j&&!j.error){INS=j.insights||[];STAFF=j.staff||[];ME=j.me||'';MYEMAIL=j.email||'';CANEDIT=!!j.canEdit;}insReady=true;render();if(cur)paintIns();}).catch(()=>{insReady=true;});}
 
 async function load(){
   loadInsights();
@@ -605,7 +623,7 @@ async function load(){
     document.getElementById('dot').className='dot error';
   }
 }
-load();
+load().then(()=>{try{const p=sessionStorage.getItem('artium_open_insight');if(p){sessionStorage.removeItem('artium_open_insight');window.openInsight(p);}}catch(x){}});
 </script>
 </body>
 </html>

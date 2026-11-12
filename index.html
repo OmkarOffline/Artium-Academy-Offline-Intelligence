@@ -326,6 +326,8 @@
     if(location.hash.slice(1).split("&")[0] !== name) history.replaceState(null, "", "#" + name + extra);
     const gm = extra.match(/g=(\w+)/);
     if(name === "goals" && gm){ try{ sessionStorage.setItem("artium_open_goal", gm[1]); const f = document.getElementById("frame-goals"); if(f.contentWindow && f.contentWindow.openGoal) f.contentWindow.openGoal(gm[1]); }catch(e){} }
+    const im = extra.match(/i=(\w+)/);
+    if((name === "checkins" || name === "focus") && im){ try{ sessionStorage.setItem("artium_open_insight", im[1]); const f = document.getElementById("frame-" + name); if(f.contentWindow && f.contentWindow.openInsight){ sessionStorage.removeItem("artium_open_insight"); f.contentWindow.openInsight(im[1]); } }catch(e){} }
     const tm = extra.match(/t=(\w+)/);
     if(name === "goals" && tm){ try{ const f = document.getElementById("frame-goals"); if(f.contentWindow && f.contentWindow.openTask) f.contentWindow.openTask(tm[1]); }catch(e){} }
   }
@@ -565,18 +567,19 @@
       const who = esc(a.name || a.by.split("@")[0]); let t = "";
       if(a.kind === "update") t = `<b>${who}</b> posted an update on ${a.task ? "the task " : ""}<b>${esc(a.title)}</b>: “${esc(a.text.slice(0, 90))}${a.text.length > 90 ? "…" : ""}”${a.files && a.files.length ? " 📎" : ""}`;
       else if(a.kind === "status"){ let x = {}; try{ x = JSON.parse(a.text); }catch(e){} t = `<b>${who}</b> set <b>${esc(x.what || a.title)}</b> to <b>${ST[x.s] || ""}</b> for ${esc(x.centre || "")}`; }
+      else if(a.kind === "insight"){ const tail = a.theme ? ` ${esc(a.theme)}${a.type ? " (" + esc(a.type) + ")" : ""}: “${esc(a.text.slice(0, 80))}${a.text.length > 80 ? "…" : ""}”` : ""; t = `<b>${who}</b> recorded ${a.src ? "a " + esc(a.src.toLowerCase()) + " conversation" : "an insight"} for <b>${esc(a.title)}</b>${a.centre ? " (" + esc(a.centre) + ")" : ""}.${tail}${a.more ? ` +${a.more} more` : ""}`; }
       else if(a.kind === "completed") t = `<b>${esc(a.title)}</b> is completed at every centre`;
       else t = `<b>${who}</b> created the goal <b>${esc(a.title)}</b>`;
-      return `<button type="button" class="nit${a.unread ? " new" : ""}" data-g="${esc(a.goal)}"${a.task ? ' data-t="1"' : ""}><i></i><span>${t}<small>${ago(a.at)}</small></span></button>`; }).join("") : '<div class="nempty">Nothing yet. Updates and status changes on goals, and updates on tasks, show up here.</div>';
+      return `<button type="button" class="nit${a.unread ? " new" : ""}" data-g="${esc(a.goal)}"${a.task ? ' data-t="1"' : ""}${a.insight ? ` data-i="${esc(a.insight)}"` : ""}><i></i><span>${t}<small>${ago(a.at)}</small></span></button>`; }).join("") : '<div class="nempty">Nothing yet. Updates on goals and tasks, and new learner insights, show up here.</div>';
   }
   async function bellLoad(){ try{ bellRender(await ArtiumAuth.call("notifications", {})); }catch(e){} }
   function startBell(){
-    if(!ArtiumAuth.pages.includes("goals")) return;
+    if(!["goals", "checkins", "focus"].some(p => ArtiumAuth.pages.includes(p))) return;
     bell.hidden = false; bellLoad(); setInterval(bellLoad, 120000);
   }
   bell.addEventListener("click", e => { e.stopPropagation(); pop.hidden = !pop.hidden; if(!pop.hidden) bellLoad(); });
   document.getElementById("nread").addEventListener("click", async e => { e.stopPropagation(); try{ bellRender(await ArtiumAuth.call("notifRead", {})); }catch(err){} });
-  document.getElementById("nlist").addEventListener("click", e => { const b = e.target.closest(".nit"); if(!b) return; pop.hidden = true; show((b.dataset.t ? "goals&t=" : "goals&g=") + b.dataset.g); });
+  document.getElementById("nlist").addEventListener("click", e => { const b = e.target.closest(".nit"); if(!b) return; pop.hidden = true; if(b.dataset.i){ show((ArtiumAuth.pages.includes("checkins") ? "checkins" : "focus") + "&i=" + b.dataset.i); return; } show((b.dataset.t ? "goals&t=" : "goals&g=") + b.dataset.g); });
   document.addEventListener("click", e => { if(!pop.hidden && !pop.contains(e.target)) pop.hidden = true; });
   window.addEventListener("blur", () => { pop.hidden = true; });
 })();

@@ -113,6 +113,8 @@
   .st.on{background:#E5F4EC;color:var(--ok)}.st.off{background:#F3F1F6;color:var(--muted)}
   .st i{width:6px;height:6px;border-radius:50%;background:currentColor}
   .eyebrow{font:700 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+  .conv.hl{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .conv-top .lnk{padding:0;margin:0 0 0 4px;font-size:12px}
   .ins .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 6px 16px -8px rgba(91,42,134,.6)}
   .ins .btn{height:auto;padding:9px 16px;border-radius:11px;font:600 13.5px var(--body)}.ins .btn.primary:hover:not(:disabled){background:#4A2170;color:#fff}
   .conv-top .by{color:var(--faint);font-weight:400}
@@ -229,14 +231,14 @@ function hint(it){   // someone already spoke to this learner lately (Focus Grou
   return e?`<div class="hint">Already spoken to on ${dShow(e.date)} by ${esc(e.byName||String(e.by).split('@')[0])} (${esc(e.how)}, ${esc(e.src||'Focus Groups')}).</div>`:'';
 }
 function insCell(it,d){
-  const e=INS.find(x=>x.id===d.entry),lines=e?e.items.map(i=>`<div><span class="tg ${TYC[i.type]||'neg'}">${esc(i.type)}</span>${i.type==='Reason'?`<b>${esc(i.theme)}.</b>`:`<b>${esc(i.theme)}.</b>`} ${esc(i.note)}</div>`).join(''):`<div>${esc(d.note)||'<span class="due">No notes.</span>'}</div>`;
+  const es=entriesOf(it.id).filter(x=>x.src==='Check-in Day '+it.day),e=es.length?{items:es.slice().sort((a,b)=>(a.date+a.at).localeCompare(b.date+b.at)).flatMap(x=>x.items)}:null,lines=e?e.items.map(i=>`<div><span class="tg ${TYC[i.type]||'neg'}">${esc(i.type)}</span>${i.type==='Reason'?`<b>${esc(i.theme)}.</b>`:`<b>${esc(i.theme)}.</b>`} ${esc(i.note)}</div>`).join(''):`<div>${esc(d.note)||'<span class="due">No notes.</span>'}</div>`;
   return `<div class="rins">${lines}</div><button class="lnk" data-view="${esc(it.key)}">Open conversation</button>`;
 }
 function row(it){
   const d=DONE[it.key];
   if(d){
     const at=d.at?new Date(d.at):null,when=at?fmtS(at)+', '+at.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):'';
-    return `<tr class="done">${cells(it)}<td><span class="day">Day ${it.day}</span><div class="due">Done ${esc(when)}</div></td><td>${insCell(it,d)}</td><td class="by">${esc(d.by)}<small>${esc(when)}</small><button class="lnk" data-reopen="${esc(it.key)}">Reopen</button></td></tr>`;
+    return `<tr class="done">${cells(it)}<td><span class="day">Day ${it.day}</span><div class="due">Done ${esc(when)}</div></td><td>${insCell(it,d)}</td><td class="by">${esc(d.by)}<small>${esc(when)}</small><button class="lnk" data-rec="${esc(it.key)}">Record another insight</button></td></tr>`;
   }
   return `<tr>${cells(it)}<td><span class="day">Day ${it.day}</span>${dueText(it)}</td><td><button type="button" class="rb" data-rec="${esc(it.key)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Record insights</button>${hint(it)}</td><td>—</td></tr>`;
 }
@@ -263,19 +265,11 @@ function draw(){
   empty.hidden=!!list.length;
   empty.textContent={due:'Nothing is due right now.',done:'No check-ins are done for this month yet.',missed:'No missed check-ins.',nodate:'Everyone has a first class date.'}[TAB]||'Nothing is due for this checkpoint right now.';
 }
-async function reopen(it,btn){
-  btn.disabled=true;
-  try{
-    const j=await ArtiumAuth.call('checkinSave',{centre:it.centre,id:it.id,learner:it.name,day:it.day,reopen:true});
-    if(j.error)throw new Error(j.error==='not-allowed'?'Only the person who made this check-in can reopen it.':j.error);
-    DONE=j.done||{};INS=j.ins||INS;KEEP.delete(it.key);draw();
-  }catch(e){btn.disabled=false;alert((e.message||'Could not reopen')+'.');}
-}
 document.addEventListener('click',e=>{
   const b=e.target.closest('button');if(!b)return;
   if(b.dataset.t){TAB=b.dataset.t;KEEP.clear();draw();}
   else if(b.dataset.rec||b.dataset.view){const it=ITEMS.find(x=>x.key===(b.dataset.rec||b.dataset.view));if(it)openRec(it,!!b.dataset.view);}
-  else if(b.dataset.reopen){const it=ITEMS.find(x=>x.key===b.dataset.reopen);if(it)reopen(it,b);}
+  else if(b.dataset.edit)startEdit(b.dataset.edit);
 });
 document.addEventListener('change',e=>{const t=e.target;
   if(t.id==='cen'){CEN=t.value;KEEP.clear();try{localStorage.setItem('artium_ck_centre',CEN);}catch(x){}draw();}
@@ -292,27 +286,33 @@ document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidde
   <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div></div>
     <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
   <div class="ins-body"><div id="ins-hist"></div><div id="ins-form"></div></div></div></div>`);
-let cur=null,draft=null,viewOnly=false;
+let cur=null,draft=null,viewOnly=false,editId='',hl='';
+const canEdit=e=>(e.by===ME.email||ME.canEdit)&&!e.items.some(i=>i.type==='Reason');
 const blank=()=>({date:dKey(TODAY),with:'Parent',how:'Call',items:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
 function openRec(it,view){
-  cur=it;viewOnly=!!view;draft=view?null:blank();
-  document.getElementById('ins-eye').textContent='Check-in · Day '+it.day+' · Learner insights';
+  cur=it;viewOnly=!!view;draft=view?null:blank();editId='';hl=it.hl||'';
+  document.getElementById('ins-eye').textContent=(it.day?'Check-in · Day '+it.day+' · ':'')+'Learner insights';
   document.getElementById('ins-name').textContent=it.name;
   document.getElementById('ins-meta').innerHTML=[esc(it.id),esc(it.centre),it.phone?esc(it.phone):'',esc(it.age),esc(it.course)].filter(Boolean).join('<span class="sep">·</span>');
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
-function closeIns(){if(draft&&draft.items.some(i=>i.note.trim())&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;}
+function closeIns(){if(draft&&draft.items.some(i=>i.note.trim())&&!editId&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
+function startEdit(id){
+  const e=INS.find(x=>x.id===id);if(!e||!cur)return;
+  draft={date:e.date,with:e.with,how:e.how,items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
+  editId=id;paintIns();const f=document.getElementById('ins-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function paintIns(){
   const list=entriesOf(cur.id).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
-  document.getElementById('ins-hist').innerHTML=list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv">
-      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span></div>
+  document.getElementById('ins-hist').innerHTML=list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv${e.id===hl?' hl':''}">
+      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span>${canEdit(e)?`<button type="button" class="lnk" data-edit="${esc(e.id)}">Edit</button>`:''}</div>
       <ul>${e.items.map(itemHTML).join('')}</ul>
       ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
     </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
   const f=document.getElementById('ins-form');
   if(!draft){f.innerHTML='';return;}
   const seg=(name,opts,val)=>`<div class="seg" data-f="${name}">${opts.map(o=>`<button type="button" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}</div>`;
-  f.innerHTML=`<div class="ins-h">New conversation</div>
+  f.innerHTML=`<div class="ins-h">${editId?'Edit conversation':'New conversation'}</div>
     <div class="frow"><label>Date<input type="date" id="f-date" value="${draft.date}" max="${dKey(TODAY)}"></label>
       <label>Spoke with${seg('with',['Parent','Learner','Both'],draft.with)}</label><label>How${seg('how',['Call','In centre','WhatsApp'],draft.how)}</label></div>
     <div class="items">${draft.items.map((it,i)=>`<div class="item" data-i="${i}">
@@ -326,7 +326,7 @@ function paintIns(){
         <label>Owner<input id="f-own" list="staff-list" value="${esc(draft.follow.owner)}" placeholder="Name"></label><label>Due<input type="date" id="f-due" value="${draft.follow.due}"></label></div>
         <datalist id="staff-list">${STAFF.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:''}</div>
     <div class="ins-msg" id="ins-msg"></div>
-    <div class="ins-actions"><button type="button" class="btn" id="f-cancel">Cancel</button><button type="button" class="btn primary" id="f-save">Save conversation</button></div>`;
+    <div class="ins-actions"><button type="button" class="btn" id="f-cancel">Cancel</button><button type="button" class="btn primary" id="f-save">${editId?'Save changes':'Save conversation'}</button></div>`;
   f.querySelectorAll('.seg[data-f]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{draft[g.dataset.f]=b.dataset.v;paintIns();}));
   f.querySelectorAll('.item').forEach(el=>{const it=draft.items[+el.dataset.i];
     el.querySelector('select').onchange=e=>it.theme=e.target.value;
@@ -337,7 +337,7 @@ function paintIns(){
   document.getElementById('f-more').onclick=()=>{draft.items.push({theme:'',type:'',note:''});paintIns();const t=f.querySelectorAll('textarea');t[t.length-1].focus();};
   document.getElementById('f-fu').onclick=()=>{draft.showFollow=true;paintIns();};
   ['f-act','f-own','f-due'].forEach((id,k)=>{const el=document.getElementById(id);if(el)el.oninput=el.onchange=e=>draft.follow[['action','owner','due'][k]]=e.target.value;});
-  document.getElementById('f-cancel').onclick=()=>{draft=null;closeIns();};
+  document.getElementById('f-cancel').onclick=()=>{if(editId){editId='';draft=viewOnly?null:blank();paintIns();}else{draft=null;closeIns();}};
   document.getElementById('f-save').onclick=saveIns;
 }
 async function saveIns(){
@@ -347,12 +347,24 @@ async function saveIns(){
   if(items.some(i=>!i.theme||!i.type)){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
   const b=document.getElementById('f-save');b.disabled=true;b.textContent='Saving…';
   try{
+    if(editId){
+      const old=INS.find(x=>x.id===editId)||{ids:[cur.id]};
+      const j=await ArtiumAuth.call('editInsight',{entry:{id:editId,ids:old.ids,name:old.name||cur.name,centre:old.centre||cur.centre,date:draft.date,with:draft.with,how:draft.how,items,follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
+      if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
+      INS=j.insights||INS;editId='';draft=viewOnly?null:blank();paintIns();draw();return;
+    }
     const j=await ArtiumAuth.call('checkinInsight',{centre:cur.centre,id:cur.id,learner:cur.name,day:cur.day,
       entry:{ids:[cur.id],name:cur.name,centre:cur.centre,date:draft.date,with:draft.with,how:draft.how,items,follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
     if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
     DONE=j.done||DONE;INS=j.ins||INS;KEEP.add(cur.key);draft=null;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draw();
-  }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"you don't have permission to record check-ins":e.message)+'.';b.disabled=false;b.textContent='Save conversation';}
+  }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"only the person who recorded it can edit this conversation":e.message)+'.';b.disabled=false;b.textContent=editId?'Save changes':'Save conversation';}
 }
+window.openInsight=function(id,tries){   // from the notification bell: open the learner's conversations, with this one marked
+  const e=INS.find(x=>x.id===id);
+  if(!e){if((tries||0)<40)setTimeout(()=>window.openInsight(id,(tries||0)+1),500);return;}
+  const m=String(e.src||'').match(/Day (\d+)/),L=ITEMS.concat(NODATE).find(x=>String(x.id).toUpperCase()===String(e.ids[0]).toUpperCase());
+  openRec(L?Object.assign({},L,{day:m?+m[1]:'',hl:id}):{id:e.ids[0],name:e.name,centre:e.centre,phone:'',age:'',course:'',day:m?+m[1]:'',hl:id},true);
+};
 document.addEventListener('click',e=>{if(e.target.id==='ins'||e.target.closest('#ins-x'))closeIns();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('ins').hidden)closeIns();});
 async function load(){
@@ -364,6 +376,7 @@ async function load(){
     const by={};CENTRES.forEach((c,i)=>by[c]=rows[i]);build(by);
     if(!draw.once){draw.once=1;let s='';try{s=localStorage.getItem('artium_ck_centre')||'';}catch(x){}CEN=ME.centre||(CENTRES.concat('All').includes(s)?s:'All');}
     draw();dot.className='dot';st.textContent='Up to date.';
+    try{const p=sessionStorage.getItem('artium_open_insight');if(p){sessionStorage.removeItem('artium_open_insight');window.openInsight(p);}}catch(x){}
   }catch(e){dot.className='dot error';st.textContent='Could not load: '+e.message+'.';}
 }
 load();
