@@ -41,7 +41,37 @@
   .pill{border:1px solid var(--border);background:#fff;border-radius:99px;padding:7px 14px;font:600 12.5px var(--body);color:var(--ink2);cursor:pointer;white-space:nowrap}
   .pill:hover{background:var(--accent-soft)}.pill[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
   .sp{flex:1}
-  .sel{height:34px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--ink2);font:600 12.5px var(--body);padding:0 10px;cursor:pointer}.sel.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  .dd{position:relative}
+  .ddb{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px 0 14px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--ink);font:600 13px var(--body);cursor:pointer;box-shadow:0 1px 2px rgba(31,26,36,.04);transition:border-color .15s,box-shadow .15s}
+  .ddb:hover{border-color:#CDBFE0}.ddb[aria-expanded="true"]{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .ddb .ddl{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .ddb .ddv{color:var(--ink)}.ddb svg{color:var(--muted);transition:transform .15s}.ddb[aria-expanded="true"] svg{transform:rotate(180deg)}
+  .ddb.on{background:var(--accent-soft);border-color:var(--accent)}.ddb.on .ddv,.ddb.on .ddl{color:var(--accent)}
+  .ddm{position:absolute;top:calc(100% + 8px);right:0;min-width:220px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:6px;box-shadow:0 18px 40px -14px rgba(40,20,60,.28),0 2px 6px rgba(31,26,36,.06);z-index:30;max-height:340px;overflow:auto}
+  .ddo{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;border:0;background:none;text-align:left;padding:9px 10px;border-radius:9px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .ddo:hover{background:var(--accent-soft)}.ddo.sel{color:var(--accent);font-weight:700}.ddo svg{color:var(--accent)}
+  .th{display:flex;align-items:center;gap:6px}
+  .fb{display:inline-grid;place-items:center;width:22px;height:22px;border:0;border-radius:7px;background:none;color:#B9B3C4;cursor:pointer;opacity:.9}
+  .fb:hover{background:var(--accent-soft);color:var(--accent)}.fb.on,.fb.srt{background:var(--accent);color:#fff}
+  .fp{position:fixed;z-index:60;width:270px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 22px 48px -14px rgba(40,20,60,.34),0 2px 6px rgba(31,26,36,.06);padding:8px;font-family:var(--body);text-transform:none;letter-spacing:0}
+  .fp .so{display:flex;flex-direction:column;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
+  .fp .so button{display:flex;align-items:center;gap:9px;border:0;background:none;padding:8px 8px;border-radius:8px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;text-align:left}
+  .fp .so button:hover{background:var(--accent-soft)}.fp .so button.on{color:var(--accent);font-weight:700}
+  .fp input[type=search]{width:100%;height:34px;border:1px solid var(--border);border-radius:9px;padding:0 10px;font:400 13px var(--body);color:var(--ink);margin-bottom:6px}
+  .fp input[type=search]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .fp .qa{display:flex;gap:14px;padding:2px 4px 6px}.fp .qa button{border:0;background:none;color:var(--accent);font:600 12px var(--body);cursor:pointer;padding:0}.fp .qa button:hover{text-decoration:underline}
+  .fp .vl{max-height:230px;overflow:auto;border-top:1px solid var(--line);padding-top:4px}
+  .fp label{display:flex;align-items:center;gap:9px;padding:6px 6px;border-radius:8px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;text-transform:none;letter-spacing:0}
+  .fp label:hover{background:var(--accent-soft)}.fp label input{accent-color:var(--accent);width:15px;height:15px;flex:none}
+  .fp label span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fp label em{font-style:normal;font-size:11.5px;color:var(--faint)}
+  .fp .fa{display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+  .fp .fa .btn{height:32px}
+  .chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+  .chips .cl{font:700 10px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #D9CBEA;background:var(--accent-soft);color:var(--accent);border-radius:99px;padding:5px 6px 5px 12px;font:600 12px var(--body)}
+  .chip button{border:0;background:rgba(91,42,134,.12);color:var(--accent);width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1;display:grid;place-items:center}.chip button:hover{background:var(--accent);color:#fff}
+  .chips .ca{border:0;background:none;color:var(--muted);font:600 12px var(--body);cursor:pointer;text-decoration:underline}
   .card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:6px 14px 10px;box-shadow:var(--shadow);overflow-x:auto}
   table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:1260px}
   th{text-align:left;font:700 10px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
@@ -142,6 +172,7 @@
     <div class="mini" id="mini"></div>
   </div>
   <div class="bar" id="tabs"></div>
+  <div class="chips" id="chips" hidden></div>
   <div class="card"><table><thead id="thead"></thead><tbody id="rows"></tbody></table><div class="empty" id="empty" hidden></div></div>
 </div>
 <script>
@@ -218,35 +249,48 @@ const isDone=it=>!!DONE[it.key];
 const appears=it=>daysBetween(TODAY,it.due)<=LEAD;                 // 5 days before the checkpoint
 const missed=it=>!isDone(it)&&daysBetween(it.due,TODAY)>MISSED_AFTER;
 const dueNow=it=>!isDone(it)&&appears(it)&&!missed(it);
+let FCM='',FILT={},SORT=null;
 const inCen=it=>CEN==='All'||it.centre===CEN;
+const inScope=it=>inCen(it)&&(FCM===''||(it.fc&&moIdx(it.fc)===FCM));   // centre, and the month of the first class
 const moIdx=d=>d.getFullYear()*12+d.getMonth();
 
+const doneMo=it=>{const d=DONE[it.key],t=d&&d.at?new Date(d.at):null;return t&&!isNaN(t)?moIdx(t):moIdx(it.due);};
+const carried=it=>!isDone(it)&&moIdx(it.due)<moIdx(TODAY)&&daysBetween(it.due,TODAY)>0&&daysBetween(it.due,TODAY)<=MISSED_AFTER;
+/* A month counts everything that was due in it, plus what was recorded in it from earlier months, plus (for this month) earlier calls that are still waiting. So a call is never lost from the count when it is recorded. */
+const monthSet=(M,c)=>c.filter(it=>moIdx(it.due)===M||(isDone(it)&&doneMo(it)===M&&moIdx(it.due)<M)||(M===moIdx(TODAY)&&carried(it)));
 function summary(){
-  const mi=MONTH,mine=ITEMS.filter(it=>inCen(it)&&moIdx(it.due)===mi);
+  const mi=MONTH,mine=monthSet(mi,ITEMS.filter(inScope));
   const pct=(d,t)=>t?Math.round(d/t*100):0;
-  const tot=mine.length,dn=mine.filter(isDone).length;
+  const tot=mine.length,dn=mine.filter(isDone).length,cr=mine.filter(it=>moIdx(it.due)<mi).length;
   document.getElementById('mlabel').textContent=MFULL[mi%12]+' '+Math.floor(mi/12);
   document.getElementById('mtot').innerHTML=`<b>${tot}</b> scheduled &nbsp;·&nbsp; <b>${dn}</b> done &nbsp;·&nbsp; <b>${pct(dn,tot)}%</b> complete`;
   document.getElementById('mbar').style.width=pct(dn,tot)+'%';
   const per=DAYS.map(n=>{const a=mine.filter(x=>x.day===n),d=a.filter(isDone).length;return `<span>Day ${n} <b>${d} of ${a.length}</b> · ${pct(d,a.length)}%</span>`;}).join('');
-  const due=ITEMS.filter(it=>inCen(it)&&dueNow(it)),over=due.filter(it=>daysBetween(it.due,TODAY)>0).length;
-  document.getElementById('mini').innerHTML=per+`<span class="sep"></span><span>Due now <b>${due.length}</b></span><span class="late">Overdue <b>${over}</b></span><span>No first class date <b>${NODATE.filter(inCen).length}</b></span>`;
+  const due=ITEMS.filter(it=>inScope(it)&&dueNow(it)),over=due.filter(it=>daysBetween(it.due,TODAY)>0).length;
+  document.getElementById('mini').innerHTML=per+(cr?`<span>Includes <b>${cr}</b> from earlier months</span>`:'')+`<span class="sep"></span><span>Due now <b>${due.length}</b></span><span class="late">Overdue <b>${over}</b></span><span>No first class date <b>${NODATE.filter(inCen).length}</b></span>`;
 }
 function tabsDef(){
-  const c=ITEMS.filter(inCen),due=c.filter(dueNow);
-  const mine=c.filter(it=>moIdx(it.due)===MONTH);
+  const c=ITEMS.filter(inScope),due=c.filter(dueNow);
   return [['due','Due',due.length],...DAYS.map(n=>['d'+n,'Day '+n,due.filter(x=>x.day===n).length]),
-    ['done','Done',mine.filter(isDone).length],['missed','Missed',c.filter(missed).length],['nodate','No first class date',NODATE.filter(inCen).length]];
+    ['done','Done',monthSet(MONTH,c).filter(isDone).length],['missed','Missed',c.filter(missed).length],['nodate','No first class date',NODATE.filter(inCen).length]];
 }
+const CHEV='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+const TICK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+function dd(id,label,val,opts,on,shown){
+  const cur=opts.find(o=>String(o[0])===String(val)),sv=shown!==undefined?shown:(cur?cur[1]:'');
+  return `<div class="dd" data-dd="${id}"><button type="button" class="ddb${on?' on':''}" aria-haspopup="listbox" aria-expanded="false"><span class="ddl">${label}</span><span class="ddv">${esc(sv)}</span>${CHEV}</button><div class="ddm" role="listbox" hidden>${opts.map(o=>`<button type="button" class="ddo${String(o[0])===String(val)?' sel':''}" role="option" data-v="${esc(o[0])}"><span>${esc(o[1])}</span>${String(o[0])===String(val)?TICK:''}</button>`).join('')}</div></div>`;
+}
+const DD={cen:v=>{CEN=v;try{localStorage.setItem('artium_ck_centre',CEN);}catch(x){}},fcm:v=>{FCM=v===''?'':+v;},more:v=>{TAB=v||'due';}};
 function drawTabs(){
-  const el=document.getElementById('tabs'),T=tabsDef(),cnt=Object.fromEntries(T.map(t=>[t[0],t[2]])),main=T.filter(t=>/^(due|d\d+)$/.test(t[0]));
-  const more=[['done','Done'],['missed','Missed'],['nodate','No first class date']];
+  const el=document.getElementById('tabs'),T=tabsDef(),cnt=Object.fromEntries(T.map(t=>[t[0],t[2]])),main=T.filter(t=>/^(due|d\d+|done)$/.test(t[0]));
+  const fcs=[...new Set(ITEMS.filter(inCen).map(it=>moIdx(it.fc)))].sort((a,b)=>a-b);
+  const fcOpts=[['','All months']].concat(fcs.map(m=>[m,MFULL[m%12]+' '+Math.floor(m/12)]));
+  const moreOpts=[['','Main lists'],['missed','Missed ('+cnt.missed+')'],['nodate','No first class date ('+cnt.nodate+')']];
   el.innerHTML=main.map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'<span class="sp"></span>'+
-    (ME.scoped?'':`<select class="sel" id="cen" aria-label="Centre"><option value="All">All centres</option>${CENTRES.map(c=>`<option${c===CEN?' selected':''}>${esc(c)}</option>`).join('')}</select>`)+
-    `<select class="sel${/^(done|missed|nodate)$/.test(TAB)?' on':''}" id="more" aria-label="More lists"><option value="">More lists</option>${more.map(m=>`<option value="${m[0]}"${TAB===m[0]?' selected':''}>${m[1]} (${cnt[m[0]]})</option>`).join('')}</select>`;
-  if(document.getElementById('cen'))document.getElementById('cen').value=CEN;
+    (ME.scoped?'':dd('cen','Centre',CEN,[['All','All centres']].concat(CENTRES.map(c=>[c,c])),false))+
+    dd('fcm','First class',FCM,fcOpts,FCM!=='')+
+    dd('more','More lists',/^(missed|nodate)$/.test(TAB)?TAB:'',moreOpts,/^(missed|nodate)$/.test(TAB),/^(missed|nodate)$/.test(TAB)?(TAB==='missed'?'Missed':'No first class date'):'')
 }
-const HEAD='<th>Admission</th><th>First class</th><th>Learner</th><th>Phone</th><th>Age group</th><th>Course</th><th>Level</th><th>Package</th><th>Teacher</th>';
 function dueText(it){
   const g=daysBetween(it.due,TODAY);
   return g>0?`<div class="due late">Overdue by ${g} ${g===1?'day':'days'}</div>`:g===0?`<div class="due">Due today</div>`:`<div class="due">Due ${fmtS(it.due)}</div>`;
@@ -275,38 +319,87 @@ function row(it){
   }
   return `<tr>${cells(it)}<td><span class="day">Day ${it.day}</span>${dueText(it)}</td><td><button type="button" class="rb" data-rec="${esc(it.key)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Record insights</button>${hint(it)}</td><td>—</td></tr>`;
 }
+const COLS=[['adm','Admission'],['fc','First class'],['name','Learner'],['phone','Phone'],['age','Age group'],['course','Course'],['level','Level'],['pack','Package'],['teacher','Teacher'],['day','Check-in'],['','Insights'],['by','Check-in by']];
+const COLS_ND=[['adm','Admission'],['name','Learner'],['phone','Phone'],['age','Age group'],['course','Course'],['level','Level'],['pack','Package'],['teacher','Teacher'],['centre','Centre']];
+const GET={adm:it=>fmt(it.adm),fc:it=>it.fc?fmt(it.fc):'—',name:it=>it.name,phone:it=>it.phone||'—',age:it=>it.age||'—',course:it=>it.course||'—',level:it=>it.level||'—',pack:it=>it.pack||'—',teacher:it=>it.teacher||'—',centre:it=>it.centre,day:it=>'Day '+it.day,by:it=>DONE[it.key]?DONE[it.key].by:'Not done yet'};
+const RAW={adm:it=>+it.adm,fc:it=>it.fc?+it.fc:0,day:it=>it.day||0};
+const sortVal=(k,it)=>RAW[k]?RAW[k](it):String(GET[k](it)).toLowerCase();
+const cmpBy=(k,a,b)=>{const x=sortVal(k,a),y=sortVal(k,b);return typeof x==='number'?x-y:x.localeCompare(y,undefined,{numeric:true});};
+const LABEL=Object.fromEntries(COLS.concat(COLS_ND).filter(c=>c[0]));
+const FUN='<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6.5 7.5V19l-3 1.6v-8.1z"/></svg>';
+const headHTML=cols=>'<tr>'+cols.map(([k,l])=>k?`<th><div class="th"><span>${l}</span><button type="button" class="fb${FILT[k]?' on':''}${SORT&&SORT.k===k?' srt':''}" data-f="${k}" aria-label="Filter and sort ${l}" title="Filter and sort">${FUN}</button></div></th>`:`<th>${l}</th>`).join('')+'</tr>';
+function baseList(){
+  if(TAB==='nodate')return NODATE.filter(inCen).sort((a,b)=>b.adm-a.adm);
+  const c=ITEMS.filter(inScope),shown=it=>appears(it)&&(isDone(it)?daysBetween(it.due,TODAY)<=MISSED_AFTER:!missed(it));   // recorded check-ins stay in the list, in green
+  let list;
+  if(TAB==='due')list=c.filter(shown);
+  else if(/^d\d+$/.test(TAB))list=c.filter(shown).filter(x=>'d'+x.day===TAB);
+  else if(TAB==='done')list=monthSet(MONTH,c).filter(isDone);
+  else list=c.filter(missed);
+  list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>a.due-b.due||a.name.localeCompare(b.name));
+  return list;
+}
+function applyCols(list,cols,skip){
+  const keys=cols.map(c=>c[0]).filter(Boolean);
+  keys.forEach(k=>{if(k!==skip&&FILT[k])list=list.filter(it=>FILT[k].has(GET[k](it)));});
+  if(!skip&&SORT&&keys.includes(SORT.k)){const d=SORT.d==='desc'?-1:1;list=list.slice().sort((a,b)=>d*cmpBy(SORT.k,a,b));}
+  return list;
+}
 function draw(){
-  OPENIDS=null;summary();drawTabs();
+  OPENIDS=null;closeFp();summary();drawTabs();
   const head=document.getElementById('thead'),body=document.getElementById('rows'),empty=document.getElementById('empty');
-  let list=[],html='';
-  if(TAB==='nodate'){
-    head.innerHTML='<tr><th>Admission</th><th>Learner</th><th>Phone</th><th>Age group</th><th>Course</th><th>Level</th><th>Package</th><th>Teacher</th><th>Centre</th></tr>';
-    list=NODATE.filter(inCen).sort((a,b)=>b.adm-a.adm);
-    html=list.map(L=>`<tr><td>${fmt(L.adm)}</td><td class="nm"><b>${esc(L.name)}</b>${famHTML(L.id)}</td><td>${L.phone?`<a href="tel:${esc(L.phone.replace(/[^0-9+]/g,''))}">${esc(L.phone)}</a>`:'—'}</td><td>${esc(L.age)||'—'}</td><td>${esc(L.course)||'—'}</td><td>${esc(L.level)||'—'}</td><td>${esc(L.pack)||'—'}</td><td>${esc(L.teacher)||'—'}</td><td>${esc(L.centre)}</td></tr>`).join('');
-  }else{
-    head.innerHTML='<tr>'+HEAD+'<th>Check-in</th><th>Insights</th><th>Check-in by</th></tr>';
-    const c=ITEMS.filter(inCen);
-    const shown=it=>appears(it)&&(isDone(it)?daysBetween(it.due,TODAY)<=MISSED_AFTER:!missed(it));   // recorded check-ins stay in the list, in green
-    if(TAB==='due')list=c.filter(shown);
-    else if(/^d\d+$/.test(TAB))list=c.filter(shown).filter(x=>'d'+x.day===TAB);
-    else if(TAB==='done')list=c.filter(it=>isDone(it)&&moIdx(it.due)===MONTH);
-    else list=c.filter(missed);
-    list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>a.due-b.due||a.name.localeCompare(b.name));
-    html=list.map(row).join('');
-  }
-  body.innerHTML=html;
+  const nd=TAB==='nodate',cols=nd?COLS_ND:COLS;
+  head.innerHTML=headHTML(cols);
+  const list=applyCols(baseList(),cols);
+  body.innerHTML=nd?list.map(L=>`<tr><td>${fmt(L.adm)}</td><td class="nm"><b>${esc(L.name)}</b>${famHTML(L.id)}</td><td>${L.phone?`<a href="tel:${esc(L.phone.replace(/[^0-9+]/g,''))}">${esc(L.phone)}</a>`:'—'}</td><td>${esc(L.age)||'—'}</td><td>${esc(L.course)||'—'}</td><td>${esc(L.level)||'—'}</td><td>${esc(L.pack)||'—'}</td><td>${esc(L.teacher)||'—'}</td><td>${esc(L.centre)}</td></tr>`).join(''):list.map(row).join('');
+  const act=Object.keys(FILT).filter(k=>cols.some(c=>c[0]===k)),ch=document.getElementById('chips');
+  ch.hidden=!act.length;
+  ch.innerHTML=act.length?'<span class="cl">Filtered by</span>'+act.map(k=>{const v=[...FILT[k]];return `<span class="chip">${LABEL[k]}: ${esc(v.length<=2?v.join(', '):v.length+' selected')}<button type="button" data-fx="${k}" aria-label="Remove filter">×</button></span>`;}).join('')+'<button type="button" class="ca" data-fclear="1">Clear all</button>':'';
   empty.hidden=!!list.length;
-  empty.textContent={due:'Nothing is due right now.',done:'No check-ins are done for this month yet.',missed:'No missed check-ins.',nodate:'Everyone has a first class date.'}[TAB]||'Nothing is due for this checkpoint right now.';
+  empty.textContent=act.length?'Nothing matches these filters.':{due:'Nothing is due right now.',done:'No check-ins are done for this month yet.',missed:'No missed check-ins.',nodate:'Everyone has a first class date.'}[TAB]||'Nothing is due for this checkpoint right now.';
+}
+/* Column filter: the same idea as a Google Sheet. Sort, search the values, tick the ones you want. */
+let FP=null;
+function closeFp(){if(FP){FP.remove();FP=null;}}
+function openFp(btn,k){
+  closeFp();
+  const nd=TAB==='nodate',cols=nd?COLS_ND:COLS,pool=applyCols(baseList(),cols,k);
+  const m=new Map();pool.forEach(it=>{const v=GET[k](it);if(!m.has(v))m.set(v,{n:0,it});m.get(v).n++;});
+  const vals=[...m.keys()].sort((a,b)=>cmpBy(k,m.get(a).it,m.get(b).it));
+  const sel=new Set(FILT[k]?[...FILT[k]].filter(v=>m.has(v)):vals);
+  const dateCol=k==='adm'||k==='fc';
+  FP=document.createElement('div');FP.className='fp';
+  FP.innerHTML=`<div class="so"><button type="button" data-so="asc" class="${SORT&&SORT.k===k&&SORT.d==='asc'?'on':''}">${dateCol?'Oldest first':'Sort A to Z'}</button><button type="button" data-so="desc" class="${SORT&&SORT.k===k&&SORT.d==='desc'?'on':''}">${dateCol?'Newest first':'Sort Z to A'}</button></div>
+    <input type="search" placeholder="Search ${LABEL[k].toLowerCase()}" aria-label="Search values"><div class="qa"><button type="button" data-qa="all">Select all</button><button type="button" data-qa="none">Clear</button></div>
+    <div class="vl">${vals.map(v=>`<label data-v="${esc(v)}"><input type="checkbox" ${sel.has(v)?'checked':''}><span>${esc(v)}</span><em>${m.get(v).n}</em></label>`).join('')}</div>
+    <div class="fa"><button type="button" class="btn" data-fc="no">Cancel</button><button type="button" class="btn pri" data-fc="ok">Apply</button></div>`;
+  document.body.appendChild(FP);
+  const r=btn.getBoundingClientRect();FP.style.top=Math.min(r.bottom+6,innerHeight-FP.offsetHeight-10)+'px';FP.style.left=Math.max(10,Math.min(r.left-10,innerWidth-290))+'px';
+  const q=FP.querySelector('input[type=search]');q.focus();
+  q.oninput=()=>{const t=q.value.toLowerCase();FP.querySelectorAll('.vl label').forEach(l=>l.hidden=!l.dataset.v.toLowerCase().includes(t));};
+  FP.onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.so){SORT={k,d:b.dataset.so};draw();}
+    else if(b.dataset.qa){FP.querySelectorAll('.vl label').forEach(l=>{if(!l.hidden)l.querySelector('input').checked=b.dataset.qa==='all';});}
+    else if(b.dataset.fc==='no')closeFp();
+    else if(b.dataset.fc==='ok'){const on=new Set([...FP.querySelectorAll('.vl label')].filter(l=>l.querySelector('input').checked).map(l=>l.dataset.v));if(on.size===vals.length)delete FILT[k];else FILT[k]=on;draw();}
+  };
 }
 document.addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b)return;
+  const t=e.target;
+  const ddb=t.closest('.ddb');
+  document.querySelectorAll('.dd').forEach(d=>{const open=ddb&&d.contains(ddb)&&d.querySelector('.ddm').hidden;d.querySelector('.ddm').hidden=!open;d.querySelector('.ddb').setAttribute('aria-expanded',open?'true':'false');});
+  const o=t.closest('.ddo');if(o){const id=o.closest('.dd').dataset.dd;DD[id](o.dataset.v);KEEP.clear();draw();return;}
+  const f=t.closest('.fb');if(f){const again=FP&&FP.dataset.k===f.dataset.f;if(again)closeFp();else{openFp(f,f.dataset.f);FP.dataset.k=f.dataset.f;}return;}
+  if(FP&&!t.closest('.fp'))closeFp();
+  const x=t.closest('[data-fx]');if(x){delete FILT[x.dataset.fx];draw();return;}
+  if(t.closest('[data-fclear]')){FILT={};SORT=null;draw();return;}
+  const b=t.closest('button');if(!b)return;
   if(b.dataset.t){TAB=b.dataset.t;KEEP.clear();draw();}
   else if(b.dataset.rec||b.dataset.view){const it=ITEMS.find(x=>x.key===(b.dataset.rec||b.dataset.view));if(it)openRec(it,!!b.dataset.view);}
   else if(b.dataset.edit)startEdit(b.dataset.edit);
 });
-document.addEventListener('change',e=>{const t=e.target;
-  if(t.id==='cen'){CEN=t.value;KEEP.clear();try{localStorage.setItem('artium_ck_centre',CEN);}catch(x){}draw();}
-  else if(t.id==='more'){TAB=t.value||'due';KEEP.clear();draw();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFp();document.querySelectorAll('.ddm').forEach(m=>m.hidden=true);}});
 document.getElementById('mprev').onclick=()=>{MONTH--;draw();};
 document.getElementById('mnext').onclick=()=>{MONTH++;draw();};
 document.getElementById('refresh').onclick=()=>{ArtiumAuth.freshUntil=Date.now()+15000;load();};
