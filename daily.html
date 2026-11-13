@@ -253,6 +253,11 @@
   table.mx td.z{color:#C9C5D0}
   table.mx tr.sb td{font-weight:600}
   table.mx tr.der td.xm{padding-left:46px}
+  table.mx tr.kid td{font-size:13px;color:#5E5A68;height:40px}table.mx tr.kid td.xm{padding-left:62px}
+  table.mx tr.kid td.z{color:#C9C5D0}
+  table.mx .fb{display:inline-grid;place-items:center;width:22px;height:22px;margin:0 8px 0 -4px;border:0;border-radius:7px;background:#F1EAFE;color:#4A1FB8;cursor:pointer;vertical-align:-5px;transition:transform .15s}
+  table.mx .fb:hover{background:#E6DAFC}
+  table.mx.fold-ap .fb{transform:rotate(-90deg)}table.mx.fold-ap tr.k-ap{display:none}
   table.mx tr.pct td.xm{color:#5E4F8C}
   table.mx td.pos{color:#1F7A4D}table.mx td.neg{color:#B42318}
   table.mx td .na{color:#9A96A3;font-weight:400;font-size:12.5px}
@@ -391,7 +396,7 @@ function prep(name){
 function series(name,days){
   const P=PREP[name];if(!P)return null;
   const idx=new Map(days.map((k,i)=>[k,i])),z=()=>days.map(()=>0),S={};
-  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG','ldA','ldAin','ldAout','expIn','expPrev','expNd'].forEach(k=>S[k]=z());
+  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG','ldA','ldAin','ldAout','expIn','expPrev','expNd','apBk','apUntil','apAll'].forEach(k=>S[k]=z());
   const put=(k,d,n=1)=>{const i=idx.get(d);if(i!=null)S[k][i]+=n;};
   const end=days[days.length-1];
   const PP=period(),pEnd=PP.month?ymd(PP.full):end,pStart=days[0];   // the month (or period) the expected visit dates are judged against
@@ -404,6 +409,11 @@ function series(name,days){
   P.t.leads.forEach(([d,n])=>{if(!(P.leads&&d>=LEAD_FROM))put('leads',d,n);});   // ads tracker before the lead list starts
   if(P.leads)P.leads.forEach(l=>{if(l.d>=LEAD_FROM)put('leads',l.d);});
   if(P.hasAppts){P.appts.forEach(a=>{if(a[1]){put('exp',a[1]);put(!a[0]?'expNd':a[0]>=pStart?'expIn':'expPrev',a[1]);}put('apR',a[0]||a[1]);if(!a[0])return;put('appts',a[0]);if(P.leads)put(a.src==='today'?'aToday':a.src==='earlier'?'aEarlier':'aNone',a[0]);});P.show.forEach(s=>{put('showE',s.e);if(s.came)put('showC',s.e);});}
+  /* Futwork appointments: entry date (when it was booked) and demo date (the visit day).
+     apBk = booked in the period for the period; apAll = every demo date in the period; apUntil = every demo date up to the last day shown */
+  const FWR=P.t.futwork||[];
+  FWR.forEach(f=>{const en=f[0],de=f[1];if(!de||de<pStart||de>pEnd)return;put('apAll',de);if(de<=end)put('apUntil',de);if(en&&en>=pStart&&en<=pEnd)put('apBk',en);});
+  S.hasFw=FWR.length>0;S.hasFwE=FWR.some(f=>f[0]&&f[0]>=pStart&&f[0]<=pEnd);
   const VK={today:'vToday',earlier:'vEarlier',later:'vLater',walk:'vWalk',booked:'vBooked',unknown:'vUnknown'};
   P.visits.forEach(v=>{put('vis',v.d);put(VK[v.kind],v.d);if(v.paid)put('vPaid',v.d);if(['today','earlier','later'].includes(v.kind))put('apptVis',v.d);});
   P.fresh.forEach(f=>{put('conv',f.d);put('fs',f.d);put('fc',f.d,f.amt);put({appt:'cAppt',walk:'cWalk',unknown:'cUnknown',nolog:'cNolog'}[f.journey],f.d);if(f.when==='same')put('cSame',f.d);else if(f.when==='earlier')put('cEarlier',f.d);});
@@ -480,8 +490,10 @@ const ROWS=[
 const MX=[
   {sec:'Funnel'},
   {id:'leads',label:'Leads registered {p}',k:'n',t:['leads'],need:'leads'},
-  {id:'exp',label:'Appointments booked for {p}',k:'n',t:['appts'],need:'appts'},
-  {label:'Leads to Appointments %',k:'pct',num:'exp',den:'leads',tn:['appts'],td:['leads'],need:'both'},
+  {id:'apBk',label:'Appointments booked {p}',k:'n',t:['appts'],need:'fwe',fold:'ap'},
+  {id:'apUntil',label:'All appointments booked until {end}',k:'n',need:'fw',kid:'ap'},
+  {id:'apAll',label:'All appointments for {pm}',k:'n',need:'fw',kid:'ap',whole:1},
+  {label:'Leads to Appointments %',k:'pct',num:'apBk',den:'leads',tn:['appts'],td:['leads'],need:'fwel',cum:1},
   {id:'vis',label:'Visits',k:'n',t:['visits'],sb:1},
   {label:'Leads to Visits %',k:'pct',num:'vis',den:'leads',tn:['visits'],td:['leads'],need:'leads'},
   {id:'conv',label:'Conversions',k:'n',t:['conv'],sb:1},
@@ -504,6 +516,9 @@ const MX=[
   {label:'ATV – Blended',k:'inr',num:'tc',den:'cr',tn:['fscol','rncol'],td:['conv','renewed']}
 ];
 const MXF={n:fmtN,r:fmtR,inr:fmtR,pct:v=>v.toFixed(1)+'%',x:v=>v.toFixed(2)+'×'};
+let FOLD={};try{FOLD=JSON.parse(localStorage.getItem('artium_daily_fold')||'{}')||{};}catch(e){FOLD={};}
+document.getElementById('mx').addEventListener('click',e=>{const b=e.target.closest('[data-fold]');if(!b)return;const k=b.dataset.fold;FOLD[k]=!FOLD[k];
+  document.getElementById('mx').classList.toggle('fold-'+k,!!FOLD[k]);try{localStorage.setItem('artium_daily_fold',JSON.stringify(FOLD));}catch(err){}});
 function mainTable(c){
   const {P,days,ORD,per,ok,add,tot,tgt,cur,gone,all,isOff,isToday,list}=c;
   const M=P.month,wp=M?'this month':'this period',star=[];
@@ -514,17 +529,22 @@ function mainTable(c){
   for(const i of ORD){const dt=fromYmd(days[i]);h+=`<th class="${dcls(i)}">${dt.getDate()} ${MON[dt.getMonth()]}<small>${isToday(i)?'Today':WD[dt.getDay()]}</small></th>`;}
   h+='</tr></thead><tbody>';
   // renewals due: memberships ending in the whole month, not only the days so far
-  let dueAll=null;
+  let dueAll=null,apAllFull=null;
   if(M){const fd=[];for(let d=new Date(P.a);d<=P.full;d.setDate(d.getDate()+1))fd.push(ymd(d));
-    dueAll=list.reduce((s,x)=>{const S=series(x.name,fd);return s+(S?S.due.reduce((a,b)=>a+b,0):0);},0);}
+    dueAll=list.reduce((s,x)=>{const S=series(x.name,fd);return s+(S?S.due.reduce((a,b)=>a+b,0):0);},0);
+    // every appointment whose demo day is in the month, including the days still to come
+    apAllFull=ok('fw').reduce((s,p)=>{const S=series(p.c.name,fd);return s+(S?S.apAll.reduce((a,b)=>a+b,0):0);},0);}
+  const ld=fromYmd(days[days.length-1]),endLbl=ld.getDate()+' '+MON[ld.getMonth()],pmLbl=M?MONTH_FULL[viewM]:'this period';
   MX.forEach(r=>{
     if(r.sec){h+=`<tr class="sec"><td class="xm" colspan="${M?5:2}">${r.sec}</td><td class="xg"></td><td colspan="${days.length}"></td></tr>`;return;}
-    const label=r.label.split('{p}').join(wp),f=MXF[r.k],ps=ok(r.need);
-    const cls=r.num?'der'+(r.k==='pct'?' pct':''):(r.sb?'sb':'')+(r.col?' col':'')+(r.total?' total':'');
+    let label=r.label.split('{p}').join(wp).split('{end}').join(endLbl).split('{pm}').join(pmLbl);const f=MXF[r.k],ps=ok(r.need);
+    if(r.fold)label=`<button type="button" class="fb" data-fold="${r.fold}" aria-label="Show or hide the two rows below"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`+label;
+    const cls=r.num?'der'+(r.k==='pct'?' pct':''):(r.sb?'sb':'')+(r.col?' col':'')+(r.total?' total':'')+(r.kid?' kid k-'+r.kid:'');
     if(!ps.length){h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ('<span class="na">Not recorded</span>','','',M?'<td class="xs"></td>':'')+ORD.map(i=>`<td class="${dcls(i)} z">–</td>`).join('')+'</tr>';return;}
     if(!r.num){   // a count or an amount, added up
       const a=add(r.id,ps);let so=tot(a),t='',rr='',g=null;
       if(r.due&&M)so=dueAll;
+      if(r.whole&&M)so=apAllFull;
       if(M&&r.t){const T=tgt(r.t);if(T){t=f(T.v)+(T.all?'':'<sup>*</sup>');if(!T.all)star.push(1);
         const mine=tot(add(r.id,T.has.filter(p=>ps.includes(p))));g=mine-T.v;}
         if(cur&&gone)rr=f(so/gone*all);}
@@ -533,12 +553,14 @@ function mainTable(c){
       return;}
     // a rate or an average: numerator ÷ denominator
     const m=r.k==='pct'?100:1,an=add(r.num,ps),ad=add(r.den,ps),N=tot(an),D=tot(ad),so=D?N/D*m:null;let t='',g=null;
+    // this ratio runs from the start of the period (bookings and leads on the same day aren't the same people)
+    const cu=a=>{let c=0;return a.map(v=>c+=v);},an2=r.cum?cu(an):an,ad2=r.cum?cu(ad):ad;
     if(M){const both=per.filter(p=>r.tn.concat(r.td).every(k=>p.T[k]!=null)),tn=both.reduce((s,p)=>s+r.tn.reduce((x,k)=>x+p.T[k],0),0),td=both.reduce((s,p)=>s+r.td.reduce((x,k)=>x+p.T[k],0),0);
       if(both.length&&td){const tv=tn/td*m;t=f(tv)+(both.length===per.length?'':'<sup>*</sup>');if(both.length!==per.length)star.push(1);if(so!=null)g=so-tv;}}
     h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(so==null?'–':f(so),t,'',M?gapTd(g,r.k,r.inv):'')
-      +ORD.map(i=>`<td class="${dcls(i)}${ad[i]?'':' z'}">${ad[i]?f(an[i]/ad[i]*m):'–'}</td>`).join('')+'</tr>';
+      +ORD.map(i=>`<td class="${dcls(i)}${ad2[i]?'':' z'}">${ad2[i]?f(an2[i]/ad2[i]*m):'–'}</td>`).join('')+'</tr>';
   });
-  const mx=document.getElementById('mx');mx.className='mx'+(M?'':' rng');mx.innerHTML=h+'</tbody>';
+  const mx=document.getElementById('mx');mx.className='mx'+(M?'':' rng')+(FOLD.ap?' fold-ap':'');mx.innerHTML=h+'</tbody>';
   document.getElementById('mxsc').scrollLeft=0;
   const who=selCentre==='All'?'All centres':selCentre;
   const fd=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
@@ -568,7 +590,7 @@ function render(){
   const ORD=days.map((_,i)=>i).reverse();
   const list=selCentre==='All'?CENTRES:CENTRES.filter(c=>c.name===selCentre);
   const per=list.map(c=>({c,S:series(c.name,days),T:P.month?((TARGETS[monthKey(viewY,viewM)]||{})[c.name]||{}):{}})).filter(p=>p.S);
-  const ok=need=>per.filter(p=>!need||(need==='appts'?p.S.hasAppts:need==='booked'?p.S.hasBooked:need==='leads'?p.S.hasLeads:need==='list'?p.S.hasList:p.S.hasAppts&&p.S.hasLeads));
+  const ok=need=>per.filter(p=>!need||(need==='fw'?p.S.hasFw:need==='fwe'?p.S.hasFwE:need==='fwel'?p.S.hasFwE&&p.S.hasLeads:need==='appts'?p.S.hasAppts:need==='booked'?p.S.hasBooked:need==='leads'?p.S.hasLeads:need==='list'?p.S.hasList:p.S.hasAppts&&p.S.hasLeads));
   const add=(id,ps)=>days.map((_,i)=>ps.reduce((s,p)=>s+p.S[id][i],0));
   const tot=a=>a.reduce((s,v)=>s+v,0),cum=a=>{let c=0;return a.map(v=>c+=v);};
   // month view: run-rate over working days (Mondays off) and targets
@@ -665,7 +687,7 @@ function render(){
   const kc=(l,id,keys,need,money)=>{const ps=ok(need);if(!ps.length)return card(l,'–','Not recorded',null);const v=tot(add(id,ps)),T=P.month&&keys?tgt(keys):null;
     return card(l,money?fmtR(v):fmtN(v),T?`${Math.round(v/T.v*100)}% of ${money?fmtR(T.v):fmtN(T.v)} target`:sp,T?v/T.v*100:null);};
   const rnN=tot(add('rn',per)),dueN=tot(add('due',per)),eff=dueN?rnN/dueN*100:null,colT=tot(add('tc',per));
-  document.getElementById('kpis').innerHTML=[kc('Leads registered','leads',['leads'],'leads'),kc('Appointments booked for '+(P.month?'this month':'this period'),'exp',['appts'],'appts'),kc('Centre visits','vis',['visits']),kc('Conversions','conv',['conv']),kc('Collections – Fresh Sales','fc',['fscol'],null,1),
+  document.getElementById('kpis').innerHTML=[kc('Leads registered','leads',['leads'],'leads'),kc('Appointments booked '+(P.month?'this month':'this period'),'apBk',['appts'],'fwe'),kc('Centre visits','vis',['visits']),kc('Conversions','conv',['conv']),kc('Collections – Fresh Sales','fc',['fscol'],null,1),
     card('Renewals',`${fmtN(rnN)}<em> of ${fmtN(dueN)} due</em>`,'renewals paid · memberships ending',null),
     card('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%','renewed ÷ due',eff),
     kc('Collections – Renewals','rc',['rncol'],null,1),kc('Total collections','tc',['fscol','rncol'],null,1)].join('')+'<div class="kpi"></div>';
