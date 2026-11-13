@@ -258,6 +258,8 @@
   table.mx .fb{display:inline-grid;place-items:center;width:22px;height:22px;margin:0 2px 0 -24px;border:0;border-radius:7px;background:#F1EAFE;color:#4A1FB8;cursor:pointer;vertical-align:-5px;transition:transform .15s}
   table.mx .fb:hover{background:#E6DAFC}
   table.mx.fold-ap .fb{transform:rotate(-90deg)}table.mx.fold-ap tr.k-ap{display:none}
+  #mxfl{position:fixed;top:0;z-index:30;overflow:hidden;display:none;background:#FBFAFE;box-shadow:0 8px 14px -12px rgba(28,20,52,.45)}
+  #mxfl table.mx{table-layout:fixed;margin:0}
   table.mx tr.sub td{height:auto;padding:9px 14px 5px;border-bottom:1px solid #E9E6EE;background:#FAF8FE;text-align:left}
   table.mx tr.sub td.xm{padding-left:28px;font:600 10.5px "Onest",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#4A1FB8}table.mx tr.sub td.xg{padding:0}
   table.mx tr.pct td.xm{color:#5E4F8C}
@@ -278,7 +280,7 @@
   table.mx td.empty{text-align:center;color:#7C7786;padding:40px}
   @media (min-width:901px){
     table.mx .xm{position:sticky;left:0;z-index:2}
-    table.mx .xa{position:sticky;left:300px;z-index:2}table.mx .xt{position:sticky;left:416px;z-index:2}table.mx .xr{position:sticky;left:532px;z-index:2}
+    table.mx .xa{position:sticky;left:300px;z-index:2}table.mx .xr{position:sticky;left:416px;z-index:2}table.mx .xt{position:sticky;left:532px;z-index:2}
     table.mx .xs{position:sticky;left:648px;z-index:2}table.mx .xg{position:sticky;left:788px;z-index:2}
     table.mx.rng .xg{left:416px}
   }
@@ -522,6 +524,19 @@ const MX=[
   {label:'ATV – Blended',k:'inr',num:'tc',den:'cr',tn:['fscol','rncol'],td:['conv','renewed']}
 ];
 const MXF={n:fmtN,r:fmtR,inr:fmtR,pct:v=>v.toFixed(1)+'%',x:v=>v.toFixed(2)+'×'};
+/* column headings stay on screen while the tracker table is scrolled past (a fixed copy that follows the sideways scroll) */
+const FL=document.createElement('div');FL.id='mxfl';document.body.appendChild(FL);let flW=0,flStale=true;
+function floatHead(){const t=document.getElementById('mx'),sc=document.getElementById('mxsc'),th=t&&t.tHead;
+  if(!th){FL.style.display='none';return;}
+  const hr=th.getBoundingClientRect(),tr=t.getBoundingClientRect(),cr=sc.getBoundingClientRect();
+  if(!(hr.top<0&&tr.bottom>hr.height)){FL.style.display='none';return;}
+  if(flStale||flW!==t.offsetWidth){const c=document.createElement('table');c.className=t.className;c.style.width=t.offsetWidth+'px';
+    const h2=th.cloneNode(true),o=th.querySelectorAll('th'),n=h2.querySelectorAll('th');
+    n.forEach((x,i)=>{const w=o[i].getBoundingClientRect().width+'px';x.style.width=x.style.minWidth=x.style.maxWidth=w;});
+    c.appendChild(h2);FL.innerHTML='';FL.appendChild(c);flW=t.offsetWidth;flStale=false;}
+  FL.style.left=cr.left+'px';FL.style.width=cr.width+'px';FL.style.display='block';FL.scrollLeft=sc.scrollLeft;}
+window.addEventListener('scroll',floatHead,{passive:true});window.addEventListener('resize',()=>{flStale=true;floatHead();});
+document.getElementById('mxsc').addEventListener('scroll',floatHead,{passive:true});
 let FOLD={};try{FOLD=JSON.parse(localStorage.getItem('artium_daily_fold')||'{}')||{};}catch(e){FOLD={};}
 document.getElementById('mx').addEventListener('click',e=>{const b=e.target.closest('[data-fold]');if(!b)return;const k=b.dataset.fold;FOLD[k]=!FOLD[k];
   document.getElementById('mx').classList.toggle('fold-'+k,!!FOLD[k]);try{localStorage.setItem('artium_daily_fold',JSON.stringify(FOLD));}catch(err){}});
@@ -530,8 +545,8 @@ function mainTable(c){
   const M=P.month,wp=M?'this month':'this period',star=[];
   const dcls=i=>'d'+(isOff(i)?' xo':'')+(isToday(i)?' xn':'');
   const gapTd=(g,k,inv)=>{if(g==null)return '<td class="xs"></td>';const f=MXF[k],good=inv?g<=0:g>=0,txt=(g>0?'+':g<0?'−':'')+(k==='pct'?Math.abs(g).toFixed(1)+' pts':f(Math.abs(g)));return `<td class="xs ${good?'pos':'neg'}">${txt}</td>`;};
-  const summ=(a,t,r,g)=>`<td class="xa">${a}</td>`+(M?`<td class="xt">${t}</td><td class="xr">${r}</td>${g}`:'')+'<td class="xg"></td>';
-  let h='<thead><tr><th class="xm">Metric</th><th class="xa">'+(M?'Actual':'Period total')+'</th>'+(M?'<th class="xt">Target</th><th class="xr">Run-rate</th><th class="xs">Surplus / Deficit</th>':'')+'<th class="xg"></th>';
+  const summ=(a,t,r,g)=>`<td class="xa">${a}</td>`+(M?`<td class="xr">${r}</td><td class="xt">${t}</td>${g}`:'')+'<td class="xg"></td>';
+  let h='<thead><tr><th class="xm">Metric</th><th class="xa">'+(M?'Actual':'Period total')+'</th>'+(M?'<th class="xr">Run-rate</th><th class="xt">Target</th><th class="xs">Surplus / Deficit</th>':'')+'<th class="xg"></th>';
   for(const i of ORD){const dt=fromYmd(days[i]);h+=`<th class="${dcls(i)}">${dt.getDate()} ${MON[dt.getMonth()]}<small>${isToday(i)?'Today':WD[dt.getDay()]}</small></th>`;}
   h+='</tr></thead><tbody>';
   // renewals due: memberships ending in the whole month, not only the days so far
@@ -567,7 +582,7 @@ function mainTable(c){
     h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(so==null?'–':f(so),t,'',M?gapTd(g,r.k,r.inv):'')
       +ORD.map(i=>`<td class="${dcls(i)}${ad2[i]?'':' z'}">${ad2[i]?f(an2[i]/ad2[i]*m):'–'}</td>`).join('')+'</tr>';
   });
-  const mx=document.getElementById('mx');mx.className='mx'+(M?'':' rng')+(FOLD.ap?' fold-ap':'');mx.innerHTML=h+'</tbody>';
+  const mx=document.getElementById('mx');mx.className='mx'+(M?'':' rng')+(FOLD.ap?' fold-ap':'');mx.innerHTML=h+'</tbody>';flStale=true;floatHead();
   document.getElementById('mxsc').scrollLeft=0;
   const who=selCentre==='All'?'All centres':selCentre;
   const fd=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
