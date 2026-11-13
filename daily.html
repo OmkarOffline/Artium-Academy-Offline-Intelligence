@@ -258,6 +258,8 @@
   table.mx .fb{display:inline-grid;place-items:center;width:22px;height:22px;margin:0 2px 0 -24px;border:0;border-radius:7px;background:#F1EAFE;color:#4A1FB8;cursor:pointer;vertical-align:-5px;transition:transform .15s}
   table.mx .fb:hover{background:#E6DAFC}
   table.mx.fold-ap .fb{transform:rotate(-90deg)}table.mx.fold-ap tr.k-ap{display:none}
+  table.mx tr.sub td{height:auto;padding:9px 14px 5px;border-bottom:1px solid #E9E6EE;background:#FAF8FE;text-align:left}
+  table.mx tr.sub td.xm{padding-left:28px;font:600 10.5px "Onest",sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#4A1FB8}table.mx tr.sub td.xg{padding:0}
   table.mx tr.pct td.xm{color:#5E4F8C}
   table.mx td.pos{color:#1F7A4D}table.mx td.neg{color:#B42318}
   table.mx td .na{color:#9A96A3;font-weight:400;font-size:12.5px}
@@ -396,7 +398,7 @@ function prep(name){
 function series(name,days){
   const P=PREP[name];if(!P)return null;
   const idx=new Map(days.map((k,i)=>[k,i])),z=()=>days.map(()=>0),S={};
-  ['leads','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG','ldA','ldAin','ldAout','expIn','expPrev','expNd','apBk','apUntil','apAll'].forEach(k=>S[k]=z());
+  ['leads','apBkU','appts','exp','vis','vToday','vEarlier','vLater','vWalk','vBooked','vUnknown','conv','cAppt','cWalk','cUnknown','cNolog','cSame','cEarlier','fs','fc','rn','rc','showE','showC','apptVis','vPaid','due','L','LA','LV','LC','aToday','aEarlier','aNone','kA','kV','kC','kAV','apR','sp','spM','spG','ldA','ldAin','ldAout','expIn','expPrev','expNd','apBk','apUntil','apAll'].forEach(k=>S[k]=z());
   const put=(k,d,n=1)=>{const i=idx.get(d);if(i!=null)S[k][i]+=n;};
   const end=days[days.length-1];
   const PP=period(),pEnd=PP.month?ymd(PP.full):end,pStart=days[0];   // the month (or period) the expected visit dates are judged against
@@ -412,7 +414,7 @@ function series(name,days){
   /* Futwork appointments: entry date (when it was booked) and demo date (the visit day).
      apBk = booked in the period for the period; apAll = every demo date in the period; apUntil = every demo date up to the last day shown */
   const FWR=P.t.futwork||[];
-  FWR.forEach(f=>{const en=f[0],de=f[1];if(!de||de<pStart||de>pEnd)return;put('apAll',de);if(de<=end)put('apUntil',de);if(en&&en>=pStart&&en<=pEnd)put('apBk',en);});
+  FWR.forEach(f=>{const en=f[0],de=f[1];if(!de||de<pStart||de>pEnd)return;put('apAll',de);if(de<=end)put('apUntil',de);if(en&&en>=pStart&&en<=pEnd){put('apBk',en);if(de<=end)put('apBkU',en);}});
   S.hasFw=FWR.length>0;S.hasFwE=FWR.some(f=>f[0]&&f[0]>=pStart&&f[0]<=pEnd);
   const VK={today:'vToday',earlier:'vEarlier',later:'vLater',walk:'vWalk',booked:'vBooked',unknown:'vUnknown'};
   P.visits.forEach(v=>{put('vis',v.d);put(VK[v.kind],v.d);if(v.paid)put('vPaid',v.d);if(['today','earlier','later'].includes(v.kind))put('apptVis',v.d);});
@@ -491,8 +493,12 @@ const MX=[
   {sec:'Funnel'},
   {id:'leads',label:'Leads registered {p}',k:'n',t:['leads'],need:'leads'},
   {id:'apBk',label:'Appointments booked {p}',k:'n',t:['appts'],need:'fwe',fold:'ap'},
-  {id:'apUntil',label:'All appointments booked until {end}',k:'n',need:'fw',kid:'ap'},
-  {id:'apAll',label:'All appointments for {pm}',k:'n',need:'fw',kid:'ap',whole:1},
+  {sub:"A · Current month's leads",kid:'ap'},
+  {id:'apBkU',label:'Booked till {end}',k:'n',need:'fwe',kid:'ap'},
+  {id:'apBk',label:'Booked for {tm}',k:'n',need:'fwe',kid:'ap'},
+  {sub:'B · All leads',kid:'ap'},
+  {id:'apUntil',label:'Booked till {end}',k:'n',need:'fw',kid:'ap'},
+  {id:'apAll',label:'Booked for {tm}',k:'n',need:'fw',kid:'ap',whole:1},
   {label:'Leads to Appointments %',k:'pct',num:'apBk',den:'leads',tn:['appts'],td:['leads'],need:'fwel',cum:1},
   {id:'vis',label:'Visits',k:'n',t:['visits'],sb:1},
   {label:'Leads to Visits %',k:'pct',num:'vis',den:'leads',tn:['visits'],td:['leads'],need:'leads'},
@@ -536,9 +542,10 @@ function mainTable(c){
     apAllFull=ok('fw').reduce((s,p)=>{const S=series(p.c.name,fd);return s+(S?S.apAll.reduce((a,b)=>a+b,0):0);},0);}
   const ld=fromYmd(days[days.length-1]),endLbl=ld.getDate()+' '+MON[ld.getMonth()],pmLbl=M?MONTH_FULL[viewM]:'this period';
   MX.forEach(r=>{
+    if(r.sub){h+=`<tr class="sub k-${r.kid}"><td class="xm" colspan="${M?5:2}">${r.sub}</td><td class="xg"></td><td colspan="${days.length}"></td></tr>`;return;}
     if(r.sec){h+=`<tr class="sec"><td class="xm" colspan="${M?5:2}">${r.sec}</td><td class="xg"></td><td colspan="${days.length}"></td></tr>`;return;}
-    let label=r.label.split('{p}').join(wp).split('{end}').join(endLbl).split('{pm}').join(pmLbl);const f=MXF[r.k],ps=ok(r.need);
-    if(r.fold)label=`<button type="button" class="fb" data-fold="${r.fold}" aria-label="Show or hide the two rows below"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`+label;
+    let label=r.label.split('{p}').join(wp).split('{end}').join(endLbl).split('{pm}').join(pmLbl).split('{tm}').join(M?'the month':'the period');const f=MXF[r.k],ps=ok(r.need);
+    if(r.fold)label=`<button type="button" class="fb" data-fold="${r.fold}" aria-label="Show or hide the rows below"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`+label;
     const cls=r.num?'der'+(r.k==='pct'?' pct':''):(r.sb?'sb':'')+(r.col?' col':'')+(r.total?' total':'')+(r.kid?' kid k-'+r.kid:'');
     if(!ps.length){h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ('<span class="na">Not recorded</span>','','',M?'<td class="xs"></td>':'')+ORD.map(i=>`<td class="${dcls(i)} z">–</td>`).join('')+'</tr>';return;}
     if(!r.num){   // a count or an amount, added up
