@@ -316,10 +316,23 @@ function render(){
     const r=bRows(g[1],g[2],g[3]);if(r.length){B.push({h:g[0]});r.forEach(x=>B.push(x));}});
   const bNote='<div class="fnote">Fresh-sales admissions only. The small figure beside each number is that row’s share of the month’s admissions. A course appears only if the centre has admitted learners in it.</div>';
 
+  /* 4 · Marketing: spend, leads, visits and what each costs. Marketing data starts later than the admissions, so the Total covers only the months that have it */
+  const mkM=allM.filter(mm=>get(mm,'spend')||get(mm,'leads')),tm=(k,i)=>mkM.reduce((s,mm)=>s+get(mm,k,i),0);
+  const sp=series('spend'),ld=series('leads'),vs=series('vis'),ad=series('fs',0),fc=series('fs',1);
+  const z=f=>v=>v?f(v):'–',xf=v=>v==null||!isFinite(v)?'–':v.toFixed(2)+'×';
+  const rt=(a,b,ta,tb,f,cls)=>({v:ratio(a,b),t:tb?ta/tb:null,f,cls});
+  const MK=[{l:'Marketing spends',v:sp,t:tm('spend'),f:z(inr)},{l:'Leads registered',v:ld,t:tm('leads'),f:z(num)},
+    Object.assign({l:'Blended CPL'},rt(sp,ld,tm('spend'),tm('leads'),z(inr))),
+    {l:'No. of admissions',v:ad,t:tm('fs',0),f:z(num),cls:'mut'},Object.assign({l:'CAC'},rt(sp,ad,tm('spend'),tm('fs',0),z(inr))),
+    {l:'No. of centre visits',v:vs,t:tm('vis'),f:z(num)},Object.assign({l:'Cost per centre visit'},rt(sp,vs,tm('spend'),tm('vis'),z(inr))),
+    Object.assign({l:'ROAS'},rt(fc,sp,tm('fs',1),tm('spend'),xf))];
+  const mkNote=mkM.length?`<div class="fnote">Marketing data starts from ${full(mkM[0])}, and the Total covers only the months from then. CAC is spend per fresh admission, and ROAS is fresh-sales collections per rupee of spend.</div>`:'';
+
   out.innerHTML=`<section class="sec strip${fold('glance')?' closed':''}" data-s="glance"><button type="button" class="sh"><span class="st"><b>${isQ?qName(m):full(m)} at a glance</b><span class="nt">${gM.indexOf(CUR)>=0?'so far, ':''}against this ${isQ?'quarter':'month'}'s targets</span></span>${CHEV}</button><div class="sb">${strip}</div></section>`
     +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(cs0,C)+note)
     +section('s2',2,'Discounts','How much of the gross coaching fee is given away as discount.',table(cs0,D))
-    +section('s3',3,'Fresh sales breakdown','Admissions by course, level, age, gender and package.',B.length?table(cs0,B)+bNote:'<div class="empty">No admissions recorded yet.</div>');
+    +section('s3',3,'Fresh sales breakdown','Admissions by course, level, age, gender and package.',B.length?table(cs0,B)+bNote:'<div class="empty">No admissions recorded yet.</div>')
+    +section('s4',4,'Marketing','Spend, leads and visits, and what each costs.',mkM.length?table(cs0,MK)+mkNote:'<div class="empty">No marketing data recorded yet.</div>');
   out.querySelectorAll('section[data-s]>.sh').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.s;setFold(k,!fold(k));render();});
   out.querySelectorAll('tr.has').forEach(t=>t.onclick=()=>{const k=t.dataset.k;setFold(k,!fold(k,true));render();});
   }
