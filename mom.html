@@ -144,6 +144,10 @@ table.calm tr.grp2 th>span{position:sticky;left:18px}
 table.calm tr.grp2 th>span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#6601fd,#dd30b1);margin-right:8px;vertical-align:1px}
 table.calm tbody tr:not(.net):not(.grp2):hover th,table.calm tbody tr:not(.net):not(.grp2):hover td{background:#F7F4FD}
 table.calm tr.has{cursor:pointer}
+table.calm .bn{display:inline-block;min-width:30px;text-align:right;color:var(--ink);font-weight:600}
+table.calm .bp{display:inline-block;min-width:46px;margin-left:6px;text-align:right;font:500 12px var(--f);color:var(--ink4)}
+table.calm .bz{color:#C9C3DD}
+table.calm tr.btot th,table.calm tr.btot td{border-top:1px solid var(--line);font-weight:700;color:var(--ink)}table.calm tr.btot td.at{color:var(--ink)}
 .tgl{display:inline-grid;place-items:center;width:20px;height:20px;margin:0 8px 0 -4px;border-radius:6px;background:#F1EAFE;color:#6b3fc7;vertical-align:-4px}
 .tgl svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}.tgl.on svg{transform:rotate(90deg)}
 .fnote{padding:12px 24px 16px;font-size:12.5px;color:var(--ink3);border-top:1px solid var(--edge)}
@@ -293,9 +297,29 @@ function render(){
   const D=[...dBlock('Fresh Sales','fd'),...dBlock('Renewals','rd'),{h:'Overall'},Object.assign({l:'% discount – Coaching fees',f:pc,cls:'net'},dPct('fd','rd'))];
   const note=missing.length?`<div class="fnote">${missing.join(' and ')} ${missing.length>1?'do':'does'} not record exam fees, instrument sales, other income or refunds yet${hasOther?', so those rows cover the other centres only':''}.</div>`:'';
 
+  /* 3 · Fresh sales breakdown: admissions split by course, level, age group, gender and package length (each row's number and its share of that month's admissions) */
+  const base=series('fs',0),baseT=total('fs',0);
+  const keysOf=pre=>{const s={};allM.forEach(mm=>Object.keys(all[mm]||{}).forEach(k=>{if(k.indexOf(pre+'|')===0)s[k.slice(pre.length+1)]=1;}));return Object.keys(s);};
+  const pcell=P=>P&&P[0]?`<span class="bn">${num(P[0])}</span><span class="bp">${Math.round(P[1])}%</span>`:'<span class="bz">–</span>';
+  const bRows=(pre,order,lbl)=>{
+    const ks=keysOf(pre).map(k=>({k,s:series(pre+'|'+k),t:total(pre+'|'+k)})).filter(x=>x.t>0);
+    ks.forEach(x=>{x.rec=x.k==='Not recorded';});
+    ks.sort((a,b)=>(a.rec-b.rec)||order(a,b));
+    const r=ks.map(x=>({l:lbl?lbl(x.k):x.k,v:x.s.map((n,i)=>[n,base[i]?n/base[i]*100:0]),t:[x.t,baseT?x.t/baseT*100:0],f:pcell}));
+    if(r.length)r.push({l:'Total admissions',v:base,t:baseT,f:num,cls:'btot'});
+    return r;};
+  const byTotal=(a,b)=>b.t-a.t||a.k.localeCompare(b.k),fixed=list=>(a,b)=>{const i=list.indexOf(a.k),j=list.indexOf(b.k);return (i<0?99:i)-(j<0?99:j)||byTotal(a,b);};
+  const lead=k=>parseFloat(k),B=[];
+  [['A · Course','bc',byTotal],['B · Course level','bl',fixed(['Preparatory','Intermediate','Proficient','Advanced'])],
+   ['C · Age group','ba',(a,b)=>(lead(a.k)||0)-(lead(b.k)||0)],['D · Gender','bg',fixed(['Male','Female'])],
+   ['E · Package length','bp',(a,b)=>lead(a.k)-lead(b.k),k=>isNaN(lead(k))?k:(lead(k)===1?'1 month':lead(k)+' months')]].forEach(g=>{
+    const r=bRows(g[1],g[2],g[3]);if(r.length){B.push({h:g[0]});r.forEach(x=>B.push(x));}});
+  const bNote='<div class="fnote">Fresh-sales admissions only. The small figure beside each number is that row’s share of the month’s admissions. A course appears only if the centre has admitted learners in it.</div>';
+
   out.innerHTML=`<section class="sec strip${fold('glance')?' closed':''}" data-s="glance"><button type="button" class="sh"><span class="st"><b>${isQ?qName(m):full(m)} at a glance</b><span class="nt">${gM.indexOf(CUR)>=0?'so far, ':''}against this ${isQ?'quarter':'month'}'s targets</span></span>${CHEV}</button><div class="sb">${strip}</div></section>`
     +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(cs0,C)+note)
-    +section('s2',2,'Discounts','How much of the gross coaching fee is given away as discount.',table(cs0,D));
+    +section('s2',2,'Discounts','How much of the gross coaching fee is given away as discount.',table(cs0,D))
+    +section('s3',3,'Fresh sales breakdown','Admissions by course, level, age, gender and package.',B.length?table(cs0,B)+bNote:'<div class="empty">No admissions recorded yet.</div>');
   out.querySelectorAll('section[data-s]>.sh').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.s;setFold(k,!fold(k));render();});
   out.querySelectorAll('tr.has').forEach(t=>t.onclick=()=>{const k=t.dataset.k;setFold(k,!fold(k,true));render();});
   }
