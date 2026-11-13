@@ -541,7 +541,7 @@ let FOLD={};try{FOLD=JSON.parse(localStorage.getItem('artium_daily_fold')||'{}')
 document.getElementById('mx').addEventListener('click',e=>{const b=e.target.closest('[data-fold]');if(!b)return;const k=b.dataset.fold;FOLD[k]=!FOLD[k];
   document.getElementById('mx').classList.toggle('fold-'+k,!!FOLD[k]);try{localStorage.setItem('artium_daily_fold',JSON.stringify(FOLD));}catch(err){}});
 function mainTable(c){
-  const {P,days,ORD,per,ok,add,tot,tgt,cur,gone,all,isOff,isToday,list}=c;
+  const {P,days,ORD,per,ok,add,tot,tgt,cur,gone,goneY,allCal,ti,all,isOff,isToday,list}=c;
   const M=P.month,wp=M?'this month':'this period',star=[];
   const dcls=i=>'d'+(isOff(i)?' xo':'')+(isToday(i)?' xn':'');
   const gapTd=(g,k,inv)=>{if(g==null)return '<td class="xs"></td>';const f=MXF[k],good=inv?g<=0:g>=0,txt=(g>0?'+':g<0?'−':'')+(k==='pct'?Math.abs(g).toFixed(1)+' pts':f(Math.abs(g)));return `<td class="xs ${good?'pos':'neg'}">${txt}</td>`;};
@@ -569,7 +569,7 @@ function mainTable(c){
       if(r.whole&&M)so=apAllFull;
       if(M&&r.t){const T=tgt(r.t);if(T){t=f(T.v)+(T.all?'':'<sup>*</sup>');if(!T.all)star.push(1);
         const mine=tot(add(r.id,T.has.filter(p=>ps.includes(p))));g=mine-T.v;}
-        if(cur&&gone)rr=f(so/gone*all);}
+        if(cur&&goneY)rr=f((so-(ti>=0?a[ti]:0))/goneY*allCal);}
       h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(f(so),t,rr,M?gapTd(g,r.k,0):'')
         +ORD.map(i=>`<td class="${dcls(i)}${a[i]?'':' z'}">${a[i]?f(a[i]):'–'}</td>`).join('')+'</tr>';
       return;}
@@ -619,6 +619,8 @@ function render(){
   const work=k=>fromYmd(k).getDay()!==OFF_DAY;
   const cur=P.month&&viewY===now.getFullYear()&&viewM===now.getMonth();
   let gone=days.filter(work).length,all=0;if(P.month){for(let d=new Date(P.a);d<=P.full;d.setDate(d.getDate()+1))if(d.getDay()!==OFF_DAY)all++;}
+  // run-rate counts calendar days and completed days only: up to yesterday, so today's part-day numbers are left out
+  const ti=days.indexOf(TODAY),goneY=days.filter(k=>k!==TODAY).length;let allCal=0;if(P.month){for(let d=new Date(P.a);d<=P.full;d.setDate(d.getDate()+1))allCal++;}
   const tgt=keys=>{const has=per.filter(p=>keys.every(k=>p.T[k]!=null));return has.length?{v:has.reduce((s,p)=>s+keys.reduce((a,k)=>a+p.T[k],0),0),has,all:has.length===per.length}:null;};
   const missing=[];
   const isOff=i=>!work(days[i]),isToday=i=>days[i]===TODAY,first=i=>days[i]%100===1&&i!==0;
@@ -635,7 +637,7 @@ function render(){
     const keys=r.tkeys||(r.tkey?[r.tkey]:null);
     if(P.month&&keys){const T=tgt(keys);if(T){t=fm(r.kind,T.v)+(T.all?'':'<sup class="ast">*</sup>');if(!T.all)missing.push(r.label);
       const mine=tot(add(r.src||r.id,T.has.filter(p=>ps.includes(p))));gap={v:mine-T.v,t:(mine-T.v>0?'+':'')+fm(r.kind,mine-T.v)};}
-      if(cur&&gone)rr=fm(r.kind,so/gone*all);}
+      if(cur&&goneY)rr=fm(r.kind,(so-(ti>=0?a[ti]:0))/goneY*allCal);}
     const mx=Math.max(...a),T0=P.month&&keys?tgt(keys):null;
     const val=fm(r.kind,so);
     if(T0&&T0.v){const done=so/T0.v*100,pace=cur&&all?gone/all*100:100;
@@ -714,7 +716,7 @@ function render(){
     card('Renewal collection efficiency',eff==null?'–':Math.round(eff)+'%','renewed ÷ due',eff),
     kc('Collections – Renewals','rc',['rncol'],null,1),kc('Total collections','tc',['fscol','rncol'],null,1)].join('')+'<div class="kpi"></div>';
   document.getElementById('sumline').innerHTML=[['Leads',fmtN(tot(add('leads',ok('leads'))))],['Visits',fmtN(tot(add('vis',per)))],['Conversions',fmtN(tot(add('conv',per)))],['Renewals',fmtN(rnN)+(dueN?' of '+fmtN(dueN):'')],['Collected',fmtR(colT)]].map(([l,v])=>`<span>${l}<b>${v}</b></span>`).join('');
-  mainTable({P,days,ORD,per,ok,add,tot,tgt,cur,gone,all,isOff,isToday,list});
+  mainTable({P,days,ORD,per,ok,add,tot,tgt,cur,gone,goneY,allCal,ti,all,isOff,isToday,list});
   grid.className=P.month?'':'rng';
   grid.innerHTML=h.split('{p}').join(P.month?'this month':'this period').split('{later}').join(P.month?'future months':'after this period').split('{earlier}').join(P.month?'previous months':'before this period')+'</tbody>';
   document.getElementById('sc').scrollLeft=0;
