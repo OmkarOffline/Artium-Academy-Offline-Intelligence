@@ -144,6 +144,15 @@ table.calm tr.grp2 th>span{position:sticky;left:18px}
 table.calm tr.grp2 th>span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#6601fd,#dd30b1);margin-right:8px;vertical-align:1px}
 table.calm tbody tr:not(.net):not(.grp2):hover th,table.calm tbody tr:not(.net):not(.grp2):hover td{background:#F7F4FD}
 table.calm tr.has{cursor:pointer}
+table.calm tr.gap td{height:30px;padding:0;border:0;background:linear-gradient(90deg,rgba(102,1,253,0),rgba(102,1,253,.55) 18%,rgba(221,48,177,.6) 50%,rgba(102,1,253,.55) 82%,rgba(102,1,253,0)) center/100% 2px no-repeat,linear-gradient(180deg,rgba(65,1,247,.06),rgba(65,1,247,0) 30%,rgba(65,1,247,0) 70%,rgba(65,1,247,.06)),#F8F6FD}
+table.calm tr.band th{background:#F3EEFD;color:var(--ink4);font:600 12px var(--f);padding:10px 18px;border-top:1px solid #E4DBF8;border-bottom:1px solid #E4DBF8;position:static;text-align:right;letter-spacing:.01em}
+table.calm tr.band th:first-child{position:sticky;left:0;z-index:2;text-align:left;font:800 14.5px var(--f);color:var(--ink);background:#F3EEFD}
+table.calm tr.band th.at{background:#ECE4FB;color:var(--ink3);position:sticky;left:270px;z-index:2}
+table.calm tr.band{cursor:pointer}table.calm tr.band:hover th{background:#EDE6FB}table.calm tr.band:hover th.at{background:#E6DCF9}
+table.calm .bl{display:inline-grid;place-items:center;width:24px;height:24px;margin-right:10px;border-radius:8px;background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;font:800 12px var(--f);vertical-align:-1px}
+table.calm .bc{display:inline-grid;place-items:center;width:20px;height:20px;margin-left:10px;border-radius:6px;background:#fff;color:var(--ink3);vertical-align:-4px}
+table.calm .bc svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;transition:transform .15s}
+table.calm tr.band.shut .bc svg{transform:rotate(-90deg)}
 table.calm tr.net .op{color:#fff}
 table.calm .gn{color:var(--ok);font-weight:600}table.calm .ls{color:var(--bad);font-weight:600}
 table.calm .pill{display:inline-block;min-width:46px;text-align:center;padding:2px 9px;border-radius:999px;font:700 12.5px var(--f)}
@@ -226,6 +235,8 @@ function cols(all){
 function table(cs,rows){
   let h='<div class="tw"><table class="calm"><thead><tr><th></th><th class="at">Total</th>'+cs.map(c=>`<th>${c.lab}${c.cur?'<em>So far</em>':''}${c.sub?`<small>${c.sub}</small>`:''}</th>`).join('')+'</tr></thead><tbody>';
   rows.forEach(r=>{
+    if(r.g&&fold('b_'+r.g))return;
+    if(r.band){const cl=fold('b_'+r.letter);h+=`<tr class="gap"><td colspan="${cs.length+2}"></td></tr><tr class="band${cl?' shut':''}" data-b="b_${r.letter}"><th scope="row"><span class="bl">${r.letter}</span>${r.h}<span class="bc"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span></th><th class="at">Total</th>`+cs.map(c=>`<th>${c.lab}</th>`).join('')+'</tr>';return;}
     if(r.h){h+=`<tr class="grp2"><th colspan="${cs.length+2}"><span>${r.h}</span></th></tr>`;return;}
     if(r.hide)return;
     const tog=r.kids?`<span class="tgl${fold('k_'+r.key,true)?'':' on'}"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span>`:'';
@@ -319,10 +330,10 @@ function render(){
     return r;};
   const byTotal=(a,b)=>b.t-a.t||a.k.localeCompare(b.k),fixed=list=>(a,b)=>{const i=list.indexOf(a.k),j=list.indexOf(b.k);return (i<0?99:i)-(j<0?99:j)||byTotal(a,b);};
   const lead=k=>parseFloat(k),B=[];
-  [['A · Course','bc',byTotal],['B · Course level','bl',fixed(['Preparatory','Intermediate','Proficient','Advanced'])],
-   ['C · Age group','ba',(a,b)=>(lead(a.k)||0)-(lead(b.k)||0)],['D · Gender','bg',fixed(['Male','Female'])],
-   ['E · Package length','bp',(a,b)=>lead(a.k)-lead(b.k),k=>isNaN(lead(k))?k:(lead(k)===1?'1 month':lead(k)+' months')]].forEach(g=>{
-    const r=bRows(g[1],g[2],g[3]);if(r.length){B.push({h:g[0]});r.forEach(x=>B.push(x));}});
+  [['A','Course','bc',byTotal],['B','Course level','bl',fixed(['Preparatory','Intermediate','Proficient','Advanced'])],
+   ['C','Age group','ba',(a,b)=>(lead(a.k)||0)-(lead(b.k)||0)],['D','Gender','bg',fixed(['Male','Female'])],
+   ['E','Package length','bp',(a,b)=>lead(a.k)-lead(b.k),k=>isNaN(lead(k))?k:(lead(k)===1?'1 month':lead(k)+' months')]].forEach(g=>{
+    const r=bRows(g[2],g[3],g[4]);if(r.length){B.push({band:1,letter:g[0],h:g[1]});r.forEach(x=>{x.g=g[0];B.push(x);});}});
   const bNote='<div class="fnote">Fresh-sales admissions only. The small figure beside each number is that row’s share of the month’s admissions. A course appears only if the centre has admitted learners in it.</div>';
 
   /* 4 · Marketing: spend, leads, visits and what each costs. Marketing data starts later than the admissions, so the Total covers only the months that have it */
@@ -365,6 +376,7 @@ function render(){
     +section('s4',4,'Marketing','Spend, leads and visits, and what each costs.',mkM.length?table(cs0,MK)+mkNote:'<div class="empty">No marketing data recorded yet.</div>')
     +section('s5',5,'Active learners by month','Opening balance, admissions, renewals and capacity.',table(cs0,LR)+lNote);
   out.querySelectorAll('section[data-s]>.sh').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.s;setFold(k,!fold(k));render();});
+  out.querySelectorAll('tr.band').forEach(t=>t.onclick=()=>{const k=t.dataset.b;setFold(k,!fold(k));render();});
   out.querySelectorAll('tr.has').forEach(t=>t.onclick=()=>{const k=t.dataset.k;setFold(k,!fold(k,true));render();});
   }
 
