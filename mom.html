@@ -144,6 +144,7 @@ table.calm tr.grp2 th>span{position:sticky;left:18px}
 table.calm tr.grp2 th>span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#6601fd,#dd30b1);margin-right:8px;vertical-align:1px}
 table.calm tbody tr:not(.net):not(.grp2):hover th,table.calm tbody tr:not(.net):not(.grp2):hover td{background:#F7F4FD}
 table.calm tr.has{cursor:pointer}
+table.calm .op{display:inline-block;width:22px;color:var(--violet2);font:700 15px var(--f)}
 table.calm .bn{display:inline-block;min-width:30px;text-align:right;color:var(--ink);font-weight:600}
 table.calm .bp{display:inline-block;min-width:46px;margin-left:6px;text-align:right;font:500 12px var(--f);color:var(--ink4)}
 table.calm .bz{color:#C9C3DD}
@@ -292,9 +293,13 @@ function render(){
   const dPct=(...ks)=>({v:cs0.map((c,i)=>{const g=ks.reduce((s,k)=>s+series(k,0)[i],0),d=ks.reduce((s,k)=>s+series(k,1)[i],0);return g?d/g*100:null;}),
     t:(()=>{const g=ks.reduce((s,k)=>s+total(k,0),0),d=ks.reduce((s,k)=>s+total(k,1),0);return g?d/g*100:null;})()});
   const netS=k=>series(k,0).map((g,i)=>g-series(k,1)[i]);
-  const dBlock=(h,k)=>[{h},row('Gross coaching fees',k,0,inr),row('Discount given',k,1,inr,'mut'),
-    {l:'Net coaching fees',v:netS(k),t:total(k,0)-total(k,1),f:inr},Object.assign({l:'% discount',f:pc,cls:'sum'},dPct(k))];
-  const D=[...dBlock('Fresh Sales','fd'),...dBlock('Renewals','rd'),{h:'Overall'},Object.assign({l:'% discount – Coaching fees',f:pc,cls:'net'},dPct('fd','rd'))];
+  const op=(sym,t)=>`<span class="op">${sym}</span>${t}`;   // the sum is read down the left: gross − discount = net coaching fees + enrollment fee = net collections
+  const dBlock=(h,k)=>[{h},row(op('','Gross coaching fees'),k,0,inr),row(op('−','Discount given'),k,1,inr,'mut'),
+    {l:op('=','Net coaching fees'),nc:1,v:netS(k),t:total(k,0)-total(k,1),f:inr},Object.assign({l:'% discount',f:pc,cls:'sum'},dPct(k))];
+  // Fresh sales also show the enrolment (registration) fee, which with the net coaching fees makes the net collection
+  const fresh=dBlock('Fresh Sales','fd'),fi=fresh.findIndex(x=>x.nc),enr=series('fr',1),nsf=netS('fd');
+  fresh.splice(fi+1,0,row(op('+','Enrollment fee'),'fr',1,inr),{l:op('=','Net collections'),v:nsf.map((x,i)=>x+enr[i]),t:total('fd',0)-total('fd',1)+total('fr',1),f:inr,cls:'btot'});
+  const D=[...fresh,...dBlock('Renewals','rd'),{h:'Overall'},Object.assign({l:'% discount – Coaching fees',f:pc,cls:'net'},dPct('fd','rd'))];
   const note=missing.length?`<div class="fnote">${missing.join(' and ')} ${missing.length>1?'do':'does'} not record exam fees, instrument sales, other income or refunds yet${hasOther?', so those rows cover the other centres only':''}.</div>`:'';
 
   /* 3 · Fresh sales breakdown: admissions split by course, level, age group, gender and package length (each row's number and its share of that month's admissions) */
