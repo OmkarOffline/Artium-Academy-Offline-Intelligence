@@ -144,6 +144,10 @@ table.calm tr.grp2 th>span{position:sticky;left:18px}
 table.calm tr.grp2 th>span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#6601fd,#dd30b1);margin-right:8px;vertical-align:1px}
 table.calm tbody tr:not(.net):not(.grp2):hover th,table.calm tbody tr:not(.net):not(.grp2):hover td{background:#F7F4FD}
 table.calm tr.has{cursor:pointer}
+table.calm tr.net .op{color:#fff}
+table.calm .gn{color:var(--ok);font-weight:600}table.calm .ls{color:var(--bad);font-weight:600}
+table.calm .pill{display:inline-block;min-width:46px;text-align:center;padding:2px 9px;border-radius:999px;font:700 12.5px var(--f)}
+table.calm .pill.lo{background:var(--rose);color:var(--bad)}table.calm .pill.mid{background:#FFF1D6;color:#8A5A00}table.calm .pill.hi{background:var(--okbg);color:var(--ok)}table.calm .pill.top{background:var(--tbbg);color:var(--tbfg)}
 table.calm .op{display:inline-block;width:22px;color:var(--violet2);font:700 15px var(--f)}
 table.calm .bn{display:inline-block;min-width:30px;text-align:right;color:var(--ink);font-weight:600}
 table.calm .bp{display:inline-block;min-width:46px;margin-left:6px;text-align:right;font:500 12px var(--f);color:var(--ink4)}
@@ -333,11 +337,33 @@ function render(){
     Object.assign({l:'ROAS'},rt(fc,sp,tm('fs',1),tm('spend'),xf))];
   const mkNote=mkM.length?`<div class="fnote">Marketing data starts from ${full(mkM[0])}, and the Total covers only the months from then. CAC is spend per fresh admission, and ROAS is fresh-sales collections per rupee of spend.</div>`:'';
 
+  /* 5 · Active learners by month: the same table as the Monthly Active Learners page, built month by month from May 2024 */
+  const CAP={'Alwarpet':540,'Thoraipakkam':630,'Borewell Road':720},LFIRST='2024-05';
+  const opened=n=>{const ms=Object.keys(((DATA[n]||{}).months)||{}).filter(x=>x>=LFIRST&&((DATA[n].months[x].lN||0)+(DATA[n].months[x].lG||0))>0).sort();return ms[0]||CUR;};
+  const LM={};{let open=0;for(let x=LFIRST;x<=CUR;x=addM(x,1)){
+    const B=get(x,'lN'),D=get(x,'lF'),E=get(x,'lR'),G=get(x,'lG'),A=open,C=A+B,F=D+E,H=C-F+G;open=H;
+    LM[x]={A,B,C,D,E,F,G,H,K:cs.reduce((t,n)=>t+(x>=opened(n)?CAP[n]||0:0),0)};}}
+  const lcol=c=>{const ms=c.ms.filter(x=>LM[x]);if(!ms.length)return null;const f=LM[ms[0]],l=LM[ms[ms.length-1]],sm=k=>ms.reduce((t,x)=>t+LM[x][k],0);
+    const o={A:f.A,B:sm('B'),D:sm('D'),E:sm('E'),F:sm('F'),G:sm('G'),H:l.H,K:l.K};o.C=o.A+o.B;o.I=o.H-o.A;o.J=o.G-o.F;o.L=o.K?o.H/o.K*100:null;return o;};
+  const LC=cs0.map(lcol),lsum=k=>Object.keys(LM).filter(x=>x<=CUR).reduce((t,x)=>t+LM[x][k],0);
+  const lv=k=>LC.map(o=>o?o[k]:null),ln=v=>v===undefined?'':v==null?'–':v===0?'<span class="bz">0</span>':num(v);
+  const lsg=v=>v===undefined?'':v==null?'–':v===0?'<span class="bz">0</span>':`<span class="${v>0?'gn':'ls'}">${v>0?'+':'−'}${num(Math.abs(v))}</span>`;
+  const lrow=(l,k,o)=>Object.assign({l:op(o&&o.op||'',l),v:lv(k),t:o&&o.t!=null?o.t:undefined,f:o&&o.f||ln},o&&o.cls?{cls:o.cls}:{});
+  const LR=[lrow('Opening balance','A'),lrow('New admissions','B',{op:'+',t:lsum('lN'.replace('lN','B'))}),lrow('Total','C',{op:'=',cls:'sum'}),
+    lrow('First-time renewals due','D',{t:lsum('D')}),lrow('Repeated renewals due','E',{t:lsum('E')}),
+    lrow('Total due for renewals','F',{op:'−',cls:'sum',t:lsum('F')}),lrow('Actually renewed in the month','G',{op:'+',t:lsum('G')}),
+    lrow('Monthly Active Learners','H',{op:'=',cls:'net'}),
+    lrow('Net gain / loss','I',{f:lsg}),lrow('Win-back / Churn','J',{f:lsg,t:lsum('G')-lsum('F')}),
+    {h:'Capacity'},lrow('Total capacity','K'),
+    {l:op('','Capacity utilisation %'),v:lv('L'),t:undefined,f:v=>v===undefined?'':v==null?'–':`<span class="pill ${v>=70?'top':v>=55?'hi':v>=40?'mid':'lo'}">${Math.round(v)}%</span>`}];
+  const lNote='<div class="fnote">Due for renewal counts memberships that have ended, up to today. Monthly Active Learners is Total, minus those due for renewal, plus those actually renewed. Win-back / Churn is renewed minus due: plus means more renewed than were due, minus means learners were lost. Capacity is Alwarpet 540, Thoraipakkam 630 and Borewell Road 720, counted from each centre’s first month.</div>';
+
   out.innerHTML=`<section class="sec strip${fold('glance')?' closed':''}" data-s="glance"><button type="button" class="sh"><span class="st"><b>${isQ?qName(m):full(m)} at a glance</b><span class="nt">${gM.indexOf(CUR)>=0?'so far, ':''}against this ${isQ?'quarter':'month'}'s targets</span></span>${CHEV}</button><div class="sb">${strip}</div></section>`
     +section('s1',1,'Collections','How fresh sales and renewals add up to total collections, with their volume and ATV.',table(cs0,C)+note)
     +section('s2',2,'Discounts','How much of the gross coaching fee is given away as discount.',table(cs0,D))
     +section('s3',3,'Fresh sales breakdown','Admissions by course, level, age, gender and package.',B.length?table(cs0,B)+bNote:'<div class="empty">No admissions recorded yet.</div>')
-    +section('s4',4,'Marketing','Spend, leads and visits, and what each costs.',mkM.length?table(cs0,MK)+mkNote:'<div class="empty">No marketing data recorded yet.</div>');
+    +section('s4',4,'Marketing','Spend, leads and visits, and what each costs.',mkM.length?table(cs0,MK)+mkNote:'<div class="empty">No marketing data recorded yet.</div>')
+    +section('s5',5,'Active learners by month','Opening balance, admissions, renewals and capacity.',table(cs0,LR)+lNote);
   out.querySelectorAll('section[data-s]>.sh').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.s;setFold(k,!fold(k));render();});
   out.querySelectorAll('tr.has').forEach(t=>t.onclick=()=>{const k=t.dataset.k;setFold(k,!fold(k,true));render();});
   }
