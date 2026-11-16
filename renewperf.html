@@ -470,7 +470,7 @@ let SECINFO={};
 const mbar=(a,b)=>b?`<div class="mb"><i style="width:${Math.min(100,Math.round(a/b*100))}%"></i></div>`:'';
 const BANDS=[['r','0 to 40%','Needs attention'],['a','41 to 60%','Getting there'],['g','61 to 75%','On track'],['b','Above 75%','Excellent']];
 const bi=(def,note='Counts have no colour. A percentage with nothing to measure shows a dash.')=>`<span class="ib" role="button" tabindex="0" aria-label="How the colours work" data-info>i<span class="ipop"><b>How the colour is chosen</b><p>${def}</p><span class="bl" style="display:grid;gap:6px;background:none;padding:0">${BANDS.map(([k,r,t])=>`<span class="bd-${k}">${r}<i>${t}</i></span>`).join('')}</span><span class="nb" style="display:block;margin:10px 0 0">${note}</span></span></span>`;
-SECINFO={a_sum:bi('Each percentage in this summary takes the colour of the band it falls in.'),l_sum:bi('Each percentage in this summary takes the colour of the band it falls in.'),a_lb:bi('Percentages in the table take the colour of the band they fall in.'),l_lb:bi('Percentages in the table take the colour of the band they fall in.'),m_tbl:bi('Utilisation takes the colour of the band it falls in.')};
+SECINFO={a_sum:bi('Each percentage in this summary takes the colour of the band it falls in.'),l_sum:bi('Each percentage in this summary takes the colour of the band it falls in.'),a_lb:bi('Percentages in the table take the colour of the band they fall in.'),l_lb:bi('Percentages in the table take the colour of the band they fall in.'),m_tbl:bi('Capacity utilisation takes the colour of the band its own percentage falls in, not how close it is to the target.')};
 const inP=(d,P)=>d&&d>=P.a&&d<=P.b;
 const CHEV='<span class="cv" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>';
 
@@ -660,11 +660,11 @@ function malView(sel){
   const nowOf=v=>{const b=malBuild(sel,[MDIM[MBY][0],v]).out[last];return b?b.H:0;};
   const by=`<div class="mby"><div class="seg2" role="group" aria-label="View by"><span class="sl">View by</span>${[['all','All learners'],['age','Age group'],['level','Course level'],['gender','Gender']].map(([k,l])=>`<button type="button" data-mby="${k}" class="${MBY===k?'on':''}">${l}</button>`).join('')}</div>
     ${MBY!=='all'?`<div class="mvals">${vals.length?vals.map(v=>`<button type="button" class="mv${v===val?' on':''}" data-mval="${esc(v)}">${esc(v)}<i>${nowOf(v)}</i></button>`).join('')+'<span class="mvn">Number = Monthly Active Learners today.</span>':'<span class="mvn">Nothing recorded for this yet.</span>'}</div>`:''}</div>`;
-  const meter=(lbl,val,unit,target,pct,note)=>`<div class="kpi ${bdc(pct,100)}"><div class="kl">${lbl}</div><div class="kv">${val}<small>${unit}</small></div>
+  const meter=(lbl,val,unit,target,pct,note,bp=null)=>`<div class="kpi ${bp==null?'':bdc(bp,100)}"><div class="kl">${lbl}</div><div class="kv">${val}<small>${unit}</small></div>
       <div class="kt"><span>Target <b>${target}</b></span><span class="kn">${note}</span></div>
       <div class="kb"><i style="width:${Math.max(2,Math.min(100,pct))}%"></i></div></div>`;
   const strip=`<div class="kpis">${meter('Monthly Active Learners today',n(cur.H),'learners',T_MAL,cur.H/T_MAL*100,gap>0?gap+' more to reach the target':'Target reached')}
-    ${meter('Capacity utilisation today',Math.round(cur.L)+'%','of '+CAP+' learners',T_UTIL+'%',cur.L/T_UTIL*100,cur.L>=T_UTIL?'Target reached':Math.round(T_UTIL-cur.L)+' points to go')}</div>`;
+    ${meter('Capacity utilisation today',Math.round(cur.L)+'%','of '+CAP+' learners',T_UTIL+'%',cur.L/T_UTIL*100,cur.L>=T_UTIL?'Target reached':Math.round(T_UTIL-cur.L)+' points to go',cur.L)}</div>`;
   const ROWSM=[['A','Opening balance'],['B','New admissions','add','Add'],['C','Total','sum'],0,['D','Due for renewal – First-time renewals'],['E','Due for renewal – Repeated renewals'],['F','Total due for renewals','sum less','Less'],0,
     ['G','Actually renewed in the month','add','Add'],['H','Monthly Active Learners','malr'],['I','Net gain / loss','sg'],['J','Win-back / Churn','sg']].concat(MBY==='all'?[0,['K','Total capacity'],['L','Capacity utilisation %','cu']]:[]);   // capacity is per teacher, so it is left out for a single group
   const yrs=[];M.forEach(k=>{const y=Math.floor(k/12);if(!yrs.length||yrs[yrs.length-1].y!==y)yrs.push({y,n:0});yrs[yrs.length-1].n++;});
