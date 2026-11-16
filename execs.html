@@ -148,6 +148,24 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .card-e{border:1px solid var(--edge);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;background:#FCFBFF}
 .card-e .row .in{flex:1}
 .card-e textarea{height:92px}
+/* Headings and gaps on the slide: a heading is 2 px larger and semibold with no space around it; a gap is one plain line */
+.tx li.h1,.u li.h1{list-style:none;margin:0 0 0 -24px;font-weight:600;color:var(--ink)}.u li.h1{margin-left:-22px}
+.tx li.h1{font-size:23px}.u li.h1{font-size:21px}.flow .u li.h1{font-size:calc(21px*var(--z,1))}
+.tx li.sp,.u li.sp{list-style:none;margin:0;height:1.5em}
+.tx li:has(+li.h1),.u li:has(+li.h1),.tx li:has(+li.sp),.u li:has(+li.sp){margin-bottom:0}
+.tx li i,.u li i{font-style:italic}.tx li u,.u li u{text-decoration:underline;text-underline-offset:3px}
+/* The text editor: a small toolbar over a box that shows the formatting */
+.rtw{display:flex;flex-direction:column;gap:0}
+.rtb{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:#fff;padding:6px}
+.rtb button{height:30px;min-width:32px;padding:0 10px;border:0;border-radius:8px;background:none;font:600 13px var(--f);color:var(--ink2);cursor:pointer}
+.rtb button:hover{background:#F1ECFC}.rtb button.on{background:#E8E0FF;color:var(--violet2)}
+.rtb .sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.rtb .bb{font-weight:800}.rtb .bi{font-style:italic;font-family:Georgia,serif}.rtb .bu{text-decoration:underline}
+.rte{min-height:132px;max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:0 0 12px 12px;background:#F6F3FC;padding:10px 12px;font:400 14px/1.5 var(--f);color:var(--ink);outline:none;white-space:pre-wrap;word-break:break-word}
+.card-e .rte{min-height:92px}
+.rte:focus{border-color:var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12);background:#fff}
+.rte h1{font:600 16px/1.5 var(--f);margin:0;color:var(--ink)}.rte div,.rte p{margin:0}
+.rte:empty:before{content:attr(data-ph);color:var(--ink4)}
 .addc{border:1.5px dashed #CDBDF7;background:none;border-radius:12px;padding:12px;font:700 13.5px var(--f);color:var(--violet2);cursor:pointer}
 .save{position:sticky;bottom:16px;z-index:5;display:flex;align-items:center;gap:10px;margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px -20px rgba(18,14,43,.45);padding:12px 16px}
 .save span{margin-right:auto;font:500 13.5px var(--f);color:var(--ink2)}.save .msg{color:var(--bad)}
@@ -364,9 +382,16 @@ function grid(ms,n,withText){
   return'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr';
 }
 const line=t=>{const m=String(t).match(/^([^:.]{1,28}):\s*(.*)$/);return m?`<b>${esc(m[1])}:</b> ${esc(m[2])}`:esc(t);};
+/* Formatted text: a line starting with "# " is a heading; <b>, <i> and <u> are kept, everything else is shown as typed; an empty line is a gap of one line */
+const FMT=/<\/?(b|i|u)>/;
+const inl=t=>esc(t).replace(/&lt;(\/?)(b|i|u)&gt;/g,'<$1$2>');
+const rich=ls=>(ls||[]).map(l=>{l=String(l);
+  if(!l.trim())return'<li class="sp"></li>';
+  if(l.startsWith('# '))return`<li class="h1">${inl(l.slice(2))}</li>`;
+  return`<li>${FMT.test(l)?inl(l):line(l)}</li>`;}).join('');
 function cardHtml(c){
   const of=+c.of||0,done=+c.done||0,pct=of?Math.round(done/of*100):0;
-  return`<div class="u">${c.tag?`<span class="tg">${esc(c.tag)}</span>`:''}<h3>${esc(c.title||'Untitled update')}</h3><ul>${(c.lines||[]).map(l=>`<li>${line(l)}</li>`).join('')}</ul>
+  return`<div class="u">${c.tag?`<span class="tg">${esc(c.tag)}</span>`:''}<h3>${esc(c.title||'Untitled update')}</h3><ul>${rich(c.lines)}</ul>
     ${of?`<div class="meter"><div class="n">${done.toLocaleString('en-IN')}<small> / ${of.toLocaleString('en-IN')}</small></div><div class="bw"><div><span>${esc(c.unit||'')}</span><b>${pct}%</b></div><div class="tr"><i style="width:${Math.min(100,pct)}%"></i></div></div></div>`:''}</div>`;
 }
 /* One slide, 1600 × 900 */
@@ -390,7 +415,7 @@ function slideHtml(page,s,i,n,thumb){
     const shownMs=VIEW==='edit'||thumb?ms:ms.filter(Boolean);
     const big=shownMs.length===3?'grid-row:1/3;':'';
     const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
-    const tx=T[2]?`<div class="tx">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${(s.lines||[]).map(l=>`<li>${line(l)}</li>`).join('')}</ul></div>`:'';
+    const tx=T[2]?`<div class="tx">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${rich(s.lines)}</ul></div>`:'';
     body=tx+mg||`<div class="s-empty">Nothing on this slide yet.</div>`;
   }
   return`<div class="s-top"><div><div class="s-h">${esc(title)}${s.cont?'<span class="cont">(continued)</span>':''}</div><div class="s-wk">${wkSlide(WEEK)}</div></div></div>
@@ -438,6 +463,64 @@ function renderShow(){
 function paint(){if(document.body.classList.contains('fs'))presentPaint();else if(VIEW==='edit')renderEditor();else renderShow();}
 
 /* ── Edit view ── */
+/* ── The formatted text box ──
+   Kept as lines: "# " starts a heading; <b>, <i>, <u> mark bold, italics and underline; an empty line is a gap. */
+try{document.execCommand('defaultParagraphSeparator',false,'div');}catch(e){}
+function toEd(ls){const a=(ls||[]).map(l=>{l=String(l);if(!l.trim())return'<div><br></div>';
+  if(l.startsWith('# '))return`<h1>${inl(l.slice(2))||'<br>'}</h1>`;return`<div>${FMT.test(l)?inl(l):esc(l)}</div>`;});return a.join('');}
+function fromEd(root){
+  const out=[];let cur=null;
+  const flush=()=>{if(cur){out.push(cur);cur=null;}};
+  const inline=n=>{
+    if(n.nodeType===3)return n.nodeValue.replace(/\u00a0/g,' ');
+    if(n.nodeType!==1)return'';const t=n.tagName;if(t==='BR')return'';
+    let x=[...n.childNodes].map(inline).join('');if(!x)return'';
+    const st=n.style||{},b=t==='B'||t==='STRONG'||+st.fontWeight>=600||st.fontWeight==='bold',it=t==='I'||t==='EM'||st.fontStyle==='italic',u=t==='U'||/underline/.test(st.textDecoration||st.textDecorationLine||'');
+    if(u)x='<u>'+x+'</u>';if(it)x='<i>'+x+'</i>';if(b)x='<b>'+x+'</b>';return x;};
+  const block=n=>{const h=/^H[1-6]$/.test(n.tagName);
+    // a block can hold line breaks: each piece is a line
+    let parts=[''];[...n.childNodes].forEach(c=>{if(c.nodeType===1&&c.tagName==='BR')parts.push('');else if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI|UL|OL)$/.test(c.tagName)){parts.push(...blockLines(c),'');}else parts[parts.length-1]+=inline(c);});
+    if(parts.length>1&&parts[parts.length-1]==='')parts.pop();
+    return parts.map(p=>h&&p.trim()?'# '+p:p);};
+  const blockLines=n=>block(n);
+  [...root.childNodes].forEach(c=>{
+    if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI|UL|OL)$/.test(c.tagName)){flush();out.push(...block(c));}
+    else if(c.nodeType===1&&c.tagName==='BR'){if(cur==null)cur='';flush();}
+    else{cur=(cur||'')+inline(c);}});
+  flush();
+  // tidy: no formatting around nothing, joined runs, no gaps at the ends, never two gaps in a row
+  let v=out.map(l=>l.replace(/<(b|i|u)><\/\1>/g,'').replace(/<\/(b|i|u)><\1>/g,'').replace(/\s+$/,'').replace(/^\s+/,''));
+  v=v.map(l=>l==='#'?'':l);
+  while(v.length&&!v[0].trim())v.shift();while(v.length&&!v[v.length-1].trim())v.pop();
+  return v.filter((l,i)=>l.trim()||(v[i-1]||'').trim()).slice(0,30);
+}
+/* where the caret is, as characters into the box, so it can be put back after the form is drawn again */
+function caretOf(el){const sel=getSelection();if(!sel.rangeCount)return null;const r=sel.getRangeAt(0);if(!el.contains(r.endContainer))return null;
+  const pre=document.createRange();pre.selectNodeContents(el);pre.setEnd(r.endContainer,r.endOffset);return textLen(pre.cloneContents());}
+function textLen(fr){let n=0;const w=x=>{if(x.nodeType===3)n+=x.nodeValue.length;else{if(x.nodeType===1&&/^(DIV|P|H[1-6])$/.test(x.tagName)&&n>0)n+=1;x.childNodes.forEach(w);}};fr.childNodes.forEach(w);return n;}
+function setCaret(el,k){let n=0,done=false;const r=document.createRange();
+  const w=x=>{if(done)return;if(x.nodeType===3){if(n+x.nodeValue.length>=k){r.setStart(x,k-n);done=true;return;}n+=x.nodeValue.length;}
+    else{if(x.nodeType===1&&/^(DIV|P|H[1-6])$/.test(x.tagName)&&n>0&&x!==el){n+=1;if(n>k){r.setStart(x,0);done=true;return;}}x.childNodes.forEach(w);}};
+  w(el);if(!done){r.selectNodeContents(el);r.collapse(false);}else r.collapse(true);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}
+function rtState(){
+  document.querySelectorAll('.rtw').forEach(w=>{const ed=w.querySelector('.rte'),sel=getSelection(),inside=sel.rangeCount&&ed.contains(sel.anchorNode);
+    let h=false;if(inside){let n=sel.anchorNode;while(n&&n!==ed){if(n.nodeType===1&&n.tagName==='H1')h=true;n=n.parentNode;}}
+    w.querySelectorAll('[data-rt]').forEach(b=>{const k=b.dataset.rt;let on=false;
+      if(inside){if(k==='h1')on=h;else if(k==='p')on=!h;else{try{on=document.queryCommandState(k);}catch(e){}}}
+      b.classList.toggle('on',on);});});
+}
+document.addEventListener('selectionchange',rtState);
+document.getElementById('ed').addEventListener('mousedown',e=>{if(e.target.closest('[data-rt]'))e.preventDefault();});
+document.getElementById('ed').addEventListener('click',e=>{
+  const b=e.target.closest('[data-rt]');if(!b)return;e.stopPropagation();
+  const ed=b.closest('.rtw').querySelector('.rte');const sel=getSelection();
+  if(!(sel.rangeCount&&ed.contains(sel.anchorNode))){ed.focus();setCaret(ed,1e9);}
+  const k=b.dataset.rt;
+  if(k==='h1')document.execCommand('formatBlock',false,'h1');else if(k==='p')document.execCommand('formatBlock',false,'div');else document.execCommand(k);
+  rtState();ed.dispatchEvent(new Event('input',{bubbles:true}));
+},true);
+/* pasting brings in the words only, not the formatting of wherever they came from */
+document.getElementById('ed').addEventListener('paste',e=>{if(!e.target.closest('.rte'))return;e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t);});
 const TAGOPTS=v=>`<option value="">No tag</option>`+TAGS.map(t=>`<option${t===v?' selected':''}>${esc(t)}</option>`).join('');
 function startDraft(){DRAFT=JSON.parse(JSON.stringify(deckOf(SUB).slides||[]));DIRTY=false;SEL=Math.min(SEL,Math.max(0,DRAFT.length-1));}
 function renderEditor(){
@@ -461,14 +544,14 @@ function renderEditor(){
     if(s.tpl==='upd'){
       f+=`<div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="${SUB==='key'?'Key updates':'Updates'}"></label>
         ${(s.cards||[]).map((c,k)=>`<div class="card-e" data-c="${k}"><div class="row"><input class="in" data-cf="title" placeholder="Update title, e.g. Baseline audits" value="${esc(c.title)}"><select class="in" style="width:200px" data-cf="tag" aria-label="Tag">${TAGOPTS(c.tag)}</select><button class="ic del" data-a="delc" title="Remove this update">✕</button></div>
-          <label class="fl">Points <small>One per line. Start a line with a word and a colon, like "Goal:", to make that word bold.</small><textarea data-cf="lines">${esc((c.lines||[]).join('\n'))}</textarea></label>
+          <div class="fl">Points <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Goal:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" data-rt="h1" title="Heading 1">Heading 1</button><button type="button" data-rt="p" title="Normal text">Normal text</button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-cf="lines" data-ph="Goal: every teacher audited once.">${toEd(c.lines)}</div></div></div>
           <div class="row"><span class="fl">Progress</span><input class="in num" data-cf="done" inputmode="decimal" placeholder="Done" value="${c.done==null?'':c.done}"> of <input class="in num" data-cf="of" inputmode="decimal" placeholder="Out of" value="${c.of==null?'':c.of}"><input class="in" data-cf="unit" placeholder="Label, e.g. Teachers audited" value="${esc(c.unit)}"></div></div>`).join('')}
         ${(s.cards||[]).length<4?'<button type="button" class="addc" data-a="addc">+ Add an update card</button>':''}</div>`;
     }else{
       const left=`<div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="e.g. Diwali Showcase"></label>
         ${T[2]?`<label class="fl">Tag<select data-f="tag">${TAGOPTS(s.tag)}</select></label>
         <label class="fl">Text box heading <small>Optional.</small><input class="in" data-f="head" value="${esc(s.head)}" placeholder="e.g. Diwali Showcase at the centre"></label>
-        <label class="fl">Text box <small>One point per line. Start a line with a word and a colon, like "Turnout:", to make that word bold.</small><textarea data-f="lines" placeholder="Turnout: 46 learners performed.">${esc((s.lines||[]).join('\n'))}</textarea></label>`:''}</div>`;
+        <div class="fl">Text box <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Turnout:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" data-rt="h1" title="Heading 1">Heading 1</button><button type="button" data-rt="p" title="Normal text">Normal text</button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="lines" data-ph="Turnout: 46 learners performed.">${toEd(s.lines)}</div></div></div>`:''}</div>`;
       const ms=s.media||[],slots=[];
       for(let k=0;k<T[5];k++){const m=ms[k];
         if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
@@ -485,10 +568,10 @@ function renderEditor(){
   const save=DIRTY||CH()||(deckOf(SUB).carried&&DRAFT.length)?`<div class="save"><span id="save-n">${UPLOADING?'Wait for the upload to finish before saving.':DIRTY||CH()?'Changes not saved yet.':'Save to keep these slides for this month.'}</span><span class="msg" id="msg"></span>
     <button class="btn" id="discard" type="button">Discard</button><button class="btn pri" id="go" type="button"${UPLOADING||busy?' disabled':''}>${busy?'Saving…':'Save'}</button></div>`:'';
   // keep the field being typed in focused
-  const a=document.activeElement,keep=a&&ed.contains(a)?{f:a.dataset.f,cf:a.dataset.cf,c:a.closest('[data-c]')?.dataset.c,s:a.selectionStart,e:a.selectionEnd}:null;
+  const a=document.activeElement,keep=a&&ed.contains(a)?{f:a.dataset.f,cf:a.dataset.cf,c:a.closest('[data-c]')?.dataset.c,s:a.selectionStart,e:a.selectionEnd,rte:a.classList.contains('rte')?caretOf(a):null}:null;
   ed.innerHTML=rail+`<div>${main}${save}</div>`;
   spillNote();
-  if(keep&&(keep.f||keep.cf)){const q=keep.cf?`[data-c="${keep.c}"] [data-cf="${keep.cf}"]`:`[data-f="${keep.f}"]`,el=ed.querySelector(q);if(el){el.focus();try{el.setSelectionRange(keep.s,keep.e);}catch(e){}}}
+  if(keep&&(keep.f||keep.cf)){const q=keep.cf?`[data-c="${keep.c}"] [data-cf="${keep.cf}"]`:`[data-f="${keep.f}"]`,el=ed.querySelector(q);if(el){el.focus();if(el.classList.contains('rte')){if(keep.rte!=null)setCaret(el,keep.rte);}else try{el.setSelectionRange(keep.s,keep.e);}catch(e){}}}
   fit();
 }
 const cur=()=>DRAFT&&DRAFT[SEL];
@@ -499,6 +582,9 @@ function refreshCanvas(){const page=pageOf(SUB),s=cur();const el=document.getEle
   const sv=document.querySelector('.save');if(!sv)renderEditor();else document.getElementById('save-n').textContent=UPLOADING?'Wait for the upload to finish before saving.':'Changes not saved yet.';}
 document.getElementById('ed').addEventListener('input',e=>{
   const s=cur();if(!s)return;const t=e.target,v=t.value;
+  if(t.classList&&t.classList.contains('rte')){const ls=fromEd(t);
+    if(t.dataset.cf){s.cards[+t.closest('[data-c]').dataset.c].lines=ls;}else s.lines=ls;
+    touch();refreshCanvas();return;}
   if(t.dataset.f){const f=t.dataset.f;
     if(f==='lines')s.lines=v.split('\n').map(x=>x.trim()).filter(String);else if(f==='show'){s.hide=!t.checked;touch();renderEditor();return;}else s[f]=v;}
   else if(t.dataset.cf){const c=s.cards[+t.closest('[data-c]').dataset.c],f=t.dataset.cf;
