@@ -710,7 +710,7 @@ function listView(P,mine,sel){
   const tbl=o=>ltable(o.rows,o.cols,sel,o.key,o.base);
   const dueA=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
   const dSub=LSUB.due==='ft'?dueA.filter(x=>x.tab==='fs'):LSUB.due==='rr'?dueA.filter(x=>x.tab==='rn'):dueA;
-  const dC=STD(dueOc),tD=T(dSub,dC,'due',dueOc,'due'),cAll=byR(colFilter(dueA,dC,'due'),dueOc,'due');
+  const dC=STD(dueOc,LIST==='wnr'?[['Reason for discontinuing',x=>tdc(esc(x.reason)),x=>x.reason,'t']]:[]),tD=T(dSub,dC,'due',dueOc,'due'),cAll=byR(colFilter(dueA,dC,'due'),dueOc,'due');
   const sDue=row2(subT('due',[['all','All renewals due',cAll.length],['ft','First-time renewals',cAll.filter(x=>x.tab==='fs').length],['rr','Repeated renewals',cAll.filter(x=>x.tab==='rn').length]]),'due')+tbl(tD);
 
   /* Learners with at least two 1-month renewals */
