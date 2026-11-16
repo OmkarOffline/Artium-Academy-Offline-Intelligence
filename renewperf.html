@@ -234,7 +234,7 @@ table.lt th .fa{display:inline-grid;place-items:center;width:17px;height:17px;bo
 .tsub{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:5px;margin:0 0 18px;box-shadow:0 8px 20px -18px rgba(60,20,120,.5)}
 .tsub button{border:0;background:none;border-radius:10px;padding:10px 18px;font:600 14px var(--f);color:var(--ink4,#6B6774);display:flex;flex-direction:column;align-items:flex-start;cursor:pointer}
 .tsub button.on{background:#4101f7;color:#fff}.tsub button small{font:600 9.5px var(--f);letter-spacing:.1em;text-transform:uppercase;opacity:.7;margin-top:2px}.tsub button:disabled{cursor:default;opacity:.6}
-.sec[data-k=l_sum] .sb,.sec[data-k=l_lb] .sb{padding:4px 22px 22px}.sum3{display:grid;grid-template-columns:1.55fr 1fr 1fr;gap:18px}@media (max-width:1100px){.sum3{grid-template-columns:1fr}}
+.sec[data-k=l_sum] .sb,.sec[data-k=l_lb] .sb,.sec[data-k=a_sum] .sb,.sec[data-k=a_lb] .sb{padding:4px 22px 22px}.sum3{display:grid;grid-template-columns:1.55fr 1fr 1fr;gap:18px}@media (max-width:1100px){.sum3{grid-template-columns:1fr}}
 .sg{background:#FCFBFF;border:1px solid var(--edge);border-radius:20px;padding:18px 20px 20px;box-shadow:0 14px 30px -26px rgba(60,20,120,.6)}
 .sg h3{font:700 11px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--violet2);margin:0 0 3px}.sg p{font:400 12.5px var(--f);color:var(--ink4);margin:0 0 14px}
 .sc{display:grid;gap:10px}.sc.c4{grid-template-columns:repeat(4,1fr)}.sc.c2{grid-template-columns:repeat(2,1fr)}
@@ -496,6 +496,39 @@ function admK(P,sel){
   return{PP,demo:C,conv:C.filter(v=>v.conv),open:C.filter(v=>!v.conv&&!v.lost),lost:C.filter(v=>!v.conv&&v.lost),
     carry,carryConv:carry.filter(v=>v.conv&&inP(v.cd,P)),early:V.filter(v=>v.d<P.a&&v.conv&&inP(v.cd,P))};
 }
+
+/* Admissions leaderboard: the same design as the Renewals one. Admins work it out here from every teacher's visits;
+   a teacher gets the top three and their own place from the data service (ABOARD), so they never see anyone else's visitors. */
+let ABOARD=null,ABKEY='';
+function admRank(S,P){const per={};
+  VIS.forEach(v=>{if(!S.includes(v.c))return;const k=tn(v.teacher),x=per[k]=per[k]||{name:v.teacher,due:0,c:0,early:0,cs:{}};
+    if(inP(v.d,P)){x.due++;if(v.conv)x.c++;x.cs[v.c]=(x.cs[v.c]||0)+1;}else if(v.d<P.a&&v.conv&&inP(v.cd,P))x.early++;});
+  const L=Object.values(per).filter(x=>x.due>0).map(x=>({name:x.name,due:x.due,c:x.c,e:x.c+x.early,centre:Object.keys(x.cs).sort((p,q)=>x.cs[q]-x.cs[p])[0]||''}));
+  L.sort((p,q)=>q[LBY]/q.due-p[LBY]/p.due||q[LBY]-p[LBY]||p.name.localeCompare(q.name));
+  const all=L.map((x,i)=>({name:x.name,centre:x.centre,due:x.due,n:x[LBY],rank:i+1,me:tn(x.name)===tn(ME.name)}));
+  return{teachers:L.length,list:all.filter(x=>x.rank<=3||x.me)};}
+function admBoard(P){
+  const MN=mode==='month'?MONTH_FULL[P.a.getMonth()]:'this period',k=pkey(P);
+  let B=null,have=true;
+  if(ALLM){const S=LSC==='centre'?ME.centres:LSC==='city'?cityCs(ME.centres):CENTRES.map(c=>c.name);B=admRank(S,P);}
+  else{have=ABKEY===k;if(!have)fetchBoard(P);B=have&&ABOARD&&ABOARD[LSC]?ABOARD[LSC][LBY]:null;}
+  const cell=(a,b)=>`<td><div class="pv key"><b>${pc(a,b)}</b><span>${a} of ${b}</span></div><div class="bar2"><i style="width:${b?Math.round(a/b*100):0}%"></i></div></td>`;
+  const row=x=>`<tr class="${x.me?'me':''}"><td>${x.rank<=3?`<span class="emo">${['🥇','🥈','🥉'][x.rank-1]}</span>`:`<span class="rk">#${x.rank}</span>`}</td>
+    <td><div class="tw2"><span class="av2">${esc(x.name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase())}</span><div><b>${esc(x.name)}</b><small>${esc(x.centre)}</small></div></div></td>${cell(x.n,x.due)}</tr>`;
+  let body;
+  if(!have)body='<tr><td colspan="3" class="ld">Loading the leaderboard…</td></tr>';
+  else if(!B||!B.list.length)body='<tr><td colspan="3" class="ld">No trial classes in this period.</td></tr>';
+  else{const top=B.list.filter(x=>x.rank<=3),me=B.list.find(x=>x.me&&x.rank>3);
+    body=top.map(row).join('')+(me?(me.rank>4?'<tr class="gap"><td colspan="3">···</td></tr>':'')+row(me):'');}
+  const tg=(attr,cur,opts)=>opts.map(([v,l])=>`<button type="button" data-${attr}="${v}" class="${cur===v?'on':''}">${l}</button>`).join('');
+  const cen=ME.centres.length===1?ME.centres[0]:'My centre';
+  const lbl=LBY==='c'?MN+' demo conversion':'Overall demo conversion';
+  return section('a_lb','Leaderboard',`<span>${esc(P.label)}</span>`,`<div class="lbt">
+    <div class="tg2" role="group">${tg('lsc',LSC,[['centre',esc(cen)],['city',ME.city?esc(ME.city):'My city'],['all','All centres']])}</div>
+    <div class="tg2" role="group"><span class="tl">Rank by</span>${tg('lby',LBY,[['c',MN+' demo conversion'],['e','Overall demo conversion']])}</div></div>
+    <table class="ldb"><thead><tr><th>Rank</th><th>Teacher</th><th>${lbl}</th></tr></thead><tbody>${body}</tbody></table>
+    <div class="lbn">${LBY==='c'?MN+' demo conversion: joined out of the trial classes taken in '+MN+'.':'Overall demo conversion: everyone who joined in '+MN+', whenever their trial class was, out of the trial classes taken in '+MN+'.'}${B?' '+B.teachers+' teacher'+(B.teachers===1?'':'s')+' took trial classes.':''}</div>`);
+}
 function admView(P,sel){
   const K=admK(P,sel),MN=mode==='month'?MONTH_FULL[P.a.getMonth()]:'this period',LM=MONTH_FULL[K.PP.a.getMonth()];
   if(!K[ALIST])ALIST='demo';
@@ -530,7 +563,7 @@ function admView(P,sel){
   const base=K[ALIST].slice().sort((a,b)=>b.d-a.d||a.n.localeCompare(b.n)),cfd=colFilter(base,cols,'adm');
   const cv=cfd.filter(v=>ALIST==='carry'?v.conv&&inP(v.cd,P):v.conv).length;
   const kst=`<span class="kst"><span>Visitors <b>${n(cfd.length)}</b></span>${['demo','carry'].includes(ALIST)?`<span>Converted <b>${n(cv)}</b></span><span class="kp">Conversion <b>${cfd.length?Math.round(cv/cfd.length*100)+'%':'–'}</b></span>`:''}</span>`;
-  return sum+`<div class="lgrp" id="alists">Visitor lists</div>`
+  return sum+admBoard(P)+`<div class="lgrp" id="alists">Visitor lists</div>`
     +section('a_list',esc(NM[ALIST][0]),`<span>${ALIST==='carry'?esc(LM+' trial classes'):ALIST==='early'?'joined in '+esc(P.label):esc(P.label)}</span>`+kst,pick+ltable(colSort(cfd,cols,'adm'),cols,sel,'adm',base));
 }
 
@@ -613,7 +646,7 @@ function boardFor(k){
 async function fetchBoard(P){
   const k=pkey(P);if(BWAIT===k)return;BWAIT=k;
   try{const j=await ArtiumAuth.call('teacherRenewals',ALLM?{only:'board',all:true,a:iso(P.a),b:iso(P.b)}:{only:'board',a:iso(P.a),b:iso(P.b),as:AS});if(BWAIT!==k)return;
-    if(ALLM)BOARDS[k]=j.boards;else{BOARD=j.board;BKEY=k;}}catch(e){if(ALLM)BOARDS[k]={};else{BOARD=null;BKEY=k;}}
+    if(ALLM)BOARDS[k]=j.boards;else{BOARD=j.board;BKEY=k;ABOARD=j.aboard||null;ABKEY=k;}}catch(e){if(ALLM)BOARDS[k]={};else{BOARD=null;BKEY=k;ABOARD=null;ABKEY=k;}}
   BWAIT='';render();
 }
 function board(P){
@@ -1044,7 +1077,7 @@ async function load(){
   try{
     const P=period(),j=await ArtiumAuth.call('teacherRenewals',{a:iso(P.a),b:iso(P.b),as:AS,all:true});
     if(j.all){ALLM=true;TEACH=j.teachers||[];BOARDS={};BOARDS[pkey(P)]=j.boards||{};ME=TEACH.find(x=>tn(x.name)===tn(AS))||TEACH[0]||ME;j.teachers=TEACH.map(x=>x.name);}
-    else{ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);}
+    else{ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);ABOARD=j.aboard||null;ABKEY=pkey(P);}
     VIS=(j.visits||[]).map(v=>Object.assign({},v,{d:fromIso(v.d),cd:fromIso(v.cd)})).filter(v=>v.d);
     DATA={};CENTRES.forEach(c=>{const d=(j.data||{})[c.name]||{};DATA[c.name]={fs:(d['Fresh Sales']||[]).map(r=>r.map(v=>String(v).trim())),rn:(d['Renewals']||[]).map(r=>r.map(v=>String(v).trim()))};});
     paintCentres();
