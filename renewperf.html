@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Renewal Performance</title>
+<title>My Performance</title>
 <link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
 <link rel="apple-touch-icon" href="brand/emblem-180.png">
@@ -263,7 +263,7 @@ table.ldb td:first-child{border-left:1px solid var(--edge);border-radius:14px 0 
 tr.me td{background:#F1EBFF;border-color:#C9B5FA}tr.me .tw2 b::after{content:'You';margin-left:8px;font:700 10px var(--f);letter-spacing:.08em;text-transform:uppercase;background:var(--violet2);color:#fff;border-radius:6px;padding:3px 7px;vertical-align:2px}
 tr.gap td,tr.gap td:first-child,tr.gap td:last-child{background:none;border:0;padding:0 18px;color:var(--ink4);font-size:18px;line-height:1;letter-spacing:.3em}
 .lbn{font:400 12.5px var(--f);color:var(--ink4);margin-top:6px}
-.asw{display:flex;align-items:center;gap:8px;font:600 12px var(--f);color:#D8CEFF;margin-bottom:10px}.asw select{font:600 13px var(--f);border-radius:10px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;padding:7px 10px}.asw select option{color:#120e2b}
+.asw{display:flex;align-items:center;gap:8px;font:600 12px var(--f);color:#D8CEFF;margin-bottom:12px;flex-wrap:wrap;justify-content:flex-end}.asw .asl{font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:#CFC2FF;margin-right:4px}.asw .ap{display:flex;flex-direction:column;gap:3px}.asw .ap small{font:600 10px var(--f);letter-spacing:.08em;text-transform:uppercase;color:#B9A9F5;padding-left:2px}.asw .ap select{min-width:130px}.asw .tch select{min-width:190px;font-weight:700;background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.55)}.asw select{font:600 13px var(--f);border-radius:10px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;padding:7px 10px}.asw select option{color:#120e2b}
 .ldb .ld{padding:22px;text-align:center;color:var(--ink4)}
 /* Clickable summary cards: a soft 👀 says "see these learners"; the card whose list is open below has a ring */
 button.m{all:unset;box-sizing:border-box}
@@ -323,8 +323,8 @@ table.mtab tr.cu td.mt{color:var(--violet2);font-weight:700}
 </style>
 </head>
 <body>
-<div class="hero"><div class="hin"><div><h1>Renewal Performance</h1><div class="sub" id="psub"></div></div>
-<div class="hr"><label class="asw" id="asw" hidden>Viewing as<select id="as"></select></label><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+<div class="hero"><div class="hin"><div><h1>My Performance</h1><div class="sub" id="psub"></div></div>
+<div class="hr"><div class="asw" id="asw" hidden><span class="asl">Viewing as</span><label class="ap"><small>Centre</small><select id="asc"></select></label><label class="ap"><small>Course</small><select id="asco"></select></label><label class="ap tch"><small>Teacher</small><select id="as"></select></label></div><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
 <div class="vt" id="vt" style="display:none" role="group" aria-label="View"><button type="button" data-v="glance" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Glance</button><button type="button" data-v="list" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button></div></div></div></div>
 <div class="page">
 <nav class="tsub" aria-label="Sections" id="tsub"><button type="button" data-sp="ren">Renewals</button><button type="button" data-sp="mal">Monthly Active Learners</button><button disabled>Admissions<small>Coming soon</small></button></nav>
@@ -524,7 +524,7 @@ function malView(sel){
   const strip=`<div class="kpis">${meter('Monthly Active Learners today',n(cur.H),'learners',T_MAL,cur.H/T_MAL*100,gap>0?gap+' more to reach the target':'Target reached')}
     ${meter('Capacity utilisation today',Math.round(cur.L)+'%','of '+CAP+' learners',T_UTIL+'%',cur.L/T_UTIL*100,cur.L>=T_UTIL?'Target reached':Math.round(T_UTIL-cur.L)+' points to go')}</div>`;
   const ROWSM=[['A','Opening balance'],['B','New admissions','add','Add'],['C','Total','sum'],0,['D','Due for renewal – First-time renewals'],['E','Due for renewal – Repeated renewals'],['F','Total due for renewals','sum less','Less'],0,
-    ['G','Actually renewed in the month','add','Add'],['H','Monthly Active Learners','malr'],['I','Net gain / loss','sg'],['J','Win-back / Churn','sg'],0,['K','Total capacity'],['L','Capacity utilisation %','cu']];
+    ['G','Actually renewed in the month','add','Add'],['H','Monthly Active Learners','malr'],['I','Net gain / loss','sg'],['J','Win-back / Churn','sg']].concat(MBY==='all'?[0,['K','Total capacity'],['L','Capacity utilisation %','cu']]:[]);   // capacity is per teacher, so it is left out for a single group
   const yrs=[];M.forEach(k=>{const y=Math.floor(k/12);if(!yrs.length||yrs[yrs.length-1].y!==y)yrs.push({y,n:0});yrs[yrs.length-1].n++;});
   const head=`<thead><tr class="yr"><th class="mt" rowspan="2">Particulars</th>${yrs.map(y=>`<th colspan="${y.n}">${y.y}</th>`).join('')}</tr>
     <tr class="mo">${M.map(k=>`<th class="${k===last?'now':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===last?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
@@ -957,6 +957,21 @@ function paintCentres(){
   document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_tr_centre',selCentre);}catch(e){}render();});
 }
 document.querySelectorAll('#tsub [data-sp]').forEach(b=>b.onclick=()=>{SP=b.dataset.sp;try{localStorage.setItem('artium_tr_sp',SP);}catch(e){}render();});
+/* Admins: narrow the teacher list by centre and course; only the teacher matters, the other two are optional */
+let PC=(()=>{try{return localStorage.getItem('artium_tr_pc')||'';}catch(e){return'';}})(),PCO=(()=>{try{return localStorage.getItem('artium_tr_pco')||'';}catch(e){return'';}})();
+function paintPicker(){
+  const inC=t=>!PC||t.centres.includes(PC),cs=TEACH.filter(inC);
+  const courses=[...new Set(cs.map(t=>t.course).filter(Boolean))].sort();if(PCO&&!courses.includes(PCO))PCO='';
+  const L=cs.filter(t=>!PCO||t.course===PCO),cur=L.filter(t=>t.onTeam),past=L.filter(t=>!t.onTeam);
+  if(!L.some(t=>tn(t.name)===tn(ME.name))&&L.length){ME=L[0];AS=ME.name;paintCentres();}
+  const o=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+  document.getElementById('asc').innerHTML=o('','All centres',!PC)+CENTRES.map(c=>o(c.name,c.name,PC===c.name)).join('');
+  document.getElementById('asco').innerHTML=o('','All courses',!PCO)+courses.map(c=>o(c,c,PCO===c)).join('');
+  document.getElementById('as').innerHTML=cur.map(t=>o(t.name,t.name,tn(t.name)===tn(ME.name))).join('')
+    +(past.length?`<optgroup label="Not on the Offline Team tab">${past.map(t=>o(t.name,t.name,tn(t.name)===tn(ME.name))).join('')}</optgroup>`:'')||o('','No teachers',1);
+}
+document.getElementById('asc').onchange=e=>{PC=e.target.value;try{localStorage.setItem('artium_tr_pc',PC);}catch(x){}paintPicker();render();};
+document.getElementById('asco').onchange=e=>{PCO=e.target.value;try{localStorage.setItem('artium_tr_pco',PCO);}catch(x){}paintPicker();render();};
 document.getElementById('as').onchange=e=>{AS=e.target.value;try{localStorage.setItem('artium_tr_as',AS);}catch(x){}
   if(ALLM){const t=TEACH.find(x=>tn(x.name)===tn(AS));if(t){ME=t;paintCentres();render();}return;}
   DUE=null;BOARD=null;BKEY='';load();};
@@ -973,9 +988,10 @@ async function load(){
     if(j.all){ALLM=true;TEACH=j.teachers||[];BOARDS={};BOARDS[pkey(P)]=j.boards||{};ME=TEACH.find(x=>tn(x.name)===tn(AS))||TEACH[0]||ME;j.teachers=TEACH.map(x=>x.name);}
     else{ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);}
     DATA={};CENTRES.forEach(c=>{const d=(j.data||{})[c.name]||{};DATA[c.name]={fs:(d['Fresh Sales']||[]).map(r=>r.map(v=>String(v).trim())),rn:(d['Renewals']||[]).map(r=>r.map(v=>String(v).trim()))};});
-    if(j.canPick){const sel=document.getElementById('as');document.getElementById('asw').hidden=false;
-      sel.innerHTML=(j.teachers||[]).map(t=>`<option${tn(t)===tn(ME.name)?' selected':''}>${esc(t)}</option>`).join('');}
     paintCentres();
+    if(j.canPick){document.getElementById('asw').hidden=false;
+      if(ALLM)paintPicker();
+      else{document.querySelectorAll('#asw .ap:not(.tch)').forEach(x=>x.hidden=true);document.getElementById('as').innerHTML=(j.teachers||[]).map(t=>`<option${tn(t)===tn(ME.name)?' selected':''}>${esc(t)}</option>`).join('');}}
     ITEMS=build();DUE=buildDue();
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
