@@ -320,6 +320,8 @@ table.mtab tr.cu td.mt{color:var(--violet2);font-weight:700}
 .mv:hover{border-color:#B9A3F7;color:var(--violet2)}.mv.on{background:var(--violet2);border-color:var(--violet2);color:#fff}.mv.on i{background:rgba(255,255,255,.22);color:#fff}
 .mvn{font:400 12px var(--f);color:var(--ink4);margin-left:6px}
 .sh b .slice,.slice{display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:var(--violet2);color:#fff;font:700 13px var(--f);vertical-align:3px;opacity:1}
+.sc.c5{grid-template-columns:repeat(5,1fr)}.sc.c3{grid-template-columns:repeat(3,1fr)}.sc.c1{grid-template-columns:1fr}
+.sub2{display:block;font-size:12px;color:var(--ink4);margin-top:3px;font-weight:400}
 </style>
 </head>
 <body>
@@ -327,7 +329,7 @@ table.mtab tr.cu td.mt{color:var(--violet2);font-weight:700}
 <div class="hr"><div class="asw" id="asw" hidden><span class="asl">Viewing as</span><label class="ap"><small>Centre</small><select id="asc"></select></label><label class="ap"><small>Course</small><select id="asco"></select></label><label class="ap tch"><small>Teacher</small><select id="as"></select></label></div><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
 <div class="vt" id="vt" style="display:none" role="group" aria-label="View"><button type="button" data-v="glance" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Glance</button><button type="button" data-v="list" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button></div></div></div></div>
 <div class="page">
-<nav class="tsub" aria-label="Sections" id="tsub"><button type="button" data-sp="ren">Renewals</button><button type="button" data-sp="mal">Monthly Active Learners</button><button disabled>Admissions<small>Coming soon</small></button></nav>
+<nav class="tsub" aria-label="Sections" id="tsub"><button type="button" data-sp="ren">Renewals</button><button type="button" data-sp="mal">Monthly Active Learners</button><button type="button" data-sp="adm">Admissions</button></nav>
 <div class="bar"><nav class="seg" id="centre-toggle" aria-label="Centre" style="display:none"></nav>
 <div class="per" id="perbox"><div class="t" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
 <div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="m" id="prev" aria-label="Previous month">‹</button><div class="l" id="mlabel">—</div><button class="m" id="next" aria-label="Next month">›</button></div>
@@ -355,6 +357,7 @@ const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+Stri
 const fromIso=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
 const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
 const days=(a,b)=>Math.round((b-a)/864e5);
+const pl=(k,w)=>k+' '+w+(k===1?'':'s');
 const valid=d=>d&&d.getFullYear()>=2020?d:null;
 let DATA={},ITEMS=null,GAPS=[],ALL=[],TARGETS={};   // TARGETS['2026-10']['Alwarpet']={renewed, rncol, …} from the Targets page   // ALL: every membership row, for the renewal totals
 
@@ -479,6 +482,58 @@ function learnerList(list,ext){
 }
 
 /* ── The page ── */
+/* ── Admissions (sub page): the trial classes (demos) a teacher took, and who joined ──
+   VIS: every centre visit with this teacher as the demo teacher, sent by the data service without phone numbers or amounts:
+   {c: centre, d: visit date, n: visitor, age, course, vt: visit type, src: lead source, st: visit status, note, conv: joined, cd: date joined, lost: not joining}.
+   A visitor counts as joined when a Fresh Sales admission matches the visit (the same matching as the Admissions Pipeline). */
+let VIS=[];
+let ALIST=(()=>{try{return localStorage.getItem('artium_tr_alist')||'demo';}catch(e){return'demo';}})();
+function admK(P,sel){
+  const V=VIS.filter(v=>tn(v.teacher)===tn(ME.name)&&(!sel||v.c===sel.name));
+  const PP={a:new Date(P.a.getFullYear(),P.a.getMonth()-1,1),b:new Date(P.a.getFullYear(),P.a.getMonth(),0)};
+  const C=V.filter(v=>inP(v.d,P)),L=V.filter(v=>inP(v.d,PP));
+  const carry=L.filter(v=>!v.lost&&!(v.conv&&v.cd&&v.cd<P.a));   // last month's visitors still open on its last day
+  return{PP,demo:C,conv:C.filter(v=>v.conv),open:C.filter(v=>!v.conv&&!v.lost),lost:C.filter(v=>!v.conv&&v.lost),
+    carry,carryConv:carry.filter(v=>v.conv&&inP(v.cd,P)),early:V.filter(v=>v.d<P.a&&v.conv&&inP(v.cd,P))};
+}
+function admView(P,sel){
+  const K=admK(P,sel),MN=mode==='month'?MONTH_FULL[P.a.getMonth()]:'this period',LM=MONTH_FULL[K.PP.a.getMonth()];
+  if(!K[ALIST])ALIST='demo';
+  const card=(t,v,cls,lk,extra='')=>lk?`<button type="button" class="m clk ${cls||''}${ALIST===lk?' cur':''}" data-alist="${lk}" title="See these visitors"><span class="eye" aria-hidden="true">👀</span><div class="t">${t}</div><div class="v">${v}</div>${extra}</button>`
+    :`<div class="m ${cls||''}"><div class="t">${t}</div><div class="v">${v}</div>${extra}</div>`;
+  const rr=(a,b,w)=>`<div class="rb"><div class="rt"><span>${n(b)} ${w}</span><b>${pc(b,a)}</b></div><div class="tr"><i style="width:${a?Math.round(b/a*100):0}%"></i></div></div>`;
+  const tot=K.conv.length+K.early.length;
+  const sum=section('a_sum','Summary',`<span>${esc(P.label)}</span>`,`<div class="sum3">
+   <div class="sg"><h3>${MN} trial classes</h3><p>Centre visits in ${MN} where you took the trial class.</p>
+    <div class="sc c3">${card('Trial classes taken',n(K.demo.length),'hero','demo')}${card('Converted',n(K.conv.length),'ok','conv')}${card('Demo conversion %',pc(K.conv.length,K.demo.length),'ok')}
+    ${card('Yet to convert',n(K.open.length),'','open')}${card('Not joining',n(K.lost.length),'bad','lost')}</div></div>
+   <div class="sg"><h3>Carried over from ${LM}</h3><p>Trial classes in ${LM} still not converted on ${K.PP.b.getDate()} ${LM}.</p>
+    <div class="sc c1">${card('Yet to convert from '+LM,n(K.carry.length),'','carry',rr(K.carry.length,K.carryConv.length,'converted in '+MN))}</div></div>
+   <div class="sg"><h3>Converted in ${MN}</h3><p>Everyone who joined this month after your trial class, whenever it was.</p>
+    <div class="sc c2">${card('From the '+MN+' trial classes',n(K.conv.length))}${card('From earlier months',n(K.early.length),'','early')}${card('Total conversions',n(tot),'hero')}${card('Overall demo conversion %',pc(tot,K.demo.length),'ok')}</div></div>
+  </div>`);
+  // the list
+  const NM={demo:['Trial classes taken','All trial classes'],conv:['Converted','Converted'],open:['Yet to convert','Yet to convert'],lost:['Not joining','Not joining'],
+    carry:['Yet to convert from '+LM,'Yet to convert from '+LM.slice(0,3)],early:['Converted from earlier months','Converted from earlier']};
+  const chip=k=>`<button type="button" class="lc${ALIST===k?' on':''}" data-alist="${k}">${esc(NM[k][1])}<i>${K[k].length}</i></button>`;
+  const pick=`<div class="lpick"><div class="lg"><span class="lgl">${MN} trial classes</span><div class="lgb">${['demo','conv','open','lost'].map(chip).join('')}</div></div>
+    <div class="lg"><span class="lgl">From earlier months</span><div class="lgb">${['carry','early'].map(chip).join('')}</div></div></div>`;
+  const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
+  const res=v=>v.conv?'Converted':v.lost?'Not joining':'Yet to convert';
+  const cols=[['Visitor',v=>`<td class="who"><b>${esc(v.n)||'—'}</b><small>${esc(v.age)}${sel?'':' · '+esc(v.c)}</small></td>`,v=>v.n,'t'],
+    ['Visited',v=>tdc(fmtD(v.d)+(v.vt?`<small class="sub2">${esc(v.vt)}</small>`:'')),v=>v.d,'d'],['Course',v=>tdc(esc(v.course)),v=>v.course,'t'],
+    ['Lead source',v=>tdc(esc(v.src)),v=>v.src,'t'],
+    ['Result',v=>`<td>${pill(res(v),v.conv?'ok':v.lost?'rd':'gy')}${v.conv&&v.cd?`<small class="sub2">Joined ${fmtD(v.cd)}</small>`:''}</td>`,res,'t'],
+    ['Days',v=>tdc(v.conv&&v.cd?(days(v.d,v.cd)===0?'Joined the same day':'Joined in '+pl(days(v.d,v.cd),'day')):pl(days(v.d,TODAY),'day')+' since the visit'),v=>v.conv&&v.cd?days(v.d,v.cd):days(v.d,TODAY),'n'],
+    ['Visit status',v=>tdc(esc(v.st)),v=>v.st,'t'],
+    ['Notes',v=>`<td class="ds">${esc(v.note)||'<span class="mut">—</span>'}</td>`,v=>v.note,'t']];
+  const base=K[ALIST].slice().sort((a,b)=>b.d-a.d||a.n.localeCompare(b.n)),cfd=colFilter(base,cols,'adm');
+  const cv=cfd.filter(v=>ALIST==='carry'?v.conv&&inP(v.cd,P):v.conv).length;
+  const kst=`<span class="kst"><span>Visitors <b>${n(cfd.length)}</b></span>${['demo','carry'].includes(ALIST)?`<span>Converted <b>${n(cv)}</b></span><span class="kp">Conversion <b>${cfd.length?Math.round(cv/cfd.length*100)+'%':'–'}</b></span>`:''}</span>`;
+  return sum+`<div class="lgrp" id="alists">Visitor lists</div>`
+    +section('a_list',esc(NM[ALIST][0]),`<span>${ALIST==='carry'?esc(LM+' trial classes'):ALIST==='early'?'joined in '+esc(P.label):esc(P.label)}</span>`+kst,pick+ltable(colSort(cfd,cols,'adm'),cols,sel,'adm',base));
+}
+
 /* ── Monthly Active Learners (sub page): the same month-by-month table as the Monthly Active Learners page, for one teacher ──
    Learners are the teacher's own (Teacher Name column), across both courses for South and North Vocals teachers.
    Capacity is 90 learners per teacher; the targets are 63 Monthly Active Learners (70% of 90). */
@@ -644,6 +699,7 @@ function render(){
   document.querySelectorAll('#tsub [data-sp]').forEach(b=>b.classList.toggle('on',b.dataset.sp===SP));
   document.getElementById('perbox').style.visibility=SP==='mal'?'hidden':'';
   if(SP==='mal'){out.innerHTML=malView(sel);bindList(out);return;}
+  if(SP==='adm'){out.innerHTML=admView(P,sel);bindList(out);return;}
   if(view==='list'){out.innerHTML=listView(P,mine,sel);bindList(out);return;}
 
   /* At a glance (as on Monthly Performance Analysis): due = memberships whose package expires in the period;
@@ -935,6 +991,8 @@ function bindList(out){
     FOLD.l_due=false;render();if(fromCard){const t=document.getElementById('lists');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}});
   out.querySelectorAll('[data-mby]').forEach(b=>b.onclick=()=>{MBY=b.dataset.mby;try{localStorage.setItem('artium_tr_mby',MBY);}catch(e){}render();});
   out.querySelectorAll('[data-mval]').forEach(b=>b.onclick=()=>{MVAL[MBY]=b.dataset.mval;render();});
+  out.querySelectorAll('[data-alist]').forEach(b=>b.onclick=()=>{const fromCard=b.classList.contains('clk');ALIST=b.dataset.alist;try{localStorage.setItem('artium_tr_alist',ALIST);}catch(e){}
+    FOLD.a_list=false;render();if(fromCard){const t=document.getElementById('alists');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}});
   out.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{LSHOW[b.dataset.more]=!LSHOW[b.dataset.more];render();});
   const setF=(k,f)=>{FL[k]=Object.assign(fl(k),f);try{localStorage.setItem('artium_tr_lf',JSON.stringify(FL));}catch(e){}render();};
   out.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>setF(b.dataset.lk,{pkg:b.dataset.pkg}));
@@ -987,6 +1045,7 @@ async function load(){
     const P=period(),j=await ArtiumAuth.call('teacherRenewals',{a:iso(P.a),b:iso(P.b),as:AS,all:true});
     if(j.all){ALLM=true;TEACH=j.teachers||[];BOARDS={};BOARDS[pkey(P)]=j.boards||{};ME=TEACH.find(x=>tn(x.name)===tn(AS))||TEACH[0]||ME;j.teachers=TEACH.map(x=>x.name);}
     else{ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);}
+    VIS=(j.visits||[]).map(v=>Object.assign({},v,{d:fromIso(v.d),cd:fromIso(v.cd)})).filter(v=>v.d);
     DATA={};CENTRES.forEach(c=>{const d=(j.data||{})[c.name]||{};DATA[c.name]={fs:(d['Fresh Sales']||[]).map(r=>r.map(v=>String(v).trim())),rn:(d['Renewals']||[]).map(r=>r.map(v=>String(v).trim()))};});
     paintCentres();
     if(j.canPick){document.getElementById('asw').hidden=false;
