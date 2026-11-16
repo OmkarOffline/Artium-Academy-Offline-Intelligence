@@ -265,6 +265,61 @@ tr.gap td,tr.gap td:first-child,tr.gap td:last-child{background:none;border:0;pa
 .lbn{font:400 12.5px var(--f);color:var(--ink4);margin-top:6px}
 .asw{display:flex;align-items:center;gap:8px;font:600 12px var(--f);color:#D8CEFF;margin-bottom:10px}.asw select{font:600 13px var(--f);border-radius:10px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;padding:7px 10px}.asw select option{color:#120e2b}
 .ldb .ld{padding:22px;text-align:center;color:var(--ink4)}
+/* Clickable summary cards: a soft 👀 says "see these learners"; the card whose list is open below has a ring */
+button.m{all:unset;box-sizing:border-box}
+.m.clk{position:relative;cursor:pointer;transition:transform .15s,box-shadow .15s;border:1.5px solid transparent;border-radius:14px;padding:12px 14px;min-height:84px;display:flex;flex-direction:column;font-family:var(--f)}
+.m.clk:not(.hero):not(.ok):not(.bad){background:#F7F4FE}.m.clk.sub{background:none;border:1px dashed var(--line)}
+.m.clk:hover{transform:translateY(-2px);box-shadow:0 12px 22px -16px rgba(65,1,247,.55)}.m.clk:focus-visible{outline:2px solid var(--violet2);outline-offset:2px}
+.m.clk .eye{position:absolute;top:9px;right:10px;font:14px/1 'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;opacity:.55;transition:opacity .15s,transform .15s}
+.m.clk:hover .eye{opacity:1;transform:scale(1.15)}.m.clk .t{padding-right:16px}
+.m.clk.cur{border:1.5px solid var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12)}.m.clk.hero.cur{border-color:#fff;box-shadow:0 0 0 3px rgba(65,1,247,.35)}
+/* The list picker above the table: two quiet groups of chips, the open list filled */
+.lpick{display:flex;gap:28px;flex-wrap:wrap;padding:6px 22px 16px;border-bottom:1px solid var(--edge)}
+.lg{display:flex;flex-direction:column;gap:8px}.lgl{font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4)}
+.lgb{display:flex;flex-wrap:wrap;gap:6px}
+.lc{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 8px 7px 14px;font:600 13px var(--f);color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s}
+.lc i{font-style:normal;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#F1ECFD;color:var(--violet2);font:700 11.5px var(--f);display:inline-flex;align-items:center;justify-content:center}
+.lc:hover{border-color:#B9A3F7;color:var(--violet2)}.lc.on{background:var(--violet2);border-color:var(--violet2);color:#fff}.lc.on i{background:rgba(255,255,255,.22);color:#fff}
+/* Monthly Active Learners: two slim target meters, then the month-by-month table */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}@media (max-width:800px){.kpis{grid-template-columns:1fr}}
+.kpi{background:#fff;border:1px solid var(--edge);border-radius:20px;padding:18px 22px;box-shadow:0 14px 30px -26px rgba(60,20,120,.6)}
+.kl{font:700 11px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--violet2)}
+.kv{font:800 34px/1.1 var(--f);color:var(--ink);margin-top:6px;letter-spacing:-.02em}.kv small{font:500 13px var(--f);color:var(--ink4);margin-left:8px;letter-spacing:0}
+.kt{display:flex;justify-content:space-between;font:500 12.5px var(--f);color:var(--ink3);margin-top:8px}.kt b{color:var(--ink);font-weight:700}.kn{color:var(--ink4)}
+.kb{height:8px;border-radius:9px;background:#EDE7FB;margin-top:8px;overflow:hidden}.kb i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#6601FD,#4101F7)}
+.mtw{overflow-x:auto;padding:0 0 4px}
+table.mtab{width:100%;border-collapse:collapse;font:500 14px var(--f);color:var(--ink2)}
+table.mtab th{font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);text-align:right;padding:10px 20px;white-space:nowrap;background:#FBFAFE}
+table.mtab tr.yr th{padding-top:16px;padding-bottom:2px;color:var(--violet2);text-align:left;font-size:10px}
+table.mtab tr.mo th{border-bottom:1px solid var(--edge);padding-bottom:12px}
+table.mtab th.now{color:var(--violet2)}table.mtab th small{display:block;font:500 10.5px var(--f);letter-spacing:0;text-transform:none;color:var(--ink4);margin-top:2px}
+table.mtab th.mt,table.mtab td.mt{text-align:left;position:sticky;left:0;z-index:1;min-width:330px}
+table.mtab th.mt{background:#FBFAFE;vertical-align:bottom;padding-bottom:12px}
+table.mtab td{text-align:right;padding:13px 20px;border-bottom:1px solid #F1EDF9;white-space:nowrap;font-variant-numeric:tabular-nums}
+table.mtab td.mt{background:#fff;color:var(--ink);font-weight:500}
+.op{display:inline-block;width:46px;font:700 10px var(--f);letter-spacing:.1em;text-transform:uppercase}.op.a{color:var(--ok)}.op.l{color:var(--bad)}
+table.mtab tr.add td:not(.mt){color:var(--ok)}table.mtab tr.sum td{background:#FBFAFE;font-weight:700;color:var(--ink)}table.mtab tr.sum td.mt{background:#FBFAFE}
+table.mtab tr.less td:not(.mt){color:var(--bad)}
+table.mtab tr.malr td{background:linear-gradient(90deg,#F1EBFF,#EFE7FF);font-weight:800;color:var(--violet2);font-size:15px;border-top:1px solid #D9C9F7;border-bottom:1px solid #D9C9F7}
+table.mtab tr.malr td.mt{background:#F1EBFF}
+table.mtab td.z,table.mtab tr td.z:not(.mt){color:#B9B3CC;font-weight:500}table.mtab td.p{color:var(--ok);font-weight:700}table.mtab td.ng{color:var(--bad);font-weight:700}
+table.mtab tr.gap td{padding:5px;background:#FBFAFE;border-bottom:1px solid #F1EDF9}
+.ut{display:inline-block;min-width:54px;text-align:center;border-radius:999px;padding:4px 10px;font:700 12.5px var(--f)}
+.ut.lo{background:#FBEDEB;color:var(--bad)}.ut.mid{background:#FBF1DC;color:#9A6200}.ut.hi{background:var(--okbg);color:var(--ok)}.ut.top{background:#E6EEFF;color:#1E4FD8}
+table.mtab tr.cu td.mt{color:var(--violet2);font-weight:700}
+.mdefs{margin:14px 22px 20px}.mdefs summary{cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font:600 12.5px var(--f);color:var(--ink2);list-style:none}
+.mdefs summary::-webkit-details-marker{display:none}.mdefs .i{width:18px;height:18px;border-radius:50%;background:var(--violet2);color:#fff;font:700 11px var(--f);display:inline-flex;align-items:center;justify-content:center}
+.mdefs div{margin-top:12px;font:400 13px/1.6 var(--f);color:var(--ink3);max-width:900px}.mdefs p{margin:0 0 6px}.mdefs b{color:var(--ink)}
+.mby{padding:4px 22px 18px;border-bottom:1px solid var(--edge);display:flex;flex-direction:column;gap:12px}
+.seg2{display:inline-flex;align-self:flex-start;background:#F3EFFC;border-radius:12px;padding:4px;gap:2px;align-items:center}
+.seg2 .sl{font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);padding:0 8px 0 10px}
+.seg2 button{border:0;background:none;border-radius:9px;padding:8px 14px;font:600 13px var(--f);color:var(--ink3);cursor:pointer}.seg2 button.on{background:#fff;color:var(--violet2);box-shadow:0 2px 8px -4px rgba(60,20,120,.4)}
+.mvals{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding-left:2px;position:relative}
+.mv{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 8px 7px 14px;font:600 13px var(--f);color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.mv i{font-style:normal;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#F1ECFD;color:var(--violet2);font:700 11.5px var(--f);display:inline-flex;align-items:center;justify-content:center}
+.mv:hover{border-color:#B9A3F7;color:var(--violet2)}.mv.on{background:var(--violet2);border-color:var(--violet2);color:#fff}.mv.on i{background:rgba(255,255,255,.22);color:#fff}
+.mvn{font:400 12px var(--f);color:var(--ink4);margin-left:6px}
+.sh b .slice,.slice{display:inline-block;margin-left:10px;padding:4px 12px;border-radius:999px;background:var(--violet2);color:#fff;font:700 13px var(--f);vertical-align:3px;opacity:1}
 </style>
 </head>
 <body>
@@ -272,9 +327,9 @@ tr.gap td,tr.gap td:first-child,tr.gap td:last-child{background:none;border:0;pa
 <div class="hr"><label class="asw" id="asw" hidden>Viewing as<select id="as"></select></label><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
 <div class="vt" id="vt" style="display:none" role="group" aria-label="View"><button type="button" data-v="glance" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Glance</button><button type="button" data-v="list" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button></div></div></div></div>
 <div class="page">
-<nav class="tsub" aria-label="Sections"><button class="on">Renewals</button><button disabled>Admissions<small>Coming soon</small></button></nav>
+<nav class="tsub" aria-label="Sections" id="tsub"><button type="button" data-sp="ren">Renewals</button><button type="button" data-sp="mal">Monthly Active Learners</button><button disabled>Admissions<small>Coming soon</small></button></nav>
 <div class="bar"><nav class="seg" id="centre-toggle" aria-label="Centre" style="display:none"></nav>
-<div class="per"><div class="t" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
+<div class="per" id="perbox"><div class="t" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
 <div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="m" id="prev" aria-label="Previous month">‹</button><div class="l" id="mlabel">—</div><button class="m" id="next" aria-label="Next month">›</button></div>
 <div id="prange" class="range" hidden><input type="date" id="from" aria-label="From"><span>to</span><input type="date" id="to" aria-label="To"></div></div></div>
 <div id="out"></div>
@@ -424,25 +479,98 @@ function learnerList(list,ext){
 }
 
 /* ── The page ── */
+/* ── Monthly Active Learners (sub page): the same month-by-month table as the Monthly Active Learners page, for one teacher ──
+   Learners are the teacher's own (Teacher Name column), across both courses for South and North Vocals teachers.
+   Capacity is 90 learners per teacher; the targets are 63 Monthly Active Learners (70% of 90). */
+let SP=(()=>{try{return localStorage.getItem('artium_tr_sp')||'ren';}catch(e){return'ren';}})();
+const CAP=90,T_MAL=63,T_UTIL=70;
+const mi=d=>d.getFullYear()*12+d.getMonth();
+/* View by: everything, or one age group, course level or gender at a time */
+let MBY=(()=>{try{return localStorage.getItem('artium_tr_mby')||'all';}catch(e){return'all';}})(),MVAL={};
+const MDIM={age:[6,'Age group'],level:[9,'Course level'],gender:[5,'Gender']};
+const LV_ORDER=['preparatory','beginner','intermediate','proficient','advanced'];
+function malBuild(sel,only){
+  const c={},bump=(k,f)=>{(c[k]=c[k]||{adm:0,dueFT:0,dueRP:0,ren:0})[f]++;};
+  const nk=v=>String(v||'').replace(/\s+/g,' ').trim().toLowerCase(),mineR=(r,cn)=>tn(r[29])===tn(ME.name)&&(!sel||cn===sel.name)&&(!only||nk(r[only[0]])===nk(only[1]));
+  const end=r=>{const t=valid(parseDate(r[23]));return t&&t<=TODAY?t:null;};
+  let first=mi(TODAY);
+  CENTRES.forEach(C=>{const d=DATA[C.name];if(!d)return;
+    d.fs.filter(r=>mineR(r,C.name)).forEach(r=>{const t=valid(parseDate(r[0]));if(t){bump(mi(t),'adm');first=Math.min(first,mi(t));}const e=end(r);if(e)bump(mi(e),'dueFT');});
+    d.rn.filter(r=>mineR(r,C.name)).forEach(r=>{const t=valid(parseDate(r[0]));if(t){bump(mi(t),'ren');first=Math.min(first,mi(t));}const e=end(r);if(e)bump(mi(e),'dueRP');});});
+  const out={};let open=0;
+  for(let k=first;k<=mi(TODAY);k++){const x=c[k]||{adm:0,dueFT:0,dueRP:0,ren:0};
+    const A=open,B=x.adm,C=A+B,D=x.dueFT,E=x.dueRP,F=D+E,G=x.ren,H=C-F+G;out[k]={A,B,C,D,E,F,G,H,I:H-A,J:G-F,K:CAP,L:H/CAP*100};open=H;}
+  return{out,first};
+}
+/* The groups always offered (in this order), plus any other value found in the sheets */
+const MFIX={6:['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'],9:['Preparatory','Intermediate','Proficient','Advanced'],5:['M','F']};
+const nk=v=>String(v||'').replace(/\s+/g,' ').trim().toLowerCase();
+function malValues(sel,col){const fix=MFIX[col]||[],extra=new Set();
+  CENTRES.forEach(C=>{const d=DATA[C.name];if(!d||(sel&&sel.name!==C.name))return;d.fs.concat(d.rn).forEach(r=>{if(tn(r[29])===tn(ME.name)){const v=String(r[col]||'').replace(/\s+/g,' ').trim();if(v&&!fix.some(f=>nk(f)===nk(v)))extra.add(v);}});});
+  return fix.concat([...extra].sort());}
+function malView(sel){
+  const all=malBuild(sel),first=all.first,last=mi(TODAY),M=[];for(let k=last;k>=first;k--)M.push(k);
+  const cur=all.out[last]||{H:0,L:0},gap=T_MAL-cur.H;
+  // the slice on screen
+  let vals=[],val='',out=all.out;
+  if(MBY!=='all'){const col=MDIM[MBY][0];vals=malValues(sel,col);val=vals.includes(MVAL[MBY])?MVAL[MBY]:vals[0]||'';
+    if(val){const b=malBuild(sel,[col,val]);out={};M.forEach(k=>out[k]=b.out[k]||{A:0,B:0,C:0,D:0,E:0,F:0,G:0,H:0,I:0,J:0,K:CAP,L:0});}}
+  const nowOf=v=>{const b=malBuild(sel,[MDIM[MBY][0],v]).out[last];return b?b.H:0;};
+  const by=`<div class="mby"><div class="seg2" role="group" aria-label="View by"><span class="sl">View by</span>${[['all','All learners'],['age','Age group'],['level','Course level'],['gender','Gender']].map(([k,l])=>`<button type="button" data-mby="${k}" class="${MBY===k?'on':''}">${l}</button>`).join('')}</div>
+    ${MBY!=='all'?`<div class="mvals">${vals.length?vals.map(v=>`<button type="button" class="mv${v===val?' on':''}" data-mval="${esc(v)}">${esc(v)}<i>${nowOf(v)}</i></button>`).join('')+'<span class="mvn">Number = Monthly Active Learners today.</span>':'<span class="mvn">Nothing recorded for this yet.</span>'}</div>`:''}</div>`;
+  const meter=(lbl,val,unit,target,pct,note)=>`<div class="kpi"><div class="kl">${lbl}</div><div class="kv">${val}<small>${unit}</small></div>
+      <div class="kt"><span>Target <b>${target}</b></span><span class="kn">${note}</span></div>
+      <div class="kb"><i style="width:${Math.max(2,Math.min(100,pct))}%"></i></div></div>`;
+  const strip=`<div class="kpis">${meter('Monthly Active Learners today',n(cur.H),'learners',T_MAL,cur.H/T_MAL*100,gap>0?gap+' more to reach the target':'Target reached')}
+    ${meter('Capacity utilisation today',Math.round(cur.L)+'%','of '+CAP+' learners',T_UTIL+'%',cur.L/T_UTIL*100,cur.L>=T_UTIL?'Target reached':Math.round(T_UTIL-cur.L)+' points to go')}</div>`;
+  const ROWSM=[['A','Opening balance'],['B','New admissions','add','Add'],['C','Total','sum'],0,['D','Due for renewal – First-time renewals'],['E','Due for renewal – Repeated renewals'],['F','Total due for renewals','sum less','Less'],0,
+    ['G','Actually renewed in the month','add','Add'],['H','Monthly Active Learners','malr'],['I','Net gain / loss','sg'],['J','Win-back / Churn','sg'],0,['K','Total capacity'],['L','Capacity utilisation %','cu']];
+  const yrs=[];M.forEach(k=>{const y=Math.floor(k/12);if(!yrs.length||yrs[yrs.length-1].y!==y)yrs.push({y,n:0});yrs[yrs.length-1].n++;});
+  const head=`<thead><tr class="yr"><th class="mt" rowspan="2">Particulars</th>${yrs.map(y=>`<th colspan="${y.n}">${y.y}</th>`).join('')}</tr>
+    <tr class="mo">${M.map(k=>`<th class="${k===last?'now':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===last?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+  const body=ROWSM.map(r=>!r?`<tr class="gap"><td colspan="${M.length+1}"></td></tr>`:`<tr class="${r[2]||''}"><td class="mt">${r[3]?`<span class="op ${r[3]==='Add'?'a':'l'}">${r[3]}</span>`:'<span class="op"></span>'}${r[1]}</td>${M.map(k=>{
+      const x=out[k][r[0]];
+      if(r[0]==='L'){const v=Math.round(x);return`<td><span class="ut ${x>=70?'top':x>=55?'hi':x>=40?'mid':'lo'}">${v}%</span></td>`;}
+      const sg=r[2]==='sg',t=(sg&&x>0?'+':x<0?'−':'')+Math.abs(x).toLocaleString('en-IN');
+      return`<td class="${x===0?'z':sg?(x>0?'p':'ng'):''}">${t}</td>`;}).join('')}</tr>`).join('');
+  const defs=`<details class="mdefs"><summary><span class="i">i</span>How these numbers are worked out</summary><div>
+    <p><b>Your learners:</b> admissions and renewals with your name in the Teacher column, across all your courses (for South and North Vocals, PFM and the classical course together).</p>
+    <p><b>Due for renewal:</b> memberships ending in the month, counted up to today. <b>Monthly Active Learners:</b> Total, minus due for renewal, plus actually renewed.</p>
+    <p><b>Win-back / Churn:</b> renewed minus due; + means more renewed than were due. <b>Capacity:</b> 90 learners per teacher. <b>Targets:</b> 63 Monthly Active Learners, which is 70% of capacity.</p></div></details>`;
+  return strip+section('m_tbl','Active learners'+(MBY!=='all'&&val?` <span class="slice">${esc(val)}</span>`:''),`<span>${M.length} month${M.length===1?'':'s'} · since ${MON[first%12]} ${Math.floor(first/12)}</span>`,`${by}<div class="mtw"><table class="mtab">${head}<tbody>${body}</tbody></table></div>${defs}`);
+}
+
 /* Leaderboard: the top three teachers and where you stand, worked out by the data service for the period on screen */
 let BOARD=null,BKEY='',BWAIT='';
 let LSC=(()=>{try{return localStorage.getItem('artium_tr_lsc')||'centre';}catch(e){return'centre';}})();
 let LBY=(()=>{try{return localStorage.getItem('artium_tr_lby')||'c';}catch(e){return'c';}})();
 const pkey=P=>iso(P.a)+'|'+iso(P.b);
+/* Admins get every teacher's data and full leaderboards at once (ALLM), so switching teachers needs no new request */
+let ALLM=false,TEACH=[],BOARDS={};
+const setKey=cs=>'S:'+cs.slice().sort().join('|');
+const cityCs=cs=>{const ci=CENTRES.filter(c=>cs.includes(c.name)).map(c=>c.city);return CENTRES.filter(c=>ci.includes(c.city)).map(c=>c.name);};
+function boardFor(k){
+  if(!ALLM)return BKEY===k&&BOARD&&BOARD[LSC]?BOARD[LSC][LBY]:null;
+  const all=BOARDS[k];if(!all)return null;
+  const S=LSC==='centre'?ME.centres:LSC==='city'?cityCs(ME.centres):CENTRES.map(c=>c.name),full=(all[setKey(S)]||{})[LBY]||[];
+  return{teachers:full.length,list:full.filter(x=>x.rank<=3||tn(x.name)===tn(ME.name)).map(x=>Object.assign({},x,{me:tn(x.name)===tn(ME.name)}))};
+}
 async function fetchBoard(P){
   const k=pkey(P);if(BWAIT===k)return;BWAIT=k;
-  try{const j=await ArtiumAuth.call('teacherRenewals',{only:'board',a:iso(P.a),b:iso(P.b),as:AS});if(BWAIT!==k)return;BOARD=j.board;BKEY=k;}catch(e){BOARD=null;BKEY=k;}
+  try{const j=await ArtiumAuth.call('teacherRenewals',ALLM?{only:'board',all:true,a:iso(P.a),b:iso(P.b)}:{only:'board',a:iso(P.a),b:iso(P.b),as:AS});if(BWAIT!==k)return;
+    if(ALLM)BOARDS[k]=j.boards;else{BOARD=j.board;BKEY=k;}}catch(e){if(ALLM)BOARDS[k]={};else{BOARD=null;BKEY=k;}}
   BWAIT='';render();
 }
 function board(P){
   const MN=mode==='month'?MONTH_FULL[P.a.getMonth()]:'this period',k=pkey(P);
-  if(BKEY!==k)fetchBoard(P);
-  const B=BKEY===k&&BOARD&&BOARD[LSC]?BOARD[LSC][LBY]:null;
+  const have=ALLM?!!BOARDS[k]:BKEY===k;
+  if(!have)fetchBoard(P);
+  const B=boardFor(k);
   const cell=(a,b)=>`<td><div class="pv key"><b>${pc(a,b)}</b><span>${a} of ${b}</span></div><div class="bar2"><i style="width:${b?Math.round(a/b*100):0}%"></i></div></td>`;
   const row=x=>`<tr class="${x.me?'me':''}"><td>${x.rank<=3?`<span class="emo">${['🥇','🥈','🥉'][x.rank-1]}</span>`:`<span class="rk">#${x.rank}</span>`}</td>
     <td><div class="tw2"><span class="av2">${esc(x.name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase())}</span><div><b>${esc(x.name)}</b><small>${esc(x.centre)}</small></div></div></td>${cell(x.n,x.due)}</tr>`;
   let body;
-  if(BKEY!==k)body='<tr><td colspan="3" class="ld">Loading the leaderboard…</td></tr>';
+  if(!have)body='<tr><td colspan="3" class="ld">Loading the leaderboard…</td></tr>';
   else if(!B||!B.list.length)body='<tr><td colspan="3" class="ld">No learners were due in this period.</td></tr>';
   else{const top=B.list.filter(x=>x.rank<=3),me=B.list.find(x=>x.me&&x.rank>3);
     body=top.map(row).join('')+(me?(me.rank>4?'<tr class="gap"><td colspan="3">···</td></tr>':'')+row(me):'');}
@@ -457,7 +585,23 @@ function board(P){
 
 /* Summary for the teacher: this month's cohort, last month's carry-over, and everything renewed this month */
 const tn=s=>String(s||'').replace(/\s+/g,' ').trim().toLowerCase();
+/* The learner lists behind the summary cards; the same lists are offered above the table */
+let LIST=(()=>{try{return localStorage.getItem('artium_tr_list')||'due';}catch(e){return'due';}})();
+function cohorts(P,mine){
+  const endNow=x=>x.newEnd||(x.ext>0?new Date(x.end.getFullYear(),x.end.getMonth(),x.end.getDate()+Math.round(x.ext)):x.end);
+  const PP={a:new Date(P.a.getFullYear(),P.a.getMonth()-1,1),b:new Date(P.a.getFullYear(),P.a.getMonth(),0)};
+  const C=DUE.filter(x=>mine(x)&&inP(x.end,P)),L=DUE.filter(x=>mine(x)&&inP(x.end,PP));
+  const ext=C.filter(x=>x.ext>0);
+  const paidOn=x=>x.paidOn||valid(parseDate(x.r[26])),openAt=x=>x.st!=='lost'&&!(x.st==='paid'&&(!paidOn(x)||paidOn(x)<P.a));
+  const oext=L.filter(x=>x.ext>0&&inP(endNow(x),P));
+  return{PP,endNow,paidOn,due:C,ren:C.filter(x=>x.st==='paid'),ytr:C.filter(x=>x.st!=='paid'&&x.st!=='lost'),wnr:C.filter(x=>x.st==='lost'),ext,
+    spill:ext.filter(x=>x.st!=='paid'&&endNow(x)>P.b),inm:ext.filter(x=>x.st!=='paid'&&endNow(x)<=P.b),oext,oexp:L.filter(x=>openAt(x)&&!oext.includes(x))};
+}
+function listNames(P){const MN=MONTH_FULL[P.a.getMonth()],LM=MONTH_FULL[(P.a.getMonth()+11)%12],NM=MONTH_FULL[(P.a.getMonth()+1)%12];
+  return{due:['Renewals due','All due'],ren:['Renewed','Renewed'],ytr:['Yet to renew','Yet to renew'],wnr:['Will not renew','Will not renew'],ext:['Extensions given','Extensions'],
+    spill:['Spilling over to '+NM,'Spilling over'],inm:['Extended, ending in '+MN,'Ending in '+MN.slice(0,3)],oext:['Extended into '+MN,'Extended into '+MN.slice(0,3)],oexp:['Expired in '+LM,'Expired in '+LM.slice(0,3)]};}
 function summary(P,mine){
+  const K=cohorts(P,mine);
   const endNow=x=>x.newEnd||(x.ext>0?new Date(x.end.getFullYear(),x.end.getMonth(),x.end.getDate()+Math.round(x.ext)):x.end);
   const PP={a:new Date(P.a.getFullYear(),P.a.getMonth()-1,1),b:new Date(P.a.getFullYear(),P.a.getMonth(),0)};
   const MN=MONTH_FULL[P.a.getMonth()],LM=MONTH_FULL[PP.a.getMonth()],NM=MONTH_FULL[(P.a.getMonth()+1)%12];
@@ -465,17 +609,21 @@ function summary(P,mine){
   const ext=C.filter(x=>x.ext>0),spill=ext.filter(x=>x.st!=='paid'&&endNow(x)>P.b),inM=ext.filter(x=>x.st!=='paid'&&endNow(x)<=P.b);
   const comp=C.filter(x=>x.st!=='paid'&&x.st!=='lost').reduce((s,x)=>s+(x.comp||0),0);
   const L=DUE.filter(x=>mine(x)&&inP(x.end,PP)),lDue=L.filter(x=>x.st!=='paid'&&x.st!=='lost');
-  const lExt=L.filter(x=>x.ext>0&&inP(endNow(x),P)),lExtR=lExt.filter(x=>x.st==='paid'),lExp=L.filter(x=>x.st!=='lost'&&!lExt.includes(x)),lExpR=lExp.filter(x=>x.st==='paid');
+  // Extended into this month: last month's learners given an extension whose new expiry date falls in this month; renewed = those who have renewed.
+  // Expired last month: the rest of last month's learners still open on its last day (not renewed by then and not "Will not renew");
+  // renewed = renewal paid in this period, so it sits inside "From earlier months" on the right.
+  const paidOn=x=>x.paidOn||valid(parseDate(x.r[26])),openAt=x=>x.st!=='lost'&&!(x.st==='paid'&&(!paidOn(x)||paidOn(x)<P.a)),renNow=x=>x.st==='paid'&&inP(paidOn(x),P);
+  const lExt=L.filter(x=>x.ext>0&&inP(endNow(x),P)),lExtR=lExt.filter(x=>x.st==='paid'),lExp=L.filter(x=>openAt(x)&&!lExt.includes(x)),lExpR=lExp.filter(renNow);
   const rr=(a,b)=>`<div class="rb"><div class="rt"><span>${n(b)} renewed</span><b>${pc(b,a)}</b></div><div class="tr"><i style="width:${a?Math.round(b/a*100):0}%"></i></div></div>`;
   const rnl=ALL.filter(x=>x.tab==='rn'&&inP(x.date,P)&&tn(x.r[29])===tn(ME.name)&&(selCentre==='All'||x.centre===selCentre));
   const rPrev=rnl.filter(x=>!(x.prevEnd&&inP(x.prevEnd,P))).length,tot=ren.length+rPrev;
-  const m=(t,v,cls='',sm='')=>`<div class="m ${cls}"><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div></div>`;
+  const m=(t,v,cls='',sm='',lk='')=>lk?`<button type="button" class="m clk ${cls}${LIST===lk?' cur':''}" data-list="${lk}" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div></button>`:`<div class="m ${cls}"><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div></div>`;
   return section('l_sum','Summary',`<span>${esc(P.label)}</span>`,`<div class="sum3">
    <div class="sg"><h3>${MN} cohort</h3><p>Learners whose package expires in ${MN}.</p>
-    <div class="sc c4">${m('Renewals due',n(C.length),'hero')}${m('Renewed',n(ren.length),'ok')}${m('Renewal %',pc(ren.length,C.length),'ok')}${m('Will not renew',n(wnr.length),'bad')}
-    ${m('Extensions given',n(ext.length))}${m('Spilling over to '+NM,n(spill.length),'sub')}${m('Extended, ending in '+MN,n(inM.length),'sub')}${m('Compensation classes to deliver',n(comp))}</div></div>
-   <div class="sg"><h3>Carried over from ${LM}</h3><p>Learners whose package expired in ${LM}.</p>
-    <div class="sc c2"><div class="m"><div class="t">Extended into ${MN}</div><div class="v">${n(lExt.length)}</div>${rr(lExt.length,lExtR.length)}</div><div class="m"><div class="t">Expired in ${LM}</div><div class="v">${n(lExp.length)}</div>${rr(lExp.length,lExpR.length)}</div></div></div>
+    <div class="sc c4">${m('Renewals due',n(C.length),'hero','','due')}${m('Renewed',n(ren.length),'ok','','ren')}${m('Renewal %',pc(ren.length,C.length),'ok')}${m('Will not renew',n(wnr.length),'bad','','wnr')}
+    ${m('Extensions given',n(ext.length),'','','ext')}${m('Spilling over to '+NM,n(spill.length),'sub','','spill')}${m('Extended, ending in '+MN,n(inM.length),'sub','','inm')}${m('Compensation classes to deliver',n(comp))}</div></div>
+   <div class="sg"><h3>Carried over from ${LM}</h3><p>Learners whose package was due in ${LM}.</p>
+    <div class="sc c2"><button type="button" class="m clk${LIST==='oext'?' cur':''}" data-list="oext" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">Extended into ${MN}</div><div class="v">${n(lExt.length)}</div>${rr(lExt.length,lExtR.length)}</button><button type="button" class="m clk${LIST==='oexp'?' cur':''}" data-list="oexp" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">Expired in ${LM}</div><div class="v">${n(lExp.length)}</div>${rr(lExp.length,lExpR.length)}</button></div></div>
    <div class="sg"><h3>Renewed in ${MN}</h3><p>Everyone who renewed this month, whenever they were due.</p>
     <div class="sc c2">${m('From the '+MN+' cohort',n(ren.length))}${m('From earlier months',n(rPrev))}${m('Total renewed',n(tot),'hero')}${m('Renewal collection efficiency',pc(tot,C.length),'ok')}</div></div>
   </div>`);
@@ -493,6 +641,9 @@ function render(){
   if(!DUE){out.innerHTML='<section class="sec"><div class="empty big">Loading…</div></section>';return;}
   const mine=x=>(!sel||x.centre===sel.name)&&tn(x.teacher)===tn(ME.name);
   const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
+  document.querySelectorAll('#tsub [data-sp]').forEach(b=>b.classList.toggle('on',b.dataset.sp===SP));
+  document.getElementById('perbox').style.visibility=SP==='mal'?'hidden':'';
+  if(SP==='mal'){out.innerHTML=malView(sel);bindList(out);return;}
   if(view==='list'){out.innerHTML=listView(P,mine,sel);bindList(out);return;}
 
   /* At a glance (as on Monthly Performance Analysis): due = memberships whose package expires in the period;
@@ -629,10 +780,10 @@ function filterPanel(pool){
   return`<section class="filters${FOPEN?'':' closed'}" id="fbox"><div class="filters-head" id="fhead"><div class="t"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Filters<span class="f-badge${k?' on':''}">${k?k+' active':'All optional'}</span></div><span class="f-chev" aria-hidden="true">${FCH}</span></div>
     <div class="filters-body"><div class="f-grid">${grid}</div><button class="f-clear" id="fclr" type="button"${k?'':' disabled'}>Clear filters</button></div></section>`;
 }
-const fl=k=>Object.assign({pkg:'all',ren:'all'},FL[k]);
+const fl=k=>Object.assign({pkg:'all'},FL[k],{ren:'all'});
 function tools(k){const f=fl(k);
   return`<div class="ltools"><div class="lsub pks" role="group" aria-label="Previous package"><span class="tl">Previous package</span>${PKGS.map(v=>`<button type="button" data-lk="${k}" data-pkg="${v}" aria-pressed="${f.pkg===v}">${v==='all'?'All':v+'M'}</button>`).join('')}</div>`
-    +`<div class="lsub pks" role="group" aria-label="Show">${[['all','All'],['not','Not renewed'],['ren','Renewed']].map(([v,l])=>`<button type="button" data-lk="${k}" data-ren="${v}" aria-pressed="${f.ren===v}">${l}</button>`).join('')}</div></div>`;}
+    +`</div>`;}
 let LSUB=(()=>{try{return Object.assign({due:'all',one:'act'},JSON.parse(localStorage.getItem('artium_tr_lsub')||'{}'));}catch(e){return{due:'all',one:'act'};}})();
 const OC={ren:['Renewed','ok'],pipe:['Pipeline','vi'],wnr:['Will not renew','rd'],ext:['Extended','bl'],ytc:['Yet to commit','gy']};
 const pill=(t,c)=>`<span class="pl ${c}">${t}</span>`;
@@ -701,17 +852,23 @@ function listView(P,mine,sel){
 
   /* Due in the period: every membership whose package expires in it */
   /* Due, Renewed and % renewal for the list in view (its tab, package and filters; the Show toggle only hides rows) */
-  const kst=(L,ocf)=>{const r=L.filter(x=>ocf(x)==='ren').length;
-    return`<span class="kst"><span>Due <b>${n(L.length)}</b></span><span>Renewed <b>${n(r)}</b></span><span class="kp">Renewal <b>${L.length?Math.round(r/L.length*100)+'%':'–'}</b></span></span>`;};
+  const kst=(L,ocf,lr)=>{const r=L.filter(x=>ocf(x)==='ren').length;
+    return`<span class="kst"><span>${lr?'Learners':'Due'} <b>${n(L.length)}</b></span><span>Renewed <b>${n(r)}</b></span><span class="kp">Renewal <b>${L.length?Math.round(r/L.length*100)+'%':'–'}</b></span></span>`;};
   const kn=L=>`<span class="kst"><span>Learners <b>${n(L.length)}</b></span></span>`;
   const byR=(L,ocf,k)=>L.filter(x=>okR(x,ocf,k));
   // Each table: its rows before the Show toggle → column filters → counts → Show toggle → table
   const T=(base,cols,key,ocf,showK)=>{const cfd=colFilter(base,cols,key);return{cols,base,cfd,rows:byR(cfd,ocf,showK),key};};
   const tbl=o=>ltable(o.rows,o.cols,sel,o.key,o.base);
-  const dueA=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
+  const K=cohorts(P,mine),NAMES=listNames(P);if(!K[LIST])LIST='due';
+  const dueA=K[LIST].filter(x=>okP(x,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
   const dSub=LSUB.due==='ft'?dueA.filter(x=>x.tab==='fs'):LSUB.due==='rr'?dueA.filter(x=>x.tab==='rn'):dueA;
   const dC=STD(dueOc,LIST==='wnr'?[['Reason for discontinuing',x=>tdc(esc(x.reason)),x=>x.reason,'t']]:[]),tD=T(dSub,dC,'due',dueOc,'due'),cAll=byR(colFilter(dueA,dC,'due'),dueOc,'due');
-  const sDue=row2(subT('due',[['all','All renewals due',cAll.length],['ft','First-time renewals',cAll.filter(x=>x.tab==='fs').length],['rr','Repeated renewals',cAll.filter(x=>x.tab==='rn').length]]),'due')+tbl(tD);
+  const LM3=MONTH_FULL[(P.a.getMonth()+11)%12],MN3=MONTH_FULL[P.a.getMonth()];
+  const chip=k=>`<button type="button" class="lc${LIST===k?' on':''}" data-list="${k}">${esc(NAMES[k][1])}<i>${K[k].length}</i></button>`;
+  const pick=`<div class="lpick"><div class="lg"><span class="lgl">${MN3} cohort</span><div class="lgb">${['due','ren','ytr','wnr','ext','spill','inm'].map(chip).join('')}</div></div>
+    <div class="lg"><span class="lgl">From ${LM3}</span><div class="lgb">${['oext','oexp'].map(chip).join('')}</div></div></div>`;
+  const typ=`<div class="lsub pks" role="group" aria-label="Type">${[['all','All'],['ft','First-time'],['rr','Repeated']].map(([v,l])=>`<button type="button" data-sub="due" data-v="${v}" aria-pressed="${LSUB.due===v}">${l}<i>${v==='all'?cAll.length:cAll.filter(x=>x.tab===(v==='ft'?'fs':'rn')).length}</i></button>`).join('')}</div>`;
+  const sDue=pick+row2(typ,'due')+tbl(tD);
 
   /* Learners with at least two 1-month renewals */
   const one=latest.filter(x=>x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length>=2&&okP(x,'one')).map(x=>Object.assign(x,{n1:x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length}));
@@ -734,8 +891,8 @@ function listView(P,mine,sel){
   const cnt=(n,c='')=>`<span class="ct ${c}">${n}</span>`;
   const info=t=>`<span class="ib" role="button" tabindex="0" aria-label="About this list" data-info>i<span class="ipop">${t}</span></span>`;
   return summary(P,mine)+board(P)
-    +`<div class="lgrp">Due in ${esc(P.label)}</div>`
-    +section('l_due','Renewals due',`<span>${esc(P.label)}</span>`+kst(tD.cfd,dueOc),sDue)
+    +`<div class="lgrp" id="lists">Learner lists</div>`
+    +section('l_due',esc(NAMES[LIST][0]),`<span>${LIST.startsWith('o')?esc(LM3+' cohort'):esc(P.label)}</span>`+(LIST==='due'?kst(tD.cfd,dueOc):LIST.startsWith('o')?kst(tD.cfd,dueOc,1):kn(tD.cfd)),sDue)
 ;
 }
 /* One icon button per list: clears its package and Show choices and its column filters and sorting */
@@ -774,6 +931,10 @@ function bindList(out){
   out.querySelectorAll('[data-info]').forEach(b=>{b.onclick=e=>{e.stopPropagation();b.classList.toggle('open');};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();b.classList.toggle('open');}};});
   out.querySelectorAll('[data-lsc]').forEach(b=>b.onclick=()=>{LSC=b.dataset.lsc;try{localStorage.setItem('artium_tr_lsc',LSC);}catch(e){}render();});
   out.querySelectorAll('[data-lby]').forEach(b=>b.onclick=()=>{LBY=b.dataset.lby;try{localStorage.setItem('artium_tr_lby',LBY);}catch(e){}render();});
+  out.querySelectorAll('[data-list]').forEach(b=>b.onclick=()=>{const fromCard=b.classList.contains('clk');LIST=b.dataset.list;try{localStorage.setItem('artium_tr_list',LIST);}catch(e){}
+    FOLD.l_due=false;render();if(fromCard){const t=document.getElementById('lists');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}});
+  out.querySelectorAll('[data-mby]').forEach(b=>b.onclick=()=>{MBY=b.dataset.mby;try{localStorage.setItem('artium_tr_mby',MBY);}catch(e){}render();});
+  out.querySelectorAll('[data-mval]').forEach(b=>b.onclick=()=>{MVAL[MBY]=b.dataset.mval;render();});
   out.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{LSHOW[b.dataset.more]=!LSHOW[b.dataset.more];render();});
   const setF=(k,f)=>{FL[k]=Object.assign(fl(k),f);try{localStorage.setItem('artium_tr_lf',JSON.stringify(FL));}catch(e){}render();};
   out.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>setF(b.dataset.lk,{pkg:b.dataset.pkg}));
@@ -795,7 +956,10 @@ function paintCentres(){
     .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
   document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;try{localStorage.setItem('artium_tr_centre',selCentre);}catch(e){}render();});
 }
-document.getElementById('as').onchange=e=>{AS=e.target.value;try{localStorage.setItem('artium_tr_as',AS);}catch(x){}DUE=null;BOARD=null;BKEY='';load();};
+document.querySelectorAll('#tsub [data-sp]').forEach(b=>b.onclick=()=>{SP=b.dataset.sp;try{localStorage.setItem('artium_tr_sp',SP);}catch(e){}render();});
+document.getElementById('as').onchange=e=>{AS=e.target.value;try{localStorage.setItem('artium_tr_as',AS);}catch(x){}
+  if(ALLM){const t=TEACH.find(x=>tn(x.name)===tn(AS));if(t){ME=t;paintCentres();render();}return;}
+  DUE=null;BOARD=null;BKEY='';load();};
 document.querySelectorAll('#vt button').forEach(b=>b.onclick=()=>{view=b.dataset.v;try{localStorage.setItem('artium_tr_view',view);}catch(e){}render();});
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;if(mode==='range'&&!rFrom){rFrom=new Date(viewY,viewM,1);rTo=new Date(viewY,viewM+1,0);}render();});
 document.getElementById('prev').onclick=()=>{viewM--;if(viewM<0){viewM=11;viewY--;}render();};
@@ -805,8 +969,9 @@ document.getElementById('next').onclick=()=>{viewM++;if(viewM>11){viewM=0;viewY+
 async function load(){
   render();
   try{
-    const P=period(),j=await ArtiumAuth.call('teacherRenewals',{a:iso(P.a),b:iso(P.b),as:AS});
-    ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);
+    const P=period(),j=await ArtiumAuth.call('teacherRenewals',{a:iso(P.a),b:iso(P.b),as:AS,all:true});
+    if(j.all){ALLM=true;TEACH=j.teachers||[];BOARDS={};BOARDS[pkey(P)]=j.boards||{};ME=TEACH.find(x=>tn(x.name)===tn(AS))||TEACH[0]||ME;j.teachers=TEACH.map(x=>x.name);}
+    else{ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);}
     DATA={};CENTRES.forEach(c=>{const d=(j.data||{})[c.name]||{};DATA[c.name]={fs:(d['Fresh Sales']||[]).map(r=>r.map(v=>String(v).trim())),rn:(d['Renewals']||[]).map(r=>r.map(v=>String(v).trim()))};});
     if(j.canPick){const sel=document.getElementById('as');document.getElementById('asw').hidden=false;
       sel.innerHTML=(j.teachers||[]).map(t=>`<option${tn(t)===tn(ME.name)?' selected':''}>${esc(t)}</option>`).join('');}
