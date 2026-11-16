@@ -465,11 +465,7 @@ function summary(P,mine){
   const ext=C.filter(x=>x.ext>0),spill=ext.filter(x=>x.st!=='paid'&&endNow(x)>P.b),inM=ext.filter(x=>x.st!=='paid'&&endNow(x)<=P.b);
   const comp=C.filter(x=>x.st!=='paid'&&x.st!=='lost').reduce((s,x)=>s+(x.comp||0),0);
   const L=DUE.filter(x=>mine(x)&&inP(x.end,PP)),lDue=L.filter(x=>x.st!=='paid'&&x.st!=='lost');
-  // Extended into this month: last month's learners given an extension whose new expiry date falls in this month; renewed = those who have renewed.
-  // Expired last month: the rest of last month's learners still open on its last day (not renewed by then and not "Will not renew");
-  // renewed = renewal paid in this period, so it sits inside "From earlier months" on the right.
-  const paidOn=x=>x.paidOn||valid(parseDate(x.r[26])),openAt=x=>x.st!=='lost'&&!(x.st==='paid'&&(!paidOn(x)||paidOn(x)<P.a)),renNow=x=>x.st==='paid'&&inP(paidOn(x),P);
-  const lExt=L.filter(x=>x.ext>0&&inP(endNow(x),P)),lExtR=lExt.filter(x=>x.st==='paid'),lExp=L.filter(x=>openAt(x)&&!lExt.includes(x)),lExpR=lExp.filter(renNow);
+  const lExt=L.filter(x=>x.ext>0&&inP(endNow(x),P)),lExtR=lExt.filter(x=>x.st==='paid'),lExp=L.filter(x=>x.st!=='lost'&&!lExt.includes(x)),lExpR=lExp.filter(x=>x.st==='paid');
   const rr=(a,b)=>`<div class="rb"><div class="rt"><span>${n(b)} renewed</span><b>${pc(b,a)}</b></div><div class="tr"><i style="width:${a?Math.round(b/a*100):0}%"></i></div></div>`;
   const rnl=ALL.filter(x=>x.tab==='rn'&&inP(x.date,P)&&tn(x.r[29])===tn(ME.name)&&(selCentre==='All'||x.centre===selCentre));
   const rPrev=rnl.filter(x=>!(x.prevEnd&&inP(x.prevEnd,P))).length,tot=ren.length+rPrev;
@@ -478,7 +474,7 @@ function summary(P,mine){
    <div class="sg"><h3>${MN} cohort</h3><p>Learners whose package expires in ${MN}.</p>
     <div class="sc c4">${m('Renewals due',n(C.length),'hero')}${m('Renewed',n(ren.length),'ok')}${m('Renewal %',pc(ren.length,C.length),'ok')}${m('Will not renew',n(wnr.length),'bad')}
     ${m('Extensions given',n(ext.length))}${m('Spilling over to '+NM,n(spill.length),'sub')}${m('Extended, ending in '+MN,n(inM.length),'sub')}${m('Compensation classes to deliver',n(comp))}</div></div>
-   <div class="sg"><h3>Carried over from ${LM}</h3><p>Learners whose package was due in ${LM}.</p>
+   <div class="sg"><h3>Carried over from ${LM}</h3><p>Learners whose package expired in ${LM}.</p>
     <div class="sc c2"><div class="m"><div class="t">Extended into ${MN}</div><div class="v">${n(lExt.length)}</div>${rr(lExt.length,lExtR.length)}</div><div class="m"><div class="t">Expired in ${LM}</div><div class="v">${n(lExp.length)}</div>${rr(lExp.length,lExpR.length)}</div></div></div>
    <div class="sg"><h3>Renewed in ${MN}</h3><p>Everyone who renewed this month, whenever they were due.</p>
     <div class="sc c2">${m('From the '+MN+' cohort',n(ren.length))}${m('From earlier months',n(rPrev))}${m('Total renewed',n(tot),'hero')}${m('Renewal collection efficiency',pc(tot,C.length),'ok')}</div></div>
