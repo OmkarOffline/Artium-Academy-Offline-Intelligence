@@ -15,10 +15,13 @@
   // Each page file and the name used for it in the access list
   const PAGE_OF={'start.html':'start','home.html':'home','daily.html':'daily','pipeline.html':'pipeline','renewperf.html':'renewperf','admissions.html':'admissions','targets.html':'targets','dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance','mom.html':'mom','review.html':'review','execs.html':'execs','learners.html':'learners','teachers.html':'teachers','courses.html':'courses','stats.html':'stats','analysis.html':'analysis','focus.html':'focus','calendar.html':'calendar','planner.html':'planner','goals.html':'goals','checkins.html':'checkins','collections.html':'collections','updates.html':'updates','spotlight.html':'spotlight','texp.html':'texp'};
 
+  /* Phones: every page loads the shared phone stylesheet */
+  try{ if(!document.querySelector('link[href*="mobile.css"]')){ const l=document.createElement('link');l.rel='stylesheet';l.href='mobile.css?v=1';(document.head||document.documentElement).appendChild(l); } }catch(e){}
   /* ── Inside the landing page: borrow its sign-in ── */
   if(window.parent!==window){
     try{ if(window.parent.ArtiumAuth){
       window.ArtiumAuth=window.parent.ArtiumAuth;
+      document.documentElement.classList.add('in-frame');   // the phone stylesheet only touches pages shown inside the site
       const pg=PAGE_OF[location.pathname.split('/').pop()];
       if(pg&&!window.ArtiumAuth.pages.includes(pg)){ document.documentElement.innerHTML='<body style="font:15px sans-serif;padding:48px;color:#6B6774">You don\'t have access to this page.</body>'; throw new Error('no access'); }
       return;

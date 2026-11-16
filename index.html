@@ -210,10 +210,22 @@
   .menu-btn:hover,.menu-btn:focus-visible{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff}
   .rf .tip{background:var(--ink);font-family:"Onest",sans-serif}
   .bell b{background:var(--violet2);font-family:"Onest",sans-serif}
+  /* Phones: a slim top bar holds the menu, refresh and bell buttons and the page name, and pages start below it */
+  .mtop{display:none}
+  @media (max-width:760px){
+    .mtop{display:flex;position:fixed;top:0;left:0;right:0;height:58px;z-index:28;align-items:center;justify-content:center;padding:0 112px 0 60px;
+      background:rgba(255,255,255,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--hair,#ece4ff)}
+    .mtop span{font:700 15px "Onest",sans-serif;color:var(--ink,#120e2b);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .frames{top:58px}
+    body.presenting .mtop{display:none}body.presenting .frames{top:0}
+    .menu-btn{top:10px;left:12px;width:38px;height:38px;border-radius:12px}
+    .sidebar{width:min(320px,86vw)}
+  }
 </style>
 <script src="auth.js"></script>
 </head>
 <body>
+  <div class="mtop" id="mtop" aria-hidden="true"><span id="mtitle"></span></div>
   <main class="frames">
     <iframe id="frame-start" data-src="start.html" title="Home"></iframe>
     <iframe id="frame-execs" data-src="execs.html" title="Execs Call" allow="fullscreen; autoplay" allowfullscreen hidden></iframe>
@@ -330,6 +342,7 @@
     if(!document.getElementById("frame-" + name)) name = "start";
     if(!ArtiumAuth.pages.includes(name)) name = ArtiumAuth.pages[0];   // only pages this person may open
     document.querySelectorAll(".tab[data-tab]").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
+    { const t = document.querySelector(`.nav-g:not(.pins) .tab[data-tab="${name}"]`), m = document.getElementById("mtitle"); if(t && m) m.textContent = [...t.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join("").trim(); }
     document.querySelectorAll(".frames iframe").forEach(f => {
       const on = f.id === "frame-" + name;
       if(on && !f.getAttribute("src")) f.src = f.dataset.src + "?v=" + Date.now(); // load each page the first time it is opened, always the latest version
@@ -391,10 +404,13 @@
   function openMenu(){ clearTimeout(closeTimer); body.classList.add("open"); btn.setAttribute("aria-expanded", "true"); }
   function closeMenu(){ clearTimeout(closeTimer); if(document.activeElement && document.activeElement.id === "q") return; body.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
   function closeSoon(){ clearTimeout(closeTimer); closeTimer = setTimeout(() => { if(!side.querySelector(".um-pop.open")) closeMenu(); }, 260); }
-  btn.addEventListener("mouseenter", openMenu);
-  document.getElementById("edge").addEventListener("mouseenter", openMenu);
-  side.addEventListener("mouseenter", openMenu);
-  side.addEventListener("mouseleave", closeSoon);
+  // Hover opens the menu only for a real mouse: on a phone a tap also fires a "hover" just before the click,
+  // which used to open the menu and then the click closed it again straight away
+  const mouse = f => e => { if(e.pointerType === "mouse") f(); };
+  btn.addEventListener("pointerenter", mouse(openMenu));
+  document.getElementById("edge").addEventListener("pointerenter", mouse(openMenu));
+  side.addEventListener("pointerenter", mouse(openMenu));
+  side.addEventListener("pointerleave", mouse(closeSoon));
   btn.addEventListener("click", () => body.classList.contains("open") ? closeMenu() : openMenu());
   document.getElementById("scrim").addEventListener("click", closeMenu);
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeMenu(); });

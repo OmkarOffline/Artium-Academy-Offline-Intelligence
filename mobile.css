@@ -1,0 +1,18 @@
+/* Phone layout shared by every page of the site (loaded by auth.js; only applies inside the site, on screens up to 760px wide).
+   Each page keeps its own design; this only makes the common building blocks fit a phone. */
+@media (max-width:760px){
+  .in-frame,.in-frame body{overflow-x:hidden;-webkit-text-size-adjust:100%}
+  /* No zooming in when a field is tapped (iPhone zooms on text under 16px) */
+  .in-frame input,.in-frame select,.in-frame textarea{font-size:16px}
+  /* Centre selectors, segmented switches and month pickers wrap instead of running off the edge */
+  .in-frame .seg,.in-frame #centre-toggle{display:flex;flex-wrap:wrap;max-width:100%;width:100%;box-sizing:border-box}
+  .in-frame .ct-btn{flex:1 1 calc(50% - 4px);min-width:0;padding:8px 12px;white-space:normal}
+  .in-frame .ct-btn span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .in-frame .per{flex-wrap:wrap;max-width:100%;box-sizing:border-box}
+  .in-frame .bar{flex-direction:column;align-items:stretch;gap:10px}
+  .in-frame .bar>*{max-width:100%}
+  /* Wide tables scroll sideways inside their card */
+  .in-frame .tw,.in-frame .tbl-wrap,.in-frame .mtw,.in-frame .twrap,.in-frame .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  /* Pop-ups and dialogs fit the screen */
+  .in-frame dialog,.in-frame .dlg,.in-frame .modal{max-width:calc(100vw - 24px)}
+}
