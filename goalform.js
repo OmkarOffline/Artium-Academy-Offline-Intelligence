@@ -24,8 +24,8 @@
     return out+(inL?'</ul>':'');
   }
   const TOOLS=[['h3','Heading','<span style="font:700 13px Onest,Poppins,sans-serif">H</span>'],['b','Bold (Ctrl+B)','<b>B</b>'],['i','Italics (Ctrl+I)','<i style="font-family:Georgia,serif">I</i>'],['u','Underline (Ctrl+U)','<u>U</u>'],['ul','Bullet points (type "- " at the start of a line)','<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/></svg>']];
-  const editorHtml=(val,ph)=>`<div class="gf-rt"><div class="gf-tb" role="toolbar" aria-label="Formatting">${TOOLS.map(([k,t,i])=>`<button type="button" data-fmt="${k}" title="${t}" aria-label="${t}" aria-pressed="false">${i}</button>`).join('')}</div>
-    <div class="gf-ed" contenteditable="true" role="textbox" aria-multiline="true" data-ph="${ph}">${toHtml(val)}</div></div>`;
+  const editorHtml=(val,ph,key)=>`<div class="gf-rt"><div class="gf-tb" role="toolbar" aria-label="Formatting">${TOOLS.map(([k,t,i])=>`<button type="button" data-fmt="${k}" title="${t}" aria-label="${t}" aria-pressed="false">${i}</button>`).join('')}</div>
+    <div class="gf-ed" contenteditable="true" role="textbox" aria-multiline="true" data-ph="${ph}" data-key="${key||'desc'}">${toHtml(val)}</div></div>`;
   function fmt(ed,k){
     ed.focus();
     if(k==='h3'){const cur=(document.queryCommandValue('formatBlock')||'').toLowerCase();document.execCommand('formatBlock',false,cur==='h3'?'p':'h3');}
@@ -33,10 +33,12 @@
     else document.execCommand({b:'bold',i:'italic',u:'underline'}[k]);
   }
   function syncTools(root){
-    const ed=root.querySelector('.gf-ed');if(!ed)return;const sel=getSelection();const inside=sel.rangeCount&&ed.contains(sel.anchorNode);
-    root.querySelectorAll('[data-fmt]').forEach(b=>{const k=b.dataset.fmt;let on=false;
-      if(inside){if(k==='h3')on=(document.queryCommandValue('formatBlock')||'').toLowerCase()==='h3';else if(k==='ul'){let x=sel.anchorNode;while(x&&x!==ed&&x.nodeName!=='LI')x=x.parentNode;on=!!x&&x!==ed;}else on=document.queryCommandState({b:'bold',i:'italic',u:'underline'}[k]);}
-      b.setAttribute('aria-pressed',on);});
+    root.querySelectorAll('.gf-rt').forEach(rt=>{
+      const ed=rt.querySelector('.gf-ed');if(!ed)return;const sel=getSelection();const inside=sel.rangeCount&&ed.contains(sel.anchorNode);
+      rt.querySelectorAll('[data-fmt]').forEach(b=>{const k=b.dataset.fmt;let on=false;
+        if(inside){if(k==='h3')on=(document.queryCommandValue('formatBlock')||'').toLowerCase()==='h3';else if(k==='ul'){let x=sel.anchorNode;while(x&&x!==ed&&x.nodeName!=='LI')x=x.parentNode;on=!!x&&x!==ed;}else on=document.queryCommandState({b:'bold',i:'italic',u:'underline'}[k]);}
+        b.setAttribute('aria-pressed',on);});
+    });
   }
   // The bullet button: the line the cursor is on becomes a bullet point, or stops being one
   function toggleList(ed){
@@ -94,7 +96,7 @@
   .gf-tb button{min-width:32px;height:30px;border:0;border-radius:8px;background:none;color:#4a4466;font-size:14px;cursor:pointer;display:grid;place-items:center;padding:0 8px}
   .gf-tb button:hover{background:#f1eafe;color:#4101f7}.gf-tb button[aria-pressed="true"]{background:#4101f7;color:#fff}
   .gf-tb button:first-child{margin-right:6px;position:relative}.gf-tb button:first-child::after{content:"";position:absolute;right:-5px;top:6px;bottom:6px;width:1px;background:#dcd5ee}
-  .gf-ed{min-height:150px;max-height:360px;overflow:auto;padding:10px 14px;font:400 14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#120e2b;outline:none}
+  .gf-ed{min-height:96px;max-height:360px;overflow:auto;padding:10px 14px;font:400 14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#120e2b;outline:none}
   .gf-ed:empty::before{content:attr(data-ph);color:#7a7196}
   .gf-ed p{margin:0 0 8px}.gf-ed h3{font:600 18px/1.35 'Onest','Poppins',sans-serif;color:#120e2b;margin:10px 0 6px}.gf-ed h3:first-child{margin-top:0}
   .gf-ed ul{margin:0 0 8px;padding-left:22px}.gf-ed li{margin:2px 0}
@@ -137,8 +139,8 @@
     if(el)return;document.head.appendChild(Object.assign(document.createElement('style'),{textContent:css}));
     el=document.createElement('div');el.className='gf-bg';el.hidden=true;document.body.appendChild(el);
     el.addEventListener('click',onClick);el.addEventListener('change',onChange);el.addEventListener('input',onInput);
-    el.addEventListener('keydown',e=>{const ed=e.target.closest&&e.target.closest('.gf-ed');if(ed){autoBullet(e,ed);setTimeout(()=>{F.desc=clean(ed.innerHTML);syncTools(el);},0);}});
-    el.addEventListener('paste',e=>{const ed=e.target.closest&&e.target.closest('.gf-ed');if(ed){onPaste(e);F.desc=clean(ed.innerHTML);}});
+    el.addEventListener('keydown',e=>{const ed=e.target.closest&&e.target.closest('.gf-ed');if(ed){autoBullet(e,ed);setTimeout(()=>{F[ed.dataset.key||'desc']=clean(ed.innerHTML);syncTools(el);},0);}});
+    el.addEventListener('paste',e=>{const ed=e.target.closest&&e.target.closest('.gf-ed');if(ed){onPaste(e);F[ed.dataset.key||'desc']=clean(ed.innerHTML);}});
     el.addEventListener('mousedown',e=>{if(e.target.closest('[data-fmt]'))e.preventDefault();});   // keep the selection in the text
     document.addEventListener('selectionchange',()=>{if(el&&!el.hidden)syncTools(el);});
     try{document.execCommand('defaultParagraphSeparator',false,'p');}catch(e){}
@@ -146,9 +148,10 @@
   }
   function open(opts){
     mount();O=opts;const g=opts.goal;
-    F=g?JSON.parse(JSON.stringify(g)):{tags:[],id:'',init:opts.init&&opts.init.id||'',line:opts.line||'',title:opts.line||'',desc:'',target:'',draft:true,centres:{},tasks:[]};
+    F=g?JSON.parse(JSON.stringify(g)):{tags:[],id:'',init:opts.init&&opts.init.id||'',line:opts.line||'',title:opts.line||'',desc:'',mission:'',objectives:'',methods:'',learnings:'',target:'',draft:true,centres:{},tasks:[]};
     if(!g)((opts.lineCentres&&opts.lineCentres.length)?opts.lineCentres:CENTRES).forEach(c=>F.centres[c]={owners:[],s:'tbp'});
-    F.tasks=(F.tasks||[]).map(t=>({...t}));render();el.hidden=false;
+    if(g&&!F.objectives&&!F.mission&&F.desc)F.objectives=F.desc;   // older goals: the old description becomes the objectives
+    ['mission','objectives','methods','learnings'].forEach(k=>{if(F[k]==null)F[k]='';});render();el.hidden=false;
     setTimeout(()=>{const t=el.querySelector('[data-f=title]');t&&t.focus();},50);
   }
   function close(){el.hidden=true;F=null;}
@@ -159,44 +162,36 @@
     el.innerHTML=`<div class="gf" role="dialog" aria-modal="true"><div class="gf-hd"><div><h2>${O.goal?'Edit goal':i?'Make it a goal':'New goal'}</h2>${i?`<div class="gf-from">From <b>${esc(i.dept||'')}</b> › <b>${esc(i.path||'')}</b> › <b>${esc(i.n||'')}</b></div>`:''}</div><button class="gf-x" type="button" data-close aria-label="Close">×</button></div>
       <div class="gf-bd">
         <div><span class="gf-l">Goal</span><input class="gf-in" data-f="title" value="${esc(F.title)}" maxlength="200"></div>
-        <div><span class="gf-l">Goal description</span>${editorHtml(F.desc,'Why it matters, what to do, and what &quot;done&quot; looks like.')}<div class="gf-hint">This is what the owners read in their email, so write it the way you'd brief them.</div></div>
-        <div><span class="gf-l">Centres and owners</span><div class="gf-box">${CENTRES.map(c=>{const C=F.centres[c];return`<div class="gf-row${C?'':' off'}"><input type="checkbox" data-c="${esc(c)}"${C?' checked':''} aria-label="${esc(c)}"><b>${esc(c)}</b>${C?people(C.owners,c):'<span style="font-size:12.5px;color:#7a7196">Not part of this goal</span>'}${C?`<span class="gf-st ${C.s||'tbp'}"><i></i>${ST[C.s||'tbp']}</span>`:'<span></span>'}</div>`;}).join('')}</div>
-          <div class="gf-hint">Untick a centre this goal doesn't apply to. Each centre has its own status, and the goal is Completed when every chosen centre is.</div></div>
+        <div><span class="gf-l">Mission</span>${editorHtml(F.mission,'Why this goal exists, in a line or two.','mission')}<div class="gf-hint">Shown large at the top of the goal, and first in the email.</div></div>
+        <div><span class="gf-l">Objectives</span>${editorHtml(F.objectives,'What we are trying to achieve.','objectives')}</div>
+        <div><span class="gf-l">Recommended methods</span>${editorHtml(F.methods,'How we suggest going about it.','methods')}</div>
+        <div><span class="gf-l">Learnings</span>${editorHtml(F.learnings,'Filled in once the goal is done: what worked, what did not, what we would do differently.','learnings')}<div class="gf-hint">Leave this empty for now. Add it when the goal is done.</div></div>
+        <div><span class="gf-l">Centres</span><div class="gf-tags">${CENTRES.map(c=>`<button type="button" class="gf-tag" data-cc="${esc(c)}" aria-pressed="${!!F.centres[c]}">${esc(c)}</button>`).join('')}</div>
+          <div class="gf-hint">The centres this goal applies to. Everyone together owns the goal. There is no single owner. Centre managers mark their centre as implemented on the Goals page.</div></div>
         <div><span class="gf-l">Tags</span><div class="gf-tags">${TAGS.map(t=>`<button type="button" class="gf-tag" data-tag="${esc(t)}" aria-pressed="${(F.tags||[]).includes(t)}">${esc(t)}</button>`).join('')}</div></div>
         <div style="max-width:260px"><span class="gf-l">Target date</span><input class="gf-in" type="date" data-f="target" value="${esc(F.target)}"></div>
-        <div><span class="gf-l">Subtasks</span><div class="gf-box">${F.tasks.map((t,k)=>`<div class="gf-task"><span class="n">${k+1}</span><input class="gf-in" data-t="${k}|title" value="${esc(t.title)}" placeholder="e.g. Shortlist 3 vendors and get quotes"><input class="gf-in" type="date" data-t="${k}|due" value="${esc(t.due)}" aria-label="Due date"><button type="button" class="gf-rm" data-rt="${k}" aria-label="Remove subtask">✕</button></div>`).join('')}
-          <button type="button" class="gf-add" data-addt>+ Add a subtask</button></div><div class="gf-hint">Every chosen centre works through the same subtasks; each centre's owner updates their own.</div></div>
-        ${live?'':'<div class="gf-note"><b>Email to the stakeholders</b> goes out when you choose to send it — now, or later with <b>Email stakeholders</b> on the Goals page. Until then the goal is tagged <b>Yet to email</b> and only you can see it. The email has the goal, your description, the target date and the subtasks, plus a link to the goal. You\'re copied.</div>'}
+        ${live?'':'<div class="gf-note"><b>Email to the centre managers</b> goes out when you choose to send it — now, or later with <b>Email stakeholders</b> on the Goals page. Until then the goal is tagged <b>Yet to email</b> and only you can see it. The email goes to the centre managers and has the mission, objectives, recommended methods and target date, plus a link to the goal. You\'re copied.</div>'}
       </div>
       <div class="gf-ft"><span class="gf-msg" id="gf-msg"></span><span class="sp"></span><button class="gf-btn" type="button" data-close>Cancel</button>
         ${live?'<button class="gf-btn pri" type="button" data-save="live">Save changes</button>':`<button class="gf-btn" type="button" data-save="draft">${O.goal?'Save':'Save goal'} — email later</button><button class="gf-btn pri" type="button" data-save="live">${O.goal?'Save &amp; email stakeholders':'Create &amp; email stakeholders'}</button>`}</div></div>`;
   }
-  function onInput(e){if(e.target.classList&&e.target.classList.contains('gf-ed')){F.desc=clean(e.target.innerHTML);return;}const d=e.target.dataset;if(d.f==='title'||d.f==='desc')F[d.f]=e.target.value;else if(d.t){const[k,f]=d.t.split('|');if(f==='title')F.tasks[+k].title=e.target.value;}}
+  function onInput(e){if(e.target.classList&&e.target.classList.contains('gf-ed')){F[e.target.dataset.key||'desc']=clean(e.target.innerHTML);return;}const d=e.target.dataset;if(d.f==='title'||d.f==='desc')F[d.f]=e.target.value;}
   function onChange(e){
     const x=e.target,d=x.dataset;
     if(d.f){F[d.f]=x.value;return;}
-    if(d.t){const[k,f]=d.t.split('|');F.tasks[+k][f]=x.value;return;}
-    if(d.c){if(x.checked)F.centres[d.c]={owners:[],s:'tbp'};else delete F.centres[d.c];render();return;}
-    if(d.addp!=null){let v=x.value;if(!v)return;const L=F.centres[d.addp].owners;
-      if(v==='@'){v=(prompt('Email address')||'').trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){render();return;}if(!L.some(p=>p.email===v))L.push({name:'',email:v});}
-      else{const s=(O.staff||[]).find(z=>z.email===v);if(s&&!L.some(p=>p.email===s.email))L.push({name:s.name,email:s.email});}
-      render();}
   }
   async function onClick(e){
     const b=e.target.closest('button');if(!b){if(e.target===el)close();return;}const d=b.dataset;
-    if(d.fmt){const ed=el.querySelector('.gf-ed');fmt(ed,d.fmt);F.desc=clean(ed.innerHTML);syncTools(el);return;}
+    if(d.fmt){const ed=b.closest('.gf-rt').querySelector('.gf-ed');fmt(ed,d.fmt);F[ed.dataset.key||'desc']=clean(ed.innerHTML);syncTools(el);return;}
     if('close' in d)return close();
-    if(d.rmp){const[c,i]=d.rmp.split('|');F.centres[c].owners.splice(+i,1);return render();}
-    if('addt' in d){F.tasks.push({id:uid(),title:'',due:''});render();const ins=el.querySelectorAll('[data-t$="|title"]');ins[ins.length-1].focus();return;}
-    if(d.rt){F.tasks.splice(+d.rt,1);return render();}
+    if(d.cc){if(F.centres[d.cc])delete F.centres[d.cc];else F.centres[d.cc]=(O.goal&&O.goal.centres&&O.goal.centres[d.cc])||{owners:[],s:'tbp'};b.setAttribute('aria-pressed',!!F.centres[d.cc]);return;}
     if(d.tag){F.tags=F.tags||[];F.tags=F.tags.includes(d.tag)?F.tags.filter(x=>x!==d.tag):F.tags.concat(d.tag);b.setAttribute('aria-pressed',F.tags.includes(d.tag));return;}
     if(d.save){
       const draft=d.save==='draft',cs=Object.keys(F.centres),m=el.querySelector('#gf-msg');
-      const miss=!F.title.trim()?'Give the goal a name.':!cs.length?'Choose at least one centre.':!draft&&!plain(F.desc)?'Write the goal description — it goes into the email.':
-        !draft&&cs.some(c=>!F.centres[c].owners.length)?'Every chosen centre needs an owner.':F.tasks.some(t=>!t.title.trim())?'Every subtask needs a name, or remove it.':'';
+      const miss=!F.title.trim()?'Give the goal a name.':!cs.length?'Choose at least one centre.':!draft&&!plain(F.mission)?'Write the mission. It goes first in the email.':'';
       if(miss){m.textContent=miss;return;}
       el.querySelectorAll('[data-save]').forEach(x=>x.disabled=true);m.textContent='';
-      try{const j=await ArtiumAuth.call('saveGoal',{goal:{...F,draft:O.goal&&!O.goal.draft?false:draft}});if(j.error)throw new Error(j.error);close();O.onSaved&&O.onSaved(j);}
+      try{const j=await ArtiumAuth.call('saveGoal',{goal:{...F,desc:'',tasks:undefined,draft:O.goal&&!O.goal.draft?false:draft}});if(j.error)throw new Error(j.error);close();O.onSaved&&O.onSaved(j);}
       catch(err){m.textContent='Couldn\'t save: '+(err.message||err);el.querySelectorAll('[data-save]').forEach(x=>x.disabled=false);}
     }
   }
