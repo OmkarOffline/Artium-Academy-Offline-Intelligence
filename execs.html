@@ -77,6 +77,7 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .tx h3{font:800 34px/1.15 var(--f);color:var(--ink);margin-top:18px;letter-spacing:-.01em}
 .tx ul{margin-top:18px;padding-left:24px}.tx li{font:400 21px/1.5 var(--f);color:var(--ink2);margin-bottom:12px}.tx li b{color:var(--ink);font-weight:700}
 .mg{flex:1;display:grid;gap:22px;min-width:0;min-height:0}
+.tx.fl{flex:1 1 0;min-width:0}
 .md{position:relative;border-radius:24px;overflow:hidden;background:#F1ECFC;min-height:0}
 .md img,.md video,.md iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .md img{object-fit:cover}.md.contain img{object-fit:contain}
@@ -84,6 +85,10 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .md .ph{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;font:600 18px var(--f);color:var(--ink4);text-align:center}
 .md.empty{border:3px dashed #CDBDF7;background:#FBF9FF}.md.empty .ph{color:var(--violet2)}
 .md.vthumb{background:linear-gradient(135deg,#2B0256,#4101f7)}.md.vthumb .ph{color:#fff}
+/* A photo or video with a shape: landscape 16:9 or portrait 9:16, as large as its space allows and centred in it */
+.mdo{position:relative;min-height:0;min-width:0;display:grid;place-items:center;container-type:size}
+.mdo>.md{aspect-ratio:16/9;width:min(100cqw,calc(100cqh * 16 / 9));height:auto}
+.mdo.o-p>.md{aspect-ratio:9/16;width:min(100cqw,calc(100cqh * 9 / 16))}
 .md .play{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;margin:0 auto}
 .md .play svg{width:34px;height:34px;fill:var(--violet2);margin-left:6px}
 /* update cards (as on Key Updates) */
@@ -147,6 +152,7 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .slot .ctl{display:flex;gap:6px;align-items:center;margin-top:6px}
 .slot .ctl select{flex:1;height:30px;border:1px solid var(--line);border-radius:8px;background:#F6F3FC;font:500 12px var(--f);color:var(--ink);padding:0 6px;min-width:0}
 .slot .ctl .ic{width:30px;height:30px;font-size:12px}
+.slot select.shp{width:100%;height:30px;border:1px solid var(--line);border-radius:8px;background:#F6F3FC;font:500 12px var(--f);color:var(--ink);padding:0 6px;margin-top:6px}
 .prog{width:100%;height:6px;border-radius:6px;background:#EEE8FB;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--pink))}
 .card-e{border:1px solid var(--edge);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;background:#FCFBFF}
 .card-e .row .in{flex:1}
@@ -365,6 +371,10 @@ async function loadImg(id){
 const PLAY='<div class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>';
 function media(m,k,kind,thumb){
   if(!m)return`<div class="md empty"><div class="ph">${kind==='video'?'Video':'Photo'} ${k+1}</div></div>`;
+  if(m.o==='l'||m.o==='p')return`<div class="mdo o-${m.o}">${tile(m,k,kind,thumb)}</div>`;
+  return tile(m,k,kind,thumb);
+}
+function tile(m,k,kind,thumb){
   const fit=m.fit==='contain'?' contain':'';
   if(m.kind==='video'){
     if(thumb)return`<div class="md vthumb"><div class="ph">${PLAY}</div></div>`;
@@ -417,8 +427,16 @@ function slideHtml(page,s,i,n,thumb){
     for(let k=0;k<Math.max(cnt,(s.media||[]).length);k++)ms.push((s.media||[])[k]||null);
     const shownMs=VIEW==='edit'||thumb?ms:ms.filter(Boolean);
     const big=shownMs.length===3?'grid-row:1/3;':'';
-    const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
-    const tx=T[2]?`<div class="tx">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${rich(s.lines)}</ul></div>`:'';
+    // when every photo or video has a shape, the media take only the width that shape needs and the text box takes the rest
+    let fx='';
+    if(T[2]&&shownMs.length&&shownMs.every(m=>m&&(m.o==='l'||m.o==='p'))){
+      const r=m=>m.o==='p'?9/16:16/9,g=grid(shownMs,shownMs.length,T[2]);
+      const ratio=shownMs.length===1?r(shownMs[0]):/rows/.test(g)?Math.max(...shownMs.map(r))/2:shownMs.reduce((a,m)=>a+r(m),0);
+      fx=`;flex:0 0 auto;aspect-ratio:${ratio.toFixed(4)};max-width:calc(100% - 520px)`;
+      // side by side: each column as wide as its own shape needs, so a portrait and a landscape sit at the same height
+      if(shownMs.length===2&&!/rows/.test(g))fx+=`;grid-template-columns:${shownMs.map(m=>r(m).toFixed(4)+'fr').join(' ')}`;}
+    const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}${fx}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
+    const tx=T[2]?`<div class="tx${fx?' fl':''}">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${rich(s.lines)}</ul></div>`:'';
     body=tx+mg||`<div class="s-empty">Nothing on this slide yet.</div>`;
   }
   return`<div class="s-top"><div><div class="s-h">${esc(title)}${s.cont?'<span class="cont">(continued)</span>':''}</div><div class="s-wk">${wkSlide(WEEK)}</div></div></div>
@@ -559,6 +577,7 @@ function renderEditor(){
       for(let k=0;k<T[5];k++){const m=ms[k];
         if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
           <div class="nm">${k+1}. ${esc(m.name||(m.kind==='video'?'Video':'Photo'))}</div>
+          <select class="shp" data-mf="o" aria-label="Shape"><option value="l"${m.o==='l'?' selected':''}>Landscape 16:9</option><option value="p"${m.o==='p'?' selected':''}>Portrait 9:16</option><option value=""${m.o!=='l'&&m.o!=='p'?' selected':''}>No fixed shape</option></select>
           <div class="ctl">${m.kind==='image'?`<select data-mf="fit" aria-label="Fit"><option value="cover"${m.fit!=='contain'?' selected':''}>Fill the space</option><option value="contain"${m.fit==='contain'?' selected':''}>Show the whole photo</option></select>`:'<span style="flex:1"></span>'}
           <button class="ic" data-a="mleft" title="Move earlier"${k?'':' disabled'}>←</button><button class="ic" data-a="mright" title="Move later"${k<ms.length-1?'':' disabled'}>→</button><button class="ic del" data-a="unmedia" title="Remove">✕</button></div></div>`);
         else if(k===ms.length)slots.push(`<div class="slot" data-k="${k}">${s._up?`<div class="prog"><i style="width:${s._up.pct}%"></i></div><small>${esc(s._up.text)}</small>`
@@ -594,7 +613,7 @@ document.getElementById('ed').addEventListener('input',e=>{
   else if(t.dataset.cf){const c=s.cards[+t.closest('[data-c]').dataset.c],f=t.dataset.cf;
     if(f==='lines')c.lines=v.split('\n').map(x=>x.trim()).filter(String);
     else if(f==='done'||f==='of'){const x=v.replace(/[^0-9.]/g,'');if(x!==v)t.value=x;c[f]=x===''?null:+x;}else c[f]=v;}
-  else if(t.dataset.mf){const m=s.media[+t.closest('[data-k]').dataset.k];m.fit=v;}
+  else if(t.dataset.mf){const m=s.media[+t.closest('[data-k]').dataset.k];m[t.dataset.mf]=v;}
   else return;
   touch();refreshCanvas();
 });
@@ -749,6 +768,7 @@ async function fromDrive(s,url){
     const m={id:j.id,kind:T[3],w:j.w||16,h:j.h||9,name:j.name||'',fit:'cover'};
     if(T[3]==='image'&&j.data){IMG[j.id]='data:'+j.mime+';base64,'+j.data;
       await new Promise(r=>{const im=new Image();im.onload=()=>{m.w=im.naturalWidth||16;m.h=im.naturalHeight||9;r();};im.onerror=r;im.src=IMG[j.id];});}
+    m.o=m.h>m.w?'p':'l';
     s.media=(s.media||[]).concat(m).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The file could not be added: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
@@ -769,7 +789,7 @@ async function upload(s,f){
       off=res.done?size:res.next;
       s._up={pct:Math.round(off/size*100),text:'Uploading '+Math.round(off/size*100)+'% of '+(size/1048576).toFixed(1)+' MB…'};if(cur()===s)renderEditor();
     }
-    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover'}).slice(0,T[5]);DIRTY=true;
+    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover',o:h>w?'p':'l'}).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The upload stopped: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
 }
