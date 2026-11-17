@@ -78,6 +78,11 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .tx ul{margin-top:18px;padding-left:24px}.tx li{font:400 21px/1.5 var(--f);color:var(--ink2);margin-bottom:12px}.tx li b{color:var(--ink);font-weight:700}
 .mg{flex:1;display:grid;gap:22px;min-width:0;min-height:0}
 .tx.fl{flex:1 1 0;min-width:0}
+/* Shaped photos and videos: they take the width their shapes need (the text box keeps at least 520 px), and the text box
+   matches their height, so both share the same top and bottom edge; a long text box can still grow taller */
+.s-b.fxb{container-type:size;align-items:center}
+.fxb>.mg{flex:0 0 auto;width:min(calc((100cqh - var(--gv)) * var(--r) + var(--gh)),calc(100cqw - 556px));height:min(100cqh,calc((100cqw - 556px - var(--gh)) / var(--r) + var(--gv)))}
+.fxb>.tx{align-self:center;min-height:min(100cqh,calc((100cqw - 556px - var(--gh)) / var(--r) + var(--gv)));max-height:100cqh}
 .md{position:relative;border-radius:24px;overflow:hidden;background:#F1ECFC;min-height:0}
 .md img,.md video,.md iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
 .md img{object-fit:cover}.md.contain img{object-fit:contain}
@@ -89,6 +94,8 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .mdo{position:relative;min-height:0;min-width:0;display:grid;place-items:center;container-type:size}
 .mdo>.md{aspect-ratio:16/9;width:min(100cqw,calc(100cqh * 16 / 9));height:auto}
 .mdo.o-p>.md{aspect-ratio:9/16;width:min(100cqw,calc(100cqh * 9 / 16))}
+.mdo.o-s>.md{aspect-ratio:1/1;width:min(100cqw,100cqh)}
+.mdo.o-q>.md{aspect-ratio:3/4;width:min(100cqw,calc(100cqh * 3 / 4))}
 .md .play{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;margin:0 auto}
 .md .play svg{width:34px;height:34px;fill:var(--violet2);margin-left:6px}
 /* update cards (as on Key Updates) */
@@ -369,9 +376,12 @@ async function loadImg(id){
   paint();
 }
 const PLAY='<div class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>';
+/* The shapes a photo or video can take (width ÷ height), and the nearest one to a file's own size */
+const SHAPE={l:16/9,s:1,q:3/4,p:9/16};
+const shapeOf=(w,h)=>{const r=Math.log((+w||16)/(+h||9));return Object.keys(SHAPE).reduce((a,k)=>Math.abs(Math.log(SHAPE[k])-r)<Math.abs(Math.log(SHAPE[a])-r)?k:a,'l');};
 function media(m,k,kind,thumb){
   if(!m)return`<div class="md empty"><div class="ph">${kind==='video'?'Video':'Photo'} ${k+1}</div></div>`;
-  if(m.o==='l'||m.o==='p')return`<div class="mdo o-${m.o}">${tile(m,k,kind,thumb)}</div>`;
+  if(SHAPE[m.o])return`<div class="mdo o-${m.o}">${tile(m,k,kind,thumb)}</div>`;
   return tile(m,k,kind,thumb);
 }
 function tile(m,k,kind,thumb){
@@ -417,7 +427,7 @@ function slideHtml(page,s,i,n,thumb){
   if(s.tpl==='coll')return collSlide(!!s.edit&&!thumb,i,n);
   const T=TPL[s.tpl]||TPL.upd;
   const title=s.title||(s.tpl==='upd'?'Updates':'Untitled slide');
-  let body;
+  let body,fxOn=false;
   if(s.tpl==='upd'){const cs=(s.cards||[]).filter(c=>c.title||(c.lines||[]).length);
     const h=cs.length===1?1:Math.ceil(cs.length/2),cols=cs.length===1?[cs]:[cs.slice(0,h),cs.slice(h)];
     body=cs.length?`<div class="flow" style="--z:${s.z||1}">${cols.map(c=>`<div class="fcol">${c.map(cardHtml).join('')}</div>`).join('')}</div>`
@@ -429,10 +439,11 @@ function slideHtml(page,s,i,n,thumb){
     const big=shownMs.length===3?'grid-row:1/3;':'';
     // when every photo or video has a shape, the media take only the width that shape needs and the text box takes the rest
     let fx='';
-    if(T[2]&&shownMs.length&&shownMs.every(m=>m&&(m.o==='l'||m.o==='p'))){
-      const r=m=>m.o==='p'?9/16:16/9,g=grid(shownMs,shownMs.length,T[2]);
+    if(T[2]&&shownMs.length&&shownMs.every(m=>m&&SHAPE[m.o])){
+      const r=m=>SHAPE[m.o],g=grid(shownMs,shownMs.length,T[2]);
       const ratio=shownMs.length===1?r(shownMs[0]):/rows/.test(g)?Math.max(...shownMs.map(r))/2:shownMs.reduce((a,m)=>a+r(m),0);
-      fx=`;flex:0 0 auto;aspect-ratio:${ratio.toFixed(4)};max-width:calc(100% - 520px)`;
+      const rows=/rows/.test(g)&&shownMs.length>1;
+      fx=';';fxOn=`--r:${ratio.toFixed(4)};--gh:${rows?0:22*(shownMs.length-1)}px;--gv:${rows?22:0}px`;
       // side by side: each column as wide as its own shape needs, so a portrait and a landscape sit at the same height
       if(shownMs.length===2&&!/rows/.test(g))fx+=`;grid-template-columns:${shownMs.map(m=>r(m).toFixed(4)+'fr').join(' ')}`;}
     const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}${fx}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
@@ -440,7 +451,7 @@ function slideHtml(page,s,i,n,thumb){
     body=tx+mg||`<div class="s-empty">Nothing on this slide yet.</div>`;
   }
   return`<div class="s-top"><div><div class="s-h">${esc(title)}${s.cont?'<span class="cont">(continued)</span>':''}</div><div class="s-wk">${wkSlide(WEEK)}</div></div></div>
-    <div class="s-b">${body}</div>${slideFoot(i,n)}`;
+    <div class="s-b${fxOn?' fxb':''}"${fxOn?` style="${fxOn}"`:''}>${body}</div>${slideFoot(i,n)}`;
 }
 
 /* ── Rendering ── */
@@ -577,7 +588,7 @@ function renderEditor(){
       for(let k=0;k<T[5];k++){const m=ms[k];
         if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
           <div class="nm">${k+1}. ${esc(m.name||(m.kind==='video'?'Video':'Photo'))}</div>
-          <select class="shp" data-mf="o" aria-label="Shape"><option value="l"${m.o==='l'?' selected':''}>Landscape 16:9</option><option value="p"${m.o==='p'?' selected':''}>Portrait 9:16</option><option value=""${m.o!=='l'&&m.o!=='p'?' selected':''}>No fixed shape</option></select>
+          <select class="shp" data-mf="o" aria-label="Shape">${[['l','Landscape 16:9'],['s','Square 1:1'],['q','Portrait 3:4'],['p','Portrait 9:16'],['','No fixed shape']].map(([v,t])=>`<option value="${v}"${(SHAPE[m.o]?m.o:'')===v?' selected':''}>${t}</option>`).join('')}</select>
           <div class="ctl">${m.kind==='image'?`<select data-mf="fit" aria-label="Fit"><option value="cover"${m.fit!=='contain'?' selected':''}>Fill the space</option><option value="contain"${m.fit==='contain'?' selected':''}>Show the whole photo</option></select>`:'<span style="flex:1"></span>'}
           <button class="ic" data-a="mleft" title="Move earlier"${k?'':' disabled'}>←</button><button class="ic" data-a="mright" title="Move later"${k<ms.length-1?'':' disabled'}>→</button><button class="ic del" data-a="unmedia" title="Remove">✕</button></div></div>`);
         else if(k===ms.length)slots.push(`<div class="slot" data-k="${k}">${s._up?`<div class="prog"><i style="width:${s._up.pct}%"></i></div><small>${esc(s._up.text)}</small>`
@@ -768,7 +779,7 @@ async function fromDrive(s,url){
     const m={id:j.id,kind:T[3],w:j.w||16,h:j.h||9,name:j.name||'',fit:'cover'};
     if(T[3]==='image'&&j.data){IMG[j.id]='data:'+j.mime+';base64,'+j.data;
       await new Promise(r=>{const im=new Image();im.onload=()=>{m.w=im.naturalWidth||16;m.h=im.naturalHeight||9;r();};im.onerror=r;im.src=IMG[j.id];});}
-    m.o=m.h>m.w?'p':'l';
+    m.o=shapeOf(m.w,m.h);
     s.media=(s.media||[]).concat(m).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The file could not be added: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
@@ -789,7 +800,7 @@ async function upload(s,f){
       off=res.done?size:res.next;
       s._up={pct:Math.round(off/size*100),text:'Uploading '+Math.round(off/size*100)+'% of '+(size/1048576).toFixed(1)+' MB…'};if(cur()===s)renderEditor();
     }
-    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover',o:h>w?'p':'l'}).slice(0,T[5]);DIRTY=true;
+    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover',o:shapeOf(w,h)}).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The upload stopped: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
 }
