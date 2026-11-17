@@ -366,6 +366,36 @@ td.shortn{background:#F6F3FC!important;color:var(--ink4);font:500 13px var(--f)!
   .kpi{padding:14px 16px}.kv{font-size:28px}
   table.mtab th.mt,table.mtab td.mt{min-width:200px}table.mtab td{padding:11px 14px}
 }
+
+/* Churn analysis */
+.chn{margin:0;padding:0 24px 14px;font:400 13.5px/1.5 var(--f);color:var(--ink3)}
+.chw{overflow-x:auto;border:1px solid var(--edge);border-radius:16px;background:#fff}
+table.cht,table.chl{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:100%}
+.cht th,.cht td{padding:11px 14px;white-space:nowrap;text-align:right;font:400 14px var(--f);color:var(--ink2);border-bottom:1px solid #F1EDF9}
+.cht thead th{font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);background:#FBFAFE;padding:10px 14px}
+.cht thead tr:first-child th{color:var(--ink);font-size:11.5px;letter-spacing:.08em;border-bottom:0}
+.cht thead th.mh{border-left:1px solid var(--edge)}.cht tbody td.mn{border-left:1px solid #F1EDF9}
+.cht .fl{width:100%;padding:0}
+.cht .c1{position:sticky;left:0;z-index:2;text-align:left;width:260px;min-width:260px;max-width:260px;box-sizing:border-box;white-space:normal;background:#fff;font-weight:600;color:var(--ink);box-shadow:8px 0 10px -8px rgba(18,14,43,.12)}
+.cht thead .c1{background:#FBFAFE;vertical-align:bottom}
+.cht .c2{position:sticky;left:260px;z-index:2;background:#F7F3FF;font-weight:700;color:var(--ink);width:84px;min-width:84px;box-sizing:border-box}
+.cht .c3{position:sticky;left:344px;z-index:2;background:#F7F3FF;width:130px;min-width:130px;box-sizing:border-box;box-shadow:8px 0 10px -8px rgba(18,14,43,.12)}
+.cht thead .c2,.cht thead .c3{background:#F1EAFE;color:var(--violet2)}.cht thead th.lt2{position:sticky;left:260px;z-index:2;background:#F1EAFE;color:var(--violet2)}
+.cht .pb{display:inline-block;width:44px;height:6px;border-radius:6px;background:#E6DEFB;margin-right:8px;vertical-align:middle;overflow:hidden}.cht .pb i{display:block;height:100%;background:var(--violet2)}
+.cht tbody tr[data-chr]{cursor:pointer}.cht tbody tr[data-chr]:hover th,.cht tbody tr[data-chr]:hover td{background:#FAF7FF}
+.cht tbody tr.on th,.cht tbody tr.on td{background:#EFE7FF!important}.cht tbody tr.on th.c1{color:var(--violet2);box-shadow:inset 4px 0 0 var(--violet2),8px 0 10px -8px rgba(18,14,43,.12)}
+.cht tbody tr.nr th.c1{color:var(--ink3);font-weight:500;font-style:italic}
+.cht td.z{color:#cdc7de}
+.cht tr.tot th,.cht tr.tot td{font-weight:800;color:var(--ink);background:#FBFAFE;border-bottom:0}.cht tr.tot .c2,.cht tr.tot .c3{background:#F1EAFE}
+.chl th,.chl td{padding:12px 16px;text-align:left;white-space:nowrap;font:400 14px var(--f);color:var(--ink2);border-bottom:1px solid #F1EDF9;vertical-align:top}
+.chl thead th{font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);background:#FBFAFE}
+.chl td.who{position:sticky;left:0;background:#fff;z-index:1}.chl thead th.who{position:sticky;left:0;z-index:1;background:#FBFAFE}
+.chl td.who b{font-weight:700;color:var(--ink)}.chl td.who small{display:block;font-size:12px;color:var(--ink4);margin-top:2px}
+.chl td.ds{white-space:normal;min-width:320px;max-width:460px;line-height:1.5;color:var(--ink)}.chl .mut{color:#cdc7de}
+.chl tr:last-child td{border-bottom:0}
+.chx{margin-left:10px;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font:600 12.5px var(--f);color:var(--violet2);cursor:pointer}
+@media (max-width:760px){.cht .c1{width:150px;min-width:150px;max-width:150px}.cht .c2,.cht thead th.lt2{left:150px;width:64px;min-width:64px}.cht .c3{left:214px;width:66px;min-width:66px}.cht .pb{display:none}}
+@media (max-width:760px){.tsub{flex-wrap:wrap}.tsub button{flex:1 1 30%}}
 </style>
 </head>
 <body>
@@ -373,7 +403,7 @@ td.shortn{background:#F6F3FC!important;color:var(--ink4);font:500 13px var(--f)!
 <div class="hr"><div class="asw" id="asw" hidden><span class="asl">Viewing as</span><label class="ap"><small>Centre</small><select id="asc"></select></label><label class="ap"><small>Course</small><select id="asco"></select></label><label class="ap tch"><small>Teacher</small><select id="as"></select></label></div><div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
 <div class="vt" id="vt" style="display:none" role="group" aria-label="View"><button type="button" data-v="glance" aria-pressed="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Glance</button><button type="button" data-v="list" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>List</button></div></div></div></div>
 <div class="page">
-<nav class="tsub" aria-label="Sections" id="tsub"><button type="button" data-sp="ren">Renewals</button><button type="button" data-sp="mal">Monthly Active Learners</button><button type="button" data-sp="adm">Admissions</button><button type="button" data-sp="lb">Leaderboard</button></nav>
+<nav class="tsub" aria-label="Sections" id="tsub"><button type="button" data-sp="ren">Renewals</button><button type="button" data-sp="mal">Monthly Active Learners</button><button type="button" data-sp="adm">Admissions</button><button type="button" data-sp="lb">Leaderboard</button><button type="button" data-sp="churn">Churn analysis</button></nav>
 <div class="bar"><nav class="seg" id="centre-toggle" aria-label="Centre" style="display:none"></nav>
 <div class="per" id="perbox"><div class="t" id="mode"><button type="button" data-m="month" aria-pressed="true">Month</button><button type="button" data-m="range" aria-pressed="false">Date range</button></div>
 <div id="pmonth" style="display:flex;align-items:center;gap:6px"><button class="m" id="prev" aria-label="Previous month">‹</button><div class="l" id="mlabel">—</div><button class="m" id="next" aria-label="Next month">›</button></div>
@@ -715,6 +745,50 @@ function leadsFor(k){
   if(r)['rc','re','ac','ae'].forEach(m=>{if(r.m[m]&&r.m[m].due<LB_MIN)o[m].short=r.m[m];});
   return o;
 }
+/* ── Churn analysis: learners marked Will not renew, by the reason given ──
+   A learner counts once, on the membership marked Will not renew (with no later renewal), in the month that membership ended.
+   Several reasons in one cell (separated by ";") each count once, so the percentages are of all the reasons given. */
+let CHR=(()=>{try{return localStorage.getItem('artium_tr_chr')||'';}catch(e){return'';}})();
+const NOREASON='Reason not given';
+function churnList(sel){
+  const mine=x=>(!sel||x.centre===sel.name)&&tn(x.teacher)===tn(ME.name);
+  const first=new Map();ALL.forEach(t=>{if(!t.id)return;const f=first.get(t.id);if(!f||t.date<f)first.set(t.id,t.date);});
+  const by=new Map();
+  (DUE||[]).filter(x=>x.st==='lost'&&x.end&&mine(x)).forEach(x=>{const k=x.id||x.name+'|'+x.centre,o=by.get(k);if(!o||x.end>o.end)by.set(k,x);});
+  return[...by.values()].map(x=>{
+    const rs=x.reason.split(';').map(v=>v.trim()).filter(Boolean),adm=first.get(x.id)||x.date;
+    const mo=adm&&x.end?Math.max(0,(x.end.getFullYear()-adm.getFullYear())*12+x.end.getMonth()-adm.getMonth()+(x.end.getDate()>=adm.getDate()?0:-1)):null;
+    return Object.assign({},x,{rs:rs.length?rs:[NOREASON],adm,mo,mk:x.end.getFullYear()*12+x.end.getMonth()});
+  }).sort((a,b)=>b.end-a.end);
+}
+function churnView(sel){
+  const L=churnList(sel);
+  if(!L.length)return section('ch_sum','Reasons for discontinuing','',`<div class="empty big">No learners marked Will not renew${sel?' at '+esc(sel.name):''} for ${esc(ME.name||'this teacher')}.</div>`);
+  const pc=(n,d)=>d?Math.round(n/d*100)+'%':'–';
+  const cnt={},mon={},tot={all:0},mk=new Set();
+  L.forEach(x=>{mk.add(x.mk);x.rs.forEach(r=>{cnt[r]=(cnt[r]||0)+1;tot.all++;(mon[r]=mon[r]||{})[x.mk]=(mon[r][x.mk]||0)+1;tot[x.mk]=(tot[x.mk]||0)+1;});});
+  const R=Object.keys(cnt).sort((a,b)=>(a===NOREASON)-(b===NOREASON)||cnt[b]-cnt[a]||a.localeCompare(b));
+  const M=[...mk].sort((a,b)=>b-a),ml=k=>MON[k%12]+' '+String(Math.floor(k/12)).slice(2);
+  if(CHR&&!cnt[CHR])CHR='';
+  let h=`<div class="chw"><table class="cht"><thead><tr><th class="c1" rowspan="2">Reason for discontinuing</th><th class="c2 lt2" colspan="2">All time</th>${M.map(k=>`<th class="mh" colspan="2">${ml(k)}</th>`).join('')}<th class="fl" rowspan="2"></th></tr>
+    <tr><th class="c2">Count</th><th class="c3">%</th>${M.map(()=>'<th>Count</th><th>%</th>').join('')}</tr></thead><tbody>`;
+  R.forEach(r=>{h+=`<tr class="${CHR===r?'on':''}${r===NOREASON?' nr':''}" data-chr="${esc(r)}" tabindex="0" role="button" aria-pressed="${CHR===r}"><th class="c1">${esc(r)}</th><td class="c2">${cnt[r]}</td><td class="c3"><span class="pb"><i style="width:${Math.round(cnt[r]/tot.all*100)}%"></i></span>${pc(cnt[r],tot.all)}</td>`
+    +M.map(k=>{const n=(mon[r]||{})[k]||0;return`<td class="mn${n?'':' z'}">${n||'–'}</td><td class="${n?'':'z'}">${n?pc(n,tot[k]):'–'}</td>`;}).join('')+'<td class="fl"></td></tr>';});
+  h+=`<tr class="tot"><th class="c1">Total</th><td class="c2">${tot.all}</td><td class="c3">100%</td>${M.map(k=>`<td class="mn">${tot[k]||0}</td><td>${tot[k]?'100%':'–'}</td>`).join('')}<td class="fl"></td></tr></tbody></table></div>`;
+  const sum=section('ch_sum','Reasons for discontinuing',`<span>${L.length} learner${L.length===1?'':'s'} · latest month first</span>`,
+    `<p class="chn">Click a reason to see those learners below. The months are when the membership marked Will not renew ended.${R.length&&tot.all>L.length?' Some learners gave more than one reason, so the percentages are of all the reasons given.':''}</p>${h}`);
+  const list=CHR?L.filter(x=>x.rs.includes(CHR)):L,fd=d=>d?fmtD(d):'–';
+  const rows=list.map(x=>`<tr><td>${fd(x.adm)}</td><td class="who"><b>${esc(x.name)}</b>${sel?'':`<small>${esc(x.centre)}</small>`}</td><td>${esc(x.course)||'–'}</td><td>${esc(x.age)||'–'}</td><td>${esc(x.level)||'–'}</td><td>${fd(x.end)}</td>
+    <td>${x.mo==null?'–':x.mo<1?'Under a month':x.mo+' month'+(x.mo===1?'':'s')}</td><td>${x.rs.map(esc).join('<br>')}</td><td class="ds">${esc(x.desc)||'<span class="mut">–</span>'}</td></tr>`).join('');
+  const lst=section('ch_list',CHR?esc(CHR):'Every learner who left',`<span>${list.length} learner${list.length===1?'':'s'}</span>`,
+    `${CHR?'<p class="chn">Only learners who gave this reason. <button type="button" class="chx" data-chr="">Show every reason</button></p>':''}<div class="chw"><table class="chl"><thead><tr><th>Date of admission</th><th class="who">Learner</th><th>Course</th><th>Age group</th><th>Course level</th><th>Membership end date</th><th>Tenure</th><th>Reason</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table></div>`);
+  return sum+lst;
+}
+function bindChurn(out){
+  out.querySelectorAll('[data-chr]').forEach(b=>{const go=e=>{e.stopPropagation();const r=b.dataset.chr;CHR=CHR===r?'':r;try{localStorage.setItem('artium_tr_chr',CHR);}catch(x){}render();
+      setTimeout(()=>{const l=document.querySelector('[data-k="ch_list"]');if(l&&r&&CHR)l.scrollIntoView({behavior:'smooth',block:'start'});},30);};
+    b.onclick=go;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go(e);}};});
+}
 function lbView(P){
   const k=pkey(P),MN=mode==='month'?MONTH_FULL[P.a.getMonth()]:'This period',CO=mode==='month'?MN+' cohort':'Period cohort';
   const have=ALLM?!!LEADS[k]:BKEY===k;
@@ -832,11 +906,12 @@ function render(){
   const mine=x=>(!sel||x.centre===sel.name)&&tn(x.teacher)===tn(ME.name);
   const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
   document.querySelectorAll('#tsub [data-sp]').forEach(b=>b.classList.toggle('on',b.dataset.sp===SP));
-  document.getElementById('perbox').style.visibility=SP==='mal'?'hidden':'';
+  document.getElementById('perbox').style.visibility=SP==='mal'||SP==='churn'?'hidden':'';
   document.body.classList.toggle('lbp',SP==='lb');
   if(SP==='mal'){out.innerHTML=malView(sel);bindList(out);return;}
   if(SP==='adm'){out.innerHTML=admView(P,sel);bindList(out);return;}
   if(SP==='lb'){out.innerHTML=lbView(P);bindList(out);return;}
+  if(SP==='churn'){out.innerHTML=churnView(sel);bindList(out);bindChurn(out);return;}
   if(view==='list'){out.innerHTML=listView(P,mine,sel);bindList(out);return;}
 
   /* At a glance (as on Monthly Performance Analysis): due = memberships whose package expires in the period;
@@ -1153,6 +1228,7 @@ function paintCentres(){
 }
 document.querySelectorAll('#tsub [data-sp]').forEach(b=>b.onclick=()=>{SP=b.dataset.sp;try{localStorage.setItem('artium_tr_sp',SP);}catch(e){}render();});
 /* Admins: narrow the teacher list by centre and course; only the teacher matters, the other two are optional */
+let ACS=null;   // the centres this person may see (a Centre Manager: their own)
 let PC=(()=>{try{return localStorage.getItem('artium_tr_pc')||'';}catch(e){return'';}})(),PCO=(()=>{try{return localStorage.getItem('artium_tr_pco')||'';}catch(e){return'';}})();
 function paintPicker(){
   const inC=t=>!PC||t.centres.includes(PC),cs=TEACH.filter(inC);
@@ -1160,7 +1236,8 @@ function paintPicker(){
   const L=cs.filter(t=>!PCO||t.course===PCO),cur=L.filter(t=>t.onTeam),past=L.filter(t=>!t.onTeam);
   if(!L.some(t=>tn(t.name)===tn(ME.name))&&L.length){ME=L[0];AS=ME.name;paintCentres();}
   const o=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
-  document.getElementById('asc').innerHTML=o('','All centres',!PC)+CENTRES.map(c=>o(c.name,c.name,PC===c.name)).join('');
+  const AC=CENTRES.filter(c=>!ACS||ACS.includes(c.name));if(PC&&!AC.some(c=>c.name===PC))PC='';
+  document.getElementById('asc').innerHTML=(AC.length>1?o('',ACS&&ACS.length<CENTRES.length?'All my centres':'All centres',!PC):'')+AC.map(c=>o(c.name,c.name,PC===c.name||AC.length===1)).join('');
   document.getElementById('asco').innerHTML=o('','All courses',!PCO)+courses.map(c=>o(c,c,PCO===c)).join('');
   document.getElementById('as').innerHTML=cur.map(t=>o(t.name,t.name,tn(t.name)===tn(ME.name))).join('')
     +(past.length?`<optgroup label="Not on the Offline Team tab">${past.map(t=>o(t.name,t.name,tn(t.name)===tn(ME.name))).join('')}</optgroup>`:'')||o('','No teachers',1);
@@ -1180,7 +1257,7 @@ async function load(){
   render();
   try{
     const P=period(),j=await ArtiumAuth.call('teacherRenewals',{a:iso(P.a),b:iso(P.b),as:AS,all:true});
-    if(j.all){ALLM=true;TEACH=j.teachers||[];BOARDS={};BOARDS[pkey(P)]=j.boards||{};LEADS={};LEADS[pkey(P)]=j.leads||{};ME=TEACH.find(x=>tn(x.name)===tn(AS))||TEACH[0]||ME;j.teachers=TEACH.map(x=>x.name);}
+    if(j.all){ALLM=true;ACS=j.centres||null;TEACH=j.teachers||[];BOARDS={};BOARDS[pkey(P)]=j.boards||{};LEADS={};LEADS[pkey(P)]=j.leads||{};ME=TEACH.find(x=>tn(x.name)===tn(AS))||TEACH[0]||ME;j.teachers=TEACH.map(x=>x.name);}
     else{ME=j.me||ME;BOARD=j.board;BKEY=pkey(P);ABOARD=j.aboard||null;ABKEY=pkey(P);LEAD=j.lead||null;}
     VIS=(j.visits||[]).map(v=>Object.assign({},v,{d:fromIso(v.d),cd:fromIso(v.cd)})).filter(v=>v.d);
     DATA={};CENTRES.forEach(c=>{const d=(j.data||{})[c.name]||{};DATA[c.name]={fs:(d['Fresh Sales']||[]).map(r=>r.map(v=>String(v).trim())),rn:(d['Renewals']||[]).map(r=>r.map(v=>String(v).trim()))};});
