@@ -78,6 +78,26 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .tx ul{margin-top:18px;padding-left:24px}.tx li{font:400 21px/1.5 var(--f);color:var(--ink2);margin-bottom:12px}.tx li b{color:var(--ink);font-weight:700}
 .mg{flex:1;display:grid;gap:22px;min-width:0;min-height:0}
 .tx.fl{flex:1 1 0;min-width:0}
+/* PDF slides */
+.pdfb{flex:1;min-width:0;min-height:0;border-radius:26px;background:linear-gradient(160deg,#F7F2FF,#F3EEFD);border:1.5px solid var(--edge);display:flex;align-items:center;justify-content:center;gap:28px;padding:22px 26px 52px;position:relative;container-type:size}
+.pdfb .book{position:relative;flex:none;width:min(calc(100cqw - 172px),calc(100cqh * var(--ar,1.7778)));aspect-ratio:var(--ar,1.7778);perspective:5200px}
+.pdfb .pg{position:absolute;inset:0;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 18px 40px -22px rgba(18,14,43,.55)}
+.pdfb .pg img{width:100%;height:100%;object-fit:contain;display:block}
+.pdfb .pg.turn{transform-origin:left center;backface-visibility:hidden;will-change:transform}
+.pdfb .pg.turn.fwd{animation:pgfwd .62s cubic-bezier(.45,.05,.55,.95) forwards}
+.pdfb .pg.turn.back{animation:pgback .62s cubic-bezier(.45,.05,.55,.95) forwards}
+@keyframes pgfwd{from{transform:rotateY(0)}to{transform:rotateY(-100deg)}}
+@keyframes pgback{from{transform:rotateY(-100deg)}to{transform:rotateY(0)}}
+.pdfb .pg .sh{position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,14,43,0) 35%,rgba(18,14,43,.32));pointer-events:none}
+.pdfb .pg.turn.fwd .sh{animation:pgsh .62s forwards}.pdfb .pg.turn.back .sh{animation:pgsh .62s reverse forwards}
+@keyframes pgsh{from{opacity:0}to{opacity:1}}
+.pdfb .cast{position:absolute;inset:0;border-radius:12px;background:linear-gradient(90deg,rgba(18,14,43,.28),rgba(18,14,43,0) 55%);pointer-events:none;opacity:0}
+.pdfb .cast.fwd{animation:pgcast .62s forwards}.pdfb .cast.back{animation:pgcast .62s reverse forwards}
+@keyframes pgcast{0%{opacity:0}45%{opacity:1}100%{opacity:0}}
+.pnav{width:58px;height:58px;border-radius:50%;border:0;background:#fff;box-shadow:0 10px 24px -10px rgba(43,2,86,.45);display:grid;place-items:center;color:var(--violet2);font:800 26px var(--f);flex:none;cursor:pointer;transition:transform .15s}
+.pnav:hover:not(:disabled){transform:scale(1.06)}.pnav:disabled{opacity:.35;cursor:default}
+.pdfb .pct{position:absolute;z-index:3;left:0;right:0;bottom:16px;text-align:center;font:600 15px var(--f);color:#6b6390}
+.pdfmsg{font:600 18px var(--f);color:var(--ink3);text-align:center;padding:20px}
 /* Shaped photos and videos: they take the width their shapes need (the text box keeps at least 520 px), and the text box
    matches their height, so both share the same top and bottom edge; a long text box can still grow taller */
 .s-b.fxb{container-type:size;align-items:center}
@@ -305,8 +325,9 @@ const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* Templates: [name, short description, text box?, kind, fewest, most] */
 const TPL={upd:['Updates','Up to 4 update cards, as on Key Updates.',0,'',0,0],t1p:['Text and 1 photo','One text box beside a photo.',1,'image',1,1],t2p:['Text and 2 photos','One text box beside two photos.',1,'image',2,2],
   t1v:['Text and 1 video','One text box beside a video.',1,'video',1,1],t2v:['Text and 2 videos','One text box beside two videos.',1,'video',2,2],
-  ponly:['Photos only','2 to 4 photos, with a title.',0,'image',2,4],vonly:['Videos only','2 to 4 videos, with a title.',0,'video',2,4]};
-const TPL_ORDER=['upd','t1p','t2p','t1v','t2v','ponly','vonly'];
+  ponly:['Photos only','2 to 4 photos, with a title.',0,'image',2,4],vonly:['Videos only','2 to 4 videos, with a title.',0,'video',2,4],
+  pdf:['PDF','A title and a PDF, turned page by page.',0,'pdf',1,1]};
+const TPL_ORDER=['upd','t1p','t2p','t1v','t2v','ponly','vonly','pdf'];
 
 /* The deck is kept per month. The Collections Overview slide follows the same month and "data up to" day as the Collections Overview page. */
 const NOW=new Date(),YDAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate()-1);
@@ -378,6 +399,64 @@ async function loadImg(id){
   paint();
 }
 const PLAY='<div class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>';
+/* ── PDF slides: the PDF is drawn page by page with the PDF.js library, and the arrows turn the pages like a book ── */
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+let PDFLIB=null;const PDFS={},PDFPG={};
+function pdfLib(){
+  if(!PDFLIB)PDFLIB=new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=PDFJS+'pdf.min.js';
+    sc.onload=()=>{window.pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js';res(window.pdfjsLib);};
+    sc.onerror=()=>{PDFLIB=null;rej(new Error('the PDF viewer could not be loaded'));};document.head.appendChild(sc);});
+  return PDFLIB;
+}
+async function pdfOpen(id){
+  if(PDFS[id])return;PDFS[id]={st:'load',img:{},busy:{}};
+  try{const lib=await pdfLib();let src;
+    if(LOCAL[id])src={url:LOCAL[id]};
+    else{const j=await ArtiumAuth.call('execsDeckMedia',{id});if(j.error)throw new Error(j.error);
+      const b=atob(j.data),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);src={data:u};}
+    const doc=await lib.getDocument(src).promise,v=(await doc.getPage(1)).getViewport({scale:1});
+    Object.assign(PDFS[id],{st:'ok',doc,n:doc.numPages,ar:v.width/v.height});
+    await pdfPage(id,0);pdfPage(id,1);
+  }catch(e){PDFS[id].st='x';PDFS[id].err=e.message||'unknown error';}
+  paint();
+}
+/* one page as a picture, drawn the first time it is needed (about 1800 px wide, sharp on a big screen) */
+function pdfPage(id,k){
+  const P=PDFS[id];if(!P||P.st!=='ok'||k<0||k>=P.n)return Promise.resolve(null);
+  if(P.img[k])return Promise.resolve(P.img[k]);if(P.busy[k])return P.busy[k];
+  return P.busy[k]=(async()=>{const pg=await P.doc.getPage(k+1),v0=pg.getViewport({scale:1}),v=pg.getViewport({scale:1800/Math.max(v0.width,v0.height)});
+    const c=document.createElement('canvas');c.width=Math.round(v.width);c.height=Math.round(v.height);
+    const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);
+    await pg.render({canvasContext:x,viewport:v}).promise;P.img[k]=c.toDataURL('image/jpeg',.9);
+    document.querySelectorAll(`.pdfb[data-pdf="${CSS.escape(id)}"]`).forEach(b=>{if(!b.dataset.turning&&(PDFPG[b.dataset.sid]||0)===k){const g=b.querySelector('.book .pg');if(g&&!g.querySelector('img'))g.innerHTML=`<img src="${P.img[k]}" alt="Page ${k+1}">`;}});
+    return P.img[k];})();
+}
+function pdfBody(s,thumb){
+  const m=(s.media||[])[0];
+  if(!m)return'<div class="pdfb"><div class="pdfmsg">Upload a PDF, or paste a Google Drive link to one.</div></div>';
+  pdfOpen(m.id);const P=PDFS[m.id];
+  if(!P||P.st==='load')return'<div class="pdfb"><div class="pdfmsg">Loading the PDF…</div></div>';
+  if(P.st==='x')return`<div class="pdfb"><div class="pdfmsg">The PDF couldn't be loaded (${esc(P.err)}).</div></div>`;
+  const k=Math.min(PDFPG[s.id]||0,P.n-1),img=P.img[k];if(!img)pdfPage(m.id,k);
+  const nav=(d,on,l)=>thumb?'':`<button type="button" class="pnav" data-pd="${d}"${on?'':' disabled'} aria-label="${l}">${d<0?'←':'→'}</button>`;
+  return`<div class="pdfb" data-pdf="${esc(m.id)}" data-sid="${esc(s.id)}" style="--ar:${P.ar.toFixed(4)}">${nav(-1,k>0,'Previous page')}<div class="book"><div class="pg">${img?`<img src="${img}" alt="Page ${k+1}">`:''}</div></div>${nav(1,k<P.n-1,'Next page')}${thumb?'':`<div class="pct">Page ${k+1} of ${P.n}</div>`}</div>`;
+}
+function pdfCan(b,d){const P=PDFS[b.dataset.pdf];if(!P||P.st!=='ok')return false;const t=(PDFPG[b.dataset.sid]||0)+d;return t>=0&&t<P.n;}
+/* the turn: going forward, the page lifts from its left edge and swings away, showing the next one; going back, the earlier page swings back in */
+async function pdfTurn(b,d){
+  if(!pdfCan(b,d))return;if(b.dataset.turning)return;b.dataset.turning='1';
+  const id=b.dataset.pdf,sid=b.dataset.sid,P=PDFS[id],k=PDFPG[sid]||0,t=k+d;
+  const cur=await pdfPage(id,k),nxt=await pdfPage(id,t),book=b.querySelector('.book');PDFPG[sid]=t;
+  book.innerHTML=d>0?`<div class="pg"><img src="${nxt}" alt=""></div><div class="cast fwd"></div><div class="pg turn fwd"><img src="${cur}" alt=""><i class="sh"></i></div>`
+    :`<div class="pg"><img src="${cur}" alt=""></div><div class="cast back"></div><div class="pg turn back"><img src="${nxt}" alt=""><i class="sh"></i></div>`;
+  const ct=b.querySelector('.pct');if(ct)ct.textContent=`Page ${t+1} of ${P.n}`;
+  b.querySelectorAll('.pnav').forEach(x=>x.disabled=!pdfCan(b,+x.dataset.pd));
+  setTimeout(()=>{book.innerHTML=`<div class="pg"><img src="${nxt}" alt="Page ${t+1}"></div>`;delete b.dataset.turning;},650);
+  pdfPage(id,t+1);pdfPage(id,t-1);
+}
+document.addEventListener('click',e=>{const p=e.target.closest('.pnav');if(!p)return;e.stopPropagation();const b=p.closest('.pdfb');if(b)pdfTurn(b,+p.dataset.pd);},true);
+/* the shown slide's PDF, if the keys should turn its pages first */
+function pdfKey(scope,d){const b=document.querySelector(scope+' .pdfb[data-pdf]');if(b&&(pdfCan(b,d)||b.dataset.turning)){pdfTurn(b,d);return true;}return false;}
 /* The shapes a photo or video can take (width ÷ height), and the nearest one to a file's own size */
 const SHAPE={l:16/9,s:1,q:3/4,p:9/16};
 const shapeOf=(w,h)=>{const r=Math.log((+w||16)/(+h||9));return Object.keys(SHAPE).reduce((a,k)=>Math.abs(Math.log(SHAPE[k])-r)<Math.abs(Math.log(SHAPE[a])-r)?k:a,'l');};
@@ -434,6 +513,7 @@ function slideHtml(page,s,i,n,thumb){
     const h=cs.length===1?1:Math.ceil(cs.length/2),cols=cs.length===1?[cs]:[cs.slice(0,h),cs.slice(h)];
     body=cs.length?`<div class="flow" style="--z:${s.z||1}">${cols.map(c=>`<div class="fcol">${c.map(cardHtml).join('')}</div>`).join('')}</div>`
       :`<div class="s-empty">Add update cards to this slide.</div>`;}
+  else if(s.tpl==='pdf')body=pdfBody(s,thumb);
   else{
     const ms=[],cnt=Math.max(T[4],Math.min(T[5],(s.media||[]).length+(thumb?0:0)));
     for(let k=0;k<Math.max(cnt,(s.media||[]).length);k++)ms.push((s.media||[])[k]||null);
@@ -587,16 +667,16 @@ function renderEditor(){
         <div class="fl">Text box <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Turnout:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" data-rt="h1" title="Heading 1">Heading 1</button><button type="button" data-rt="p" title="Normal text">Normal text</button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="lines" data-ph="Turnout: 46 learners performed.">${toEd(s.lines)}</div></div></div>`:''}</div>`;
       const ms=s.media||[],slots=[];
       for(let k=0;k<T[5];k++){const m=ms[k];
-        if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
-          <div class="nm">${k+1}. ${esc(m.name||(m.kind==='video'?'Video':'Photo'))}</div>
-          <select class="shp" data-mf="o" aria-label="Shape">${[['l','Landscape 16:9'],['s','Square 1:1'],['q','Portrait 3:4'],['p','Portrait 9:16'],['','No fixed shape']].map(([v,t])=>`<option value="${v}"${(SHAPE[m.o]?m.o:'')===v?' selected':''}>${t}</option>`).join('')}</select>
+        if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='pdf'?`<div class="vi">PDF${PDFS[m.id]&&PDFS[m.id].n?' · '+PDFS[m.id].n+' pages':''}</div>`:m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
+          <div class="nm">${k+1}. ${esc(m.name||(m.kind==='video'?'Video':m.kind==='pdf'?'PDF':'Photo'))}</div>
+          ${m.kind==='pdf'?'':`<select class="shp" data-mf="o" aria-label="Shape">${[['l','Landscape 16:9'],['s','Square 1:1'],['q','Portrait 3:4'],['p','Portrait 9:16'],['','No fixed shape']].map(([v,t])=>`<option value="${v}"${(SHAPE[m.o]?m.o:'')===v?' selected':''}>${t}</option>`).join('')}</select>`}
           <div class="ctl">${m.kind==='image'?`<select data-mf="fit" aria-label="Fit"><option value="cover"${m.fit!=='contain'?' selected':''}>Fill the space</option><option value="contain"${m.fit==='contain'?' selected':''}>Show the whole photo</option></select>`:'<span style="flex:1"></span>'}
           <button class="ic" data-a="mleft" title="Move earlier"${k?'':' disabled'}>←</button><button class="ic" data-a="mright" title="Move later"${k<ms.length-1?'':' disabled'}>→</button><button class="ic del" data-a="unmedia" title="Remove">✕</button></div></div>`);
         else if(k===ms.length)slots.push(`<div class="slot" data-k="${k}">${s._up?`<div class="prog"><i style="width:${s._up.pct}%"></i></div><small>${esc(s._up.text)}</small>`
           :DLINK===s.id+'|'+k?`<div class="dl"><input class="in" id="dlurl" placeholder="Paste the Google Drive link" aria-label="Google Drive link"><div class="dlb"><button type="button" class="btn" data-a="dlx">Cancel</button><button type="button" class="btn pri" data-a="dlgo">Add</button></div></div>`
-          :`<button type="button" class="up" data-a="pick">+ Upload ${T[3]==='video'?'a video':'a photo'}</button><button type="button" class="up dlk" data-a="dlink" data-k="${k}">or paste a Google Drive link</button><small>${k<T[4]?'Needed':'Optional'} · ${T[3]==='video'?'up to 300 MB':'resized for the screen'}</small>`}</div>`);
+          :`<button type="button" class="up" data-a="pick">+ Upload ${T[3]==='video'?'a video':T[3]==='pdf'?'a PDF':'a photo'}</button><button type="button" class="up dlk" data-a="dlink" data-k="${k}">or paste a Google Drive link</button><small>${k<T[4]?'Needed':'Optional'} · ${T[3]==='video'?'up to 300 MB':T[3]==='pdf'?'up to 20 MB':'resized for the screen'}</small>`}</div>`);
         else slots.push(`<div class="slot" style="opacity:.5"><small>${T[3]==='video'?'Video':'Photo'} ${k+1}${k<T[4]?' · needed':' · optional'}</small></div>`);}
-      f+=`<div class="fg">${left}<div class="fl">${T[3]==='video'?'Videos':'Photos'} <small>${T[4]===T[5]?T[4]+' for this template.':T[4]+' to '+T[5]+' for this template.'}</small><div class="slots">${slots.join('')}</div></div></div>`;
+      f+=`<div class="fg">${left}<div class="fl">${T[3]==='video'?'Videos':T[3]==='pdf'?'PDF':'Photos'} <small>${T[3]==='pdf'?'One PDF. In the slideshow, the arrows turn its pages.':T[4]===T[5]?T[4]+' for this template.':T[4]+' to '+T[5]+' for this template.'}</small><div class="slots">${slots.join('')}</div></div></div>`;
     }
     main=`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,s,SEL,n)}</div></div><div class="spill" id="spill" hidden></div></div><div class="form" id="form">${f}</div>`;
   }
@@ -663,8 +743,8 @@ function renderPicker(){
   const S=(v,c)=>`<div style="background:${c}">${v?'<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>':''}</div>`;
   const P='linear-gradient(135deg,#9B7BF5,#4101f7)',Q='linear-gradient(135deg,#F1B6FA,#dd30b1)',L='#E9E0FD';
   const PV={upd:['','grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr',S(0,L)+S(0,L)+S(0,L)+S(0,L)],t1p:[1,'',S(0,P)],t2p:[1,'grid-template-rows:1fr 1fr',S(0,P)+S(0,Q)],
-    t1v:[1,'',S(1,P)],t2v:[1,'grid-template-rows:1fr 1fr',S(1,P)+S(1,Q)],ponly:['','grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr',S(0,P)+S(0,Q)+S(0,Q)+S(0,P)],vonly:['','grid-template-columns:1fr 1fr',S(1,P)+S(1,Q)]};
-  document.getElementById('dlg').innerHTML=`<div class="ov" id="ov"><div class="dlg" role="dialog" aria-label="Add a slide"><h3>Add a slide</h3><p>Choose a template first. You'll then add the text and upload the photos or videos it needs.</p>
+    t1v:[1,'',S(1,P)],t2v:[1,'grid-template-rows:1fr 1fr',S(1,P)+S(1,Q)],ponly:['','grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr',S(0,P)+S(0,Q)+S(0,Q)+S(0,P)],vonly:['','grid-template-columns:1fr 1fr',S(1,P)+S(1,Q)],pdf:['','','<div style="background:#fff;border:1.5px solid #CDBDF7;color:#4101f7;font:800 15px var(--f);letter-spacing:.08em">PDF</div>']};
+  document.getElementById('dlg').innerHTML=`<div class="ov" id="ov"><div class="dlg" role="dialog" aria-label="Add a slide"><h3>Add a slide</h3><p>Choose a template first. You'll then add the text and upload the photos, videos or PDF it needs.</p>
     <div class="tpls">${TPL_ORDER.map(k=>`<button type="button" class="tp" data-tpl="${k}" aria-pressed="${PICK===k}"><div class="pv">${PV[k][0]?'<div class="t"><i></i><i></i><i></i><i></i></div>':''}<div class="g" style="${PV[k][1]}">${PV[k][2]}</div></div><b>${TPL[k][0]}</b><small>${TPL[k][1]}</small></button>`).join('')}</div>
     <div class="ft"><button class="btn" type="button" data-x>Cancel</button><button class="btn pri" type="button" data-ok>Add this slide</button></div></div></div>`;
 }
@@ -755,7 +835,7 @@ function doImport(){
 /* Upload: photos are resized to at most 2400 px first; everything goes to Drive in 8 MB pieces */
 function pickFile(s){
   const T=TPL[s.tpl];if((s.media||[]).length>=T[5])return;
-  const inp=document.createElement('input');inp.type='file';inp.accept=T[3]==='video'?'video/*':'image/*';
+  const inp=document.createElement('input');inp.type='file';inp.accept=T[3]==='video'?'video/*':T[3]==='pdf'?'application/pdf':'image/*';
   inp.onchange=()=>{const f=inp.files[0];if(f)upload(s,f);};inp.click();
 }
 const dims=(f,kind)=>new Promise(res=>{const u=URL.createObjectURL(f);
@@ -780,14 +860,15 @@ async function fromDrive(s,url){
     const m={id:j.id,kind:T[3],w:j.w||16,h:j.h||9,name:j.name||'',fit:'cover'};
     if(T[3]==='image'&&j.data){IMG[j.id]='data:'+j.mime+';base64,'+j.data;
       await new Promise(r=>{const im=new Image();im.onload=()=>{m.w=im.naturalWidth||16;m.h=im.naturalHeight||9;r();};im.onerror=r;im.src=IMG[j.id];});}
-    m.o=shapeOf(m.w,m.h);
+    if(T[3]!=='pdf')m.o=shapeOf(m.w,m.h);
     s.media=(s.media||[]).concat(m).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The file could not be added: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
 }
 async function upload(s,f){
-  const T=TPL[s.tpl],kind=/^video\//.test(f.type)?'video':/^image\//.test(f.type)?'image':null;
-  if(kind!==T[3]){alert(T[3]==='video'?'This slide needs a video.':'This slide needs a photo.');return;}
+  const T=TPL[s.tpl],kind=/^video\//.test(f.type)?'video':/^image\//.test(f.type)?'image':f.type==='application/pdf'?'pdf':null;
+  if(kind!==T[3]){alert(T[3]==='video'?'This slide needs a video.':T[3]==='pdf'?'This slide needs a PDF.':'This slide needs a photo.');return;}
+  if(kind==='pdf'&&f.size>20*1024*1024){alert('That PDF is larger than 20 MB. Export it smaller (for example with lower image quality), then try again.');return;}
   if(f.size>300*1024*1024){alert('That file is larger than 300 MB. Trim the video or export it smaller, then try again.');return;}
   UPLOADING++;s._up={pct:0,text:'Getting ready…'};renderEditor();
   try{
@@ -801,7 +882,7 @@ async function upload(s,f){
       off=res.done?size:res.next;
       s._up={pct:Math.round(off/size*100),text:'Uploading '+Math.round(off/size*100)+'% of '+(size/1048576).toFixed(1)+' MB…'};if(cur()===s)renderEditor();
     }
-    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover',o:shapeOf(w,h)}).slice(0,T[5]);DIRTY=true;
+    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover',...(kind==='pdf'?{}:{o:shapeOf(w,h)})}).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The upload stopped: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
 }
@@ -884,8 +965,8 @@ document.addEventListener('keydown',e=>{
   if(document.getElementById('ov')){if(e.key==='Escape')closeDlg();return;}
   const fs=document.body.classList.contains('fs');
   const fwd=e.key==='ArrowRight'||e.key==='PageDown'||(fs&&e.key===' '),back=e.key==='ArrowLeft'||e.key==='PageUp';
-  if(fs){if(fwd){e.preventDefault();pstep(1);}if(back){e.preventDefault();pstep(-1);}if(e.key==='Escape'&&!document.fullscreenElement)leaveFs();return;}
-  if(VIEW==='show'&&(fwd||back)){e.preventDefault();step(fwd?1:-1);}
+  if(fs){if(fwd){e.preventDefault();if(!pdfKey('#slide',1))pstep(1);}if(back){e.preventDefault();if(!pdfKey('#slide',-1))pstep(-1);}if(e.key==='Escape'&&!document.fullscreenElement)leaveFs();return;}
+  if(VIEW==='show'&&(fwd||back)){e.preventDefault();if(!pdfKey('#slide',fwd?1:-1))step(fwd?1:-1);}
 });
 
 /* ── Collections Overview: the fixed first slide ── */
