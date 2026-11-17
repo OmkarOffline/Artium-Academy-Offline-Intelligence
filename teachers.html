@@ -227,7 +227,10 @@
   table.plt2 a{color:var(--accent);text-decoration:none;font-weight:600}
   table.plt2 td.ds{white-space:normal;min-width:300px;max-width:440px;line-height:1.5;color:var(--ink)}table.plt2 .mut{color:var(--ghost)}
   .stt{display:inline-block;border-radius:999px;padding:3px 10px;font:600 12.5px var(--body)}
-  .stt.ok{background:#E5F4EC;color:var(--ok)}.stt.bad{background:#FDECEB;color:var(--bad)}.stt.wait{background:#FBF1DC;color:#8A5A00}
+  .stt.ok{background:#E5F4EC;color:var(--ok)}.stt.pipe{background:#EDE5FF;color:var(--accent)}
+  table.plt2 tr.inp td{background:#F7F3FF}table.plt2 tr.inp td.who{box-shadow:inset 4px 0 0 var(--gold)}table.plt2 td.st small.pd{white-space:nowrap}table.plt2 td.st small.od{color:#8A5A00}
+  table.plt2 th.pc{color:var(--accent);background:#F8F5FF}table.plt2 td.pc{background:#FBF9FF}table.plt2 tr.inp td.pc{background:#F2ECFF}
+  .plt .sep{width:1px;background:var(--border);margin:4px 2px}.pln b{color:var(--accent);font-weight:600}.stt.bad{background:#FDECEB;color:var(--bad)}.stt.wait{background:#FBF1DC;color:#8A5A00}
   .ple{padding:28px;text-align:center;color:var(--muted);font-size:14px}
   /* landing cards in the brand colours */
   body .cn-card::before{background:linear-gradient(90deg,#4101f7,#dd30b1)}
@@ -470,6 +473,11 @@ const LGD='<span class="util lo">Up to 50%</span><span class="util mid">51–70%
 let SELP=null;   // {key:'act|Balu|24310', tb, t, k, f:'all'|'ren'|'not'|'other'}
 const fd=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'–';
 const ml=k=>MON[k%12]+' '+String(Math.floor(k/12)).slice(2);
+/* In the pipeline = not renewed, not marked Will not renew, and has a promised payment date (column 34) and an expected amount (column 35), the same rule as the Renewal Pipeline page */
+const numOf=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const inrOf=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const lostOf=x=>/will not renew|discontinu|refund/i.test(x.status);
+const pipeOf=x=>{if(x.pp===undefined){const d=valid(parseDate(x.r[33])),a=numOf(x.r[34]);x.pp=!x.renewed&&!lostOf(x)&&d&&a>0?{d,a}:null;}return x.pp;};
 function cellLists(tb,t,k){
   if(!R)return{due:[],other:[]};const rn=R.rn,cur=R[tb==='coh'?'a':'b'].cur,who=t==='*'?cur:[t];
   const due=[],paid=[];who.forEach(w=>{((rn.DUEL[w]||{})[k]||[]).forEach(x=>due.push(x));((rn.PAIDL[w]||{})[k]||[]).forEach(x=>paid.push(x));});
@@ -480,23 +488,25 @@ function cellLists(tb,t,k){
 function plRender(tb){
   const box=document.getElementById(tb+'-pl');if(!box)return;
   if(!SELP||SELP.tb!==tb||!R){box.innerHTML='';return;}
-  const {t,k}=SELP,{due,other}=cellLists(tb,t,k),ren=due.filter(x=>x.renewed),not=due.filter(x=>!x.renewed);
-  const f=SELP.f==='other'&&!other.length?'all':SELP.f,list=(f==='ren'?ren:f==='not'?not:f==='other'?other:due).slice().sort((a,b)=>(a.end||a.date)-(b.end||b.date));
-  const allC=selCentre==='All',many=t==='*';
+  const {t,k}=SELP,{due,other}=cellLists(tb,t,k),ren=due.filter(x=>x.renewed),not=due.filter(x=>!x.renewed),pip=not.filter(pipeOf),call=not.filter(x=>!pipeOf(x)&&!lostOf(x));
+  const f=SELP.f==='other'&&!other.length?'all':SELP.f,list=(f==='ren'?ren:f==='not'?not:f==='call'?call:f==='pipe'?pip:f==='other'?other:due).slice().sort((a,b)=>(a.end||a.date)-(b.end||b.date));
+  const allC=selCentre==='All',many=t==='*',pc=f!=='ren'&&f!=='other',td0=new Date();td0.setHours(0,0,0,0);
   const st=x=>{if(f==='other'){const pe=x.prev&&x.prev.end;return`<span class="stt ok">Renewed ${fd(x.date)}</span><small>${pe?(mi(pe)<k?'was due '+ml(mi(pe))+' (late)':'due '+ml(mi(pe))+' (in advance)'):'no earlier membership found'}</small>`;}
     if(x.renewed)return`<span class="stt ok">Renewed${x.renOn?' '+fd(x.renOn):''}</span>`;
     if(/will not renew|discontinu|refund/i.test(x.status))return`<span class="stt bad">Will not renew</span>${cell(x.r,28)?`<small>${esc(cell(x.r,28))}</small>`:''}`;
+    const pp=pipeOf(x);if(pp)return`<span class="stt pipe">In pipeline</span><small class="pd${pp.d<td0?' od':''}">Promised for ${fd(pp.d)}${pp.d<td0?' · overdue':''}</small>`;
     return`<span class="stt wait">Not renewed yet</span>`;};
-  const row=x=>{const r=x.r,ph=String(r[7]||'').replace(/\D/g,'').slice(-10),src=f==='other'&&x.prev?x.prev:x;
-    return`<tr><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
-      <td>${fd(src.end)}</td><td class="st">${st(x)}</td><td class="ds">${esc(cell(src.r,32))||'<span class="mut">–</span>'}</td></tr>`;};
+  const row=x=>{const pp=f!=='other'&&pipeOf(x),r=x.r,ph=String(r[7]||'').replace(/\D/g,'').slice(-10),src=f==='other'&&x.prev?x.prev:x;
+    return`<tr${pp?' class="inp"':''}><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
+      <td>${fd(src.end)}</td><td class="st">${st(x)}</td>${pc?`<td class="pc">${pp?fd(pp.d):'<span class="mut">–</span>'}</td><td class="pc">${pp?inrOf(pp.a):'<span class="mut">–</span>'}</td>`:''}<td class="ds">${esc(cell(src.r,32))||'<span class="mut">–</span>'}</td></tr>`;};
   const chip=(v,l,n)=>`<button type="button" data-plf="${v}" aria-pressed="${f===v}">${l}<i>${n}</i></button>`;
   const title=(many?'All current teachers':esc(t))+' · '+(tb==='act'?'due in ':'cohort ending ')+ml(k);
-  box.innerHTML=`<div class="plh"><div><b>${title}</b><span>${due.length} due · ${ren.length} renewed · ${not.length} not renewed</span></div>
-    <div class="plt" role="group" aria-label="Show">${chip('all','All due',due.length)}${chip('ren','Renewed',ren.length)}${chip('not','Not renewed',not.length)}${other.length?chip('other','Paid in '+MON[k%12]+', due another month',other.length):''}</div>
+  box.innerHTML=`<div class="plh"><div><b>${title}</b><span>${due.length} due · ${ren.length} renewed · ${not.length} not renewed · ${pip.length} in pipeline · ${call.length} to call</span></div>
+    <div class="plt" role="group" aria-label="Show">${chip('all','All due',due.length)}${chip('ren','Renewed',ren.length)}${chip('not','Not renewed',not.length)}<span class="sep"></span>${chip('call','To call',call.length)}${chip('pipe','In pipeline',pip.length)}${other.length?chip('other','Paid in '+MON[k%12]+', due another month',other.length):''}</div>
     <button type="button" class="plx" data-plx aria-label="Close the list">✕</button></div>
+    ${pc&&list.some(x=>pipeOf(x))?`<p class="pln">Learners shaded in violet are <b>already in the pipeline</b>: they have a promised payment date and an expected amount, so they don't need a call. To call leaves out the pipeline and anyone marked Will not renew.</p>`:''}
     ${tb==='act'&&other.length&&f!=='other'?`<p class="pln">The renewed figure in the cell counts every renewal paid in ${ml(k)}, including ${other.length} late or advance payment${other.length===1?'':'s'} listed under the last button.</p>`:''}
-    ${list.length?`<div class="plw"><table class="plt2"><thead><tr><th class="who">Learner</th><th>Mobile</th><th>Course</th><th>Age group</th><th>Course level</th>${many?'<th>Teacher</th>':''}<th>Membership end date</th><th>Status</th><th>Description</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div>`
+    ${list.length?`<div class="plw"><table class="plt2"><thead><tr><th class="who">Learner</th><th>Mobile</th><th>Course</th><th>Age group</th><th>Course level</th>${many?'<th>Teacher</th>':''}<th>Membership end date</th><th>Status</th>${pc?'<th class="pc">Expected payment date</th><th class="pc">Expected collections</th>':''}<th>Description</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div>`
       :'<div class="ple">No learners here.</div>'}`;
 }
 function plOpen(pk){
