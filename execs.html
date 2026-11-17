@@ -269,6 +269,9 @@ body.fs .stage{position:fixed;inset:0;width:auto;height:auto!important;border-ra
 .cs td.ti.t input{color:#6b6390}
 .cs td.ti input:focus{outline:none;border-color:var(--violet2);box-shadow:0 0 0 2px rgba(65,1,247,.16);background:#fff}
 .cs td.ti input.ch{background:#FFF7E6;border-color:#E9C98A}
+.cs .rrw{position:relative;display:block}.cs td.ti.r input{color:#4101f7;font-weight:700}.cs td.ti.r input::placeholder{color:#a79fc4;font-weight:500}
+.cs td.rro input{border-color:#9B7BF5;background:#F1EAFE}
+.cs .rrx{position:absolute;left:-9px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;border:0;background:#4101f7;color:#fff;font:700 11px/18px var(--f);padding:0;cursor:pointer}
 .s-top .hl{display:flex;gap:34px;align-items:flex-end}
 .s-top .hl div{text-align:right}.s-top .hl small{display:block;font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:#bfb0f5}
 .s-top .hl b{display:block;font:700 22px var(--f);color:#fff;margin-top:4px}.s-top .hl em{display:block;font:500 12.5px var(--f);font-style:normal;color:#d9d0ff;margin-top:2px}
@@ -976,6 +979,19 @@ let COLL={},EDIT={},SHOWRR=true;try{SHOWRR=localStorage.getItem('artium_execs_rr
 const collKey=()=>mkey(WEEK)+'|'+upto();
 const CH=()=>Object.keys(EDIT).length;
 const TYPED=['exN','exAmt','insN','insAmt','rfN','rfAmt'];
+/* Run-rate: worked out from the month so far, unless it has been typed in for this "data up to" day (for a call, to count the pipeline).
+   Typed ones are kept with the day they were typed for, so when the day moves on they go back to the formula by themselves. */
+const RRBASE=['adm','fs','rn','rc','exN','exAmt','insN','insAmt','rfN','rfAmt'];
+function rrv(F,g,k){
+  const D=daysOf(),f=x=>rrv(F,g,x)||0;
+  if(g==='Total')return CENTRES.reduce((s,c)=>s+(rrv(F,c,k)||0),0);
+  if(k==='coach')return f('fs')+f('rc');if(k==='other')return f('exAmt')+f('insAmt');if(k==='gross')return f('coach')+f('other');if(k==='net')return f('gross')-f('rfAmt');
+  const o=typed(g,k+'R');if(o!=null)return o;
+  const a=(F[g][k]||[])[1];return a==null||!D.gone?null:a/D.gone*D.n;
+}
+const rrSet=(g,k)=>typed(g,k+'R')!=null;
+const anyRR=()=>CENTRES.some(c=>RRBASE.some(k=>rrSet(c,k)));
+function rrReset(c,k){const t=((COLL[collKey()]||{}).typed||{})[c]||{};if(t[k+'R']!=null)EDIT[c+'|'+k+'R']='';else delete EDIT[c+'|'+k+'R'];}
 const typed=(c,k)=>{const e=EDIT[c+'|'+k];if(e!==undefined)return e===''?null:e;const t=((COLL[collKey()]||{}).typed||{})[c]||{};return t[k]!=null?t[k]:null;};
 function centreFigures(c){
   const d=COLL[collKey()]||{},a=(d.actuals||{})[c]||{adm:0,fs:0,rn:0,rc:0},t=(d.targets||{})[c]||{};
@@ -1027,8 +1043,14 @@ function collSlide(edit,i=0,n=0){
         return`<td class="ti ${cls}${T}"><input inputmode="numeric" data-c="${esc(g)}" data-k="${k}" value="${val==null?'':val}" class="${ch?'ch':''}" aria-label="${esc(g)} · ${r.l} · ${j?'actual':'target'}"></td>`;};
       const t=edit&&r.typed&&g!=='Total'?box(0,'t'):`<td class="t${T}">${show(v[0])}</td>`;
       const a=edit&&r.typed&&g!=='Total'?box(1,'a'):`<td class="a${T}">${show(v[1])}</td>`;
-      return`<td class="gp"></td>${t}${a}`+(RR?`<td class="r${T}">${r.atv?'<span class="na">NA</span>':show(rr(v[1]))}</td>`:'');}).join('')+'</tr>';});
-  const N=F.Total.net,nr=rr(N[1]),pct=N[0]&&nr!=null?Math.round(nr/N[0]*100):null;
+      let rc='';
+      if(RR){if(r.atv)rc=`<td class="r${T}"><span class="na">NA</span></td>`;
+        else if(edit&&g!=='Total'&&RRBASE.includes(r.k)){const k=r.k+'R',val=typed(g,k),ch=EDIT[g+'|'+k]!==undefined,set=val!=null;
+          const auto=(F[g][r.k]||[])[1],au=auto==null||!D.gone?null:auto/D.gone*D.n;
+          rc=`<td class="ti r${set?' rro':''}"><span class="rrw"><input inputmode="numeric" data-c="${esc(g)}" data-k="${k}" value="${set?val:''}" placeholder="${au==null?'':fmt(au)}" class="${ch?'ch':''}" aria-label="${esc(g)} · ${r.l} · run-rate (blank for automatic)">${set?`<button type="button" class="rrx" data-rrx="${esc(g)}|${r.k}" title="Back to the automatic run-rate">↺</button>`:''}</span></td>`;}
+        else rc=`<td class="r${T}${!edit&&g!=='Total'&&RRBASE.includes(r.k)&&rrSet(g,r.k)?' rrs':''}">${show(rrv(F,g,r.k))}</td>`;}
+      return`<td class="gp"></td>${t}${a}`+rc;}).join('')+'</tr>';});
+  const N=F.Total.net,nr=rrv(F,'Total','net'),pct=N[0]&&nr!=null?Math.round(nr/N[0]*100):null;
   const hl=`<div class="hl"><div><small>Net collections</small><b>₹${fmt(N[1]||0)}</b><em>${N[0]?'of ₹'+fmt(N[0])+' target':'No target set'}</em></div>`
     +(RR&&!D.full?`<span class="sep"></span><div><small>Run-rate</small><b>₹${fmt(nr||0)}</b><em>${pct==null?'No target set':pct+'% of target'}</em></div>`:'')+'</div>';
   return`<div class="cs">${top(hl)}<div class="ftab">${h}</tbody></table></div>${slideFoot(i,n)}</div>`;
@@ -1050,8 +1072,9 @@ function collEditMain(page,n){
     <div class="fh" style="margin-top:4px">
     <label class="chk">Data up to <input type="date" class="in" id="cupto" style="width:auto;height:34px;margin-left:6px" min="${mkey(WEEK)}-01" max="${mkey(WEEK)}-${p2(lastDay(y,m))}" value="${mkey(WEEK)}-${p2(upto())}"></label>
     <button class="btn" id="clatest" type="button" style="height:34px">Latest</button>
-    <label class="chk">Run-rate <select class="in" id="crr" style="width:auto;height:34px;margin-left:6px"><option value="1"${SHOWRR?' selected':''}>Show</option><option value="0"${SHOWRR?'':' selected'}>Hide</option></select></label></div>
-    <p class="spill" style="display:block;margin:0">Everything on this slide comes from the receipts sheets and the Targets page, except exam registrations, instruments and refunds. Type those into the boxes on the slide, then press Save.</p></div>`;
+    <label class="chk">Run-rate <select class="in" id="crr" style="width:auto;height:34px;margin-left:6px"><option value="1"${SHOWRR?' selected':''}>Show</option><option value="0"${SHOWRR?'':' selected'}>Hide</option></select></label>
+    ${SHOWRR&&anyRR()?'<button class="btn" id="rrall" type="button" style="height:34px">↺ All run-rates automatic</button>':''}</div>
+    <p class="spill" style="display:block;margin:0">Everything on this slide comes from the receipts sheets and the Targets page, except exam registrations, instruments and refunds. Type those into the boxes on the slide, then press Save. Run-rates are worked out for you; type over one to show a different figure for this call (for example, to count the pipeline). It applies only to this "data up to" day, and ↺ puts it back to the formula.</p></div>`;
 }
 function collRefresh(){
   if(!document.querySelector('.save')){renderEditor();return;}
@@ -1081,7 +1104,9 @@ document.getElementById('ed').addEventListener('change',e=>{
   if(e.target.id==='cupto'){const m=String(e.target.value).match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)setUpto(Math.min(+m[3],lastDay(+m[1],+m[2]-1)));}
   if(e.target.id==='crr'){SHOWRR=e.target.value==='1';try{localStorage.setItem('artium_execs_rr',SHOWRR?'1':'0');}catch(err){}renderEditor();}
 });
-document.getElementById('ed').addEventListener('click',e=>{if(e.target.id==='clatest')setUpto(lastDay(WEEK.getFullYear(),WEEK.getMonth()));});
+document.getElementById('ed').addEventListener('click',e=>{if(e.target.id==='clatest')setUpto(lastDay(WEEK.getFullYear(),WEEK.getMonth()));
+  const x=e.target.closest('[data-rrx]');if(x){e.stopPropagation();const [c,k]=x.dataset.rrx.split('|');rrReset(c,k);collRefresh();return;}
+  if(e.target.id==='rrall'){CENTRES.forEach(c=>RRBASE.forEach(k=>{if(rrSet(c,k))rrReset(c,k);}));renderEditor();}});
 
 /* Scale the 1600 × 900 slide to the space it has */
 function fit(){
