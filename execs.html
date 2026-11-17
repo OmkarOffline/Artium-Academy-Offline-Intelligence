@@ -136,6 +136,9 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .slot{border-radius:14px;border:1.5px dashed #CDBDF7;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--violet2);font:700 13px var(--f);background:#FBF9FF;padding:10px;text-align:center}
 .slot button.up{border:0;background:none;color:var(--violet2);font:700 13.5px var(--f);cursor:pointer}
 .slot small{font:500 11.5px var(--f);color:var(--ink4)}
+.slot button.dlk{font-weight:600;font-size:12.5px;color:var(--ink3);text-decoration:underline;text-underline-offset:3px}
+.slot .dl{width:100%;display:flex;flex-direction:column;gap:8px}.slot .dl .in{height:36px;font-size:13px}
+.slot .dlb{display:flex;gap:6px;justify-content:flex-end}.slot .dlb .btn{height:32px;padding:0 12px;font-size:12.5px}
 .slot.full{border:1px solid var(--line);background:#fff;align-items:stretch;justify-content:flex-start;padding:8px}
 .slot .pv{height:96px;border-radius:10px;overflow:hidden;position:relative;background:#F1ECFC}
 .slot .pv img{width:100%;height:100%;object-fit:cover;display:block}
@@ -559,7 +562,8 @@ function renderEditor(){
           <div class="ctl">${m.kind==='image'?`<select data-mf="fit" aria-label="Fit"><option value="cover"${m.fit!=='contain'?' selected':''}>Fill the space</option><option value="contain"${m.fit==='contain'?' selected':''}>Show the whole photo</option></select>`:'<span style="flex:1"></span>'}
           <button class="ic" data-a="mleft" title="Move earlier"${k?'':' disabled'}>←</button><button class="ic" data-a="mright" title="Move later"${k<ms.length-1?'':' disabled'}>→</button><button class="ic del" data-a="unmedia" title="Remove">✕</button></div></div>`);
         else if(k===ms.length)slots.push(`<div class="slot" data-k="${k}">${s._up?`<div class="prog"><i style="width:${s._up.pct}%"></i></div><small>${esc(s._up.text)}</small>`
-          :`<button type="button" class="up" data-a="pick">+ Upload ${T[3]==='video'?'a video':'a photo'}</button><small>${k<T[4]?'Needed':'Optional'} · ${T[3]==='video'?'up to 300 MB':'resized for the screen'}</small>`}</div>`);
+          :DLINK===s.id+'|'+k?`<div class="dl"><input class="in" id="dlurl" placeholder="Paste the Google Drive link" aria-label="Google Drive link"><div class="dlb"><button type="button" class="btn" data-a="dlx">Cancel</button><button type="button" class="btn pri" data-a="dlgo">Add</button></div></div>`
+          :`<button type="button" class="up" data-a="pick">+ Upload ${T[3]==='video'?'a video':'a photo'}</button><button type="button" class="up dlk" data-a="dlink" data-k="${k}">or paste a Google Drive link</button><small>${k<T[4]?'Needed':'Optional'} · ${T[3]==='video'?'up to 300 MB':'resized for the screen'}</small>`}</div>`);
         else slots.push(`<div class="slot" style="opacity:.5"><small>${T[3]==='video'?'Video':'Photo'} ${k+1}${k<T[4]?' · needed':' · optional'}</small></div>`);}
       f+=`<div class="fg">${left}<div class="fl">${T[3]==='video'?'Videos':'Photos'} <small>${T[4]===T[5]?T[4]+' for this template.':T[4]+' to '+T[5]+' for this template.'}</small><div class="slots">${slots.join('')}</div></div></div>`;
     }
@@ -608,6 +612,9 @@ document.getElementById('ed').addEventListener('click',async e=>{
   else if(a==='delc'){s.cards.splice(+b.closest('[data-c]').dataset.c,1);}
   else if(a==='unmedia'||a==='mleft'||a==='mright'){const k=+b.closest('[data-k]').dataset.k,m=s.media[k];s.media.splice(k,1);if(a==='mleft')s.media.splice(k-1,0,m);if(a==='mright')s.media.splice(k+1,0,m);}
   else if(a==='pick'){pickFile(s);return;}
+  else if(a==='dlink'){DLINK=s.id+'|'+b.dataset.k;renderEditor();setTimeout(()=>{const i=document.getElementById('dlurl');if(i)i.focus();},30);return;}
+  else if(a==='dlx'){DLINK=null;renderEditor();return;}
+  else if(a==='dlgo'){fromDrive(s,(document.getElementById('dlurl')||{}).value||'');return;}
   else return;
   touch();renderEditor();
 });
@@ -729,6 +736,23 @@ async function shrink(f,d){
   const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.88));return{blob:blob||f,w,h};
 }
 const b64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).replace(/^data:[^,]*,/,''));r.onerror=rej;r.readAsDataURL(blob);});
+/* A photo or video already on Google Drive: paste its link and it is copied into the deck's media folder.
+   It has to be a file on the Artium Academy Google account, shared so that the site can open it. */
+let DLINK=null;
+document.getElementById('ed').addEventListener('keydown',e=>{if(e.target.id==='dlurl'&&e.key==='Enter'){e.preventDefault();const s=cur();if(s)fromDrive(s,e.target.value);}if(e.target.id==='dlurl'&&e.key==='Escape'){DLINK=null;renderEditor();}});
+async function fromDrive(s,url){
+  const T=TPL[s.tpl];url=String(url).trim();
+  if(!/[-\w]{25,}/.test(url)){alert('That doesn\'t look like a Google Drive link. Copy the link from Drive (Share, then Copy link) and paste it here.');return;}
+  DLINK=null;UPLOADING++;s._up={pct:35,text:'Getting the file from Google Drive…'};renderEditor();
+  try{
+    const j=await ArtiumAuth.call('execsDeckFromDrive',{url,kind:T[3]});if(j.error)throw new Error(j.error);
+    const m={id:j.id,kind:T[3],w:j.w||16,h:j.h||9,name:j.name||'',fit:'cover'};
+    if(T[3]==='image'&&j.data){IMG[j.id]='data:'+j.mime+';base64,'+j.data;
+      await new Promise(r=>{const im=new Image();im.onload=()=>{m.w=im.naturalWidth||16;m.h=im.naturalHeight||9;r();};im.onerror=r;im.src=IMG[j.id];});}
+    s.media=(s.media||[]).concat(m).slice(0,T[5]);DIRTY=true;
+  }catch(err){alert('The file could not be added: '+err.message+'.');}
+  delete s._up;UPLOADING--;renderEditor();
+}
 async function upload(s,f){
   const T=TPL[s.tpl],kind=/^video\//.test(f.type)?'video':/^image\//.test(f.type)?'image':null;
   if(kind!==T[3]){alert(T[3]==='video'?'This slide needs a video.':'This slide needs a photo.');return;}
