@@ -330,7 +330,9 @@ let DRAFT=null,DIRTY=false,SEL=-1,busy=false,UPLOADING=0,PICK=null;
 const pageOf=id=>(DATA&&DATA.pages.find(p=>p.id===id))||null;
 const deckOf=id=>(DATA&&DATA.decks[id])||{slides:[]};
 const canAny=()=>!!DATA&&(DATA.canManage||DATA.pages.some(p=>p.canEdit));
-const shown=sl=>[{tpl:'coll',id:'coll'}].concat(sl.filter(s=>!s.hide).flatMap(spill));
+/* Collections Overview is a slide like the others: it can be moved anywhere in the deck (a deck saved before that has it first) */
+const withColl=sl=>(sl||[]).some(x=>x&&x.tpl==='coll')?(sl||[]):[{id:'coll',tpl:'coll',hide:false}].concat(sl||[]);
+const shown=sl=>withColl(sl).filter(s=>!s.hide).flatMap(spill);
 /* An update slide that is too full: first the text gets a little smaller (down to 88%), then the cards that still don't fit
    move to a next slide marked "(continued)". A card longer than a whole slide is split between its lines. */
 const SPILL=new Map();let MEAS=null;
@@ -554,23 +556,22 @@ document.getElementById('ed').addEventListener('click',e=>{
 /* pasting brings in the words only, not the formatting of wherever they came from */
 document.getElementById('ed').addEventListener('paste',e=>{if(!e.target.closest('.rte'))return;e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t);});
 const TAGOPTS=v=>`<option value="">No tag</option>`+TAGS.map(t=>`<option${t===v?' selected':''}>${esc(t)}</option>`).join('');
-function startDraft(){DRAFT=JSON.parse(JSON.stringify(deckOf(SUB).slides||[]));DIRTY=false;SEL=Math.min(SEL,Math.max(0,DRAFT.length-1));}
+function startDraft(){DRAFT=JSON.parse(JSON.stringify(withColl(deckOf(SUB).slides)));DIRTY=false;SEL=SEL<0?DRAFT.findIndex(x=>x.tpl==='coll'):Math.min(SEL,DRAFT.length-1);}
 function renderEditor(){
   const ed=document.getElementById('ed'),page=pageOf(SUB);
   if(!DATA){ed.innerHTML='';return;}
   if(!page.canEdit){ed.innerHTML=`<div class="ro" id="ro" style="grid-column:1/-1">You can view the Execs Call deck but not edit it. Switch to Slideshow to see it.</div>`;return;}
   if(!DRAFT)startDraft();
   const n=DRAFT.length,s=DRAFT[SEL];
-  const rail=`<div class="rail"><div class="rt">Execs Call · ${n+1} slide${n===0?'':'s'}</div>`
-    +`<button type="button" class="th${SEL===-1?' on':''}" data-sel="-1"><div class="mini"><div class="slide">${slideHtml(page,{tpl:'coll'},0,n+1,true)}</div></div><small>1. Collections Overview<em>${SEL===-1?'Editing':'Fixed'}</em></small></button>`
-    +DRAFT.map((x,i)=>`<button type="button" class="th${i===SEL?' on':''}${x.hide?' off':''}" data-sel="${i}"><div class="mini"><div class="slide">${slideHtml(page,x,i+1,n+1,true)}</div></div><small>${i+2}. ${esc(TPL[x.tpl][0])}<em>${x.hide?'Hidden':i===SEL?'Editing':''}</em></small></button>`).join('')
+  const rail=`<div class="rail"><div class="rt">Execs Call · ${n} slide${n===1?'':'s'}</div>`
+    +DRAFT.map((x,i)=>`<button type="button" class="th${i===SEL?' on':''}${x.hide?' off':''}" data-sel="${i}"><div class="mini"><div class="slide">${slideHtml(page,x,i,n,true)}</div></div><small>${i+1}. ${x.tpl==='coll'?'Collections Overview':esc(TPL[x.tpl][0])}<em>${x.hide?'Hidden':i===SEL?'Editing':''}</em></small></button>`).join('')
     +`<button type="button" class="addsl" id="addsl">+ Add a slide</button><button type="button" class="impb" id="impsl">Import from Weekly Review</button></div>`;
   let main;
-  if(SEL===-1)main=collEditMain(page,n);
-  else if(!s)main=`<div class="ro">No other slides yet. Press <b>+ Add a slide</b> to add one after Collections Overview.</div>`;
+  if(s&&s.tpl==='coll')main=collEditMain(page,n);
+  else if(!s)main=`<div class="ro">Choose a slide on the left, or press <b>+ Add a slide</b>.</div>`;
   else{
     const T=TPL[s.tpl];
-    let f=`<div class="fh"><b>Slide ${SEL+2}</b><span>${esc(T[0])}</span><span class="sp2"></span>
+    let f=`<div class="fh"><b>Slide ${SEL+1}</b><span>${esc(T[0])}</span><span class="sp2"></span>
       <label class="chk"><input type="checkbox" data-f="show"${s.hide?'':' checked'}>In the slideshow</label>
       <button class="ic" data-a="up" title="Move earlier"${SEL?'':' disabled'}>↑</button><button class="ic" data-a="down" title="Move later"${SEL<n-1?'':' disabled'}>↓</button><button class="ic del" data-a="del" title="Delete this slide">✕</button></div>`;
     if(s.tpl==='upd'){
@@ -597,7 +598,7 @@ function renderEditor(){
         else slots.push(`<div class="slot" style="opacity:.5"><small>${T[3]==='video'?'Video':'Photo'} ${k+1}${k<T[4]?' · needed':' · optional'}</small></div>`);}
       f+=`<div class="fg">${left}<div class="fl">${T[3]==='video'?'Videos':'Photos'} <small>${T[4]===T[5]?T[4]+' for this template.':T[4]+' to '+T[5]+' for this template.'}</small><div class="slots">${slots.join('')}</div></div></div>`;
     }
-    main=`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,s,SEL+1,n+1)}</div></div><div class="spill" id="spill" hidden></div></div><div class="form" id="form">${f}</div>`;
+    main=`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,s,SEL,n)}</div></div><div class="spill" id="spill" hidden></div></div><div class="form" id="form">${f}</div>`;
   }
   const save=DIRTY||CH()||(deckOf(SUB).carried&&DRAFT.length)?`<div class="save"><span id="save-n">${UPLOADING?'Wait for the upload to finish before saving.':DIRTY||CH()?'Changes not saved yet.':'Save to keep these slides for this month.'}</span><span class="msg" id="msg"></span>
     <button class="btn" id="discard" type="button">Discard</button><button class="btn pri" id="go" type="button"${UPLOADING||busy?' disabled':''}>${busy?'Saving…':'Save'}</button></div>`:'';
@@ -611,8 +612,8 @@ function renderEditor(){
 const cur=()=>DRAFT&&DRAFT[SEL];
 function touch(){DIRTY=true;}
 function spillNote(){const n=document.getElementById('spill'),s=cur();if(!n)return;const k=s&&!s.hide&&s.tpl==='upd'?spill(s).length:1;n.hidden=k<2;n.textContent=k>1?`This slide is too full, so in the slideshow it continues onto ${k-1===1?'a second slide':k+' slides'}.`:'';}
-function refreshCanvas(){const page=pageOf(SUB),s=cur();const el=document.getElementById('eslide');if(el&&s)el.innerHTML=slideHtml(page,s,SEL+1,DRAFT.length+1);spillNote();
-  const th=document.querySelector(`.th[data-sel="${SEL}"] .slide`);if(th&&s)th.innerHTML=slideHtml(page,s,SEL+1,DRAFT.length+1,true);
+function refreshCanvas(){const page=pageOf(SUB),s=cur();const el=document.getElementById('eslide');if(el&&s)el.innerHTML=slideHtml(page,s,SEL,DRAFT.length);spillNote();
+  const th=document.querySelector(`.th[data-sel="${SEL}"] .slide`);if(th&&s)th.innerHTML=slideHtml(page,s,SEL,DRAFT.length,true);
   const sv=document.querySelector('.save');if(!sv)renderEditor();else document.getElementById('save-n').textContent=UPLOADING?'Wait for the upload to finish before saving.':'Changes not saved yet.';}
 document.getElementById('ed').addEventListener('input',e=>{
   const s=cur();if(!s)return;const t=e.target,v=t.value;
@@ -637,7 +638,7 @@ document.getElementById('ed').addEventListener('click',async e=>{
   const b=e.target.closest('[data-a]');if(!b)return;const s=cur(),a=b.dataset.a;
   if(a==='up'&&SEL>0){DRAFT.splice(SEL,1);DRAFT.splice(SEL-1,0,s);SEL--;}
   else if(a==='down'&&SEL<DRAFT.length-1){DRAFT.splice(SEL,1);DRAFT.splice(SEL+1,0,s);SEL++;}
-  else if(a==='del'){if(!confirm('Delete slide '+(SEL+2)+'?'))return;DRAFT.splice(SEL,1);SEL=Math.max(-1,SEL-1);}
+  else if(a==='del'){if(s.tpl==='coll')return;if(!confirm('Delete slide '+(SEL+1)+'?'))return;DRAFT.splice(SEL,1);SEL=Math.max(0,SEL-1);}
   else if(a==='addc'){s.cards=(s.cards||[]).concat({title:'',tag:'',lines:[],done:null,of:null,unit:''}).slice(0,4);}
   else if(a==='delc'){s.cards.splice(+b.closest('[data-c]').dataset.c,1);}
   else if(a==='unmedia'||a==='mleft'||a==='mright'){const k=+b.closest('[data-k]').dataset.k,m=s.media[k];s.media.splice(k,1);if(a==='mleft')s.media.splice(k-1,0,m);if(a==='mright')s.media.splice(k+1,0,m);}
@@ -741,7 +742,7 @@ function doImport(){
     if(x.tpl==='upd')(x.cards||[]).filter(c=>c.title||(c.lines||[]).length).forEach((c,k)=>{if(IMP.sel[key+'|'+k])cards.push(copy(c));});}));
   if(!slides.length&&!cards.length)return;
   if(!DRAFT)startDraft();
-  let at=SEL<0?0:SEL+1,first=null;
+  let at=SEL+1,first=null;
   const s=cur();
   if(cards.length&&s&&s.tpl==='upd'){s.cards=s.cards||[];while(cards.length&&s.cards.filter(c=>c.title||(c.lines||[]).length).length<4){const k=s.cards.findIndex(c=>!c.title&&!(c.lines||[]).length);if(k>=0)s.cards[k]=cards.shift();else s.cards.push(cards.shift());}}
   while(cards.length){const n=blank();n.cards=cards.splice(0,4);slides.push(n);}
@@ -960,8 +961,12 @@ async function loadColl(){
 /* Editing the Collections slide: the period and the typed figures */
 function collEditMain(page,n){
   const y=WEEK.getFullYear(),m=WEEK.getMonth(),p2=x=>String(x).padStart(2,'0');
-  return`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,{tpl:'coll',edit:true},0,n+1)}</div></div></div>
-  <div class="form" id="form"><div class="fh"><b>Slide 1</b><span>Collections Overview · always the first slide</span><span class="sp2"></span>
+  const s=DRAFT[SEL];
+  return`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,{tpl:'coll',edit:true},SEL,n)}</div></div></div>
+  <div class="form" id="form"><div class="fh"><b>Slide ${SEL+1}</b><span>Collections Overview</span><span class="sp2"></span>
+    <label class="chk"><input type="checkbox" data-f="show"${s.hide?'':' checked'}>In the slideshow</label>
+    <button class="ic" data-a="up" title="Move earlier"${SEL?'':' disabled'}>↑</button><button class="ic" data-a="down" title="Move later"${SEL<n-1?'':' disabled'}>↓</button></div>
+    <div class="fh" style="margin-top:4px">
     <label class="chk">Data up to <input type="date" class="in" id="cupto" style="width:auto;height:34px;margin-left:6px" min="${mkey(WEEK)}-01" max="${mkey(WEEK)}-${p2(lastDay(y,m))}" value="${mkey(WEEK)}-${p2(upto())}"></label>
     <button class="btn" id="clatest" type="button" style="height:34px">Latest</button>
     <label class="chk">Run-rate <select class="in" id="crr" style="width:auto;height:34px;margin-left:6px"><option value="1"${SHOWRR?' selected':''}>Show</option><option value="0"${SHOWRR?'':' selected'}>Hide</option></select></label></div>
@@ -969,8 +974,8 @@ function collEditMain(page,n){
 }
 function collRefresh(){
   if(!document.querySelector('.save')){renderEditor();return;}
-  const nn=(DRAFT||[]).length+1,el=document.getElementById('eslide');if(el)el.innerHTML=collSlide(true,0,nn);
-  const th=document.querySelector('.th[data-sel="-1"] .slide');if(th)th.innerHTML=collSlide(false,0,nn);
+  const nn=(DRAFT||[]).length,ci=(DRAFT||[]).findIndex(x=>x.tpl==='coll'),el=document.getElementById('eslide');if(el)el.innerHTML=collSlide(true,ci,nn);
+  const th=document.querySelector(`.th[data-sel="${ci}"] .slide`);if(th)th.innerHTML=collSlide(false,ci,nn);
   document.getElementById('save-n').textContent=UPLOADING?'Wait for the upload to finish before saving.':'Changes not saved yet.';
 }
 document.getElementById('ed').addEventListener('input',e=>{
