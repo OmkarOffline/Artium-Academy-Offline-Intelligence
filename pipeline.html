@@ -231,6 +231,48 @@ table.lt th .fa{display:inline-grid;place-items:center;width:17px;height:17px;bo
 .rw.pl2{border-top:1px solid var(--edge)}
 .wb>.tw+.tw,.wb>.tw+.empty{border-top:1px solid var(--edge)}
 .wb table.lt th,.wb table.lt td{text-align:left;padding:13px 16px}.wb table.lt td{padding:14px 16px}.wb table.lt th:first-child,.wb table.lt td.who{position:sticky;left:0;background:#fff;z-index:1}
+
+/* ── Summary (as on My Performance → Renewals) ── */
+.sh span.ib .ipop{display:none;position:absolute;left:-12px;top:30px;z-index:20;width:380px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 20px 40px -18px rgba(18,14,43,.35);font:400 13.5px/1.55 var(--f);font-style:normal;color:var(--ink2);text-align:left;cursor:default;white-space:normal}
+.sh span.ib .ipop,span.ib .ipop{display:none;position:absolute;left:-12px;top:30px;z-index:20;width:380px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 20px 40px -18px rgba(18,14,43,.35);font:400 13.5px/1.55 var(--f);font-style:normal;color:var(--ink2);text-align:left;cursor:default;white-space:normal;letter-spacing:0;text-transform:none}
+.ipop b{display:block;font:800 14px var(--f);color:var(--ink);margin-bottom:4px}.ipop p{margin:0 0 10px}
+.bl{display:grid;gap:6px}.bl span{display:flex;justify-content:space-between;border-radius:10px;padding:7px 12px;font:700 13px var(--f)}.bl span i{font:600 11.5px var(--f);font-style:normal;opacity:.85}
+.ipop .nb{font:400 12px/17px var(--f);color:var(--ink4);margin:10px 0 0}
+.bl .bd-r,.m.bd-r,.kpi.bd-r{background:#FBE7E4;color:#A8372D}.bl .bd-a,.m.bd-a,.kpi.bd-a{background:#FFF1D1;color:#7A5200}.bl .bd-g,.m.bd-g,.kpi.bd-g{background:#E3F4EA;color:#1A6E45}.bl .bd-b,.m.bd-b,.kpi.bd-b{background:#E5EDFF;color:#1F46C4}
+.m.bd-r .t,.m.bd-r .v,.m.bd-r .v small,.m.bd-a .t,.m.bd-a .v,.m.bd-a .v small,.m.bd-g .t,.m.bd-g .v,.m.bd-g .v small,.m.bd-b .t,.m.bd-b .v,.m.bd-b .v small{color:inherit}
+.m .mb{height:6px;border-radius:9px;background:rgba(255,255,255,.7);margin-top:8px;overflow:hidden}.m .mb i{display:block;height:100%;border-radius:9px;background:currentColor}
+.sec[data-k=l_sum] .sb,.sec[data-k=l_lb] .sb,.sec[data-k=a_sum] .sb,.sec[data-k=a_lb] .sb{padding:4px 22px 22px}.sum3{display:grid;grid-template-columns:1.55fr 1fr 1fr;gap:18px}@media (max-width:1100px){.sum3{grid-template-columns:1fr}}
+.sg{background:#FCFBFF;border:1px solid var(--edge);border-radius:20px;padding:18px 20px 20px;box-shadow:0 14px 30px -26px rgba(60,20,120,.6)}
+.sg h3{font:700 11px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--violet2);margin:0 0 3px}.sg p{font:400 12.5px var(--f);color:var(--ink4);margin:0 0 14px}
+.sc{display:grid;gap:10px}.sc.c4{grid-template-columns:repeat(4,1fr)}.sc.c2{grid-template-columns:repeat(2,1fr)}
+.m{border-radius:14px;background:#F7F4FE;padding:12px 14px;min-height:84px;display:flex;flex-direction:column}
+.m .t{font:600 12px/1.3 var(--f);color:var(--ink3)}.m .v{font:800 28px/1 var(--f);color:var(--ink);margin-top:auto;padding-top:8px;letter-spacing:-.02em}
+.m .v small{font:600 12px var(--f);color:var(--ink4);margin-left:6px;letter-spacing:0}
+.m.hero{background:linear-gradient(135deg,#4101f7,#7b2cf0);}.m.hero .t{color:#E4DAFF}.m.hero .v{color:#fff}.m.hero .v small{color:#E4DAFF}
+.m.ok{background:var(--okbg)}.m.ok .t,.m.ok .v{color:var(--ok)}.m.bad{background:#FBEDEB}.m.bad .t,.m.bad .v{color:var(--bad)}
+.m.tall{grid-row:span 2}.rb{margin-top:10px}.rt{display:flex;justify-content:space-between;font:600 12px var(--f);color:var(--ok)}.rb .tr{height:6px;border-radius:9px;background:#E3DCF5;margin-top:5px;overflow:hidden}.rb .tr i{display:block;height:100%;background:var(--ok);border-radius:9px}
+.m.sub{background:none;border:1px dashed var(--line)}
+.m.clk{position:relative;cursor:pointer;transition:transform .15s,box-shadow .15s;border:1.5px solid transparent;border-radius:14px;padding:12px 14px;min-height:84px;display:flex;flex-direction:column;font-family:var(--f)}
+.m.clk:not(.hero):not(.ok):not(.bad){background:#F7F4FE}.m.clk.sub{background:none;border:1px dashed var(--line)}
+.m.clk:hover{transform:translateY(-2px);box-shadow:0 12px 22px -16px rgba(65,1,247,.55)}.m.clk:focus-visible{outline:2px solid var(--violet2);outline-offset:2px}
+.m.clk .eye{position:absolute;top:9px;right:10px;font:14px/1 'Noto Color Emoji','Apple Color Emoji','Segoe UI Emoji',sans-serif;opacity:.55;transition:opacity .15s,transform .15s}
+.m.clk:hover .eye{opacity:1;transform:scale(1.15)}.m.clk .t{padding-right:16px}
+.m.clk.cur{border:1.5px solid var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12)}.m.clk.hero.cur{border-color:#fff;box-shadow:0 0 0 3px rgba(65,1,247,.35)}
+/* The list picker above the table: two quiet groups of chips, the open list filled */
+.lpick{display:flex;gap:28px;flex-wrap:wrap;padding:6px 22px 16px;border-bottom:1px solid var(--edge)}
+.lg{display:flex;flex-direction:column;gap:8px}.lgl{font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink4)}
+.lgb{display:flex;flex-wrap:wrap;gap:6px}
+.lc{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 8px 7px 14px;font:600 13px var(--f);color:var(--ink2);cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s}
+.lc i{font-style:normal;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#F1ECFD;color:var(--violet2);font:700 11.5px var(--f);display:inline-flex;align-items:center;justify-content:center}
+.lc:hover{border-color:#B9A3F7;color:var(--violet2)}.lc.on{background:var(--violet2);border-color:var(--violet2);color:#fff}.lc.on i{background:rgba(255,255,255,.22);color:#fff}
+.sc.c5{grid-template-columns:repeat(5,1fr)}.sc.c3{grid-template-columns:repeat(3,1fr)}.sc.c1{grid-template-columns:1fr}
+@media (max-width:760px){
+  .sum3{gap:12px}.sg{padding:14px 14px 16px;border-radius:16px}
+  .sc.c4,.sc.c3,.sc.c5,.sc.c2{grid-template-columns:1fr 1fr}
+  .m,.m.clk{min-height:76px;padding:10px 12px}.m .v{font-size:24px}
+  .lpick{padding:6px 12px 12px;gap:14px}.lc{padding:6px 7px 6px 12px;font-size:12.5px}
+}
+.m.clk{text-align:left;align-items:stretch;font-family:var(--f)}
 </style>
 </head>
 <body>
@@ -326,6 +368,13 @@ let FOLD=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_fold')||'{}
 let mode='month',viewY=NOW.getFullYear(),viewM=NOW.getMonth(),rFrom=null,rTo=null;
 const n=v=>Math.round(v).toLocaleString('en-IN');
 const pc=(a,b)=>b?Math.round(a/b*100)+'%':'–';
+/* Colour bands for percentages: 0 to 40% red, 41 to 60% amber, 61 to 75% green, above 75% blue (as on My Performance) */
+const bandOf=(a,b)=>{if(!b)return'';const r=Math.round(a/b*100);return r<=40?'r':r<=60?'a':r<=75?'g':'b';};
+const bdc=(a,b)=>{const k=bandOf(a,b);return k?'bd-'+k:'';};
+const mbar=(a,b)=>b?`<div class="mb"><i style="width:${Math.min(100,Math.round(a/b*100))}%"></i></div>`:'';
+const BANDS=[['r','0 to 40%','Needs attention'],['a','41 to 60%','Getting there'],['g','61 to 75%','On track'],['b','Above 75%','Excellent']];
+const bi=(def,note='Counts have no colour. A percentage with nothing to measure shows a dash.')=>`<span class="ib" role="button" tabindex="0" aria-label="How the colours work" data-info>i<span class="ipop"><b>How the colour is chosen</b><p>${def}</p><span class="bl" style="display:grid;gap:6px;background:none;padding:0">${BANDS.map(([k,r,t])=>`<span class="bd-${k}">${r}<i>${t}</i></span>`).join('')}</span><span class="nb" style="display:block;margin:10px 0 0">${note}</span></span></span>`;
+const SECINFO={l_sum:bi('Each percentage in this summary takes the colour of the band it falls in. The 👀 cards open those learners on the Learner lists view.')};
 const inP=(d,P)=>d&&d>=P.a&&d<=P.b;
 const CHEV='<span class="cv" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></span>';
 
@@ -354,7 +403,8 @@ function outcome(x,P){
 /* ── Building blocks ── */
 function fold(key,def=false){return key in FOLD?FOLD[key]:def;}
 function section(key,title,extra,body,cls=''){
-  return`<section class="sec ${cls}${fold(key)?' closed':''}" data-k="${key}"><button type="button" class="sh" aria-expanded="${!fold(key)}"><b>${title}</b>${extra||''}${CHEV}</button><div class="sb">${body}</div></section>`;
+  const info=SECINFO[key]||'';
+  return`<section class="sec ${cls}${fold(key)?' closed':''}" data-k="${key}"><button type="button" class="sh" aria-expanded="${!fold(key)}"><b>${title}</b>${info}${extra||''}${CHEV}</button><div class="sb">${body}</div></section>`;
 }
 function wtable(W,P,rows){
   const tl=mode==='month'?MONTH_FULL[viewM]:'Period';
@@ -390,6 +440,48 @@ function learnerList(list,ext){
 }
 
 /* ── The page ── */
+/* ── The month's cohort, as on My Performance → Renewals: due, renewed, extended, carried over and renewed in the month ── */
+let LIST=(()=>{try{return localStorage.getItem('artium_rp_list')||'due';}catch(e){return'due';}})();
+function cohorts(P,mine){
+  const endNow=x=>x.newEnd||(x.ext>0?new Date(x.end.getFullYear(),x.end.getMonth(),x.end.getDate()+Math.round(x.ext)):x.end);
+  const PP={a:new Date(P.a.getFullYear(),P.a.getMonth()-1,1),b:new Date(P.a.getFullYear(),P.a.getMonth(),0)};
+  const C=DUE.filter(x=>mine(x)&&inP(x.end,P)),L=DUE.filter(x=>mine(x)&&inP(x.end,PP));
+  const ext=C.filter(x=>x.ext>0);
+  const paidOn=x=>x.paidOn||valid(parseDate(x.r[26])),openAt=x=>x.st!=='lost'&&!(x.st==='paid'&&(!paidOn(x)||paidOn(x)<P.a));
+  const oext=L.filter(x=>x.ext>0&&inP(endNow(x),P));
+  return{PP,endNow,paidOn,due:C,ren:C.filter(x=>x.st==='paid'),ytr:C.filter(x=>x.st!=='paid'&&x.st!=='lost'),wnr:C.filter(x=>x.st==='lost'),ext,
+    spill:ext.filter(x=>x.st!=='paid'&&endNow(x)>P.b),inm:ext.filter(x=>x.st!=='paid'&&endNow(x)<=P.b),oext,oexp:L.filter(x=>openAt(x)&&!oext.includes(x))};
+}
+function listNames(P){const MN=MONTH_FULL[P.a.getMonth()],LM=MONTH_FULL[(P.a.getMonth()+11)%12],NM=MONTH_FULL[(P.a.getMonth()+1)%12];
+  return{due:['Renewals due','All due'],ren:['Renewed','Renewed'],ytr:['Yet to renew','Yet to renew'],wnr:['Will not renew','Will not renew'],ext:['Extensions given','Extensions'],
+    spill:['Spilling over to '+NM,'Spilling over'],inm:['Extended, ending in '+MN,'Ending in '+MN.slice(0,3)],oext:['Extended into '+MN,'Extended into '+MN.slice(0,3)],oexp:['Expired in '+LM,'Expired in '+LM.slice(0,3)]};}
+function summary(P,mine){
+  const K=cohorts(P,mine),endNow=K.endNow,PP=K.PP;
+  const MN=MONTH_FULL[P.a.getMonth()],LM=MONTH_FULL[PP.a.getMonth()],NM=MONTH_FULL[(P.a.getMonth()+1)%12];
+  const C=K.due,ren=K.ren,wnr=K.wnr,ext=K.ext,spill=K.spill,inM=K.inm;
+  const comp=C.filter(x=>x.st!=='paid'&&x.st!=='lost').reduce((s,x)=>s+(x.comp||0),0);
+  const L=DUE.filter(x=>mine(x)&&inP(x.end,PP));
+  const paidOn=K.paidOn,openAt=x=>x.st!=='lost'&&!(x.st==='paid'&&(!paidOn(x)||paidOn(x)<P.a)),renNow=x=>x.st==='paid'&&inP(paidOn(x),P);
+  const lExt=K.oext,lExtR=lExt.filter(x=>x.st==='paid'),lExp=K.oexp,lExpR=lExp.filter(renNow);
+  const rr=(a,b)=>`<div class="rb"><div class="rt"><span>${n(b)} renewed</span><b>${pc(b,a)}</b></div><div class="tr"><i style="width:${a?Math.round(b/a*100):0}%"></i></div></div>`;
+  const rnl=ALL.filter(x=>mine(x)&&x.tab==='rn'&&inP(x.date,P));
+  const rPrev=rnl.filter(x=>!(x.prevEnd&&inP(x.prevEnd,P))).length,tot=ren.length+rPrev;
+  const m=(t,v,cls='',sm='',lk='',bar='')=>lk?`<button type="button" class="m clk ${cls}${LIST===lk?' cur':''}" data-list="${lk}" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div></button>`:`<div class="m ${cls}"><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div>${bar}</div>`;
+  const ob=(lk,t,a,b)=>`<button type="button" class="m clk${LIST===lk?' cur':''}" data-list="${lk}" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">${t}</div><div class="v">${n(a.length)}</div>${rr(a.length,b.length)}</button>`;
+  return section('l_sum','Cohort summary',`<span>${esc(P.label)}</span>`,`<div class="sum3">
+   <div class="sg"><h3>${MN} cohort</h3><p>Learners whose package expires in ${MN}.</p>
+    <div class="sc c4">${m('Renewals due',n(C.length),'hero','','due')}${m('Renewed',n(ren.length),'','','ren')}${m('Renewal %',pc(ren.length,C.length),bdc(ren.length,C.length),'','',mbar(ren.length,C.length))}${m('Will not renew',n(wnr.length),'bad','','wnr')}
+    ${m('Extensions given',n(ext.length),'','','ext')}${m('Spilling over to '+NM,n(spill.length),'sub','','spill')}${m('Extended, ending in '+MN,n(inM.length),'sub','','inm')}${m('Compensation classes to deliver',n(comp))}</div></div>
+   <div class="sg"><h3>Carried over from ${LM}</h3><p>Learners whose package was due in ${LM}.</p>
+    <div class="sc c2">${ob('oext','Extended into '+MN,lExt,lExtR)}${ob('oexp','Expired in '+LM,lExp,lExpR)}</div></div>
+   <div class="sg"><h3>Renewed in ${MN}</h3><p>Everyone who renewed this month, whenever they were due.</p>
+    <div class="sc c2">${m('From the '+MN+' cohort',n(ren.length))}${m('From earlier months',n(rPrev))}${m('Total renewed',n(tot),'hero')}${m('Renewal collection efficiency',pc(tot,C.length),bdc(tot,C.length),'','',mbar(Math.min(tot,C.length),C.length))}</div></div>
+  </div>`);
+}
+/* A 👀 card: open that list on the Learner lists view */
+function openList(k){LIST=k;try{localStorage.setItem('artium_rp_list',LIST);}catch(e){}FOLD.l_due=false;
+  if(view!=='list'){view='list';try{localStorage.setItem('artium_rp_view','list');}catch(e){}}
+  render();const t=document.getElementById('lists');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
 function render(){
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
@@ -496,11 +588,14 @@ function render(){
   const wnr=cohort.filter(x=>x.oc==='wnr'),ext=cohort.filter(x=>x.oc==='ext');
   const coh=mode==='month'?'current month cohort':'cohort due in this period';
   out.innerHTML=section('glance','At a glance',`<span>${esc(P.label)}${isCur?' · so far':''}</span>`,glance)
+    +(mode==='month'?summary(P,mine):'')
     +section('wow','Week on Week view','',wow,'wowsec')
     +section('wnr','Will not renew',`<span class="ct r">${wnr.length}</span><span>${coh}</span>`,learnerList(wnr,false))
     +section('ext','Extended',`<span class="ct b">${ext.length}</span><span>${coh}</span>`,learnerList(ext,true));
   out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
   out.querySelectorAll('[data-ol]').forEach(b=>b.onclick=e=>{e.stopPropagation();OPENL[b.dataset.ol]=!OPENL[b.dataset.ol];try{localStorage.setItem('artium_rp_lists',JSON.stringify(OPENL));}catch(err){}render();});
+  out.querySelectorAll('[data-list]').forEach(b=>b.onclick=()=>openList(b.dataset.list));
+  out.querySelectorAll('[data-info]').forEach(b=>{b.onclick=e=>{e.stopPropagation();b.classList.toggle('open');};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();b.classList.toggle('open');}};});
 }
 /* The learners behind a number: the pipeline (Expected payments), or those yet to renew in section A */
 let OPENL=(()=>{try{return JSON.parse(localStorage.getItem('artium_rp_lists')||'{}')||{};}catch(e){return{};}})();
@@ -619,10 +714,16 @@ function listView(P,mine,sel){
   // Each table: its rows before the Show toggle → column filters → counts → Show toggle → table
   const T=(base,cols,key,ocf,showK)=>{const cfd=colFilter(base,cols,key);return{cols,base,cfd,rows:byR(cfd,ocf,showK),key};};
   const tbl=o=>ltable(o.rows,o.cols,sel,o.key,o.base);
-  const dueA=DUE.filter(x=>mine(x)&&inP(x.end,P)&&okP(x,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
+  // Renewals due: in Month view, any of the cohort lists from the summary (the 👀 cards pick one); in a date range, everything due in it
+  const K=cohorts(P,mine),NAMES=listNames(P),MV=mode==='month';if(!MV||!K[LIST])LIST='due';
+  const dueA=K[LIST].filter(x=>okP(x,'due')).sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name));
   const dSub=LSUB.due==='ft'?dueA.filter(x=>x.tab==='fs'):LSUB.due==='rr'?dueA.filter(x=>x.tab==='rn'):dueA;
-  const dC=STD(dueOc),tD=T(dSub,dC,'due',dueOc,'due'),cAll=byR(colFilter(dueA,dC,'due'),dueOc,'due');
-  const sDue=row2(subT('due',[['all','All renewals due',cAll.length],['ft','First-time renewals',cAll.filter(x=>x.tab==='fs').length],['rr','Repeated renewals',cAll.filter(x=>x.tab==='rn').length]]),'due')+tbl(tD);
+  const dC=STD(dueOc,LIST==='wnr'?[['Reason for discontinuing',x=>tdc(esc(x.reason)),x=>x.reason,'t']]:[]),tD=T(dSub,dC,'due',dueOc,'due'),cAll=byR(colFilter(dueA,dC,'due'),dueOc,'due');
+  const LM3=MONTH_FULL[(P.a.getMonth()+11)%12],MN3=MONTH_FULL[P.a.getMonth()];
+  const chip=k=>`<button type="button" class="lc${LIST===k?' on':''}" data-list="${k}">${esc(NAMES[k][1])}<i>${K[k].length}</i></button>`;
+  const pick=MV?`<div class="lpick"><div class="lg"><span class="lgl">${MN3} cohort</span><div class="lgb">${['due','ren','ytr','wnr','ext','spill','inm'].map(chip).join('')}</div></div>
+    <div class="lg"><span class="lgl">From ${LM3}</span><div class="lgb">${['oext','oexp'].map(chip).join('')}</div></div></div>`:'';
+  const sDue=pick+row2(subT('due',[['all','All renewals due',cAll.length],['ft','First-time renewals',cAll.filter(x=>x.tab==='fs').length],['rr','Repeated renewals',cAll.filter(x=>x.tab==='rn').length]]),'due')+tbl(tD);
 
   /* Learners with at least two 1-month renewals */
   const one=latest.filter(x=>x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length>=2&&okP(x,'one')).map(x=>Object.assign(x,{n1:x.hist.filter(h=>h.tab==='rn'&&Math.round(h.m)===1).length}));
@@ -645,8 +746,8 @@ function listView(P,mine,sel){
   const cnt=(n,c='')=>`<span class="ct ${c}">${n}</span>`;
   const info=t=>`<span class="ib" role="button" tabindex="0" aria-label="About this list" data-info>i<span class="ipop">${t}</span></span>`;
   return filterPanel(DUE.filter(mine))
-    +`<div class="lgrp">Due in ${esc(P.label)}</div>`
-    +section('l_due','Renewals due',`<span>${esc(P.label)}</span>`+kst(tD.cfd,dueOc),sDue)
+    +`<div class="lgrp" id="lists">Due in ${esc(P.label)}</div>`
+    +section('l_due',esc(NAMES[LIST][0]),`<span>${LIST.startsWith('o')?esc(LM3+' cohort'):esc(P.label)}</span>`+(['due','oext','oexp'].includes(LIST)?kst(tD.cfd,dueOc):kn(tD.cfd)),sDue)
     +`<div class="lgrp">All time</div>`
     +section('l_one','Repeated 1-month renewers',info('This is a list of learners who have made at least two 1-month renewal transactions in the past. It includes both active and inactive learners. It helps us focus on 1-month renewers, ensuring they continue with us. It also helps us narrow down inactive 1-month renewers who may have quit due to affordability issues.')+cnt(one.length,'v')+(LSUB.one==='in'?kn(tI.rows):kst(tA.cfd,dueOc)),sOne)
     +section('l_aff','Left because of affordability','<span>latest departures first</span>'+kn(tF.rows),sAff)
@@ -658,6 +759,7 @@ const busy=k=>{const f=fl(k);return f.pkg!=='all'||f.ren!=='all'||TBL[k].some(t=
 function row2(left,k){const on=busy(k);
   return`<div class="lrow">${left||'<span></span>'}<div class="ltools">${tools(k)}<button type="button" class="clr" data-clr="${k}"${on?'':' disabled'} title="Clear this list's filters and sorting" aria-label="Clear this list's filters and sorting"><svg viewBox="0 0 24 24"><path d="M3 5h14l-5.5 6.5V18l-3 1.5v-8z"/><path d="M16 14l5 5M21 14l-5 5"/></svg></button></div></div>`;}
 function bindList(out){
+  out.querySelectorAll('[data-list]').forEach(b=>b.onclick=()=>openList(b.dataset.list));
   out.querySelectorAll('[data-clr]').forEach(b=>b.onclick=()=>{const k=b.dataset.clr;delete FL[k];TBL[k].forEach(t=>delete CF[t]);MENU=null;saveCF();try{localStorage.setItem('artium_rp_lf',JSON.stringify(FL));}catch(e){}render();});
   out.querySelectorAll('th.hc').forEach(th=>th.onclick=e=>{e.stopPropagation();const t=th.dataset.t,c=th.dataset.c;MENU=MENU&&MENU.t===t&&MENU.c===c?null:{t,c,q:''};render();});
   const m=out.querySelector('.cmenu');
