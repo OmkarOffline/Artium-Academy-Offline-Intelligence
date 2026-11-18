@@ -393,6 +393,40 @@
   h2,h3{font-family:var(--display)}
   /* Goals: brand tags and cards */
   .tchip{color:#6b3fc7;background:#f1eafe}
+
+  /* ── Colour Foundations refresh (Nov 2026): light header like the newer pages, the brand's segmented tabs,
+     calm single surfaces. Status colours keep one meaning each across Goals and Tasks:
+     lilac = to be picked (not started) · pink = in progress (work in motion) · green = completed · violet = yet to email ·
+     red only for past target / past due. Ember = where you are (Goals or Tasks). ── */
+  :root{--display:'Onest',system-ui,sans-serif;--body:'Onest',system-ui,sans-serif;--border:#DCD5EE;--line:#F1EDF9;--ink:#01073C;--ink2:#4A4466;--muted:#6A6488;--faint:#7A7196}
+  body{background:#FBFAFF}
+  .page{padding-top:40px}
+  .page-header::before{display:none}
+  .page-header h1{font:700 50px/1.06 var(--display);letter-spacing:-1.6px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .page-header .updated{color:#6A6488}.page-header .dot{background:#3DDC97}.page-header .dot.loading{background:#F5906F}
+  /* Goals / Tasks: the brand's segmented track, with an Ember underline on the one you're on */
+  .kind{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px}
+  .kind button{position:relative;border-radius:17px;color:#01073C}
+  .kind button:hover{background:rgba(255,255,255,.55)}
+  .kind small{color:#6A6488}
+  .kind button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+  .kind button[aria-pressed="true"] small{color:#A8431E}
+  .kind button[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+  .filters{border:0;border-radius:22px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 24px 50px -40px rgba(1,7,60,.35)}
+  .period{background:#EFEAF9;border:0;box-shadow:none;border-radius:18px;padding:5px}
+  .seg{background:transparent}
+  .seg button{border-radius:12px}
+  .seg button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+  /* Counts: one quiet row, no boxes */
+  .k{border:0;box-shadow:none;background:#fff;border-radius:18px;box-shadow:0 1px 2px rgba(1,7,60,.04)}
+  .card{border:0;border-radius:26px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3)}
+  .gl.tbp{background:#F3F1F8;color:#6A6488}
+  .gl.inp{background:#FCEAF7;color:#A3187F}
+  .gl.cmp{background:#E3FAF0;color:#137A4F}
+  .gl.draft{background:#F1EAFE;color:#4101F7}
+  .tchip{color:#5B2BB8;background:#F4EEFF}
+  @media (max-width:900px){.page-header h1{font-size:34px;letter-spacing:-1px}}
+  .ring{background:conic-gradient(#4101F7 calc(var(--p)*1%),#ECE7F8 0)}
 </style>
 </head>
 <body>
@@ -493,7 +527,7 @@ function render(){
   else{
     const grp=g=>{const s=cv(g).status,tg=target(g);if(g.draft)return'draft';if(s==='cmp')return'cmp';if(tg&&tg<TODAY)return'late';return s;};
     let groups;
-    if(GROUP==='status')groups=[['late','Past target','#B42318'],['inp','In progress','#C98A1B'],['tbp','To be picked','#B42318'],['draft','Yet to email','#8D6BB5'],['cmp','Completed','#1F7A4D']].map(([k,l,c])=>[l,c,list.filter(g=>grp(g)===k)]);
+    if(GROUP==='status')groups=[['late','Past target','#B42318'],['inp','In progress','#DD30B1'],['tbp','To be picked','#B7B0CC'],['draft','Yet to email','#8D6BB5'],['cmp','Completed','#1F7A4D']].map(([k,l,c])=>[l,c,list.filter(g=>grp(g)===k)]);
     else if(GROUP==='tag')groups=(TAGF.length?TAGS.filter(x=>TAGF.includes(x)):TAGS).map(tg=>[tg,'#7a7196',list.filter(g=>(g.tags||[]).includes(tg))]).concat([['No tag','#B3AFBB',list.filter(g=>!(g.tags||[]).length)]]);
     else groups=[[null,null,list]];
     groups=groups.filter(x=>x[2].length);
@@ -683,7 +717,7 @@ function renderTasks(){
   const el=document.getElementById('tasksv');
   const sw=`<div class="vbar" style="margin:0 0 12px"><div class="vgrp"><span class="vl">View</span><div class="seg" id="tview"><button type="button" data-tv="list" aria-pressed="${TVIEW==='list'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>List</button><button type="button" data-tv="board" aria-pressed="${TVIEW==='board'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:-2px;margin-right:5px"><rect x="3" y="4" width="5" height="16" rx="1.5"/><rect x="10" y="4" width="5" height="11" rx="1.5"/><rect x="17" y="4" width="4" height="7" rx="1.5"/></svg>Board</button></div></div><div class="vgrp"><span class="vl">Group by</span><div class="seg" id="tgroup"><button type="button" data-tg="status" aria-pressed="${TGROUP==='status'}" title="${TVIEW==='board'?'The board\'s columns are the statuses':''}">Status</button><button type="button" data-tg="tag" aria-pressed="${TGROUP==='tag'}">Tag</button><button type="button" data-tg="none" aria-pressed="${TGROUP==='none'}">None</button></div></div></div>`;
   if(!list.length){el.innerHTML=sw+`<div class="card empty">No tasks yet.${CAN?' Use <b>New task</b>, or make one from a teacher\'s request on the Teacher Experience page.':''}</div>`;return;}
-  const G2=[['late','Past due','#B42318'],['inp','In progress','#C98A1B'],['tbp','To be picked','#B42318'],['cmp','Completed','#1F7A4D']];
+  const G2=[['late','Past due','#B42318'],['inp','In progress','#DD30B1'],['tbp','To be picked','#B7B0CC'],['cmp','Completed','#1F7A4D']];
   if(TVIEW==='board'){
     if(TGROUP!=='tag'){el.innerHTML=sw+boardHtml([['',list]]);return;}
     el.innerHTML=sw+boardHtml(TAGS.map(x=>[x,list.filter(t=>(t.tags||[]).includes(x))]).concat([['No tag',list.filter(t=>!(t.tags||[]).length)]]).filter(l=>l[1].length));return;}
