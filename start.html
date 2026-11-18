@@ -987,7 +987,7 @@ document.getElementById('go').disabled=true;
    Most urgent first. Ticking a line (or choosing a status) saves straight away. */
 (function todo(){
   const SL=5,ST={tbp:'To be picked',inp:'In progress',cmp:'Completed'};
-  const CH=[[0,'A fresh list. Start with the first one.'],[1,'Good start. Keep the momentum going.'],[34,'Halfway there. Nicely done.'],[67,'Nearly there. Just a few left.'],[100,'All clear for today. Well done.']];
+  const CH=[[0,'Ready to begin.'],[1,'First steps taken.'],[21,'Finding its feet.'],[41,'Halfway, going strong.'],[61,'Momentum is building.'],[81,'So close now.'],[95,'One nudge away.'],[100,'Beautifully done.']];   // stage names by % (same as the Offline Centres and Goals pages)
   let T='',ROWS=[],VIS=[],BUSY=false;
   const $=id=>document.getElementById(id),box2=$('todo');
   const days=(a,b)=>Math.round((Date.parse(a)-Date.parse(b))/864e5);

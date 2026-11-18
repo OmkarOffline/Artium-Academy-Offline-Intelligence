@@ -17,8 +17,8 @@
      Ember            → where you are (the department: selected tab, badge, area stripes, warm glow, stave paper)
      Progress Violet  → how far along (every %, bar and ring)
      Passion Pink     → work in motion (In progress) and Plan ahead
-     Live green       → done (Live)
-     Lilac            → not started yet
+     Live green       → done (Complete)
+     Lilac            → not started (Yet to start)
      Navy             → Current state */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -109,7 +109,7 @@
   .sh .pgs{margin-left:auto;display:flex;align-items:center;gap:12px;width:240px}.sh em{font:800 17px var(--f);font-style:normal;color:var(--ink)}
   .pbar{flex:1;height:8px;border-radius:8px;background:var(--lilac);overflow:hidden}.pbar i{display:block;height:100%;border-radius:8px;background:var(--prog)}
   .it{border-bottom:1px solid var(--soft)}.it:last-child{border-bottom:0}
-  .ih{display:grid;grid-template-columns:minmax(0,1fr) 160px 240px 30px;align-items:center;gap:18px;padding:16px 24px;cursor:pointer}
+  .ih{display:grid;grid-template-columns:minmax(0,1fr) 200px 240px 30px;align-items:center;gap:18px;padding:16px 24px;cursor:pointer}
   .ih:hover{background:#FCFBFF}
   .in b{display:block;font:600 16px/24px var(--f);color:var(--ink)}.in small{display:block;font:400 13px/18px var(--f);color:var(--ink3)}
   .stp{display:inline-flex;align-items:center;gap:8px;font:700 13px var(--f);border-radius:999px;padding:5px 12px 5px 10px;justify-self:start;white-space:nowrap}
@@ -228,7 +228,7 @@
       <div class="msec">Progress</div>
       <div class="prg">
         <div class="rec"><small>Suggested from what you've written</small><div class="v"><b id="rec-pct">0%</b><button type="button" class="use" onclick="useRec()">Use this</button></div><p id="rec-why"></p></div>
-        <div class="own"><small>Progress you're setting</small><input type="range" id="ed-range" min="0" max="100" step="5" oninput="setPct(this.value)"><div class="ow"><input type="number" id="ed-pct" min="0" max="100" step="5" oninput="setPct(this.value)"><span id="ed-st"></span></div><p>0% shows as Not started, 100% as Live.</p></div>
+        <div class="own"><small>Progress you're setting</small><input type="range" id="ed-range" min="0" max="100" step="5" oninput="setPct(this.value)"><div class="ow"><input type="number" id="ed-pct" min="0" max="100" step="5" oninput="setPct(this.value)"><span id="ed-st"></span></div><p>0% shows as Ready to begin and 100% as Beautifully done.</p></div>
       </div>
     </div>
     <div class="mf"><span class="msg" id="ed-msg">The department and area percentages update on their own.</span><span class="sp"></span><button class="btn-g" type="button" onclick="closeEditor()">Cancel</button><button class="btn" type="button" id="ed-save" onclick="save()">Save initiative</button></div>
@@ -248,11 +248,13 @@ const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const SEP=' › ';
 const pctOf=x=>Math.max(0,Math.min(100,Math.round(+x.pct||0)));
 const avg=a=>a.length?Math.round(a.reduce((s,x)=>s+pctOf(x),0)/a.length):0;
-const ST={lv:['Live','var(--live)'],ip:['In progress','var(--pink)'],ns:['Not started','var(--ns)']};
+const ST={lv:['Complete','var(--live)'],ip:['In progress','var(--pink)'],ns:['Yet to start','var(--ns)']};
+/* Stage names by %, used everywhere a status is shown (the same names are used on the Goals and Start pages). The colour still follows the three groups above. */
+const STAGE=p=>p>=100?'Beautifully done':p>=95?'One nudge away':p>80?'So close now':p>60?'Momentum is building':p>40?'Halfway, going strong':p>20?'Finding its feet':p>0?'First steps taken':'Ready to begin';
 const stOf=p=>p>=100?'lv':p<=0?'ns':'ip';
 const counts=a=>{const c={lv:0,ip:0,ns:0};a.forEach(x=>c[stOf(pctOf(x))]++);return c;};
 const plural=(n,w,ws)=>n+' '+(n===1?w:(ws||w+'s'));
-function mood(p){return p>=100?'All live.':p>=80?'Nearly there.':p>=56?'Well on the way.':p>=45?'Nearly halfway there.':p>=25?'Picking up pace.':p>0?'Off the starting line.':'Just getting started.';}
+const mood=p=>STAGE(p)+'.';
 
 /* Build departments → areas → initiatives from the sheet's flat lists */
 function build(){
@@ -268,7 +270,7 @@ function build(){
 
 function autoSum(d){
   const c=counts(d.items),A=d.areas.filter(a=>a.items.length);
-  let t=`${plural(d.items.length,'initiative')} across ${plural(A.length,'area')}: ${c.lv} live, ${c.ip} in progress and ${c.ns} not started.`;
+  let t=`${plural(d.items.length,'initiative')} across ${plural(A.length,'area')}: ${c.lv} complete, ${c.ip} in progress and ${c.ns} yet to start.`;
   if(A.length>1){const s=A.slice().sort((a,b)=>avg(b.items)-avg(a.items));t+=` ${s[0].n} is furthest along at ${avg(s[0].items)}%, and ${s[s.length-1].n} has the most left to do at ${avg(s[s.length-1].items)}%.`;}
   else if(A.length===1)t+=` Everything sits under ${A[0].n}.`;
   return t;
@@ -308,7 +310,7 @@ function item(x){
   const ds=L.length?`<ul>${L.map((l,i)=>`<li>${esc(l.t)}${l.goal?`<button type="button" class="gl ${l.goal.status}" data-goal="${esc(l.goal.id)}" title="Open the goal"><i></i>Goal · ${{tbp:'To be picked',inp:'In progress',cmp:'Completed'}[l.goal.status]||'Goal'}</button>`:(CAN_EDIT?`<button type="button" class="mk" data-mk="${esc(x.id)}|${i}">+ Make it a goal</button>`:'')}</li>`).join('')}</ul>`:'<p class="none">Nothing written yet.</p>';
   return`<div class="it${open?' open':''}" data-id="${esc(x.id)}">
     <div class="ih" tabindex="0" role="button" aria-expanded="${open}" data-open="${esc(x.id)}"><div class="in"><b>${esc(x.n)}</b>${x.group?`<small>${esc(x.group)}</small>`:''}</div>
-      <span class="stp ${k}"><i></i>${ST[k][0]}</span><div class="pg"><div class="pbar"><i style="width:${p}%"></i></div><em>${p}%</em></div><span class="cv" aria-hidden="true">${open?'–':'+'}</span></div>
+      <span class="stp ${k}"><i></i>${STAGE(p)}</span><div class="pg"><div class="pbar"><i style="width:${p}%"></i></div><em>${p}%</em></div><span class="cv" aria-hidden="true">${open?'–':'+'}</span></div>
     <div class="ib"><div class="three">${col('ds','Desired state',ds)}${col('cs','Current state',list(x.cs))}${col('pa','Plan ahead',list(x.pa))}</div>
       ${x.at||CAN_EDIT?`<div class="foot">${x.at?`<span>Updated ${esc(x.at)}</span>`:''}${CAN_EDIT?`<button type="button" class="edit" data-edit="${esc(x.id)}">Edit</button>`:''}</div>`:''}</div></div>`;
 }
@@ -317,7 +319,7 @@ function renderTabs(){
   const full=D.filter(d=>d.items.length),empty=D.filter(d=>!d.items.length),cur=D.find(d=>d.k===sel);
   const tab=d=>`<button type="button" class="tab${d.items.length?'':' empty'}" data-k="${esc(d.k)}" aria-pressed="${d.k===sel}">${esc(d.n)}${d.items.length?`<em>${avg(d.items)}%</em>`:''}</button>`;
   const showE=showEmpty||(cur&&!cur.items.length);
-  $('tabs').innerHTML=full.map(tab).join('')+(empty.length?(showE?empty.map(tab).join(''):`<button type="button" class="tab more" data-more="1">+${empty.length} not started</button>`):'');
+  $('tabs').innerHTML=full.map(tab).join('')+(empty.length?(showE?empty.map(tab).join(''):`<button type="button" class="tab more" data-more="1">+${empty.length} yet to start</button>`):'');
 }
 
 function render(){
@@ -337,9 +339,9 @@ function render(){
     <div><span class="badge"><i></i>${esc(d.n)}</span><h2>Where we stand</h2><div class="big">${p}<span>%</span></div><div class="mood">${mood(p)}</div><div class="cap">of the way to the desired state.</div></div>
     <div><div class="eb">Today</div>${sumHtml}${stave(d.items)}</div></section>`;
   h+=`<h3>What ${esc(d.n)} covers</h3><div class="areas">${d.areas.map((a,i)=>a.items.length?
-    `<button type="button" class="ac" data-goto="a${i}"><div class="rg">${ring(avg(a.items),74,8)}<em>${avg(a.items)}%</em></div><div><b>${esc(a.n)}</b><p>${plural(a.items.length,'initiative')}</p><div class="nd">${a.items.map(x=>`<i style="background:${ST[stOf(pctOf(x))][1]}" title="${esc(x.n)}"></i>`).join('')}</div></div></button>`
+    `<button type="button" class="ac" data-goto="a${i}"><div class="rg">${ring(avg(a.items),74,8)}<em>${avg(a.items)}%</em></div><div><b>${esc(a.n)}</b><p>${plural(a.items.length,'initiative')} · ${STAGE(avg(a.items))}</p><div class="nd">${a.items.map(x=>`<i style="background:${ST[stOf(pctOf(x))][1]}" title="${esc(x.n)}"></i>`).join('')}</div></div></button>`
     :`<div class="ac emp"><div class="rg">${ring(0,74,8)}<em style="color:var(--ink3)">–</em></div><div><b>${esc(a.n)}</b><p>Nothing added yet.</p></div></div>`).join('')}</div>`;
-  h+=d.areas.map((a,i)=>a.items.length?`<section class="sec" id="a${i}"><div class="sh"><span class="sw"></span><b>${esc(a.n)}</b><span>${plural(a.items.length,'initiative')}</span><div class="pgs"><div class="pbar"><i style="width:${avg(a.items)}%"></i></div><em>${avg(a.items)}%</em></div></div>${a.items.map(item).join('')}</section>`:'').join('');
+  h+=d.areas.map((a,i)=>a.items.length?`<section class="sec" id="a${i}"><div class="sh"><span class="sw"></span><b>${esc(a.n)}</b><span>${plural(a.items.length,'initiative')} · ${STAGE(avg(a.items))}</span><div class="pgs"><div class="pbar"><i style="width:${avg(a.items)}%"></i></div><em>${avg(a.items)}%</em></div></div>${a.items.map(item).join('')}</section>`:'').join('');
   $('content').innerHTML=h;
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.querySelectorAll('.ring circle.v').forEach(c=>c.setAttribute('stroke-dasharray',c.dataset.to))));
   if(editSum){const t=$('sum-in');if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length);}}
@@ -411,7 +413,7 @@ function openEditor(id){
 function closeEditor(){$('editor').hidden=true;editing=null;}
 function msg(t,err){$('ed-msg').textContent=t;$('ed-msg').className='msg'+(err?' err':'');}
 const split=t=>t.split('\n').map(s=>s.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
-function setPct(v){v=Math.max(0,Math.min(100,Math.round(+v||0)));$('ed-range').value=v;if(+$('ed-pct').value!==v)$('ed-pct').value=v;const k=stOf(v);$('ed-st').innerHTML=`<span class="stp ${k}"><i></i>${ST[k][0]}</span>`;}
+function setPct(v){v=Math.max(0,Math.min(100,Math.round(+v||0)));$('ed-range').value=v;if(+$('ed-pct').value!==v)$('ed-pct').value=v;const k=stOf(v);$('ed-st').innerHTML=`<span class="stp ${k}"><i></i>${STAGE(v)}</span>`;}
 function suggest(){const r=recommendPct({cs:split($('ed-cs').value),pa:split($('ed-pa').value)});REC=r.pct;$('rec-pct').textContent=r.pct+'%';$('rec-why').textContent=r.reason;}
 function useRec(){setPct(REC);}
 async function save(){

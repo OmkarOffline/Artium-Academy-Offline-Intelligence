@@ -159,7 +159,8 @@
   .due.bad{color:#B42318}.due.warn{color:#9A6200}.due.ok{color:var(--ok)}.due.mut{color:var(--faint);font-weight:500}
   .ring{--p:0;width:46px;height:46px;border-radius:50%;background:conic-gradient(#1F7A4D calc(var(--p)*1%),#EEEAF2 0);display:grid;place-items:center}
   .ring span{width:36px;height:36px;border-radius:50%;background:#fff;display:grid;place-items:center;font:600 11.5px var(--display);color:var(--ink)}
-  .rl{font-size:11px;color:var(--faint);margin-top:-4px}
+  .rl{font-size:11px;color:var(--faint);margin-top:-4px;text-align:center;max-width:110px}
+  .stg{display:block;font-size:11px;color:var(--faint);margin-top:4px;white-space:nowrap}
   @media (max-width:640px){.glist{grid-template-columns:1fr}.gc-side{width:110px}}
   /* Goals | Tasks */
   .kind{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:16px;padding:5px;box-shadow:var(--shadow);margin-bottom:18px}
@@ -433,6 +434,8 @@
 <script>
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const ST={tbp:'To be picked',inp:'In progress',cmp:'Completed'};
+/* Stage names by % (same as the Offline Centres and Start pages) */
+const STAGE=p=>p>=100?'Beautifully done':p>=95?'One nudge away':p>80?'So close now':p>60?'Momentum is building':p>40?'Halfway, going strong':p>20?'Finding its feet':p>0?'First steps taken':'Ready to begin';
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
 const day=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
@@ -514,7 +517,7 @@ function grow(g){
   return`<tr class="${SEL===g.id?'sel':''}" data-g="${g.id}"><td class="gt-g"><b>${esc(g.title)}</b><div class="gt-m">${tagChips(g)}<span>${whereOf(g)?esc(whereOf(g)):'Standalone goal'}</span></div></td>
     <td><div class="gt-c">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s==='cmp'?'cmp':'';return`<span class="cd ${st}" title="${esc(k)}${g.draft?'':st==='cmp'?' — Implemented':' — Not yet implemented'}"><i></i>${esc(k)}</span>`;}).join('')}</div></td>
     <td class="nw"><span class="due ${dc}">${due}</span></td>
-    <td>${g.draft?'<span class="due mut">—</span>':`<span class="ring sm" style="--p:${pc}"><span>${p.d}/${p.t}</span></span>`}</td>
+    <td>${g.draft?'<span class="due mut">—</span>':`<span class="ring sm" style="--p:${pc}" title="${p.d} of ${p.t} implemented"><span>${p.d}/${p.t}</span></span><small class="stg">${STAGE(pc)}</small>`}</td>
     <td>${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="gl ${s}"><i></i>${ST[s]}</span>`}</td></tr>`;
 }
 function gcard(g){
@@ -526,7 +529,7 @@ function gcard(g){
       <div class="gc-cen">${cs.map(k=>{const C=g.centres[k],st=g.draft?'':C.s==='cmp'?'cmp':'';
         return`<span class="cp ${st}" title="${esc(k)}${g.draft?'':st==='cmp'?' — Implemented':' — Not yet implemented'}"><i></i>${esc(k)}</span>`;}).join('')}</div></div>
     <div class="gc-side"><span class="due ${dc}">${due}</span>
-      ${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="ring" style="--p:${pc}"><span>${p.d}/${p.t}</span></span><span class="rl">implemented</span>`}</div></button>`;
+      ${g.draft?'<span class="gl draft"><i></i>Yet to email</span>':`<span class="ring" style="--p:${pc}" title="${p.d} of ${p.t} implemented"><span>${p.d}/${p.t}</span></span><span class="rl">${STAGE(pc)}</span>`}</div></button>`;
 }
 function stSel(g,task,c,s){
   return`<span class="gl ${s}"><i></i>${ST[s]}</span>`;
