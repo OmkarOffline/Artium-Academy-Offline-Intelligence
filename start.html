@@ -216,6 +216,19 @@
   .tmore button{border:0;background:none;font:700 13px var(--body);color:var(--accent);cursor:pointer}
   .cheer{margin-top:14px;border-radius:14px;padding:13px 18px;background:linear-gradient(90deg,#f1eafe,#fdeaf9);font:600 15px var(--display);color:#3a0fb0}
   .tempty{padding:18px 2px 6px;color:var(--muted);font-size:14px}
+  /* Check-ins done per day (only for editors): one row per centre, the last 7 days, today on the right */
+  .ckd{position:relative;z-index:1;margin-top:24px;background:#fff;border:1px solid var(--border);border-radius:22px;padding:22px 24px 18px;box-shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
+  .ckd h2{font:800 20px var(--display);color:var(--ink);letter-spacing:-.01em}.ckd .ps{font-size:13px;color:var(--muted);margin:3px 0 14px}
+  .ckd .tw{overflow-x:auto}
+  .ckd table{width:100%;border-collapse:collapse;min-width:560px}
+  .ckd th,.ckd td{padding:9px 8px;text-align:center;font-size:14px;border-bottom:1px solid var(--line)}
+  .ckd th{font:700 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+  .ckd th small{display:block;font:600 11px var(--body);letter-spacing:0;text-transform:none;color:var(--ghost)}
+  .ckd td:first-child,.ckd th:first-child{text-align:left;font-weight:600;color:var(--ink)}
+  .ckd td b{display:inline-grid;place-items:center;min-width:34px;height:30px;padding:0 8px;border-radius:9px;font:700 14px var(--display);color:var(--ink);background:#F3EFFC}
+  .ckd td b.z{background:#FDECEB;color:#B42318}
+  .ckd .td{background:#FBF9FF}.ckd th.td{color:var(--accent)}
+  .ckd tr.tot td{border-bottom:0;font-weight:700}.ckd tr.tot td b{background:#EDE5FF;color:var(--accent)}
   .links{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;max-width:780px;margin:28px auto 0}
   .links:empty{display:none}
   .links button{background:rgba(255,255,255,.8);border:1px solid var(--border);border-radius:999px;padding:9px 16px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
@@ -316,6 +329,7 @@
   </div></section>
   </div>
   </div>
+  <section class="ckd" id="ckd" hidden aria-label="Check-ins done per day"><h2>Check-ins done</h2><p class="ps">Check-ins recorded each day, by centre. Hover a number to see who made them.</p><div class="tw" id="ckdt"></div></section>
   <nav class="links" id="links" aria-label="Your pinned pages"></nav>
 
 </div>
@@ -857,6 +871,7 @@ async function drawCk(res){
   try{
     const meta=await ArtiumAuth.call('checkinsData',{});if(meta.error)throw new Error(meta.error);
     const done=meta.done||{},own=meta.centre||'',out=[],t0=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
+    if(meta.canEdit)try{drawCkDone(done);}catch(e){}
     CENTRES.forEach((c,i)=>{if(!res[i]||(own&&c.name!==own))return;
       res[i][0].filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name).forEach(r=>{
         const name=(r[4]||'').trim(),fc=parseDate(r[22]),adm=parseDate(r[0]);if(!name||!fc||!adm||adm<CK_START)return;const id=(r[3]||'').trim();
@@ -870,6 +885,20 @@ async function drawCk(res){
   }catch(e){el.innerHTML='<div class="tempty">Check-ins are not available right now.</div>';}
 }
 showCk();
+/* Check-ins done per day (only for editors): counted from when each check-in was recorded */
+function drawCkDone(done){
+  const box=document.getElementById('ckd'),el=document.getElementById('ckdt');if(!box||!el)return;
+  const dk=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const days=[];for(let i=6;i>=0;i--)days.push(new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()-i));
+  const keys=days.map(dk),names=CENTRES.map(c=>c.name),cnt={},who={};
+  Object.keys(done).forEach(k=>{const c=k.split('|')[0],at=String(done[k].at||'').slice(0,10);if(!at||keys.indexOf(at)<0)return;
+    const id=c+'|'+at;cnt[id]=(cnt[id]||0)+1;(who[id]=who[id]||{})[done[k].by||'Someone']=((who[id]||{})[done[k].by||'Someone']||0)+1;});
+  const cell=(c,k,i)=>{const n=c?cnt[c+'|'+k]||0:names.reduce((a,x)=>a+(cnt[x+'|'+k]||0),0),w=c&&who[c+'|'+k]?Object.entries(who[c+'|'+k]).map(([p,m])=>p+' ('+m+')').join(', '):'';
+    return`<td class="${i===6?'td':''}"${w?` title="${esc(w)}"`:''}><b class="${n||!c?'':'z'}">${n}</b></td>`;};
+  const head=days.map((d,i)=>`<th class="${i===6?'td':''}">${i===6?'Today':d.toLocaleDateString('en-IN',{weekday:'short'})}<small>${d.getDate()} ${d.toLocaleDateString('en-IN',{month:'short'})}</small></th>`).join('');
+  el.innerHTML=`<table><thead><tr><th>Centre</th>${head}</tr></thead><tbody>${names.map(c=>`<tr><td>${esc(c)}</td>${keys.map((k,i)=>cell(c,k,i)).join('')}</tr>`).join('')}<tr class="tot"><td>All centres</td>${keys.map((k,i)=>cell('',k,i)).join('')}</tr></tbody></table>`;
+  box.hidden=false;
+}
 document.getElementById('cmore').addEventListener('click',()=>{try{window.parent.location.hash='checkins';}catch(x){}});
 let PAYS=null,PCEN=(()=>{try{return localStorage.getItem('artium_home_pay_centre')||'All';}catch(e){return'All';}})();
 function drawPays(L,failed){
