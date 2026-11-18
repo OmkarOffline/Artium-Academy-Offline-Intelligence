@@ -13,10 +13,12 @@
 <script src="auth.js"></script>
 <style>
   /* Colours (Colour Foundations), one job each:
-     Ember           → where you are (the principle you're reading)
-     Progress Violet → what to do (the numbered steps)
-     Passion Pink    → what to ask (the questions to put to a learner)
-     Live green      → done (the Success Check ticks) */
+     Each principle has its own card colour, used for everything that says "this principle":
+       Individual Attention → Cobalt · Sense of Progress → Amethyst · Ownership → Ember · Delight → Bloom
+     Navy          → Why It Matters and Good Practices
+     Passion Pink  → what to ask (the questions to put to a learner)
+     Live green    → done (the Success Check ticks)
+     Rose          → Remember (needs your attention, without being an alarm) */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --f:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -24,6 +26,7 @@
     --vio:#6601FD;--blue:#4101F7;--pink:#DD30B1;--live:#3DDC97;
     --ember:linear-gradient(135deg,#C9502A,#F5906F);--ember-x:linear-gradient(90deg,#C9502A,#F5906F);--ember-t:#A8431E;--ember-glow:rgba(245,144,111,.45);
   }
+  .page{--pc-g:linear-gradient(135deg,#2D3FD6,#93A6F8);--pc-x:linear-gradient(90deg,#2D3FD6,#93A6F8);--pc-t:#2433B8;--pc-soft:#EEF1FF;--pc-glow:rgba(147,166,248,.5)}
   body{background:#FBFAFF;font-family:var(--f);color:var(--ink2);-webkit-font-smoothing:antialiased}
   .page{max-width:1240px;margin:0 auto;padding:40px 48px 80px}
   button{font-family:inherit}
@@ -34,21 +37,21 @@
   .track{display:flex;gap:4px;background:#EFEAF9;border-radius:22px;padding:6px;margin-top:24px}
   .pt{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:14px;padding:12px 16px;border:0;border-radius:17px;background:transparent;position:relative;text-align:left;cursor:pointer;transition:background .15s}
   .pt:hover{background:rgba(255,255,255,.55)}
-  .pt .n{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;color:var(--ember-t);font:800 14px var(--f)}
+  .pt .n{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;color:var(--t);font:800 14px var(--f)}
   .pt b{display:block;font:700 16px/1.25 var(--f);color:var(--ink)}.pt small{display:block;font:500 12.5px/1.35 var(--f);color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pt[aria-selected="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
-  .pt[aria-selected="true"] .n{background:var(--ember);color:#fff;box-shadow:0 8px 16px -8px rgba(201,80,42,.8)}
-  .pt[aria-selected="true"]::after{content:"";position:absolute;left:22px;right:22px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--ember-x)}
+  .pt[aria-selected="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px var(--glow)}
+  .pt[aria-selected="true"] .n{background:var(--g);color:#fff;box-shadow:0 8px 16px -8px var(--t)}
+  .pt[aria-selected="true"]::after{content:"";position:absolute;left:22px;right:22px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:var(--g)}
   .pt:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 
   /* Principle: the one line to remember */
-  .hero{position:relative;overflow:hidden;margin-top:22px;border-radius:30px;background:linear-gradient(115deg,#FFF1E8 0%,#FBF6F6 42%,#F3F0FF 100%);padding:44px 48px 40px;animation:rise .35s ease both}
-  .hero::before{content:"";position:absolute;right:-90px;top:-140px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,var(--ember-glow),rgba(245,144,111,0) 70%)}
+  .hero{position:relative;overflow:hidden;margin-top:22px;border-radius:30px;background:linear-gradient(115deg,var(--pc-soft) 0%,#FAF9FE 48%,#F4F1FF 100%);padding:44px 48px 40px;animation:rise .35s ease both}
+  .hero::before{content:"";position:absolute;right:-90px;top:-140px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,var(--pc-glow),rgba(255,255,255,0) 70%)}
   .hero::after{content:"";position:absolute;left:30%;bottom:-170px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,247,.35),rgba(201,162,247,0) 70%)}
   .hero>*{position:relative;z-index:1}
   @keyframes rise{from{opacity:0;transform:translateY(8px)}}
-  .ptag{display:inline-flex;align-items:center;gap:10px;font:700 12px/18px var(--f);letter-spacing:1.68px;text-transform:uppercase;color:var(--ember-t)}
-  .ptag i{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--ember);color:#fff;font-style:normal}
+  .ptag{display:inline-flex;align-items:center;gap:10px;font:700 12px/18px var(--f);letter-spacing:1.68px;text-transform:uppercase;color:var(--pc-t)}
+  .ptag i{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--pc-g);color:#fff;font-style:normal}
   .ptag i svg{width:16px;height:16px}
   .quote{font:700 46px/1.12 var(--f);letter-spacing:-1.3px;color:var(--ink);margin-top:18px;max-width:900px;text-wrap:balance}
   .obj{display:grid;grid-template-columns:150px minmax(0,1fr);gap:24px;margin-top:30px;padding-top:24px;border-top:1px solid rgba(168,67,30,.18)}
@@ -57,16 +60,23 @@
 
   /* What the learner should feel: their voice, as a speech bubble */
   .feel{display:flex;gap:14px;align-items:flex-end;margin-top:24px}
-  .feel .av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--ember-t);box-shadow:0 8px 18px -10px rgba(201,80,42,.6)}.feel .av svg{width:22px;height:22px}
-  .feel .fl{font:700 12px/18px var(--f);letter-spacing:1.68px;text-transform:uppercase;color:var(--ember-t);margin:0 0 8px 4px}
-  .bub{display:inline-block;background:#fff;border-radius:22px 22px 22px 6px;padding:14px 22px;font:600 22px/1.35 var(--f);color:var(--ink);box-shadow:0 1px 2px rgba(1,7,60,.05),0 18px 36px -24px rgba(201,80,42,.55)}
+  .feel .av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--pc-t);box-shadow:0 8px 18px -10px var(--pc-t)}.feel .av svg{width:22px;height:22px}
+  .feel .fl{font:700 12px/18px var(--f);letter-spacing:1.68px;text-transform:uppercase;color:var(--pc-t);margin:0 0 8px 4px}
+  .bub{display:inline-block;background:#fff;border-radius:22px 22px 22px 6px;padding:14px 22px;font:600 22px/1.35 var(--f);color:var(--ink);box-shadow:0 1px 2px rgba(1,7,60,.05),0 18px 36px -24px var(--pc-t)}
   /* Remember: the closing thought */
-  .rem{position:relative;overflow:hidden;display:flex;gap:20px;align-items:flex-start;margin-top:56px;padding:34px 40px;border-radius:30px;background:linear-gradient(110deg,#FFF1E8 0%,#FBF6F6 45%,#F3F0FF 100%)}
-  .rem::after{content:"";position:absolute;right:-80px;bottom:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,var(--ember-glow),rgba(245,144,111,0) 70%)}
+  .rem{position:relative;overflow:hidden;display:flex;gap:20px;align-items:flex-start;margin-top:56px;padding:34px 40px;border-radius:30px;background:linear-gradient(110deg,#FFEDF2 0%,#FFF6F8 55%,#FBF6FF 100%);box-shadow:inset 4px 0 0 #D2386C}
+  .rem::after{content:"";position:absolute;right:-80px;bottom:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(245,138,166,.4),rgba(245,138,166,0) 70%)}
   .rem>*{position:relative;z-index:1}
-  .rem .ri{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--ember);color:#fff;box-shadow:0 10px 20px -10px rgba(201,80,42,.8)}.rem .ri svg{width:22px;height:22px}
-  .rem h2{font:700 12px/18px var(--f);letter-spacing:1.68px;text-transform:uppercase;color:var(--ember-t);margin:4px 0 8px}
+  .rem .ri{flex:none;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#C8245F,#F58AA6);color:#fff;box-shadow:0 10px 20px -10px rgba(200,36,95,.8)}.rem .ri svg{width:22px;height:22px}
+  .rem h2{font:700 24px/1.2 var(--f);letter-spacing:-.4px;color:#B0204F;margin:8px 0 10px}
   .rem p{font:500 21px/32px var(--f);color:var(--ink);max-width:900px}
+  /* Why It Matters: its own section, right after the principle */
+  .why{display:grid;grid-template-columns:270px minmax(0,1fr);gap:28px;margin-top:22px;background:#fff;border-radius:28px;padding:32px 40px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.35);position:relative;overflow:hidden}
+  .why::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,#01064C,#1B1F7A)}
+  .why .wh{display:flex;flex-direction:column;gap:14px}
+  .why .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#01064C,#1B1F7A);box-shadow:0 10px 20px -10px #01064C}.why .ic svg{width:22px;height:22px}
+  .why h2{font:700 28px/1.15 var(--f);letter-spacing:-.6px;color:var(--ink)}
+  .why p{font:500 21px/33px var(--f);color:var(--ink);align-self:center}
   /* Sections */
   .sec{margin-top:52px}
   .sh{display:flex;align-items:center;gap:12px;margin-bottom:6px}
@@ -76,20 +86,20 @@
   b,strong{font-weight:700;color:var(--ink)}
 
   /* What Teachers Should Do: numbered steps */
-  .do .ic{background:linear-gradient(135deg,#4101F7,#6601FD);box-shadow:0 8px 16px -8px #6601FD}
+  .do .ic{background:var(--pc-g);box-shadow:0 8px 16px -8px var(--pc-t)}
   .steps{list-style:none;counter-reset:s;margin-top:8px}
   .steps li{counter-increment:s;position:relative;display:grid;grid-template-columns:64px minmax(0,1fr);gap:8px;padding:20px 0;font:400 17px/27px var(--f);color:var(--ink2)}
   .steps li+li::before{content:"";position:absolute;left:64px;right:0;top:0;height:1px;background:linear-gradient(90deg,var(--line),var(--line) 70%,transparent)}
-  .steps li::after{content:counter(s,decimal-leading-zero);grid-column:1;grid-row:1;font:800 30px/1 var(--f);letter-spacing:-1px;background:linear-gradient(135deg,#4101F7,#9B6BFF);-webkit-background-clip:text;background-clip:text;color:transparent;padding-top:3px}
+  .steps li::after{content:counter(s,decimal-leading-zero);grid-column:1;grid-row:1;font:800 30px/1 var(--f);letter-spacing:-1px;color:var(--pc-t);padding-top:3px}
   .steps li>div{grid-column:2;grid-row:1}
   .steps .lead{display:block;font:700 19px/27px var(--f);color:var(--ink);margin-bottom:2px}
 
   /* Good Practices */
-  .gp .ic{background:var(--ember);box-shadow:0 8px 16px -8px #C9502A}
+  .gp .ic{background:linear-gradient(135deg,#01064C,#1B1F7A);box-shadow:0 8px 16px -8px #01064C}
   .gpl{list-style:none;margin-top:8px}
   .gpl>li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:16px;padding:16px 0;font:400 17px/27px var(--f);color:var(--ink2);position:relative}
   .gpl>li+li::before{content:"";position:absolute;left:46px;right:0;top:0;height:1px;background:linear-gradient(90deg,var(--line),var(--line) 70%,transparent)}
-  .gpl .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#FFEDE4;color:var(--ember-t)}.gpl .dot svg{width:15px;height:15px}
+  .gpl .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#EEF0F8;color:#1B1F7A}.gpl .dot svg{width:15px;height:15px}
   /* Questions to ask a learner: speech bubbles */
   .asks{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
   .ask{position:relative;background:#FCEAF7;color:#8E1570;border-radius:18px 18px 18px 6px;padding:10px 16px;font:600 15.5px/22px var(--f)}
@@ -116,7 +126,7 @@
     .page{padding:24px 16px 56px}h1{font-size:34px;letter-spacing:-1px}
     .track{flex-direction:column}.pt small{white-space:normal}
     .hero{padding:28px 22px;border-radius:24px}.quote{font-size:31px;letter-spacing:-.8px}
-    .obj{grid-template-columns:1fr;gap:6px}.obj p{font-size:17px;line-height:27px}
+    .why{grid-template-columns:1fr;gap:14px;padding:24px 22px}.why .wh{flex-direction:row;align-items:center}.why h2{font-size:23px}.why p{font-size:17px;line-height:27px}
     .sh h2{font-size:23px}.intro{margin-left:0}
     .steps li{grid-template-columns:44px minmax(0,1fr);font-size:16px}.steps li::after{font-size:24px}.steps li+li::before{left:44px}
     .bub{font-size:18px;padding:12px 16px}.rem{padding:24px 20px;margin-top:40px}.rem p{font-size:17px;line-height:27px}
@@ -141,6 +151,8 @@ const ICON={
   'Ownership':'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
   'Delight':'<path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/>'
 };
+const TH={'Individual Attention':['linear-gradient(135deg,#2D3FD6,#93A6F8)','#2433B8','#EEF1FF','rgba(147,166,248,.5)'],'Sense of Progress':['linear-gradient(135deg,#5B2BB8,#C9A2F7)','#5B2BB8','#F4EEFF','rgba(201,162,247,.5)'],'Ownership':['linear-gradient(135deg,#C9502A,#F5906F)','#A8431E','#FFF1E8','rgba(245,144,111,.45)'],'Delight':['linear-gradient(135deg,#DD30B1,#F1B6FA)','#A3187F','#FDEEF8','rgba(241,182,250,.55)']};
+const th=t=>TH[t]||TH['Individual Attention'];
 const SI={do:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',gp:'<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>',sc:'<path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/>'};
 const svg=(d,w)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w||2.2}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -159,14 +171,15 @@ function step(runs){
 const sec=(P,h)=>P.sections.find(s=>s.h===h);
 function render(){
   if(!(cur>=0&&cur<P.length))cur=0;
-  $('track').innerHTML=P.map((p,i)=>{const q=text(sec(p,'Principle').intro[0]);return`<button type="button" role="tab" class="pt" data-i="${i}" aria-selected="${i===cur}"><span class="n">${String(i+1).padStart(2,'0')}</span><span style="min-width:0"><b>${esc(p.title)}</b><small>${esc(q)}</small></span></button>`;}).join('');
+  $('track').innerHTML=P.map((p,i)=>{const q=text(sec(p,'Principle').intro[0]);const c=th(p.title);return`<button type="button" role="tab" class="pt" data-i="${i}" aria-selected="${i===cur}" style="--g:${c[0]};--t:${c[1]};--glow:${c[3]}"><span class="n">${String(i+1).padStart(2,'0')}</span><span style="min-width:0"><b>${esc(p.title)}</b><small>${esc(q)}</small></span></button>`;}).join('');
   const p=P[cur],pr=sec(p,'Principle'),ob=p.sections.find(s=>s.h==='Why It Matters'||s.h==='Objective'),feel=sec(p,'What the Learner Should Feel'),rem=sec(p,'Remember');
   const doS=sec(p,'What Teachers Should Do'),gp=sec(p,'Good Practices'),sc=sec(p,'Success Check');
-  const t=ticks[cur]=ticks[cur]||{};
+  const t=ticks[cur]=ticks[cur]||{},c=th(p.title),pg=document.querySelector('.page');
+  pg.style.setProperty('--pc-g',c[0]);pg.style.setProperty('--pc-t',c[1]);pg.style.setProperty('--pc-soft',c[2]);pg.style.setProperty('--pc-glow',c[3]);
   let h=`<section class="hero"><div class="ptag"><i>${svg(ICON[p.title]||'',2)}</i>Principle ${String(cur+1).padStart(2,'0')} · ${esc(p.title)}</div>
     <p class="quote">${html(pr.intro[0])}</p>
     ${feel&&feel.intro.length?`<div class="feel"><span class="av">${svg('<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',2)}</span><div><div class="fl">${esc(feel.h)}</div><p class="bub">${html(feel.intro[0])}</p></div></div>`:''}
-    ${ob?`<div class="obj"><h2>${esc(ob.h)}</h2><div>${ob.intro.map(r=>`<p>${html(r)}</p>`).join('')}</div></div>`:''}</section>`;
+</section>${ob?`<section class="why"><div class="wh"><span class="ic">${svg('<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/>',2)}</span><h2>${esc(ob.h)}</h2></div><div>${ob.intro.map(r=>`<p>${html(r)}</p>`).join('')}</div></section>`:''}`;
   if(doS)h+=`<section class="sec do"><div class="sh"><span class="ic">${svg(SI.do,2.6)}</span><h2>${esc(doS.h)}</h2></div>${doS.intro.map(r=>`<p class="intro">${html(r)}</p>`).join('')}
     <ol class="steps">${doS.items.map(it=>`<li><div>${step(it.runs)}</div></li>`).join('')}</ol>${doS.after.map(r=>`<p class="intro">${html(r)}</p>`).join('')}</section>`;
   if(gp)h+=`<section class="sec gp"><div class="sh"><span class="ic">${svg(SI.gp,2.2)}</span><h2>${esc(gp.h)}</h2></div>${gp.intro.map(r=>`<p class="intro">${html(r)}</p>`).join('')}
