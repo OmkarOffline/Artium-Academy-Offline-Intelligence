@@ -293,6 +293,51 @@
   .more[open]>summary svg{transform:rotate(90deg)}
   .more>summary b{font-size:14px;font-weight:600;color:#4A1FB8}.more>summary span{font-size:13px;color:#6F6A79}
   .more[open]>summary{margin-bottom:16px}
+
+  /* ── Colour Foundations refresh (Nov 2026): a light header like the newer pages, the brand's segmented tabs,
+     one calm surface for the table. Colours keep one job each: Ember = where you are (the centre you picked),
+     Progress Violet = the figures' accents, navy = the total line, green and red = above or below target. ── */
+  body{background:#FBFAFF}
+  .page{padding-top:40px}
+  .page-header::before{display:none}
+  .page-header .eyebrow{display:block;font:700 12px/18px var(--body);letter-spacing:1.68px;text-transform:uppercase;color:#6A6488;margin-bottom:4px}
+  .page-header .subtitle{display:block;font:400 17px/26px var(--body);color:#4A4466;margin-top:4px}
+  .page-header h1{font:700 50px/1.06 var(--display);letter-spacing:-1.6px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .page-header .updated{color:#6A6488}
+  .page-header .dot{background:#3DDC97}.page-header .dot.loading{background:#F5906F}.page-header .dot.error{background:#B42318}
+  .controls{background:#EFEAF9;border:0;box-shadow:none;border-radius:18px;padding:5px;gap:6px}
+  .seg{background:transparent;padding:0}
+  .seg button{border-radius:13px;padding:9px 14px;color:#4A4466}
+  .seg button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(201,80,42,.6)}
+  .month-btn{background:#fff;border-radius:12px}
+  .month-label{font:700 15px var(--display);color:#01073C}
+  /* Centres: the brand's segmented track; the one you're on lifts onto white with an Ember underline */
+  .centre-toggle{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px;margin-top:6px}
+  .ct-btn{position:relative;border-radius:17px;padding:10px 22px 12px}
+  .ct-btn:hover{background:rgba(255,255,255,.55)}
+  .ct-btn small{color:#6A6488}
+  .ct-btn span{color:#01073C}
+  .ct-btn[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+  .ct-btn[aria-pressed="true"] span{color:#01073C}.ct-btn[aria-pressed="true"] small{color:#A8431E}
+  .ct-btn[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+  .mx-cap{margin:6px 4px 14px;font:500 14px var(--body);color:#4A4466}
+  /* The table: one surface, softer lines, the same type */
+  .mx-card{border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.35)}
+  table.mx thead th{background:#FAF8FF;border-bottom:1px solid #DCD5EE;color:#4A4466}
+  table.mx thead th.xg{border-bottom:1px solid #DCD5EE}
+  table.mx thead th.xn{color:#01073C}table.mx thead th.xn:after{background:linear-gradient(90deg,#4101F7,#6601FD)}
+  table.mx th,table.mx td{border-bottom-color:#F1EDF9}
+  table.mx tr.sec td{padding-top:30px}
+  table.mx tr.sec td.xm,table.mx tr.sub td.xm{color:#4101F7}
+  table.mx tr.sec td.xm{position:relative}
+  table.mx tr.sec td.xm::before{content:"";position:absolute;left:12px;bottom:10px;width:4px;height:14px;border-radius:2px;background:linear-gradient(180deg,#4101F7,#DD30B1)}
+  table.mx tr.col td{background:#F7F3FF}table.mx tr.col td.xm{color:#2D0B9E;font-weight:600}
+  table.mx tr.pct td.xm{color:#5B4E8C}
+  table.mx tr.total td{background:#0B1156;font-size:16px}
+  table.mx tr.total td.d{border-left-color:rgba(255,255,255,.1)}
+  table.mx tr.total td.xg{background:#0B1156!important;border-color:rgba(255,255,255,.1)}
+  .more>summary{border:0;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.05),0 20px 40px -32px rgba(1,7,60,.4)}
+  @media (max-width:900px){.page-header h1{font-size:34px;letter-spacing:-1px}.page-header .subtitle{font-size:15px}.centre-toggle{display:flex;width:100%}.ct-btn{flex:1;padding:9px 12px 11px}}
 </style>
 </head>
 <body>

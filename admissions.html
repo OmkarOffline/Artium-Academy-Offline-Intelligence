@@ -283,6 +283,38 @@
   .tbl-wrap{box-shadow:inset 0 3px 0 var(--violet2),var(--shadow)}
   .ld-b s{background:var(--ink)}
   .kpi.main,.tl.rr{background:linear-gradient(140deg,#6601fd 0%,#4101f7 60%,#2B0256 130%)}
+
+  /* ── Colour Foundations refresh (Nov 2026): light header like the newer pages, the brand's segmented tabs,
+     one surface per section (no box inside a box). Ember = the centre you picked; Progress Violet = progress;
+     green and red = paid or overdue. ── */
+  body{background:#FBFAFF}
+  .page{padding-top:40px}
+  .page-header::before{display:none}
+  .page-header .eyebrow{display:block;font:700 12px/18px var(--body);letter-spacing:1.68px;text-transform:uppercase;color:#6A6488;margin-bottom:4px}
+  .page-header .subtitle{display:block;font:400 17px/26px var(--body);color:#4A4466;margin-top:4px}
+  .page-header h1{font:700 50px/1.06 var(--display);letter-spacing:-1.6px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .page-header .updated{color:#6A6488}.page-header .dot{background:#3DDC97}.page-header .dot.loading{background:#F5906F}
+  .centre-toggle{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px}
+  .ct-btn{position:relative;border-radius:17px;padding:10px 22px 12px}
+  .ct-btn:hover{background:rgba(255,255,255,.55)}
+  .ct-btn small{color:#6A6488}.ct-btn span{color:#01073C}
+  .ct-btn[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+  .ct-btn[aria-pressed="true"] span{color:#01073C}.ct-btn[aria-pressed="true"] small{color:#A8431E}
+  .ct-btn[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+  .period{background:#EFEAF9;border:0;box-shadow:none;border-radius:18px;padding:5px}
+  .period .seg{background:transparent}
+  .seg button{border-radius:13px}
+  .seg button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+  .mbtn{background:#fff;border-radius:12px}
+  /* Sections: one calm white surface; what was a box inside it now sits flat on it */
+  .sumbox,.panel{background:#fff;border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3)}
+  .s2{border:0;box-shadow:none;border-radius:0;background:transparent}
+  .s2-row{padding:20px 6px}.s2-row+.s2-row{border-top-color:#F1EDF9}
+  .tbl-wrap{border:0;border-radius:18px;box-shadow:0 0 0 1px #EEE9F8}
+  .seg.lv{background:#EFEAF9;border:0;box-shadow:none;border-radius:18px;padding:5px}
+  .seg.lv button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+  .ptitle::before,.st-t::before{background:linear-gradient(180deg,#4101F7,#DD30B1)!important}
+  @media (max-width:900px){.page-header h1{font-size:34px;letter-spacing:-1px}.centre-toggle{display:flex;width:100%}.ct-btn{flex:1;padding:9px 12px 11px}}
 </style>
 </head>
 <body>

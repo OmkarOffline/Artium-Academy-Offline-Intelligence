@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="brand/emblem-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -161,6 +161,43 @@
   .rins{width:290px;line-height:1.45}.rins div+div{margin-top:5px}.rins b{color:var(--ink);font-weight:600}
   .rins .tg{display:inline-block;font:700 10px var(--body);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:2px 7px;margin-right:5px}
   .rins .pos{background:#E5F4EC;color:var(--ok)}.rins .neg{background:#FDECEB;color:var(--bad)}.rins .req{background:#FBF1DC;color:#8A5A00}.rins .rsn{background:#EFE7F8;color:var(--accent)}
+
+  /* ── Colour Foundations refresh (Nov 2026): Onest, brand violet, a light gradient title, the brand's segmented tabs
+     and one calm surface for the list. Colours keep one job each: violet = actions and the call day, green = done,
+     red = overdue. Text is a touch larger for easier reading. ── */
+  :root{--display:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;--body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --bg:#FBFAFF;--border:#DCD5EE;--line:#F1EDF9;--ink:#01073C;--ink2:#4A4466;--muted:#6A6488;--faint:#7A7196;
+    --accent:#4101F7;--accent-soft:#F1EAFE;--gold:#6A6488;--done:#EFFBF5;
+    --shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3)}
+  body{font-size:14px}
+  .page{padding:36px 40px 56px}
+  .eb{font-size:12px;letter-spacing:1.68px;color:#6A6488}
+  h1{font:700 46px/1.06 var(--display);letter-spacing:-1.4px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+  .sub{font-size:16px;color:#4A4466}
+  .dot{background:#3DDC97}
+  .btn{border-radius:12px;font-weight:600}
+  .mo{border:0;border-radius:22px;padding:16px 22px;margin-bottom:16px}
+  .mn b{font-weight:700}
+  .mbtn{width:30px;height:30px;border-radius:10px;background:#EFEAF9}
+  .trk{height:7px;background:#EFEAF9}.trk i{background:linear-gradient(90deg,#4101F7,#6601FD)}
+  .mini{font-size:12.5px}
+  /* Due / Day 20 / Day 45 / Day 80 / Done: one segmented track */
+  .bar{gap:10px}
+  .bar .pill{border:0;background:transparent;border-radius:14px;padding:9px 16px;font-size:13.5px;color:#4A4466}
+  .bar:has(.pill){}
+  .pill:hover{background:rgba(255,255,255,.6)}
+  .pill[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 12px 26px -16px rgba(65,1,247,.55)}
+  .ptrack{display:inline-flex;gap:2px;background:#EFEAF9;border-radius:18px;padding:5px}
+  .ddb{border-radius:14px;height:40px}
+  .card{border:0;border-radius:24px;padding:8px 18px 12px}
+  table{font-size:13px}
+  td{white-space:nowrap}
+  th{font-size:10.5px;color:#6A6488;padding:12px 8px}
+  td{padding:12px 8px}
+  tbody tr:hover td{background:#FBF9FF}
+  tr.done td{background:var(--done)}
+  .day{background:#F1EAFE;color:#4101F7}
+  @media (max-width:760px){.page{padding:24px 16px 48px}h1{font-size:34px;letter-spacing:-1px}.ptrack{flex-wrap:wrap;max-width:100%}.mo{padding:14px 16px}}
 </style>
 </head>
 <body>
@@ -289,7 +326,7 @@ function drawTabs(){
   const fcs=[...new Set(ITEMS.filter(inCen).map(it=>moIdx(it.fc)))].sort((a,b)=>a-b);
   const fcOpts=[['','All months']].concat(fcs.map(m=>[m,MFULL[m%12]+' '+Math.floor(m/12)]));
   const moreOpts=[['','Main lists'],['missed','Missed ('+cnt.missed+')'],['nodate','No first class date ('+cnt.nodate+')']];
-  el.innerHTML=main.map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'<span class="sp"></span>'+
+  el.innerHTML='<span class="ptrack">'+main.map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'</span><span class="sp"></span>'+
     (ME.scoped?'':dd('cen','Centre',CEN,[['All','All centres']].concat(CENTRES.map(c=>[c,c])),false))+
     dd('fcm','First class',FCM,fcOpts,FCM!=='')+
     dd('more','More lists',/^(missed|nodate)$/.test(TAB)?TAB:'',moreOpts,/^(missed|nodate)$/.test(TAB),/^(missed|nodate)$/.test(TAB)?(TAB==='missed'?'Missed':'No first class date'):'')

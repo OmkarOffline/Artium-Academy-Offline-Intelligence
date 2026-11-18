@@ -273,6 +273,43 @@ table.lt th .fa{display:inline-grid;place-items:center;width:17px;height:17px;bo
   .lpick{padding:6px 12px 12px;gap:14px}.lc{padding:6px 7px 6px 12px;font-size:12.5px}
 }
 .m.clk{text-align:left;align-items:stretch;font-family:var(--f)}
+
+/* ── Colour Foundations refresh (Nov 2026): light header like the newer pages, the brand's segmented tabs,
+   fewer boxes inside boxes. Ember = where you are (the centre you picked); Progress Violet = progress and run-rates;
+   green and red = above or below target. ── */
+body{background:#FBFAFF}
+.hero{background:none;padding:40px 48px 18px;color:var(--ink)}
+.eb{color:#6A6488;font-size:12px;letter-spacing:1.68px}
+h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#4A4466;font-size:17px}
+.upd{color:#6A6488}.dot{background:#3DDC97}.dot.loading{background:#F5906F}
+.vt{background:#EFEAF9;border:0;border-radius:18px;padding:5px}
+.vt button{color:#4A4466;border-radius:13px}
+.vt button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+.page{margin-top:0}
+.seg{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px}
+.ct-btn{position:relative;border-radius:17px;padding:10px 22px 12px}
+.ct-btn:hover{background:rgba(255,255,255,.55)}
+.ct-btn small{color:#6A6488}
+.ct-btn[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.ct-btn[aria-pressed="true"] span{color:#01073C}.ct-btn[aria-pressed="true"] small{color:#A8431E}
+.ct-btn[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.per{background:#EFEAF9;border:0;box-shadow:none;border-radius:18px;padding:5px}
+.per .t{background:transparent}.per .m{background:#fff}
+.per .t button{border-radius:13px}.per .t button[aria-pressed="true"]{color:#01073C}
+/* Sections: one calm surface each; the tiles inside lose their borders */
+.sec{border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);margin-bottom:22px}
+.sh{padding:20px 28px;border-bottom-color:#F1EDF9}
+.sh b{font:700 21px var(--f)}
+.rw{padding:18px 28px 22px}.rw+.rw{background:#fff;border-top-color:#F1EDF9}
+.rl{color:#6A6488}
+.k{border:0;background:#F7F5FC;border-radius:18px}
+.k.rr{background:linear-gradient(140deg,#4101F7 0%,#6601FD 100%)}
+.per .m{height:36px!important;min-height:0!important;width:34px;padding:0!important;align-self:center;border-radius:12px;display:grid;place-items:center;box-shadow:none}
+/* Cohort summary: the three groups sit side by side on the section, split by a hairline, not boxed */
+.sg{background:transparent;border:0;box-shadow:none;border-radius:0;padding:4px 6px 6px}
+.sum3 .sg+.sg{border-left:1px solid #F1EDF9;padding-left:22px}
+@media (max-width:900px){.hero{padding:24px 16px 12px}h1{font-size:34px;letter-spacing:-1px}.sum3 .sg+.sg{border-left:0;padding-left:6px;border-top:1px solid #F1EDF9;padding-top:16px}}
 </style>
 </head>
 <body>
