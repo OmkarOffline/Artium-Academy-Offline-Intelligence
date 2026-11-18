@@ -184,7 +184,9 @@
   .ow input{width:96px!important;font:700 15px var(--f)!important}
   .own p{font:400 12px var(--f);color:var(--ink3);margin-top:10px}
   .mf{display:flex;align-items:center;gap:10px;padding:16px 28px 20px;border-top:1px solid var(--soft);margin-top:18px}
-  .mf .sp{flex:1}.mf .msg{font:500 13px var(--f);color:var(--ink3)}.mf .msg.err{color:#B42318}
+  .mf .sp{flex:1}
+  .del{height:44px;padding:0 16px;border:1px solid #F3C9C4;border-radius:14px;background:#fff;color:#B42318;font:600 14px var(--f);cursor:pointer}
+  .del:hover{background:#FDECEB}.del.sure{background:#B42318;border-color:#B42318;color:#fff}.del[hidden]{display:none}.mf .msg{font:500 13px var(--f);color:var(--ink3)}.mf .msg.err{color:#B42318}
 
   @media (prefers-reduced-motion:reduce){.note,.stp.ip i{animation:none}.ring circle.v{transition:none}}
   @media (max-width:1000px){.hero{grid-template-columns:1fr;gap:24px}.three,.g3,.prg{grid-template-columns:1fr}.col,.col:first-child{padding:10px 0}.col+.col{border-left:0;border-top:1px solid #E7E0F5}.ib{padding-left:22px}}
@@ -242,7 +244,7 @@
         <div class="own"><small>Progress you're setting</small><input type="range" id="ed-range" min="0" max="100" step="5" oninput="setPct(this.value)"><div class="ow"><input type="number" id="ed-pct" min="0" max="100" step="5" oninput="setPct(this.value)"><span id="ed-st"></span></div><p>0% shows as Ready to begin and 100% as Beautifully done.</p></div>
       </div>
     </div>
-    <div class="mf"><span class="msg" id="ed-msg">The department and area percentages update on their own.</span><span class="sp"></span><button class="btn-g" type="button" onclick="closeEditor()">Cancel</button><button class="btn" type="button" id="ed-save" onclick="save()">Save initiative</button></div>
+    <div class="mf"><button class="del" type="button" id="ed-del" hidden onclick="delInit()">Delete initiative</button><span class="msg" id="ed-msg">The department and area percentages update on their own.</span><span class="sp"></span><button class="btn-g" type="button" onclick="closeEditor()">Cancel</button><button class="btn" type="button" id="ed-save" onclick="save()">Save initiative</button></div>
   </div>
 </div>
 
@@ -428,6 +430,7 @@ function openEditor(id){
   editing=id?DATA.initiatives.find(x=>x.id===id):null;
   const x=editing||{k:sel,area:'',group:'',n:'',pct:0,ds:[],cs:[],pa:[]};
   $('ed-title').textContent=editing?'Edit initiative':'Add initiative';
+  {const b=$('ed-del');b.hidden=!editing;b.classList.remove('sure');b.textContent='Delete initiative';b.disabled=false;}
   fillDepts(x.k);fillAreas(x.area||((D.find(d=>d.k===x.k)||{areas:[]}).areas[0]||{}).n);
   $('ed-group').value=x.group||'';$('ed-newarea').value='';$('ed-name').value=x.n||'';
   $('ed-ds').value=(x.ds||[]).join('\n');$('ed-cs').value=(x.cs||[]).join('\n');$('ed-pa').value=(x.pa||[]).join('\n');
@@ -435,6 +438,17 @@ function openEditor(id){
   msg('The department and area percentages update on their own.');$('editor').hidden=false;$('ed-name').focus();
 }
 function closeEditor(){$('editor').hidden=true;editing=null;}
+/* Delete: the first click asks to confirm, the second deletes. The sheet keeps a copy in its "Deleted initiatives" tab. */
+let delTimer=null;
+async function delInit(){
+  const b=$('ed-del');if(!editing)return;
+  if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='Click again to delete';msg('This removes "'+editing.n+'" from the page. A copy stays in the "Deleted initiatives" tab of the sheet.',true);
+    clearTimeout(delTimer);delTimer=setTimeout(()=>{b.classList.remove('sure');b.textContent='Delete initiative';msg('The department and area percentages update on their own.');},6000);return;}
+  clearTimeout(delTimer);b.disabled=true;msg('Deleting…');
+  try{await ArtiumAuth.call('deleteInitiative',{id:editing.id});openIts.delete(editing.id);closeEditor();$('dot').className='dot loading';$('updated').textContent='Deleted · refreshing…';await load();}
+  catch(err){msg(err.message,true);}
+  b.disabled=false;b.classList.remove('sure');b.textContent='Delete initiative';
+}
 function msg(t,err){$('ed-msg').textContent=t;$('ed-msg').className='msg'+(err?' err':'');}
 const split=t=>t.split('\n').map(s=>s.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
 function setPct(v){v=Math.max(0,Math.min(100,Math.round(+v||0)));$('ed-range').value=v;if(+$('ed-pct').value!==v)$('ed-pct').value=v;const k=stOf(v);$('ed-st').innerHTML=`<span class="stp ${k}"><i></i>${STAGE(v)}</span>`;}
