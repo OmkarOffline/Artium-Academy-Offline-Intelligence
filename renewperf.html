@@ -396,6 +396,78 @@ table.cht,table.chl{border-collapse:separate;border-spacing:0;font-variant-numer
 .chx{margin-left:10px;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:#fff;font:600 12.5px var(--f);color:var(--violet2);cursor:pointer}
 @media (max-width:760px){.cht .c1{width:150px;min-width:150px;max-width:150px}.cht .c2,.cht thead th.lt2{left:150px;width:64px;min-width:64px}.cht .c3{left:214px;width:66px;min-width:66px}.cht .pb{display:none}}
 @media (max-width:760px){.tsub{flex-wrap:wrap}.tsub button{flex:1 1 30%}}
+
+/* ── Colour Foundations refresh (Nov 2026): the same look as the other pages. Light header, the brand's segmented tabs,
+   one calm surface per section, fewer boxes inside boxes. Colours keep one job each:
+   Ember = where you are (the centre you picked, your sub-page, your row on the leaderboard) · Progress Violet = progress ·
+   Passion Pink = in progress (the pipeline) · Rose = needs attention (Will not renew) · green and red = good and bad bands. ── */
+body{background:#FBFAFF}
+.hero{background:none;padding:40px 48px 18px;color:var(--ink)}
+h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:#4A4466;font-size:17px}
+.upd{color:#6A6488}.dot{background:#3DDC97}.dot.loading{background:#F5906F}
+.asw{color:#4A4466}.asw .asl{color:#6A6488}.asw .ap small{color:#6A6488}
+.asw select{background-color:#fff!important;color:#01073C!important;border:1px solid #E6E0F3!important}
+.vt{background:#EFEAF9;border:0;border-radius:18px;padding:5px}
+.vt button{color:#4A4466;border-radius:13px}
+.vt button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+.page{margin-top:0}
+/* Sub-pages: one segmented track, the open one raised with the Ember underline */
+.tsub{background:#EFEAF9;border:0;box-shadow:none;border-radius:20px;padding:6px;gap:3px;margin-bottom:22px}
+.tsub button{position:relative;border-radius:15px;padding:11px 20px;color:#4A4466;font:600 14.5px var(--f)}
+.tsub button:hover{background:rgba(255,255,255,.55);color:#01073C}
+.tsub button.on{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.tsub button.on::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.seg{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px}
+.ct-btn{position:relative;border-radius:17px;padding:10px 22px 12px}
+.ct-btn:hover{background:rgba(255,255,255,.55)}
+.ct-btn small{color:#6A6488}
+.ct-btn[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.ct-btn[aria-pressed="true"] span{color:#01073C}.ct-btn[aria-pressed="true"] small{color:#A8431E}
+.ct-btn[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.per{background:#EFEAF9;border:0;box-shadow:none;border-radius:18px;padding:5px}
+.per .t{background:transparent}
+.per .t button{border-radius:13px}.per .t button[aria-pressed="true"]{color:#01073C}
+.per .m{height:36px!important;min-height:0!important;width:34px;padding:0!important;align-self:center;border-radius:12px;display:grid;place-items:center;box-shadow:none;background:#fff}
+/* Sections: one calm surface each */
+.sec{border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);margin-bottom:22px}
+.sec:has(.ib)>.sb{border-radius:0 0 28px 28px}.sec:has(.ib)>.sh{border-radius:28px 28px 0 0}.sec.closed:has(.ib)>.sh{border-radius:28px}
+.sh{padding:20px 28px;border-bottom-color:#F1EDF9}
+.sh b{font:700 21px var(--f);color:#01073C}
+.lgrp{color:#6A6488;letter-spacing:.14em;margin:12px 4px 14px}.lgrp::before{background:linear-gradient(135deg,#C9502A,#F5906F)}
+/* Summaries: the groups sit side by side on the section, split by a hairline, not boxed */
+.sg{background:transparent;border:0;box-shadow:none;border-radius:0;padding:4px 6px 6px}
+.sum3 .sg+.sg{border-left:1px solid #F1EDF9;padding-left:22px}
+.sg h3{color:#4101F7}
+.m{background:#F7F5FC;border-radius:18px}
+.m.hero{background:linear-gradient(140deg,#2D0B9E 0%,#4101F7 55%,#6601FD 100%);box-shadow:0 18px 34px -22px rgba(65,1,247,.8)}
+.m.bad{background:#FFEDF2}.m.bad .t,.m.bad .v{color:#B0204F}
+.m.clk.cur{box-shadow:0 0 0 2px #4101F7}
+.m.hero.clk.cur{box-shadow:0 0 0 3px #fff,0 0 0 5px #4101F7}
+.kpi{border:0;border-radius:24px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3)}
+/* Learner lists: chips, status pills and the totals strip */
+.lc{border-color:#E6E0F3}.lc.on{background:#4101F7;border-color:#4101F7}
+.lsub,.tg2,.seg2{background:#EFEAF9;border-radius:14px}
+.lsub button[aria-pressed="true"],.tg2 button.on,.seg2 button.on{color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 8px 18px -12px rgba(1,7,60,.45)}
+.pl.vi{background:#FCEAF7;color:#A3187F}
+.pl.rd{background:#FFEDF2;color:#B0204F}
+.pl.gy{background:#F3F1F8;color:#6A6488}
+.sh .kst{background:#F7F5FC;border:0;border-radius:14px}.sh .kst>span{border-right-color:#E9E4F5}
+.wvb{background:#FBFAFF}
+.chw{border:0;border-radius:18px;background:#fff;box-shadow:inset 0 0 0 1px #F1EDF9}
+/* Leaderboards: your row is "where you are", so it takes Ember */
+.lpf,.lpc{border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3)}
+.lpf{background:radial-gradient(70% 120% at 0% 0%,#F4EEFF 0%,rgba(244,238,255,0) 60%),#fff}
+.lptop .sc2 b{background:linear-gradient(90deg,#4101F7,#DD30B1);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lpb div{background:#F7F5FC;border-radius:16px}
+table.ldb td{background:#fff;border-color:#F1EDF9}
+tr.me td{background:#FFF4EE;border-color:#F8CDB8}
+tr.me td:first-child{box-shadow:inset 4px 0 0 #C9502A}
+tr.me .tw2 b::after{background:linear-gradient(90deg,#C9502A,#F5906F)}
+@media (max-width:900px){.hero{padding:24px 16px 12px}h1{font-size:34px;letter-spacing:-1px}
+  .sum3 .sg+.sg{border-left:0;padding-left:6px;border-top:1px solid #F1EDF9;padding-top:16px}
+  .tsub{display:flex;overflow-x:auto;scrollbar-width:none;max-width:100%}.tsub button{flex:none;padding:10px 14px;font-size:13px}
+  .per{max-width:100%;box-sizing:border-box}.per .l{min-width:0;flex:1}.per .t button{padding:7px 10px}}
 </style>
 </head>
 <body>
