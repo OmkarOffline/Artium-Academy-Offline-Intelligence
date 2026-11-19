@@ -266,6 +266,7 @@
   @media (max-width:900px){.eg{grid-template-columns:1fr}.ef.wide{grid-column:auto}}
   #tp-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:#01064C;color:#fff;font:600 14px var(--f,inherit);border-radius:14px;padding:12px 18px;box-shadow:0 20px 40px -20px rgba(1,7,60,.6);transition:all .25s;z-index:99;pointer-events:none}
   #tp-toast.on{opacity:1;transform:translate(-50%,0)}
+  .stt.oth{background:#EEF1FF;color:#2433B8}
 </style>
 </head>
 <body>
@@ -507,6 +508,8 @@ const ml=k=>MON[k%12]+' '+String(Math.floor(k/12)).slice(2);
 const numOf=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
 const inrOf=x=>'₹'+Math.round(x).toLocaleString('en-IN');
 const lostOf=x=>/will not renew|discontinu|refund/i.test(x.status);
+// any other status the team has written in the sheet (Transfer to Online, Paused, Inactive…): shown as it is, and left out of To call
+const sheetSt=x=>{const s=String(x.status||'').trim();return s&&!/^(due|not yet due|renewed)$/i.test(s)&&!lostOf(x)?s:'';};
 const pipeOf=x=>{if(x.pp===undefined){const d=valid(parseDate(x.r[33])),a=numOf(x.r[34]);x.pp=!x.renewed&&!lostOf(x)&&d&&a>0?{d,a}:null;}return x.pp;};
 function cellLists(tb,t,k){
   if(!R)return{due:[],other:[]};const rn=R.rn,cur=R[tb==='coh'?'a':'b'].cur,who=t==='*'?cur:[t];
@@ -573,13 +576,14 @@ function toast(t){let el=document.getElementById('tp-toast');if(!el){el=document
 function plRender(tb){
   const box=document.getElementById(tb+'-pl');if(!box)return;
   if(!SELP||SELP.tb!==tb||!R){box.innerHTML='';return;}
-  const {t,k}=SELP,{due,other}=cellLists(tb,t,k),ren=due.filter(x=>x.renewed),not=due.filter(x=>!x.renewed),pip=not.filter(pipeOf),call=not.filter(x=>!pipeOf(x)&&!lostOf(x));
+  const {t,k}=SELP,{due,other}=cellLists(tb,t,k),ren=due.filter(x=>x.renewed),not=due.filter(x=>!x.renewed),pip=not.filter(pipeOf),call=not.filter(x=>!pipeOf(x)&&!lostOf(x)&&!sheetSt(x));
   const f=SELP.f==='other'&&!other.length?'all':SELP.f,list=(f==='ren'?ren:f==='not'?not:f==='call'?call:f==='pipe'?pip:f==='other'?other:due).slice().sort((a,b)=>(a.end||a.date)-(b.end||b.date));
   const allC=selCentre==='All',many=t==='*',pc=f!=='ren'&&f!=='other',td0=new Date();td0.setHours(0,0,0,0);
   const st=x=>{if(f==='other'){const pe=x.prev&&x.prev.end;return`<span class="stt ok">Renewed ${fd(x.date)}</span><small>${pe?(mi(pe)<k?'was due '+ml(mi(pe))+' (late)':'due '+ml(mi(pe))+' (in advance)'):'no earlier membership found'}</small>`;}
     if(x.renewed)return`<span class="stt ok">Renewed${x.renOn?' '+fd(x.renOn):''}</span>`;
     if(/will not renew|discontinu|refund/i.test(x.status))return`<span class="stt bad">Will not renew</span>${cell(x.r,28)?`<small>${esc(cell(x.r,28))}</small>`:''}`;
     const pp=pipeOf(x);if(pp)return`<span class="stt pipe">In pipeline</span><small class="pd${pp.d<td0?' od':''}">Promised for ${fd(pp.d)}${pp.d<td0?' · overdue':''}</small>`;
+    const ss=sheetSt(x);if(ss)return`<span class="stt oth">${esc(ss)}</span><small>(Not renewed yet)</small>`;   // what the team wrote, then what the dates say
     return`<span class="stt wait">Not renewed yet</span>`;};
   const row=x=>{const pp=f!=='other'&&pipeOf(x),r=x.r,ph=String(r[7]||'').replace(/\D/g,'').slice(-10),src=f==='other'&&x.prev?x.prev:x;
     return`<tr${pp?' class="inp"':''}><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td class="rw">${src.r[40]?`<b>${src.r[40]}</b><small>${src.tab==='rn'?'Renewals':'Fresh Sales'}</small>`:'<span class="mut">–</span>'}</td>
@@ -591,7 +595,7 @@ function plRender(tb){
   box.innerHTML=`<div class="plh"><div><b>${title}</b><span>${due.length} due · ${ren.length} renewed · ${not.length} not renewed · ${pip.length} in pipeline · ${call.length} to call</span></div>
     <div class="plt" role="group" aria-label="Show">${chip('all','All due',due.length)}${chip('ren','Renewed',ren.length)}${chip('not','Not renewed',not.length)}<span class="sep"></span>${chip('call','To call',call.length)}${chip('pipe','In pipeline',pip.length)}${other.length?chip('other','Paid in '+MON[k%12]+', due another month',other.length):''}</div>
     <button type="button" class="plx" data-plx aria-label="Close the list">✕</button></div>
-    ${pc&&list.some(x=>pipeOf(x))?`<p class="pln">Learners shaded in violet are <b>already in the pipeline</b>: they have a promised payment date and an expected amount, so they don't need a call. To call leaves out the pipeline and anyone marked Will not renew.</p>`:''}
+    ${pc&&list.some(x=>pipeOf(x))?`<p class="pln">Learners shaded in violet are <b>already in the pipeline</b>: they have a promised payment date and an expected amount, so they don't need a call. To call leaves out the pipeline, anyone marked Will not renew, and anyone with another status in the sheet (such as Transfer to Online or Paused).</p>`:''}
     ${tb==='act'&&other.length&&f!=='other'?`<p class="pln">The renewed figure in the cell counts every renewal paid in ${ml(k)}, including ${other.length} late or advance payment${other.length===1?'':'s'} listed under the last button.</p>`:''}
     ${list.length?`<div class="plw"><table class="plt2"><thead><tr><th class="who">Learner</th><th>Row</th><th></th><th>Mobile</th><th>Course</th><th>Age group</th><th>Course level</th>${many?'<th>Teacher</th>':''}<th>Membership end date</th><th>Status</th>${pc?'<th class="pc">Expected payment date</th><th class="pc">Expected collections</th>':''}<th>Latest discussion</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div>`
       :'<div class="ple">No learners here.</div>'}`;

@@ -343,6 +343,7 @@ button.pcn.cur{background:#fff;box-shadow:0 0 0 2px #4101F7}
 .pctab tr.sub .pct{padding-left:22px}.pctab tr.sub .pct>i{width:6px;height:28px;opacity:.55}
 .pctab tr.sub .pct b{font-size:14.5px}.pctab tr.sub .pcn{font-size:17px}.pctab tr.sub .pcp b{font-size:15.5px}
 .pctab tr.pcg-x:not(.sub) th{border-bottom-left-radius:6px}.pctab tr.pcg-x:not(.sub) td:last-child{border-bottom-right-radius:6px}
+  .sub2{display:block;font-size:11.5px;color:#6A6488;margin-top:3px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -706,6 +707,7 @@ function plist(list,kind){
   if(!list.length)return'<div class="empty">No learners here.</div>';
   const sel=selCentre!=='All',td=v=>`<td>${v||'<span class="mut">—</span>'}</td>`;
   const st=x=>{if(kind==='pipe'){const late=x.ncd&&x.ncd<TODAY;return late?`<span class="pl rd">Overdue</span>`:`<span class="pl vi">Promised</span>`;}
+    const ss=sheetSt(x);if(ss)return`<span class="pl bl">${esc(ss)}</span><small class="sub2">(${x.ca==='pipe'?'Pipeline':'Yet to commit'})</small>`;
     return x.ca==='pipe'?`<span class="pl vi">Pipeline</span>`:`<span class="pl gy">Yet to commit</span>`;};
   const rows=list.slice().sort((a,b)=>(a.ncd||9e15)-(b.ncd||9e15)||a.end-b.end);
   return`<div class="tw"><table class="lt pl3"><thead><tr><th>Learner</th><th>Row</th><th>Phone</th><th>Course</th><th>Teacher</th><th>Package expiry</th><th>Expected payment date</th><th>Expected collections</th><th>Status</th><th>Latest discussion</th></tr></thead><tbody>`
@@ -741,6 +743,9 @@ function tools(k){const f=fl(k);
   return`<div class="ltools"><div class="lsub pks" role="group" aria-label="Previous package"><span class="tl">Package</span>${PKGS.map(v=>`<button type="button" data-lk="${k}" data-pkg="${v}" aria-pressed="${f.pkg===v}">${v==='all'?'All':v+'M'}</button>`).join('')}</div>`
     +`<div class="lsub pks" role="group" aria-label="Show">${[['all','All'],['not','Not renewed'],['ren','Renewed']].map(([v,l])=>`<button type="button" data-lk="${k}" data-ren="${v}" aria-pressed="${f.ren===v}">${l}</button>`).join('')}</div></div>`;}
 let LSUB=(()=>{try{return Object.assign({due:'all',one:'act'},JSON.parse(localStorage.getItem('artium_rp_lsub')||'{}'));}catch(e){return{due:'all',one:'act'};}})();
+// the status the team wrote in the sheet, when it says more than Due / Not Yet Due (Transfer to Online, Paused, Refund…). It is shown with the
+// simple label in brackets under it; the simple label always comes from the dates (package end date, later renewals), never from the status.
+const sheetSt=x=>{const s=String(x.status||'').trim();return s&&!/^(due|not yet due|renewed)$/i.test(s)?s:'';};
 const OC={ren:['Renewed','ok'],pipe:['Pipeline','vi'],wnr:['Will not renew','rd'],ext:['Extended','bl'],ytc:['Yet to commit','gy']};
 const pill=(t,c)=>`<span class="pl ${c}">${t}</span>`;
 function subT(key,opts){return`<div class="lsub" role="group">${opts.map(([v,l,c])=>`<button type="button" data-sub="${key}" data-v="${v}" aria-pressed="${LSUB[key]===v}">${l}<i>${c}</i></button>`).join('')}</div>`;}
@@ -793,9 +798,9 @@ function listView(P,mine,sel){
   const byId=new Map();DUE.filter(mine).forEach(x=>{if(x.id)(byId.get(x.id)||byId.set(x.id,[]).get(x.id)).push(x);});
   const latest=[];byId.forEach(l=>{l.sort((a,b)=>a.date-b.date);latest.push(Object.assign(l[l.length-1],{hist:l}));});
   const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
-  const stat=(x,oc)=>`<td>${pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
+  const stat=(x,oc)=>`<td>${oc!=='ren'&&sheetSt(x)?pill(esc(sheetSt(x)),oc==='wnr'?'rd':oc==='pipe'?'vi':'bl')+`<small class="sub2">(${OC[oc][0]})</small>`:pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
   /* The columns every list shows, after the learner and any column of its own */
-  const ocL=(x,oc)=>oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
+  const ocL=(x,oc)=>oc!=='ren'&&sheetSt(x)?sheetSt(x):oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
   /* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
   const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Row',x=>RowEdit.cell(x),null,'n'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
     ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
