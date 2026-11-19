@@ -236,6 +236,35 @@
   body .cn-card::before{background:linear-gradient(90deg,#4101f7,#dd30b1)}
   body .cn-card .ic{background:linear-gradient(135deg,#6601fd,#4101f7)}
   @media (max-width:900px){.hero{padding:26px 16px 84px}h1{font-size:32px}}
+  /* Row, Open row and Add note */
+  table.plt2 td.rw b{display:block;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}table.plt2 td.rw small{display:block;font-size:11.5px;color:var(--muted,#6A6488);margin-top:2px;white-space:nowrap}
+  table.plt2 td.act{white-space:nowrap;text-align:right}
+  table.plt2 .go{display:inline-flex;align-items:center;gap:6px;font:700 12.5px var(--f,inherit);color:#4101F7;text-decoration:none;border:1px solid #DCD0FB;border-radius:10px;padding:6px 10px}
+  table.plt2 .go:hover{background:#F4EEFF}table.plt2 .go svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  table.plt2 .nt{margin-left:6px;font:700 12.5px var(--f,inherit);color:#A3187F;background:#FCEAF7;border:0;border-radius:10px;padding:7px 11px;cursor:pointer}
+  table.plt2 .nt:hover{background:#F8D5EF}
+  table.plt2 tr.ntr td{background:#FBF8FF;padding:0 14px 14px}
+  .ntb{position:sticky;left:14px;width:min(1180px,calc(100vw - 110px));background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 20px 40px -30px rgba(1,7,60,.4);padding:16px 18px}
+  .ntl b{font-size:14.5px;color:var(--ink)}.ntl span{margin-left:10px;font-size:12.5px;color:#6A6488}
+  .ntf{display:flex;gap:10px;align-items:flex-start;margin-top:10px;background:#F7F5FC;border-radius:14px;padding:10px 12px}
+  .ntd{font:700 13.5px var(--f,inherit);color:#4101F7;padding-top:3px;white-space:nowrap}
+  .ntf textarea{flex:1;border:0;background:none;resize:vertical;font:500 14px/1.5 var(--f,inherit);color:var(--ink);outline:0;min-height:44px}
+  .nta{display:flex;align-items:center;gap:10px;margin-top:10px}.nth{flex:1;font-size:12.5px;color:#6A6488}
+  .ntc{border:1px solid #E6E0F3;background:#fff;border-radius:10px;padding:8px 14px;font:600 13px var(--f,inherit);color:#4A4466;cursor:pointer}
+  .nts{border:0;background:linear-gradient(135deg,#4101F7,#6601FD);color:#fff;border-radius:10px;padding:9px 16px;font:700 13px var(--f,inherit);cursor:pointer}.nts:disabled{opacity:.6;cursor:default}
+  .nte{margin-top:10px;font-size:13px;color:#B0204F;background:#FFEDF2;border-radius:10px;padding:8px 12px}
+  .eh{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.eh b{font-size:16px;color:var(--ink)}.eh span{display:block;font-size:12.5px;color:#6A6488;margin-top:3px}
+  .ek{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#6A6488}.ek span{display:inline!important;margin:0 2px 0 0!important}.ek i{font-style:normal;font-weight:600;background:#E3FAF0;color:#137A4F;border-radius:7px;padding:3px 8px}
+  .eg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;margin-top:14px}
+  .ef{display:flex;flex-direction:column;gap:6px;min-width:0}.ef.wide{grid-column:span 3}
+  .efl{font:700 10.5px var(--f,inherit);letter-spacing:.12em;text-transform:uppercase;color:#6A6488}
+  .ef select,.ef input{height:40px;border:1px solid #E6E0F3;border-radius:12px;padding:0 12px;font:500 14px var(--f,inherit);color:var(--ink);background:#fff}
+  .ef select:focus,.ef input:focus,.ntf:focus-within{outline:0;border-color:#C9B5FA;box-shadow:0 0 0 4px rgba(65,1,247,.08)}
+  .ef small{font-size:12px;color:#6A6488}.ef small .mut{color:#B7B0CC}
+  .prev{font-size:13px;line-height:1.5;color:#4A4466;background:#FBFAFF;border-left:3px solid #E6E0F3;border-radius:6px;padding:8px 12px;white-space:pre-line;max-height:80px;overflow:auto}
+  @media (max-width:900px){.eg{grid-template-columns:1fr}.ef.wide{grid-column:auto}}
+  #tp-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:#01064C;color:#fff;font:600 14px var(--f,inherit);border-radius:14px;padding:12px 18px;box-shadow:0 20px 40px -20px rgba(1,7,60,.6);transition:all .25s;z-index:99;pointer-events:none}
+  #tp-toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
@@ -485,6 +514,59 @@ function cellLists(tb,t,k){
   const other=tb==='act'?paid.filter(x=>!(x.prev&&x.prev.end&&mi(x.prev.end)===k)):[];
   return{due,other};
 }
+/* Open row and Add note. The data service sends each entry's row number in its tab (r[40]) and, for the links, each centre's sheet and tab ids.
+   Add note writes only to the Latest Discussion cell: the note goes on top, dated, and what was there stays below it. */
+let LINKS=null,CAN_NOTE=[],NOTE=null;const NROWS={};
+const rk=x=>[x.centre,x.tab,cell(x.r,3).toUpperCase(),cell(x.r,23)].join('|');
+const rowLink=x=>{const L=LINKS&&LINKS[x.centre];if(!L)return'#';return`https://docs.google.com/spreadsheets/d/${encodeURIComponent(L.id)}/edit#gid=${L.gids[x.tab==='rn'?'Renewals':'Fresh Sales']}&range=A${x.r[40]}`;};
+const today=()=>{const d=new Date();return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();};
+const STATUS_OPTS=['Renewed','Due','Not Yet Due','Will Not Renew','Extended','Paused','May Resume Later','Inactive','Dormant','Course Completed','Refund','Transfer to Other centre','Transfer to Online'];   // from the sheet's own dropdown when live
+const statusOpts=x=>{const L=LINKS&&LINKS[x.centre],o=(L&&L.status&&L.status[x.tab==='rn'?'Renewals':'Fresh Sales'])||STATUS_OPTS,c=cell(x.r,25);return c&&!o.includes(c)?[c].concat(o):o;};
+const isoOf=s=>{const d=valid(parseDate(s));return d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'';};
+function noteRow(x){
+  const r=x.r,v=(i,ph)=>esc(cell(r,i))||`<span class="mut">${ph||'Empty'}</span>`;
+  const fld=(lab,now,inp)=>`<label class="ef"><span class="efl">${lab}</span>${inp}<small>In the sheet now: ${now}</small></label>`;
+  return`<tr class="ntr"><td colspan="20"><div class="ntb">
+    <div class="eh"><div><b>Update ${esc(cell(r,4))}</b><span>${esc(x.centre)} · ${x.tab==='rn'?'Renewals':'Fresh Sales'} · row ${r[40]}</span></div>
+      <div class="ek"><span>Checked before saving:</span><i>ID ${esc(cell(r,3))}</i><i>${esc(cell(r,4))}</i><i>${esc(String(cell(r,7)).replace(/\D/g,'').slice(-10))}</i><i>Expiry ${esc(cell(r,23))}</i></div></div>
+    <div class="eg">
+      <div class="ef wide"><span class="efl">Latest discussion · add a note</span><div class="ntf"><span class="ntd">${today()}:</span><textarea id="ntx" rows="2" placeholder="What was discussed? e.g. Spoke to the parent, will pay after the 25th.">${esc(NOTE.t||'')}</textarea></div>
+        <small>Goes on top with today's date, then a line break, then what's already there:</small><div class="prev">${v(32,'No discussion yet')}</div></div>
+      ${fld('Renewal status',v(25),`<select id="e-st">${cell(r,25)?'':'<option value="">Not set</option>'}${statusOpts(x).map(o=>`<option${o===cell(r,25)?' selected':''}>${o}</option>`).join('')}</select>`)}
+      ${fld('Actual renewal date',v(26),`<input type="date" id="e-rd" value="${isoOf(cell(r,26))}">`)}
+      ${fld('Actual package completion date',v(39),`<input type="date" id="e-cd" value="${isoOf(cell(r,39))}">`)}
+      ${fld('No. of compensations due',v(38),`<input type="number" min="0" step="1" id="e-cp" value="${esc(cell(r,38))}" placeholder="0">`)}
+      ${fld('Extension · no. of days',v(37),`<input type="number" min="0" step="1" id="e-ex" value="${esc(cell(r,37))}" placeholder="0">`)}
+    </div>
+    <div class="nta"><span class="nth">Only the details you change are written. If anyone has changed one of these cells since you opened this, nothing is saved and you'll see the newer value.</span>
+    <button type="button" class="ntc" data-notex>Cancel</button><button type="button" class="nts" data-notes${NOTE.busy?' disabled':''}>${NOTE.busy?'Saving…':'Save to sheet'}</button></div>
+    ${NOTE.err?`<div class="nte">${esc(NOTE.err)}</div>`:''}</div></td></tr>`;
+}
+/* Save: only what changed is sent, with what the page showed, so the service can check nobody changed it in the meantime */
+const FIELD={desc:32,status:25,renDate:26,done:39,comp:38,ext:37};
+async function saveNote(){
+  const rr=NROWS[NOTE.k];if(!rr)return;
+  const [c,tab]=NOTE.k.split('|'),val=id=>(document.getElementById(id)||{}).value||'';
+  const form={desc:val('ntx').trim(),status:val('e-st'),renDate:val('e-rd'),done:val('e-cd'),comp:val('e-cp').trim(),ext:val('e-ex').trim()};
+  const cur={desc:'',status:cell(rr,25),renDate:isoOf(cell(rr,26)),done:isoOf(cell(rr,39)),comp:/^\d+$/.test(cell(rr,38))?cell(rr,38):'',ext:/^\d+$/.test(cell(rr,37))?cell(rr,37):''};   // a non-number in the sheet shows as empty and is left alone unless you type one
+  const changes={},before={};
+  Object.keys(form).forEach(f=>{if(f==='desc'?form.desc:form[f]!==cur[f]){changes[f]=form[f];before[f]=cell(rr,FIELD[f]);}});
+  NOTE.t=form.desc;
+  if(!Object.keys(changes).length){NOTE.err='Nothing has changed yet.';plRender(NOTE.tb);return;}
+  NOTE.busy=true;NOTE.err='';plRender(NOTE.tb);
+  try{
+    const j=await ArtiumAuth.call('learnerUpdate',{centre:c,tab:tab==='rn'?'Renewals':'Fresh Sales',id:cell(rr,3),name:cell(rr,4),phone:cell(rr,7),end:cell(rr,23),changes,before});
+    if(j&&j.error==='changed'){Object.keys(j.current||{}).forEach(f=>rr[FIELD[f]]=j.current[f]);if(j.row)rr[40]=j.row;
+      throw new Error('Someone changed '+j.fields.map(f=>({desc:'Latest Discussion',status:'Renewal Status',renDate:'Actual Renewal Date',done:'Actual Package Completion Date',comp:'Compensations',ext:'Extension'})[f]).join(', ')+' in the sheet after you opened this. The newer value is shown now. Nothing was saved, so please check and save again.');}
+    if(j&&j.error)throw new Error(j.error==='not-found'?'Couldn’t find exactly this learner in the sheet (the Student ID, name, phone number or package expiry date has changed). Nothing was saved. Please use Open row.'
+      :j.error==='many'?'More than one row has this Student ID, name, phone number and expiry date, so nothing was saved. Please use Open row.':j.error==='not-allowed'?'You can only edit learners at your own centre.':j.error);
+    Object.keys(j.values||{}).forEach(f=>rr[FIELD[f]]=j.values[f]);if(j.row)rr[40]=String(j.row);
+    const nm=cell(rr,4);NOTE=null;plRender(SELP.tb);toast('Saved to the sheet · '+nm);return;
+  }catch(e){NOTE.busy=false;NOTE.err=e.message||String(e);}
+  plRender(SELP.tb);
+}
+function toast(t){let el=document.getElementById('tp-toast');if(!el){el=document.createElement('div');el.id='tp-toast';document.body.appendChild(el);}
+  el.textContent=t;el.className='on';clearTimeout(el._t);el._t=setTimeout(()=>el.className='',3200);}
 function plRender(tb){
   const box=document.getElementById(tb+'-pl');if(!box)return;
   if(!SELP||SELP.tb!==tb||!R){box.innerHTML='';return;}
@@ -497,8 +579,10 @@ function plRender(tb){
     const pp=pipeOf(x);if(pp)return`<span class="stt pipe">In pipeline</span><small class="pd${pp.d<td0?' od':''}">Promised for ${fd(pp.d)}${pp.d<td0?' · overdue':''}</small>`;
     return`<span class="stt wait">Not renewed yet</span>`;};
   const row=x=>{const pp=f!=='other'&&pipeOf(x),r=x.r,ph=String(r[7]||'').replace(/\D/g,'').slice(-10),src=f==='other'&&x.prev?x.prev:x;
-    return`<tr${pp?' class="inp"':''}><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
-      <td>${fd(src.end)}</td><td class="st">${st(x)}</td>${pc?`<td class="pc">${pp?fd(pp.d):'<span class="mut">–</span>'}</td><td class="pc">${pp?inrOf(pp.a):'<span class="mut">–</span>'}</td>`:''}<td class="ds">${esc(cell(src.r,32))||'<span class="mut">–</span>'}</td></tr>`;};
+    return`<tr${pp?' class="inp"':''}><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td class="rw">${src.r[40]?`<b>${src.r[40]}</b><small>${src.tab==='rn'?'Renewals':'Fresh Sales'}</small>`:'<span class="mut">–</span>'}</td>
+      <td class="act">${src.r[40]&&LINKS?`<a class="go" href="${rowLink(src)}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>`:''}${CAN_NOTE.includes(src.centre)&&src.r[40]?`<button type="button" class="nt" data-note="${esc(rk(src))}">Edit</button>`:''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
+      <td>${fd(src.end)}</td><td class="st">${st(x)}</td>${pc?`<td class="pc">${pp?fd(pp.d):'<span class="mut">–</span>'}</td><td class="pc">${pp?inrOf(pp.a):'<span class="mut">–</span>'}</td>`:''}<td class="ds">${(NROWS[rk(src)]=src.r,'')}${esc(cell(src.r,32))||'<span class="mut">–</span>'}</td></tr>
+      ${NOTE&&NOTE.k===rk(src)?noteRow(src):''}`;};
   const chip=(v,l,n)=>`<button type="button" data-plf="${v}" aria-pressed="${f===v}">${l}<i>${n}</i></button>`;
   const title=(many?'All current teachers':esc(t))+' · '+(tb==='act'?'due in ':'cohort ending ')+ml(k);
   box.innerHTML=`<div class="plh"><div><b>${title}</b><span>${due.length} due · ${ren.length} renewed · ${not.length} not renewed · ${pip.length} in pipeline · ${call.length} to call</span></div>
@@ -506,7 +590,7 @@ function plRender(tb){
     <button type="button" class="plx" data-plx aria-label="Close the list">✕</button></div>
     ${pc&&list.some(x=>pipeOf(x))?`<p class="pln">Learners shaded in violet are <b>already in the pipeline</b>: they have a promised payment date and an expected amount, so they don't need a call. To call leaves out the pipeline and anyone marked Will not renew.</p>`:''}
     ${tb==='act'&&other.length&&f!=='other'?`<p class="pln">The renewed figure in the cell counts every renewal paid in ${ml(k)}, including ${other.length} late or advance payment${other.length===1?'':'s'} listed under the last button.</p>`:''}
-    ${list.length?`<div class="plw"><table class="plt2"><thead><tr><th class="who">Learner</th><th>Mobile</th><th>Course</th><th>Age group</th><th>Course level</th>${many?'<th>Teacher</th>':''}<th>Membership end date</th><th>Status</th>${pc?'<th class="pc">Expected payment date</th><th class="pc">Expected collections</th>':''}<th>Description</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div>`
+    ${list.length?`<div class="plw"><table class="plt2"><thead><tr><th class="who">Learner</th><th>Row</th><th></th><th>Mobile</th><th>Course</th><th>Age group</th><th>Course level</th>${many?'<th>Teacher</th>':''}<th>Membership end date</th><th>Status</th>${pc?'<th class="pc">Expected payment date</th><th class="pc">Expected collections</th>':''}<th>Latest discussion</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div>`
       :'<div class="ple">No learners here.</div>'}`;
 }
 function plOpen(pk){
@@ -519,6 +603,9 @@ function plOpen(pk){
 document.addEventListener('click',e=>{
   const c=e.target.closest('td.pk[data-pk]');if(c){plOpen(c.dataset.pk);return;}
   const f=e.target.closest('[data-plf]');if(f&&SELP){SELP.f=f.dataset.plf;plRender(SELP.tb);return;}
+  const nb=e.target.closest('[data-note]');if(nb&&SELP){NOTE=NOTE&&NOTE.k===nb.dataset.note?null:{k:nb.dataset.note,tb:SELP.tb,t:''};plRender(SELP.tb);const tx=document.getElementById('ntx');if(tx)tx.focus();return;}
+  if(e.target.closest('[data-notex]')){NOTE=null;if(SELP)plRender(SELP.tb);return;}
+  if(e.target.closest('[data-notes]')){saveNote();return;}
   if(e.target.closest('[data-plx]')){SELP=null;document.querySelectorAll('table.rr td.pk.sel').forEach(td=>td.classList.remove('sel'));['coh','act'].forEach(plRender);}
 });
 document.addEventListener('keydown',e=>{const c=e.target.closest&&e.target.closest('td.pk[data-pk]');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();plOpen(c.dataset.pk);}});
@@ -556,6 +643,7 @@ async function load(){
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('dot').className='dot';
+    ArtiumAuth.call('sheetLinks',{}).then(j=>{if(j&&j.links){LINKS=j.links;CAN_NOTE=j.canEdit||[];render();}}).catch(()=>{});
     render();
   }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
 }
