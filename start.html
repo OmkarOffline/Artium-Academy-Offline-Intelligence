@@ -397,12 +397,68 @@
     .pulse{grid-template-columns:1fr;gap:12px;margin-top:-84px}.pt{min-height:0;padding:18px 20px}.it .tx{flex-basis:calc(100% - 60px)}.it{row-gap:8px}.pt .pv{font-size:34px}.pt.money .pv{font-size:38px}.links{grid-template-columns:1fr}.todo{padding:22px 18px}.pin{padding:22px 8px 10px 18px}.ckd{padding:22px 16px}
     .ptg{overflow-x:auto;scrollbar-width:none;margin-right:10px}.ptg button{flex:none;padding:8px 12px}.psum{grid-template-columns:1fr 1fr!important;display:grid!important;gap:8px;margin-right:10px}.psum .k{min-width:0}
     #ckdt{overflow-x:auto;margin:0 -16px;padding:0 16px}.ckd td b{width:44px;height:36px}.ckd th,.ckd td{padding:2px 3px}}
+
+  /* ══ Home, "Bright studio" (Nov 2026) ══
+     Light and airy: soft clouds of brand colour drift behind the page, the instruments we teach float on the right as stickers,
+     dark type for easy reading, and the name in the brand gradient. Cards keep one colour job each:
+     violet = money · pink tint = calls (in progress) · Ember tint = check-ins (where the centres are) · white = your to-do. */
+  html,body{background:#FBF8FF}
+  .studio{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .studio i{position:absolute;border-radius:50%;filter:blur(64px);will-change:transform}
+  .studio .c1{width:640px;height:640px;left:-160px;top:-280px;background:#F1B6FA;opacity:.75;animation:drift1 26s ease-in-out infinite alternate}
+  .studio .c2{width:600px;height:600px;right:-140px;top:-220px;background:#9BB6FF;opacity:.7;animation:drift2 30s ease-in-out infinite alternate}
+  .studio .c3{width:500px;height:500px;right:26%;top:110px;background:#FFC9B0;opacity:.55;animation:drift3 34s ease-in-out infinite alternate}
+  .studio .c4{width:440px;height:440px;left:30%;top:-240px;background:#C9B5FF;opacity:.5;animation:drift2 38s ease-in-out infinite alternate-reverse}
+  @keyframes drift1{to{transform:translate(120px,80px) scale(1.08)}}
+  @keyframes drift2{to{transform:translate(-110px,70px) scale(1.1)}}
+  @keyframes drift3{to{transform:translate(80px,-60px) scale(.92)}}
+  .page{position:relative;z-index:1}
+  .stage::before,.stage::after,.stv{display:none!important}
+  .stage{padding:4px 0 0}
+  .kicker{display:inline-flex;align-items:center;gap:10px;color:#4A4466;background:rgba(255,255,255,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:9px 16px 9px 14px;box-shadow:0 10px 30px -18px rgba(65,1,247,.5);letter-spacing:1.4px}
+  .kicker::before{width:8px;height:8px;box-shadow:0 0 0 4px rgba(61,220,151,.18)}
+  .stage .data-state{color:#4A4466;background:rgba(255,255,255,.75);border:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 10px 30px -18px rgba(65,1,247,.5)}
+  .stage h1{margin-top:40px;font:800 100px/.96 var(--display);letter-spacing:-4.4px;max-width:980px;background:none;-webkit-background-clip:initial;background-clip:initial;color:#01073C;padding-bottom:10px}
+  .stage h1 .nm{background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,#F5906F 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:6px}
+  .stage .sub{color:#4A4466;font-weight:500;margin:16px 0 30px}
+  .stage .ask,.stage .ask:focus-within{background:#fff;border:0;box-shadow:0 2px 4px rgba(1,7,60,.04),0 30px 60px -30px rgba(65,1,247,.45)}
+  .stage .ask:focus-within{box-shadow:0 0 0 4px rgba(65,1,247,.1),0 30px 60px -30px rgba(65,1,247,.5)}
+  .stage .ask::before{display:none}
+  .spark,.stage .ask:focus-within .spark{color:#DD30B1}
+  .stage .ask textarea,.stage .ask:focus-within textarea{color:#01073C}
+  .stage .ask textarea::placeholder,.stage .ask:focus-within textarea::placeholder{color:#6A6488}
+  .stage .go{background:linear-gradient(135deg,#4101F7,#DD30B1);box-shadow:0 12px 26px -10px rgba(102,1,253,.7)}
+  .stage .try,.stage:focus-within .try{color:#6A6488}
+  .stage .try button{background:rgba(255,255,255,.72);border:0;color:#4A4466;box-shadow:0 8px 20px -16px rgba(1,7,60,.4)}
+  .stage .try button:hover{background:#fff;color:#4101F7}
+  /* the stickers: the instruments we teach, tilted, floating gently */
+  .stk{position:absolute;display:grid;place-items:center;border-radius:28px;box-shadow:0 30px 50px -26px rgba(1,7,60,.45);pointer-events:none;animation:bob 7s ease-in-out infinite alternate}
+  .stk svg{width:52%;height:52%;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .stk.s1{right:150px;top:110px;width:124px;height:124px;background:linear-gradient(135deg,#DD30B1,#F17AD0);--r:12deg}
+  .stk.s2{right:330px;top:250px;width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#4101F7,#6601FD);--r:-10deg;animation-delay:-2s}
+  .stk.s3{right:40px;top:300px;width:108px;height:108px;background:linear-gradient(135deg,#C9502A,#F5906F);--r:-6deg;animation-delay:-4s}
+  .stk.s4{right:300px;top:40px;width:70px;height:70px;border-radius:22px;background:#fff;--r:18deg;animation-delay:-1s}.stk.s4 svg{stroke:#4101F7}
+  .stk.s5{right:200px;top:410px;width:62px;height:62px;border-radius:20px;background:#fff;--r:-14deg;animation-delay:-3s}.stk.s5 svg{stroke:#DD30B1}
+  @keyframes bob{from{transform:translateY(0) rotate(var(--r))}to{transform:translateY(-12px) rotate(calc(var(--r) + 3deg))}}
+  @media (prefers-reduced-motion:reduce){.studio i,.stk{animation:none!important}.stk{transform:rotate(var(--r))}}
+  /* the four summary cards: on the page, not lifting off a dark band */
+  .pulse{margin-top:56px}
+  .pt{box-shadow:0 2px 4px rgba(1,7,60,.04),0 30px 60px -36px rgba(1,7,60,.35)}
+  .pt.money{background:linear-gradient(140deg,#4101F7 0%,#6601FD 60%,#DD30B1 100%)}
+  #pt-ck{background:#FCEAF7}#pt-ck .pv{color:#A3187F}
+  #pt-done{background:#FFF1EA}#pt-done .pv{color:#A8431E}#pt-done .mini i{background:rgba(201,80,42,.16)}#pt-done .mini i.t{background:linear-gradient(180deg,#F5906F,#C9502A)}
+  #pt-done .pl i{background:linear-gradient(135deg,#C9502A,#F5906F)!important}
+  .todo,.pay,.ckc,.ckd,.links button{background:rgba(255,255,255,.92)}
+  @media (max-width:1100px){.stk.s2,.stk.s5{display:none}.stk.s1{right:40px;top:120px;width:96px;height:96px}.stk.s3{right:150px;top:210px;width:80px;height:80px}.stk.s4{right:30px;top:260px}}
+  @media (max-width:760px){.stk{display:none}.stage h1{font-size:46px;letter-spacing:-1.8px;margin-top:26px}.pulse{margin-top:36px}}
 </style>
 </head>
 <body>
+<div class="studio" aria-hidden="true"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i></div>
 <div class="bg" id="bg" aria-hidden="true"></div>
 <div class="page">
   <header class="stage">
+    <div class="stk s1" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><div class="stk s2" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/></svg></div><div class="stk s3" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 6v7M10 6v7M14 6v7M18 6v7"/></svg></div><div class="stk s4" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.5 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/></svg></div><div class="stk s5" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></div>
     <svg class="stv" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 20 C 360 0, 720 60, 1440 14" stroke="rgba(241,182,250,0.10)" stroke-width="1.2" fill="none"/><path d="M0 38 C 360 18, 720 78, 1440 32" stroke="rgba(241,182,250,0.13)" stroke-width="1.2" fill="none"/><path d="M0 56 C 360 36, 720 96, 1440 50" stroke="rgba(241,182,250,0.16)" stroke-width="1.2" fill="none"/><path d="M0 74 C 360 54, 720 114, 1440 68" stroke="rgba(241,182,250,0.19)" stroke-width="1.2" fill="none"/><path d="M0 92 C 360 72, 720 132, 1440 86" stroke="rgba(241,182,250,0.22)" stroke-width="1.2" fill="none"/><g fill="rgba(241,182,250,.55)"><ellipse cx="180" cy="52" rx="7" ry="5" transform="rotate(-22 180 52)"/><rect x="185.5" y="26" width="1.8" height="26"/></g><g fill="rgba(241,182,250,.55)"><ellipse cx="330" cy="70" rx="7" ry="5" transform="rotate(-22 330 70)"/><rect x="335.5" y="44" width="1.8" height="26"/></g><g fill="rgba(241,182,250,.55)"><ellipse cx="520" cy="48" rx="7" ry="5" transform="rotate(-22 520 48)"/><rect x="525.5" y="22" width="1.8" height="26"/></g><g fill="rgba(241,182,250,.55)"><ellipse cx="760" cy="78" rx="7" ry="5" transform="rotate(-22 760 78)"/><rect x="765.5" y="52" width="1.8" height="26"/></g><g fill="rgba(241,182,250,.55)"><ellipse cx="980" cy="60" rx="7" ry="5" transform="rotate(-22 980 60)"/><rect x="985.5" y="34" width="1.8" height="26"/></g><g fill="rgba(241,182,250,.55)"><ellipse cx="1160" cy="40" rx="7" ry="5" transform="rotate(-22 1160 40)"/><rect x="1165.5" y="14" width="1.8" height="26"/></g><g fill="rgba(241,182,250,.55)"><ellipse cx="1300" cy="70" rx="7" ry="5" transform="rotate(-22 1300 70)"/><rect x="1305.5" y="44" width="1.8" height="26"/></g></svg>
     <div class="kicker" id="today"></div>
     <h1 id="greet">Good afternoon</h1>
@@ -1121,7 +1177,7 @@ document.getElementById('suggest').addEventListener('click',e=>{const c=e.target
 (function greet(){
   const h=new Date().getHours(),part=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   const el=document.getElementById('greet');el.textContent=part+'.';
-  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.innerHTML=esc(part)+', <span class="nm">'+esc((j.salutation?j.salutation+' ':'')+j.first)+'</span>.';}).catch(()=>{});
+  ArtiumAuth.call('greeting',{}).then(j=>{if(j&&j.first)el.innerHTML=esc(part)+',<br><span class="nm">'+esc((j.salutation?j.salutation+' ':'')+j.first)+'.</span>';}).catch(()=>{});
 })();
 document.getElementById('go').disabled=true;
 
