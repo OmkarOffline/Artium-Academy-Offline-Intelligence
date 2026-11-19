@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loose Ends</title>
+<link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
+<link rel="apple-touch-icon" href="brand/emblem-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+  /* Loose Ends. Colours keep one job each (Colour Foundations):
+     Ember = where you are (the centre and list you picked) · Progress Violet = counts and progress · Passion Pink = new ·
+     Rose = a detail that is missing (needs attention) · amber = something filled in but looks wrong · lilac = yet to start (not an error) · green = all tied up. */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  :root{--f:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;--ink:#01073C;--ink2:#4A4466;--muted:#6A6488;--faint:#9A94B4;--line:#F1EDF9;--edge:#E6E0F3;
+    --violet:#4101F7;--violet2:#6601FD;--pink:#DD30B1;--rose:#B0204F;--rosebg:#FFEDF2;--amber:#8A5A00;--amberbg:#FFF4DC;--ok:#137A4F;--okbg:#E3FAF0;
+    --sh:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3)}
+  html,body{background:#FBFAFF}
+  body{font-family:var(--f);color:var(--ink2);-webkit-font-smoothing:antialiased;font-size:14px}
+  button{font:inherit;cursor:pointer}
+  .page{max-width:1500px;margin:0 auto;padding:40px 48px 72px}
+  .top{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap}
+  .eb{font:700 12px var(--f);letter-spacing:1.68px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+  .sub{font-size:17px;color:var(--ink2);margin-top:6px}
+  .upd{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+  .dot{width:8px;height:8px;border-radius:50%;background:#3DDC97}.dot.loading{background:#F5906F;animation:pulse 1s infinite}.dot.error{background:#B42318}
+  @keyframes pulse{50%{opacity:.35}}
+  .btn{height:38px;padding:0 16px;border:1px solid var(--edge);border-radius:12px;background:#fff;color:var(--ink);font:600 13px var(--f)}
+  .btn:hover{border-color:#C9B5FA;color:var(--violet)}
+  /* Controls */
+  .bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:28px 0 18px}
+  .trk{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:18px;padding:5px}
+  .trk button{position:relative;border:0;background:none;border-radius:13px;padding:9px 16px;font:600 13.5px var(--f);color:var(--ink2);white-space:nowrap}
+  .trk button:hover{background:rgba(255,255,255,.55);color:var(--ink)}
+  .trk button i{font-style:normal;font:700 11.5px var(--f);color:var(--muted);background:rgba(255,255,255,.7);border-radius:999px;padding:1px 8px;margin-left:7px}
+  .trk button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+  .trk button[aria-pressed="true"]::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+  .trk button[aria-pressed="true"] i{background:#F4EEFF;color:var(--violet)}
+  .trl{font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 4px 0 10px;align-self:center}
+  .sp{flex:1}
+  .search{height:42px;min-width:240px;border:1px solid var(--edge);border-radius:14px;padding:0 14px;font:500 14px var(--f);color:var(--ink);background:#fff}
+  .search:focus{outline:0;border-color:#C9B5FA;box-shadow:0 0 0 4px rgba(65,1,247,.08)}
+  /* Summary: one surface, four numbers */
+  .sum{display:grid;grid-template-columns:repeat(4,1fr);background:#fff;border-radius:28px;box-shadow:var(--sh);margin-bottom:22px;overflow:hidden}
+  .sum>div,.sum>button{all:unset;box-sizing:border-box;padding:22px 26px;border-left:1px solid var(--line);display:block}
+  .sum>:first-child{border-left:0}
+  .sum button{cursor:pointer}.sum button:hover{background:#FBFAFF}
+  .sum .t{font:700 11px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .sum .v{font:800 40px/1.1 var(--f);letter-spacing:-1px;color:var(--ink);margin-top:8px}
+  .sum .v.vio{color:var(--violet)}.sum .v.pk{color:var(--pink)}.sum .v.ok{color:var(--ok)}
+  .sum .s{font:400 13px/1.4 var(--f);color:var(--muted);margin-top:4px}
+  /* Groups */
+  .grp{background:#fff;border-radius:28px;box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
+  .gh{all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:14px;padding:20px 28px;cursor:pointer}
+  .gh:hover{background:#FDFCFF}
+  .gi{flex:none;width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#F4EEFF,#EEF1FF);color:var(--violet)}
+  .gi svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .gt b{display:block;font:700 19px var(--f);color:var(--ink)}.gt small{display:block;font:400 13px var(--f);color:var(--muted);margin-top:2px}
+  .gn{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .cnt{font:800 15px var(--f);color:var(--rose);background:var(--rosebg);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .cnt.new{color:#A3187F;background:#FCEAF7}
+  .cv{width:30px;height:30px;border-radius:50%;border:1px solid var(--edge);display:grid;place-items:center;color:var(--muted);transition:transform .2s}
+  .grp.closed .cv{transform:rotate(-90deg)}.grp.closed .gb{display:none}
+  .gb{border-top:1px solid var(--line);padding:16px 28px 20px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  .chip{border:1px solid var(--edge);background:#fff;border-radius:999px;padding:6px 8px 6px 13px;font:600 12.5px var(--f);color:var(--ink2);display:inline-flex;align-items:center;gap:7px}
+  .chip i{font-style:normal;font:700 11.5px var(--f);background:#F3F1F8;color:var(--ink2);border-radius:999px;padding:1px 8px}
+  .chip:hover{border-color:#C9B5FA;color:var(--violet)}
+  .chip.on{background:var(--violet);border-color:var(--violet);color:#fff}.chip.on i{background:rgba(255,255,255,.22);color:#fff}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover td{background:#FBFAFF}
+  td.dt{white-space:nowrap;color:var(--ink2)}
+  td.who b{display:block;font:600 14.5px var(--f);color:var(--ink)}td.who small{display:block;font:500 12px var(--f);color:var(--muted);margin-top:2px}
+  .ctag{display:inline-block;font:600 11.5px var(--f);color:var(--ink2);background:#F3F1F8;border-radius:6px;padding:2px 8px;white-space:nowrap}
+  .ms{display:flex;flex-wrap:wrap;gap:6px}
+  .m{font:600 12px var(--f);border-radius:8px;padding:4px 9px;background:var(--rosebg);color:var(--rose);white-space:nowrap}
+  .m.w{background:var(--amberbg);color:var(--amber)}
+  .nw{display:inline-block;font:700 10px var(--f);letter-spacing:.08em;text-transform:uppercase;background:linear-gradient(90deg,#DD30B1,#F17AD0);color:#fff;border-radius:6px;padding:2px 7px;margin-left:8px;vertical-align:2px}
+  .go{display:inline-flex;align-items:center;gap:6px;font:700 12.5px var(--f);color:var(--violet);text-decoration:none;white-space:nowrap;border:1px solid #DCD0FB;border-radius:10px;padding:6px 10px}
+  .go:hover{background:#F4EEFF}
+  .go svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .more{all:unset;cursor:pointer;display:block;margin:14px auto 0;font:700 13px var(--f);color:var(--violet)}
+  .empty{padding:44px 20px;text-align:center;background:#fff;border-radius:28px;box-shadow:var(--sh)}
+  .empty b{display:block;font:700 22px var(--f);color:var(--ink);margin-bottom:6px}.empty span{color:var(--muted)}
+  .empty .tick{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;background:var(--okbg);color:var(--ok);display:grid;place-items:center}
+  .empty .tick svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .lg{display:flex;align-items:center;gap:10px;font:700 11px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:30px 4px 14px}
+  .lg::before{content:"";width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,#C9502A,#F5906F)}
+  .lg::after{content:"";flex:1;height:1px;background:var(--edge)}
+  .grp.start .gi{background:#F3F1F8;color:#6A6488}.grp.start .cnt{background:#EFEAF9;color:#4A4466}
+  /* What we check */
+  .rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px 28px}
+  .rules h4{font:700 14px var(--f);color:var(--ink);margin-bottom:6px}
+  .rules p{font:400 13px/1.55 var(--f);color:var(--muted)}
+  .note{font:400 13px/1.5 var(--f);color:var(--muted);margin:2px 0 14px}
+  @media (max-width:900px){.page{padding:24px 16px 56px}h1{font-size:34px;letter-spacing:-1px}.sum{grid-template-columns:1fr 1fr}.sum>:nth-child(3){border-left:0}.sum>:nth-child(n+3){border-top:1px solid var(--line)}
+    .trk{max-width:100%;overflow-x:auto;scrollbar-width:none}.search{min-width:0;width:100%}.gh{padding:18px 16px}.gb{padding:12px 12px 16px}
+    .tw{overflow-x:auto}table{min-width:680px}}
+  td.rw{font:800 15px var(--f);color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .ctag.tab{background:#F4EEFF;color:#4101F7}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <div><div class="eb">Loose Ends</div><h1>Loose Ends.</h1><div class="sub">Details missing from the centre sheets, and where to fix them.</div></div>
+    <div class="upd"><span class="dot loading" id="dot"></span><span id="state">Checking the sheets…</span><button class="btn" type="button" id="recheck">Check again</button></div>
+  </div>
+  <div class="bar" id="bar"></div>
+  <div id="out"></div>
+</div>
+<script>
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fromIso=s=>{const m=String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const fmt=d=>d?d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear():'';
+const n=v=>Math.round(v).toLocaleString('en-IN');
+const NOW=new Date(),TODAY=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+/* Current: entries from the first day of last month onwards (and entries with no date). Past: everything older. */
+const CUT=new Date(TODAY.getFullYear(),TODAY.getMonth()-1,1),CUTI=CUT.getFullYear()+'-'+String(CUT.getMonth()+1).padStart(2,'0')+'-01';
+const SHEETS=['Fresh Sales','Renewals','Refunds','Instrument Sales','Other Income','Appointments','Centre Visits'];
+const ICON={'Fresh Sales':'<path d="M12 5v14M5 12h14"/>','Renewals':'<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>','Refunds':'<path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/>',
+  'Instrument Sales':'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>','Other Income':'<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+  'Appointments':'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>','Centre Visits':'<path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M10 21v-5h4v5"/>',
+  miss:'<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>',start:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
+/* What each sheet must have (as checked by the data service) */
+const RULES={'Fresh Sales':'Date of admission, Student ID, name, mobile number, gender, age group, course, course level, teacher, type of sale, no. of months, net coaching fees, payment mode, package expiry date. A blank Date of First Class is listed under Yet to start, not as an error.',
+  'Renewals':'Date of renewal, Student ID (the name fills in from it), package start date, course level, teacher, no. of months, net coaching fees, payment mode, package expiry date.',
+  'Refunds':'Date of enrolment, Student ID, name, mobile number, course, course level, net fees paid, classes purchased and completed, date of refund, refund amount, reason.',
+  'Instrument Sales':'Date of receipt, name, mobile, the instrument or accessory, total amount received, payment mode, invoice raised.',
+  'Other Income':'Date, Student ID, name, mobile number, gender, age group, course, total receipts, payment mode.',
+  'Appointments':'Date of entry, lead ID, lead name, gender, course, phone number, expected date of visit.',
+  'Centre Visits':'Date, visitor’s name, phone number, gender, age group, lead source, visit type, course, demo taken, and the demo teacher when a demo was taken.'};
+const LS=k=>{try{return localStorage.getItem('artium_le_'+k);}catch(e){return null;}},SS=(k,v)=>{try{localStorage.setItem('artium_le_'+k,v);}catch(e){}};
+let D=null,CEN=LS('cen')||'All',WHEN=LS('when')||'cur',BY=LS('by')||'sheet',Q='',PICK={},SHOWN={},FOLD=(()=>{try{return JSON.parse(LS('fold')||'{}')||{};}catch(e){return{};}})();
+const link=x=>`https://docs.google.com/spreadsheets/d/${encodeURIComponent(x.s)}/edit#gid=${x.g}&range=A${x.row}`;
+const isNew=x=>x.seen&&(NOW-new Date(x.seen))<7*864e5;
+const issues=x=>x.miss.concat(x.warn);
+function pool(){
+  if(!D)return[];
+  const q=Q.trim().toLowerCase();
+  return D.rows.filter(x=>(CEN==='All'||x.c===CEN)&&(WHEN==='cur'?(!x.d||x.d>=CUTI):(x.d&&x.d<CUTI))&&(!q||(x.name+' '+x.id).toLowerCase().includes(q)));
+}
+function drawBar(){
+  const cur=D?D.rows.filter(x=>(CEN==='All'||x.c===CEN)&&(!x.d||x.d>=CUTI)).length:0,past=D?D.rows.filter(x=>(CEN==='All'||x.c===CEN)&&x.d&&x.d<CUTI).length:0;
+  const tb=(k,v,l,c)=>`<button type="button" data-${k}="${v}" aria-pressed="${({cen:CEN,when:WHEN,by:BY})[k]===v}">${l}${c!=null?`<i>${n(c)}</i>`:''}</button>`;
+  const cs=D&&!D.scoped&&D.centres.length>1?`<span class="trk">${tb('cen','All','All centres')}${D.centres.map(c=>tb('cen',c,c)).join('')}</span>`:'';
+  document.getElementById('bar').innerHTML=cs+
+    `<span class="trk">${tb('when','cur','Current issues',cur)}${tb('when','past','Past issues',past)}</span>`+
+    `<span class="trk"><span class="trl">Group by</span>${tb('by','sheet','Sheet')}${tb('by','miss','Missing detail')}</span><span class="sp"></span>`+
+    `<input class="search" id="q" type="search" placeholder="Search a name or ID" value="${esc(Q)}" aria-label="Search a name or ID">`;
+}
+function rowsTable(L,key,showSheet){
+  const lim=SHOWN[key]?L.length:Math.min(L.length,25);
+  const tr=L.slice(0,lim).map(x=>{const d=fromIso(x.d);
+    return`<tr><td class="dt">${d?fmt(d):'<span class="m">No date</span>'}</td>
+      <td class="who"><b>${esc(x.name)||'<span style="color:#B0204F">No name</span>'}${isNew(x)?'<span class="nw">New</span>':''}</b>${x.id?`<small>${esc(x.id)}</small>`:''}</td>
+      ${showSheet?`<td><span class="ctag tab">${esc(x.tab)}</span></td>`:''}<td class="rw">${x.row}</td>${CEN==='All'?`<td><span class="ctag">${esc(x.c)}</span></td>`:''}
+      <td><div class="ms">${x.miss.map(m=>`<span class="m">${esc(m)}</span>`).join('')}${x.warn.map(m=>`<span class="m w">${esc(m)}</span>`).join('')}</div></td>
+      <td style="text-align:right"><a class="go" href="${link(x)}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a></td></tr>`;}).join('');
+  return`<div class="tw"><table><thead><tr><th>Entry date</th><th>Entry</th>${showSheet?'<th>Tab</th>':''}<th>Row</th>${CEN==='All'?'<th>Centre</th>':''}<th>What’s missing</th><th></th></tr></thead><tbody>${tr}</tbody></table></div>`
+    +(L.length>lim?`<button type="button" class="more" data-more="${esc(key)}">Show all ${n(L.length)}</button>`:'');
+}
+function group(key,icon,title,sub,L,body,cls=''){
+  const nw=L.filter(isNew).length;
+  return`<section class="grp ${cls}${FOLD[key]?' closed':''}" data-g="${esc(key)}"><button type="button" class="gh" aria-expanded="${!FOLD[key]}"><span class="gi"><svg viewBox="0 0 24 24">${icon}</svg></span>
+    <span class="gt"><b>${esc(title)}</b><small>${sub}</small></span><span class="gn">${nw?`<span class="cnt new">${nw} new</span>`:''}${L.length?`<span class="cnt">${n(L.length)}</span>`:''}
+    <span class="cv"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></span></button><div class="gb">${body}</div></section>`;
+}
+function draw(){
+  drawBar();
+  const out=document.getElementById('out');
+  if(!D){out.innerHTML='<div class="empty"><b>Checking the sheets…</b><span>This takes a few seconds.</span></div>';return;}
+  const P=pool(),cnt={},start=D.start.filter(x=>CEN==='All'||x.c===CEN);
+  P.forEach(x=>issues(x).forEach(m=>cnt[m]=(cnt[m]||0)+1));
+  const det=P.reduce((s,x)=>s+issues(x).length,0),nw=P.filter(isNew).length;
+  const sum=`<div class="sum"><div><div class="t">Entries to fix</div><div class="v vio">${n(P.length)}</div><div class="s">${WHEN==='cur'?'Entered since '+fmt(CUT):'Entered before '+fmt(CUT)}</div></div>
+    <div><div class="t">Details missing</div><div class="v">${n(det)}</div><div class="s">${Object.keys(cnt).length?'Most often: '+esc(Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0][0]):'Nothing missing'}</div></div>
+    <div><div class="t">New this week</div><div class="v pk">${n(nw)}</div><div class="s">New entries with something missing</div></div>
+    <button type="button" data-jump="start"><div class="t">Yet to start</div><div class="v">${n(start.length)}</div><div class="s">No first class date yet. Not an error.</div></button></div>`;
+  let body='';
+  if(!P.length)body=`<div class="empty"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><b>${Q?'Nothing matches this search.':'All tied up.'}</b><span>${Q?'Try another name or ID.':'No '+(WHEN==='cur'?'current':'past')+' entries have details missing'+(CEN==='All'?'':' at '+esc(CEN))+'.'}</span></div>`;
+  else if(BY==='sheet'){
+    body=SHEETS.map(t=>{const L=P.filter(x=>x.tab===t).sort((a,b)=>(b.d||'9').localeCompare(a.d||'9'));if(!L.length)return'';
+      const c={};L.forEach(x=>issues(x).forEach(m=>c[m]=(c[m]||0)+1));const pk=PICK[t]&&c[PICK[t]]?PICK[t]:'';
+      const chips=`<div class="chips"><button type="button" class="chip${pk?'':' on'}" data-pick="${esc(t)}" data-v="">Everything<i>${L.length}</i></button>${Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([m,k])=>`<button type="button" class="chip${pk===m?' on':''}" data-pick="${esc(t)}" data-v="${esc(m)}">${esc(m)}<i>${k}</i></button>`).join('')}</div>`;
+      const F=pk?L.filter(x=>issues(x).includes(pk)):L;
+      return group('s:'+t,ICON[t],t,`${n(L.length)} ${L.length===1?'entry':'entries'} · ${Object.keys(c).length} kind${Object.keys(c).length===1?'':'s'} of detail missing`,L,chips+rowsTable(F,'s:'+t+':'+pk,false));}).join('');
+  }else{
+    body=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([m])=>{const L=P.filter(x=>issues(x).includes(m)).sort((a,b)=>(b.d||'9').localeCompare(a.d||'9'));
+      const sh=[...new Set(L.map(x=>x.tab))];
+      return group('m:'+m,ICON.miss,m,`In ${sh.map(esc).join(', ')}`,L,rowsTable(L,'m:'+m,true));}).join('');
+  }
+  const S=start.slice().sort((a,b)=>(b.d||'').localeCompare(a.d||''));
+  const startG=S.length?`<div class="lg" id="start">Yet to start</div>`+group('start',ICON.start,'No first class date yet',`Learners who have joined but haven’t started classes, or whose start date isn’t entered. Fill in the Date of First Class once they start.`,S,
+    `<div class="tw"><table><thead><tr><th>Joined</th><th>Learner</th><th>Row</th>${CEN==='All'?'<th>Centre</th>':''}<th>Waiting</th><th></th></tr></thead><tbody>${S.slice(0,SHOWN.start?S.length:25).map(x=>{const d=fromIso(x.d),w=d?Math.round((TODAY-d)/864e5):null;
+      return`<tr><td class="dt">${d?fmt(d):'—'}</td><td class="who"><b>${esc(x.name)}</b>${x.id?`<small>${esc(x.id)}</small>`:''}</td><td class="rw">${x.row}</td>${CEN==='All'?`<td><span class="ctag">${esc(x.c)}</span></td>`:''}
+        <td class="dt">${w==null?'—':w===0?'Joined today':w+' day'+(w===1?'':'s')}</td><td style="text-align:right"><a class="go" href="${link(x)}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a></td></tr>`;}).join('')}</tbody></table></div>`
+      +(S.length>25&&!SHOWN.start?`<button type="button" class="more" data-more="start">Show all ${n(S.length)}</button>`:''),'start'):'';
+  const errs=(D.sheets||[]).filter(s=>s.err&&(CEN==='All'||s.c===CEN));
+  const rules=`<div class="lg">What we check</div>`+group('rules',ICON.miss,'Must-fill details, sheet by sheet','A row counts as an entry once it has a name, an ID or a phone number. The Row column gives the row number in that tab. “Open row” takes you straight to it, always in the same Google Sheets tab, so it never opens more than one.',[],
+    `<div class="rules">${SHEETS.map(t=>`<div><h4>${t}</h4><p>${RULES[t]}</p></div>`).join('')}</div>${errs.length?`<p class="note" style="margin-top:16px">Couldn’t read: ${errs.map(s=>esc(s.c+' · '+s.tab)).join(', ')} (the headings weren’t found).</p>`:''}`,'start');
+  out.innerHTML=sum+(BY==='sheet'?'':`<p class="note">Each missing detail, with every entry where it’s missing. An entry can appear under more than one.</p>`)+body+startG+rules;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.cen){CEN=b.dataset.cen;SS('cen',CEN);draw();}
+  else if(b.dataset.when){WHEN=b.dataset.when;SS('when',WHEN);draw();}
+  else if(b.dataset.by){BY=b.dataset.by;SS('by',BY);draw();}
+  else if(b.dataset.pick!==undefined){PICK[b.dataset.pick]=b.dataset.v;draw();}
+  else if(b.dataset.more){SHOWN[b.dataset.more]=1;draw();}
+  else if(b.dataset.jump){const t=document.getElementById(b.dataset.jump);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
+  else if(b.classList.contains('gh')){const k=b.parentElement.dataset.g;FOLD[k]=!FOLD[k];SS('fold',JSON.stringify(FOLD));draw();}
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){Q=e.target.value;const pos=e.target.selectionStart;draw();const q=document.getElementById('q');q.focus();q.setSelectionRange(pos,pos);}});
+async function load(force){
+  const dot=document.getElementById('dot'),st=document.getElementById('state');dot.className='dot loading';st.textContent='Checking the sheets…';
+  try{D=await ArtiumAuth.call('looseEnds',force?{force:true}:{});const t=new Date(D.at);
+    st.textContent='Checked '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+', '+t.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});dot.className='dot';}
+  catch(err){st.textContent='Couldn’t check the sheets. '+(err.message||'');dot.className='dot error';}
+  draw();
+}
+document.getElementById('recheck').onclick=()=>load(true);
+draw();load(false);
+</script>
+</body>
+</html>
