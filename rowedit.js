@@ -47,6 +47,7 @@
   .re-go:hover{background:#F4EEFF}.re-go svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   .re-ed{margin-left:5px;font-size:12px;font-weight:700;color:#A3187F;background:#FCEAF7;border:0;border-radius:9px;padding:6px 10px;cursor:pointer}.re-ed:hover{background:#F8D5EF}
   .re-pk{display:block;margin-top:6px;font-size:12px;font-weight:700;color:#2433B8;background:#EEF1FF;border:0;border-radius:9px;padding:6px 10px;cursor:pointer}.re-pk:hover{background:#DDE3FF}
+  .re-fu{display:block;margin-top:6px;font-size:12px;font-weight:700;color:#A8431E;background:#FFF1EA;border:0;border-radius:9px;padding:6px 10px;cursor:pointer}.re-fu:hover{background:#FFE2D3}
   .re-bg{position:fixed;inset:0;z-index:80;background:rgba(1,6,76,.32);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
   .re-bx{width:min(880px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:24px;box-shadow:0 40px 80px -30px rgba(1,7,60,.6);padding:22px 24px;font-family:inherit;color:#4A4466}
   .re-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.re-h b{font-size:17px;color:#01073C}.re-h span{display:block;font-size:12.5px;color:#6A6488;margin-top:3px}
@@ -70,7 +71,7 @@
     const T = x && x.r && kind(x), n = T && T.row(x.r);
     if (!n) return '<td class="re-c"><span style="color:#B7B0CC">—</span></td>';
     const k = key(x), ln = T.link(x); REG[k] = x;
-    return `<td class="re-c"><b>${esc(n)}</b><small>${T.sheet(x)}</small>${ln ? `<a class="re-go" href="${ln}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : ''}${CAN.includes(x.centre) ? `<button type="button" class="re-ed" data-re="${esc(k)}">Edit</button><button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button>` : ''}</td>`;
+    return `<td class="re-c"><b>${esc(n)}</b><small>${T.sheet(x)}</small>${ln ? `<a class="re-go" href="${ln}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : ''}${CAN.includes(x.centre) ? `<button type="button" class="re-ed" data-re="${esc(k)}">Edit</button><button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button>${x.kind === 'visit' ? `<button type="button" class="re-fu" data-fu="${esc(k)}">Follow-up message</button>` : ''}` : ''}</td>`;
   }
   function draw() {
     let bg = document.getElementById('re-bg'); if (!OPEN) { if (bg) bg.remove(); return; }
@@ -170,6 +171,12 @@
   .pk-ta{width:100%;min-height:420px;border:1px solid #E6E0F3;border-radius:14px;padding:12px;font:13.5px/1.5 'Segoe UI',Helvetica,Arial,sans-serif;color:#111B21;resize:vertical}
   .pk-cp{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;font:inherit;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#4101F7,#6601FD);cursor:pointer}.pk-cp:disabled{opacity:.5;cursor:default}
   .pk-x{position:absolute;top:14px;right:16px}
+  .fu-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.fu-cd{text-align:left;border:1px solid #E6E0F3;background:#fff;border-radius:16px;padding:14px;font:inherit;cursor:pointer}
+  .fu-cd b{display:block;font-size:14.5px;color:#01073C}.fu-cd small{display:block;font-size:12.5px;color:#6A6488;margin-top:4px;line-height:1.4}.fu-cd.on{border-color:#C9502A;box-shadow:0 0 0 3px rgba(245,144,111,.25)}
+  .fu-n{display:inline-block;margin-bottom:6px;font-size:11px;font-weight:700;color:#A8431E;background:#FFF1EA;border-radius:6px;padding:2px 7px}
+  .fu-seg button{padding:7px 18px}
+  .fu-hint{margin-top:18px;font-size:12.5px;color:#6A6488;background:#F7F5FC;border-radius:12px;padding:10px 12px;line-height:1.5}
+  @media (max-width:980px){.fu-cards{grid-template-columns:1fr}}
   @media (max-width:980px){.pk-bx{grid-template-columns:1fr}.pk-row{grid-template-columns:1fr}.pk-sum{grid-template-columns:repeat(2,1fr)}}`;
   let styled = false;
   /* The person, from a learner row (Fresh Sales / Renewals) or a visitor row (Centre Visits) */
@@ -302,5 +309,78 @@
   });
   document.addEventListener('input', e => { if (P && e.target.dataset.pkta !== undefined) P.edit = e.target.value; });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && P) close(); });
+  /* ── Follow-up message (Admissions Pipeline): three locked templates for visitors, written to the visitor or, for children, to the parent ── */
+  let F = null;
+  const WDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], MON3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const pd = s => { const m = String(s || '').trim().match(/^(\d{1,2})-([A-Za-z]{3})[A-Za-z]*-(\d{2,4})$/); if (!m) return null; const k = MON3.findIndex(x => x.toLowerCase() === m[2].toLowerCase()); return k < 0 ? null : new Date(m[3].length === 2 ? 2000 + +m[3] : +m[3], k, +m[1]); };
+  function whenOpts(d) {
+    if (!d) return ['recently'];
+    const t = new Date(); t.setHours(0, 0, 0, 0); const g = Math.round((t - d) / 864e5);
+    const on = g >= 2 && g <= 6 ? 'on ' + WDAY[d.getDay()] : 'on ' + d.getDate() + ' ' + MON3[d.getMonth()];
+    return g === 0 ? ['today', 'yesterday', on] : g === 1 ? ['yesterday', 'today', on] : [on, 'recently'];
+  }
+  const FU_T = [['Thank you for visiting', 'Same day or the next day, when they need time to think.'], ['First follow-up', 'A few days later. Called, but couldn’t connect.'], ['Second follow-up', 'Another attempt that didn’t connect.']];
+  function fuText() {
+    const r = F.x.r, nm = cell(r, 1), course = cell(r, 6) || 'music', c = F.x.centre, me = (FEE && FEE.me) || '', who = F.par ? nm : '';
+    const hi = F.par ? 'Hi,' : `Hi ${(F.sal ? F.sal + ' ' : '') + nm},`, sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
+    if (F.t === 0) {
+      const enjoy = F.trial ? `we hope ${F.par ? who : 'you'} enjoyed the ${course} trial class` : `we hope ${F.par ? who : 'you'} enjoyed ${F.par ? 'the' : 'your'} visit`;
+      return `${hi}\n\nThank you for visiting Artium Academy, ${c}, ${F.par ? 'with ' + who + ' ' : ''}${F.when}. It was lovely to meet you${F.par ? ' both' : ''}, and ${enjoy}.\n\n`
+        + `We'd be delighted to have ${F.par ? who : 'you'} join us. If you have any questions about the course, batch timings or fees, please feel free to reach out to me here. I'm happy to help.` + sign;
+    }
+    if (F.t === 1) return `${hi}\n\nI tried calling you a little while ago but couldn't get through. I just wanted to check in and see if you've had a chance to think about ${F.par ? who + ' joining' : 'joining'} ${course} classes at Artium Academy, ${c}.\n\n`
+      + `If you'd like any more information, or would like to visit us again, please let me know. You can reply here or call me whenever it's convenient for you.` + sign;
+    return `${hi}\n\nI hope you're doing well. I tried reaching you again today but couldn't connect, so I thought I'd drop you a quick message.\n\n`
+      + `We'd love to have ${F.par ? who : 'you'} learn ${course} with us at Artium Academy, ${c}. If you're still deciding, or have any questions about batches, timings or fees, I'm happy to help. Just reply here whenever you're ready.` + sign;
+  }
+  function fuDraw() {
+    let bg = document.getElementById('fu-bg'); if (!F) { if (bg) bg.remove(); return; }
+    if (!bg) { bg = document.createElement('div'); bg.id = 'fu-bg'; bg.className = 'pk-bg'; document.body.appendChild(bg); bg.addEventListener('click', e => { if (e.target === bg) { F = null; fuDraw(); } }); }
+    const r = F.x.r, ph = cell(r, 2).replace(/\D/g, '').slice(-10), phs = ph.replace(/(\d{5})(\d{5})/, '$1 $2'), text = F.edit != null ? F.edit : fuText();
+    const seg = (k, v, l) => `<button type="button" data-fu${k}="${v}" aria-pressed="${String(F[k === 'par' ? 'par' : k]) === String(v)}">${l}</button>`;
+    bg.innerHTML = `<div class="pk-bx" style="grid-template-columns:minmax(0,1fr) 430px"><div>
+      <h2>Follow-up message · ${esc(cell(r, 1))}</h2><div class="pk-sub">${esc(F.x.centre)} · Centre Visits · row ${esc(r[18] || '')}</div>
+      <div class="pk-k"><i>Visited ${esc(cell(r, 0))}</i>${/^y/i.test(cell(r, 7)) ? `<i>${esc(cell(r, 6))} trial class taken</i>` : ''}${cell(r, 3) ? `<i>Age group ${esc(cell(r, 3))}</i>` : ''}${ph ? `<i>${esc(phs)}</i>` : ''}</div>
+      <span class="pk-l" style="margin-top:6px">Message</span>
+      <div class="fu-cards">${FU_T.map((t, i) => `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`).join('')}</div>
+      <span class="pk-l" style="margin-top:16px">Speak to</span>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="pk-seg fu-seg" style="display:inline-flex">${seg('par', 'false', 'Visitor')}${seg('par', 'true', 'Parent')}</div>
+        ${F.par ? `<span class="pk-sub" style="margin:0">${F.kid ? 'Parent, because the age group is ' + esc(cell(r, 3)) + '.' : ''}</span>` : `<select data-fusal>${['', 'Mr.', 'Ms.', 'Mrs.'].map(s => `<option value="${s}"${F.sal === s ? ' selected' : ''}>${s ? 'Address as ' + s : 'No salutation'}</option>`).join('')}</select>`}</div>
+      ${F.t === 0 ? `<span class="pk-l" style="margin-top:16px">Details</span><div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+        <label class="pk-tk" style="margin:0"><input type="checkbox" data-futr${F.trial ? ' checked' : ''}>Mention the trial class</label>
+        <select data-fuwh>${whenOpts(pd(cell(r, 0))).map(w => `<option${w === F.when ? ' selected' : ''}>${w}</option>`).join('')}</select></div>` : ''}
+      <div class="fu-hint">“Thank you for visiting” is suggested on the day of the visit and the day after. From the third day, First follow-up is suggested. Everything fills in from the visitor's row, and you can edit the text before copying.</div></div>
+      <div><div class="pk-mh"><b>Preview · as it will look on WhatsApp</b><span>${F.edit != null ? '<button data-fure>Back to the template</button>' : '<button data-fued>Edit the text</button>'} <button data-fux>Close</button></span></div>
+        ${F.edit != null ? `<textarea class="pk-ta" data-futa>${esc(text)}</textarea>` : `<div class="pk-wa"><div class="pk-wt"><i></i><div><b>${esc(F.par ? cell(r, 1) + '’s parent' : (F.sal ? F.sal + ' ' : '') + cell(r, 1))}</b><small>${ph ? '+91 ' + esc(phs) : ''}</small></div></div><div class="pk-wb">${esc(text)}<span class="t">now</span></div></div>`}
+        <button class="pk-cp" data-fucp>Copy message</button></div></div>`;
+  }
+  function fuOpen(x) {
+    if (!styled) { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); styled = true; }
+    const r = x.r, d = pd(cell(r, 0)), t = new Date(); t.setHours(0, 0, 0, 0); const g = d ? Math.round((t - d) / 864e5) : 9, kid = /^(0 to 5|6 to 12)$/i.test(cell(r, 3));
+    F = { x, t: g <= 1 ? 0 : 1, sug: g <= 1 ? 0 : 1, kid, par: kid, sal: '', trial: /^y/i.test(cell(r, 7)), when: whenOpts(d)[0], edit: null };
+    fuDraw(); load().then(() => { if (F) fuDraw(); }).catch(() => {});   // the sender's name comes with the fee data
+  }
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b && b.dataset.fu !== undefined) { e.preventDefault(); e.stopPropagation(); const x = window.RowEdit && RowEdit._reg(b.dataset.fu); if (x) fuOpen(x); return; }
+    if (!F || !b) return; const d = b.dataset;
+    if (d.fux !== undefined) { F = null; fuDraw(); }
+    else if (d.fut) { F.t = +d.fut; F.edit = null; fuDraw(); }
+    else if (d.fupar) { F.par = d.fupar === 'true'; F.edit = null; fuDraw(); }
+    else if (d.fued !== undefined) { F.edit = fuText(); fuDraw(); }
+    else if (d.fure !== undefined) { F.edit = null; fuDraw(); }
+    else if (d.fucp !== undefined) { const t = F.edit != null ? F.edit : fuText();
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = 'Copied ✓'; setTimeout(() => { if (b.isConnected) b.textContent = 'Copy message'; }, 1800); })
+        .catch(() => { F.edit = t; fuDraw(); const ta = document.querySelector('[data-futa]'); if (ta) { ta.focus(); ta.select(); } }); }
+  }, true);
+  document.addEventListener('change', e => {
+    if (!F) return; const el = e.target, d = el.dataset;
+    if (d.fusal !== undefined) F.sal = el.value; else if (d.futr !== undefined) F.trial = el.checked; else if (d.fuwh !== undefined) F.when = el.value;
+    else if (d.futa !== undefined) { F.edit = el.value; return; } else return;
+    F.edit = null; clearTimeout(window.__fuT); window.__fuT = setTimeout(fuDraw, 0);
+  });
+  document.addEventListener('input', e => { if (F && e.target.dataset.futa !== undefined) F.edit = e.target.value; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && F) { F = null; fuDraw(); } });
+  window.FollowUp = { open: fuOpen };
   window.Package = { open };
 })();
