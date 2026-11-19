@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="rowedit.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -499,9 +500,9 @@ const SUM=(...kv)=>kv.map(([k,v])=>`<span>${k} <b>${v}</b></span>`).join('');
 function learnerList(list,ext){
   if(!list.length)return'<div class="empty">No learners here.</div>';
   const sel=selCentre!=='All';
-  let h=`<div class="tw"><table class="lt"><thead><tr><th>Learner</th><th>Course</th><th>Age group</th><th>Course level</th><th>Teacher</th>${ext?'<th>Extension</th>':''}<th>Latest discussion</th></tr></thead><tbody>`;
+  let h=`<div class="tw"><table class="lt"><thead><tr><th>Learner</th><th>Row</th><th>Course</th><th>Age group</th><th>Course level</th><th>Teacher</th>${ext?'<th>Extension</th>':''}<th>Latest discussion</th></tr></thead><tbody>`;
   list.slice().sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name)).forEach(x=>{
-    h+=`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)} · due ${fmtD(x.end)}</small></td>
+    h+=`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)} · due ${fmtD(x.end)}</small></td>${RowEdit.cell(x)}
       <td>${esc(x.course)||'—'}</td><td>${esc(x.age)||'—'}</td><td>${esc(x.level)||'—'}</td><td>${esc(x.teacher)||'—'}</td>
       ${ext?`<td class="ex">${Math.round(x.ext)} day${Math.round(x.ext)===1?'':'s'}${x.newEnd?' · to '+fmtD(x.newEnd):''}</td>`:''}
       <td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td></tr>`;});
@@ -707,8 +708,8 @@ function plist(list,kind){
   const st=x=>{if(kind==='pipe'){const late=x.ncd&&x.ncd<TODAY;return late?`<span class="pl rd">Overdue</span>`:`<span class="pl vi">Promised</span>`;}
     return x.ca==='pipe'?`<span class="pl vi">Pipeline</span>`:`<span class="pl gy">Yet to commit</span>`;};
   const rows=list.slice().sort((a,b)=>(a.ncd||9e15)-(b.ncd||9e15)||a.end-b.end);
-  return`<div class="tw"><table class="lt pl3"><thead><tr><th>Learner</th><th>Phone</th><th>Course</th><th>Teacher</th><th>Package expiry</th><th>Expected payment date</th><th>Expected collections</th><th>Status</th><th>Latest discussion</th></tr></thead><tbody>`
-    +rows.map(x=>`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>`
+  return`<div class="tw"><table class="lt pl3"><thead><tr><th>Learner</th><th>Row</th><th>Phone</th><th>Course</th><th>Teacher</th><th>Package expiry</th><th>Expected payment date</th><th>Expected collections</th><th>Status</th><th>Latest discussion</th></tr></thead><tbody>`
+    +rows.map(x=>`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>`+RowEdit.cell(x)
       +td(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'')+td(esc(x.course))+td(esc(x.teacher))+td(x.end?fmtD(x.end):'')+td(x.ncd?fmtD(x.ncd):'')+td(x.exp>0?inr(x.exp):'')+`<td>${st(x)}</td>`
       +`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td></tr>`).join('')+'</tbody></table></div>';
 }
@@ -796,7 +797,7 @@ function listView(P,mine,sel){
   /* The columns every list shows, after the learner and any column of its own */
   const ocL=(x,oc)=>oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
   /* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
-  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
+  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Row',x=>RowEdit.cell(x),null,'n'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
     ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
     ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],
     ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
@@ -918,6 +919,7 @@ async function load(){
     const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
     CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
     ITEMS=build();DUE=buildDue();
+    RowEdit.start(x=>{if(x){ITEMS=build();DUE=buildDue();}render();});   // Row, Open row and Edit in every learner list
     ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets){TARGETS=j.targets;render();}}).catch(()=>{});   // monthly targets (Targets page)
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});

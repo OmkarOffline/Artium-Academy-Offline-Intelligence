@@ -532,6 +532,8 @@ function noteRow(x){
     <div class="eg">
       <div class="ef wide"><span class="efl">Latest discussion · add a note</span><div class="ntf"><span class="ntd">${today()}:</span><textarea id="ntx" rows="2" placeholder="What was discussed? e.g. Spoke to the parent, will pay after the 25th.">${esc(NOTE.t||'')}</textarea></div>
         <small>Goes on top with today's date, then a line break, then what's already there:</small><div class="prev">${v(32,'No discussion yet')}</div></div>
+      ${fld('Expected payment date',v(33),`<input type="date" id="e-pay" value="${isoOf(cell(r,33))}">`)}
+      ${fld('Expected collections',v(34),`<input type="number" min="0" step="1" id="e-coll" value="${esc(/^\d+(\.\d+)?$/.test(cell(r,34).replace(/[,\s₹]/g,''))?String(Math.round(+cell(r,34).replace(/[,\s₹]/g,''))):'')}" placeholder="₹">`)}
       ${fld('Renewal status',v(25),`<select id="e-st">${cell(r,25)?'':'<option value="">Not set</option>'}${statusOpts(x).map(o=>`<option${o===cell(r,25)?' selected':''}>${o}</option>`).join('')}</select>`)}
       ${fld('Actual renewal date',v(26),`<input type="date" id="e-rd" value="${isoOf(cell(r,26))}">`)}
       ${fld('Actual package completion date',v(39),`<input type="date" id="e-cd" value="${isoOf(cell(r,39))}">`)}
@@ -543,12 +545,12 @@ function noteRow(x){
     ${NOTE.err?`<div class="nte">${esc(NOTE.err)}</div>`:''}</div></td></tr>`;
 }
 /* Save: only what changed is sent, with what the page showed, so the service can check nobody changed it in the meantime */
-const FIELD={desc:32,status:25,renDate:26,done:39,comp:38,ext:37};
+const FIELD={desc:32,status:25,renDate:26,done:39,comp:38,ext:37,pay:33,coll:34};
 async function saveNote(){
   const rr=NROWS[NOTE.k];if(!rr)return;
   const [c,tab]=NOTE.k.split('|'),val=id=>(document.getElementById(id)||{}).value||'';
-  const form={desc:val('ntx').trim(),status:val('e-st'),renDate:val('e-rd'),done:val('e-cd'),comp:val('e-cp').trim(),ext:val('e-ex').trim()};
-  const cur={desc:'',status:cell(rr,25),renDate:isoOf(cell(rr,26)),done:isoOf(cell(rr,39)),comp:/^\d+$/.test(cell(rr,38))?cell(rr,38):'',ext:/^\d+$/.test(cell(rr,37))?cell(rr,37):''};   // a non-number in the sheet shows as empty and is left alone unless you type one
+  const form={desc:val('ntx').trim(),status:val('e-st'),renDate:val('e-rd'),done:val('e-cd'),comp:val('e-cp').trim(),ext:val('e-ex').trim(),pay:val('e-pay'),coll:val('e-coll').trim()};
+  const cur={desc:'',status:cell(rr,25),renDate:isoOf(cell(rr,26)),done:isoOf(cell(rr,39)),comp:/^\d+$/.test(cell(rr,38))?cell(rr,38):'',ext:/^\d+$/.test(cell(rr,37))?cell(rr,37):'',pay:isoOf(cell(rr,33)),coll:/^\d+(\.\d+)?$/.test(cell(rr,34).replace(/[,\s₹]/g,''))?String(Math.round(+cell(rr,34).replace(/[,\s₹]/g,''))):''};   // a non-number in the sheet shows as empty and is left alone unless you type one
   const changes={},before={};
   Object.keys(form).forEach(f=>{if(f==='desc'?form.desc:form[f]!==cur[f]){changes[f]=form[f];before[f]=cell(rr,FIELD[f]);}});
   NOTE.t=form.desc;
@@ -557,7 +559,7 @@ async function saveNote(){
   try{
     const j=await ArtiumAuth.call('learnerUpdate',{centre:c,tab:tab==='rn'?'Renewals':'Fresh Sales',id:cell(rr,3),name:cell(rr,4),phone:cell(rr,7),end:cell(rr,23),changes,before});
     if(j&&j.error==='changed'){Object.keys(j.current||{}).forEach(f=>rr[FIELD[f]]=j.current[f]);if(j.row)rr[40]=j.row;
-      throw new Error('Someone changed '+j.fields.map(f=>({desc:'Latest Discussion',status:'Renewal Status',renDate:'Actual Renewal Date',done:'Actual Package Completion Date',comp:'Compensations',ext:'Extension'})[f]).join(', ')+' in the sheet after you opened this. The newer value is shown now. Nothing was saved, so please check and save again.');}
+      throw new Error('Someone changed '+j.fields.map(f=>({desc:'Latest Discussion',status:'Renewal Status',renDate:'Actual Renewal Date',done:'Actual Package Completion Date',comp:'Compensations',ext:'Extension',pay:'Expected Payment Date',coll:'Expected Collections'})[f]).join(', ')+' in the sheet after you opened this. The newer value is shown now. Nothing was saved, so please check and save again.');}
     if(j&&j.error)throw new Error(j.error==='not-found'?'Couldn’t find exactly this learner in the sheet (the Student ID, name, phone number or package expiry date has changed). Nothing was saved. Please use Open row.'
       :j.error==='many'?'More than one row has this Student ID, name, phone number and expiry date, so nothing was saved. Please use Open row.':j.error==='not-allowed'?'You can only edit learners at your own centre.':j.error);
     Object.keys(j.values||{}).forEach(f=>rr[FIELD[f]]=j.values[f]);if(j.row)rr[40]=String(j.row);

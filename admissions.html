@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="rowedit.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -386,7 +387,7 @@ const LOST=/not interested|unsuitable|admission restricted|suggested to other|ef
 function build(data,fresh){
   const out=[];
   CENTRES.forEach(c=>(data[c.name]||[]).forEach(r=>{const date=valid(parseDate(r[0]));if(!date)return;
-    const x={centre:c.name,date,name:String(r[1]||'').trim(),phone:String(r[2]||'').replace(/\D/g,'').slice(-10),age:String(r[3]||'').trim(),src:String(r[4]||'').trim(),
+    const x={kind:'visit',r,centre:c.name,date,name:String(r[1]||'').trim(),phone:String(r[2]||'').replace(/\D/g,'').slice(-10),age:String(r[3]||'').trim(),src:String(r[4]||'').trim(),
       vt:String(r[5]||'').trim(),course:String(r[6]||'').trim(),demo:String(r[7]||'').trim(),teacher:String(r[8]||'').trim(),status:String(r[9]||'').trim(),
       ncd:valid(parseDate(r[10])),note:String(r[11]||'').trim(),prob:String(r[12]||'').trim(),ed:valid(parseDate(r[13])),ea:parseNum(r[14]),
       conv:/^y/i.test(String(r[15]||'').trim()),act:parseNum(r[16]),cd:valid(parseDate(r[17]))};
@@ -445,12 +446,12 @@ function renderGap(list,sel,P){
   document.getElementById('back-all').onclick=()=>{show='all';render();};
   renderFilters(list);list=list.filter(passF).sort((a,b)=>b.date-a.date);
   document.getElementById('ptitle').innerHTML=`${g[0]==='stale'?'Promised earlier, not paid':esc(g[1][0].toUpperCase()+g[1].slice(1))} <small>${pl(list.length,'visitor')} · ${g[0]==='stale'?'expected before '+esc(P.label):'to follow up for '+esc(P.label)}</small>`;
-  const head=['Visited','Visitor',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Notes'];
+  const head=['Visited','Visitor','Row',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Notes'];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">Nothing missing here. Every visitor from ${esc(P.label)} has this filled in.</td></tr>`;
   list.forEach(x=>{const d=days(x.date,TODAY);
     h+=`<tr><td class="date"><b>${WD[x.date.getDay()]}, ${x.date.getDate()} ${MON[x.date.getMonth()]}</b><small>${d===0?'Today':pl(d,'day')+' ago'}</small></td>
-      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${RowEdit.cell(x)}${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
       <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${esc(x.src)||'—'}</td>
       <td>${esc(x.status)||'—'}</td><td>${x.prob?esc(x.prob):'<span class="miss">Missing</span>'}</td>
       <td>${x.ed?fmtD(x.ed):x.yes?'<span class="miss">Missing</span>':'—'}</td><td class="n">${x.ea>0?inr(x.ea):x.yes?'<span class="miss">Missing</span>':'—'}</td>
@@ -469,12 +470,12 @@ function renderVisits(P,sel){
   document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{vshow=b.dataset.s;render();});
   const shown=list.filter(x=>vshow==='all'||st(x)===vshow).sort((a,b)=>b.date-a.date||a.name.localeCompare(b.name));
   document.getElementById('ptitle').innerHTML=`Centre visits <small>${pl(shown.length,'visitor')} · ${cnt('paid')} of ${list.length} converted${list.length?' ('+Math.round(cnt('paid')/list.length*100)+'%)':''}</small>`;
-  const head=['Visited','Visitor',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Converted'];
+  const head=['Visited','Visitor','Row',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Converted'];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!shown.length)h+=`<tr><td colspan="${head.length}" class="empty">No centre visits ${vshow==='all'?'':'like this '}between ${fmtD(P.a)} and ${fmtD(P.b)}${FL.some(([k])=>FV[k])?' with these filters':''}.</td></tr>`;
   shown.forEach(x=>{
     h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.date.getDay()]}, ${x.date.getDate()} ${MON[x.date.getMonth()]}</b><small>${esc(x.vt)}</small></td>
-      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${RowEdit.cell(x)}${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
       <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${esc(x.src)||'—'}</td><td>${esc(x.status)||'—'}</td>
       <td>${x.prob?esc(x.prob):'<span style="color:var(--faint)">—</span>'}</td><td>${fmtD(x.ed)}</td><td class="n amt">${x.ea>0?inr(x.ea):'<span style="color:var(--faint);font-weight:400">—</span>'}</td>
       <td>${x.conv?`<span class="st paid"><i></i>Converted</span><span class="sub">${x.cd?fmtD(x.cd):''}${x.act?' · '+inr(x.act):''}</span>`:x.state==='lost'?`<span class="st lost"><i></i>Not joining</span>`:'<span class="st due"><i></i>Not yet</span>'}</td></tr>`;
@@ -633,7 +634,7 @@ function render(){
   document.querySelectorAll('#flt button').forEach(b=>b.onclick=()=>{show=b.dataset.s;render();});
   const list=(show==='all'?allP:allP.filter(x=>x.state===show)).slice().sort((a,b)=>a.ed-b.ed||b.ea-a.ea);
   document.getElementById('ptitle').innerHTML=`Promised payments <small>${pl(list.length,'visitor')} · ${inr(sum(list,x=>x.ea))}</small>`;
-  const head=['Promised date','Visitor',...(sel?[]:['Centre']),'Phone','Course',{t:'Expected',n:1},'Status','Visit status','Notes'];
+  const head=['Promised date','Visitor','Row',...(sel?[]:['Centre']),'Phone','Course',{t:'Expected',n:1},'Status','Visit status','Notes'];
   let h='<thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
   if(!list.length)h+=`<tr><td colspan="${head.length}" class="empty">No promised payments ${show==='all'?'':'with this status '}between ${fmtD(P.a)} and ${fmtD(P.b)}.</td></tr>`;
   let wkKey='';
@@ -646,7 +647,7 @@ function render(){
     const st=x.state==='paid'?`<span class="st paid"><i></i>Converted</span><span class="sub">${x.cd?fmtD(x.cd):''}${x.act?' · '+inr(x.act):''}</span>${ptpPill(x)}`
       :x.state==='late'?'<span class="st late"><i></i>Overdue</span>':x.state==='lost'?'<span class="st lost"><i></i>Not joining</span>':'<span class="st wait"><i></i>Yet to pay</span>';
     h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.ed.getDay()]}, ${x.ed.getDate()} ${MON[x.ed.getMonth()]}</b>${when}</td>
-      <td class="who"><b>${esc(x.name)||'—'}</b>${visited(x)}</td>${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="who"><b>${esc(x.name)||'—'}</b>${visited(x)}</td>${RowEdit.cell(x)}${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
       <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td>
       <td class="n amt">${inr(x.ea)}</td><td>${st}</td><td>${esc(x.status)||'—'}</td><td class="note">${x.note?`<div class="nt" title="${esc(x.note)}">${esc(x.note)}</div>`:'<span style="color:var(--faint)">—</span>'}</td></tr>`;
   });
@@ -674,6 +675,7 @@ async function load(){
   try{
     const j=await ArtiumAuth.call('admissions',{});
     V=build(j.visits||{},j.fresh||{});
+    RowEdit.start(x=>{if(x)V=build(j.visits||{},j.fresh||{});render();});   // Row, Open row and Edit for every visitor
     ArtiumAuth.call('targets',{}).then(j=>{if(j&&j.targets){TARGETS=j.targets;render();}}).catch(()=>{});   // monthly targets (Targets page)
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
