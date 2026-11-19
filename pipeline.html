@@ -310,6 +310,38 @@ h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;backgrou
 .sg{background:transparent;border:0;box-shadow:none;border-radius:0;padding:4px 6px 6px}
 .sum3 .sg+.sg{border-left:1px solid #F1EDF9;padding-left:22px}
 @media (max-width:900px){.hero{padding:24px 16px 12px}h1{font-size:34px;letter-spacing:-1px}.sum3 .sg+.sg{border-left:0;padding-left:6px;border-top:1px solid #F1EDF9;padding-top:16px}}
+
+/* Package completion: one table, three groups. Green = renewed, rose = will not renew, lilac = yet to renew (as everywhere on the site) */
+.pcw{padding:6px 28px 24px}
+.pcn2{font:400 14px/1.5 var(--f);color:#6A6488;margin:0 0 14px}
+.pcs{overflow-x:auto}
+.pctab{width:100%;border-collapse:separate;border-spacing:0 8px;min-width:760px}
+.pctab thead th{font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:#6A6488;text-align:left;padding:0 14px 2px;white-space:nowrap}
+.pctab .dt{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.dt.r,.pcb .r{background:#3DDC97}.dt.w,.pcb .w{background:#F58AA6}.dt.y,.pcb .y{background:#C9C2E0}
+.pctab tbody th,.pctab tbody td{background:#F7F5FC;padding:14px;vertical-align:middle;text-align:left}
+.pctab tbody th{border-radius:18px 0 0 18px;width:34%}.pctab tbody td:last-child{border-radius:0 18px 18px 0}
+.pct{display:flex;gap:12px;align-items:flex-start}.pct>i{flex:none;width:10px;height:38px;border-radius:5px;margin-top:2px}
+.pcg-c .pct>i{background:linear-gradient(180deg,#4101F7,#6601FD)}.pcg-x .pct>i{background:linear-gradient(180deg,#DD30B1,#F1B6FA)}.pcg-n .pct>i{background:#C9C2E0}
+.pct b{display:block;font:700 16px var(--f);color:#01073C}.pct small{display:block;font:400 12.5px/1.4 var(--f);color:#6A6488;margin-top:3px}
+.pcn{all:unset;box-sizing:border-box;display:inline-block;min-width:44px;padding:6px 12px;border-radius:12px;font:800 20px var(--f);color:#01073C;cursor:pointer;text-align:center;transition:background .15s,box-shadow .15s}
+button.pcn:hover{background:#fff;box-shadow:0 0 0 1px #E6E0F3,0 8px 18px -12px rgba(1,7,60,.4)}
+button.pcn.cur{background:#fff;box-shadow:0 0 0 2px #4101F7}
+.pcn.ren{color:#137A4F}.pcn.wnr{color:#B0204F}.pcn.ytr{color:#4A4466}.pcn.z{color:#B7B0CC;cursor:default}
+.pcl small{display:block;font:500 12px var(--f);color:#6A6488;margin:2px 0 0 12px}
+.pcp b{display:block;font:800 18px var(--f);color:#01073C}
+.pcb{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#EFEAF9;margin-top:8px;width:150px}
+.pcb i{display:block;height:100%}
+.pctot th,.pctot td{background:#fff!important;box-shadow:inset 0 1px 0 #E6E0F3}
+.pctot th{font:700 14px var(--f);color:#01073C}.pctot .pcn{cursor:default;color:#01064C}
+.pcfill{margin-top:12px;border-radius:16px;padding:12px 16px;background:#F4EEFF;font:400 13.5px/1.5 var(--f);color:#4A4466}
+.pcfill b{color:#01073C}.pcfill.low{background:#FFF4EE;color:#7A3A1C}.pcfill.low b{color:#A8431E}
+@media (max-width:760px){.pcw{padding:4px 14px 18px}}
+
+.pctab tr.sub th,.pctab tr.sub td{background:#FBFAFE;padding-top:10px;padding-bottom:10px}
+.pctab tr.sub .pct{padding-left:22px}.pctab tr.sub .pct>i{width:6px;height:28px;opacity:.55}
+.pctab tr.sub .pct b{font-size:14.5px}.pctab tr.sub .pcn{font-size:17px}.pctab tr.sub .pcp b{font-size:15.5px}
+.pctab tr.pcg-x:not(.sub) th{border-bottom-left-radius:6px}.pctab tr.pcg-x:not(.sub) td:last-child{border-bottom-right-radius:6px}
 </style>
 </head>
 <body>
@@ -387,7 +419,7 @@ function buildDue(){
   return ALL.filter(t=>t.end).map(t=>{const r=t.r,later=(byId.get(t.id)||[]).filter(x=>x!==t&&x.tab==='rn'&&x.date>t.date).sort((a,b)=>a.date-b.date)[0];
     let st='due';if(later||/^renewed$/i.test(t.status))st='paid';else if(/will not renew|won'?t renew|discontinu|refund/i.test(t.status))st='lost';else if(t.end<TODAY)st='late';
     return{...t,st,paidOn:later?later.date:null,name:String(r[4]||'').trim(),phone:String(r[7]||'').replace(/\D/g,'').slice(-10),age:String(r[6]||'').trim(),course:String(r[8]||'').trim(),
-      level:String(r[9]||'').trim(),pack:t.m?Math.round(t.m)+'M':'',start:valid(parseDate(r[22])),teacher:String(r[29]||'').trim(),reason:String(r[28]||'').trim(),comp:parseNum(r[38])||0};});
+      level:String(r[9]||'').trim(),pack:t.m?Math.round(t.m)+'M':'',start:valid(parseDate(r[22])),teacher:String(r[29]||'').trim(),reason:String(r[28]||'').trim(),comp:parseNum(r[38])||0,done:String(r[39]||'').trim(),doneOn:valid(parseDate(r[39]))};});
 }
 
 function period(){
@@ -486,12 +518,21 @@ function cohorts(P,mine){
   const ext=C.filter(x=>x.ext>0);
   const paidOn=x=>x.paidOn||valid(parseDate(x.r[26])),openAt=x=>x.st!=='lost'&&!(x.st==='paid'&&(!paidOn(x)||paidOn(x)<P.a));
   const oext=L.filter(x=>x.ext>0&&inP(endNow(x),P));
-  return{PP,endNow,paidOn,due:C,ren:C.filter(x=>x.st==='paid'),ytr:C.filter(x=>x.st!=='paid'&&x.st!=='lost'),wnr:C.filter(x=>x.st==='lost'),ext,
+  /* Package completion (Actual Package Completion Date, as filled in the sheet): completed with no extension · extended · not yet completed.
+     Only a filled cell counts as completed (a date, or "yes" where a centre writes that). Extended = extension days, a later New Package Expiry Date, or status Extended. */
+  const isExt=x=>x.ext>0||(x.newEnd&&x.end&&x.newEnd>x.end)||/extend/i.test(x.status);
+  const pcC=C.filter(x=>!isExt(x)&&x.done),pcX=C.filter(isExt),pcN=C.filter(x=>!isExt(x)&&!x.done),PC={};
+  // the extended split by where the extension ends: still within the month, or into the next month or later
+  const pcXi=pcX.filter(x=>endNow(x)<=P.b),pcXo=pcX.filter(x=>endNow(x)>P.b);
+  [['c',pcC],['x',pcX],['xi',pcXi],['xo',pcXo],['n',pcN]].forEach(([k,L])=>{PC['pc_'+k]=L;PC['pc_'+k+'_ren']=L.filter(x=>x.st==='paid');PC['pc_'+k+'_wnr']=L.filter(x=>x.st==='lost');PC['pc_'+k+'_ytr']=L.filter(x=>x.st!=='paid'&&x.st!=='lost');});
+  return{...PC,PP,endNow,paidOn,due:C,ren:C.filter(x=>x.st==='paid'),ytr:C.filter(x=>x.st!=='paid'&&x.st!=='lost'),wnr:C.filter(x=>x.st==='lost'),ext,
     spill:ext.filter(x=>x.st!=='paid'&&endNow(x)>P.b),inm:ext.filter(x=>x.st!=='paid'&&endNow(x)<=P.b),oext,oexp:L.filter(x=>openAt(x)&&!oext.includes(x))};
 }
 function listNames(P){const MN=MONTH_FULL[P.a.getMonth()],LM=MONTH_FULL[(P.a.getMonth()+11)%12],NM=MONTH_FULL[(P.a.getMonth()+1)%12];
   return{due:['Renewals due','All due'],ren:['Renewed','Renewed'],ytr:['Yet to renew','Yet to renew'],wnr:['Will not renew','Will not renew'],ext:['Extensions given','Extensions'],
-    spill:['Spilling over to '+NM,'Spilling over'],inm:['Extended, ending in '+MN,'Ending in '+MN.slice(0,3)],oext:['Extended into '+MN,'Extended into '+MN.slice(0,3)],oexp:['Expired in '+LM,'Expired in '+LM.slice(0,3)]};}
+    spill:['Spilling over to '+NM,'Spilling over'],inm:['Extended, ending in '+MN,'Ending in '+MN.slice(0,3)],oext:['Extended into '+MN,'Extended into '+MN.slice(0,3)],oexp:['Expired in '+LM,'Expired in '+LM.slice(0,3)],
+    ...(()=>{const o={},G={c:'Completed, no extension',x:'Extended',xi:'Extended, ending in '+MN,xo:'Extended into '+NM,n:'Not yet completed'},S={ren:'renewed',wnr:'will not renew',ytr:'yet to renew'};
+      Object.keys(G).forEach(k=>{o['pc_'+k]=[G[k],G[k]];Object.keys(S).forEach(s=>{o['pc_'+k+'_'+s]=[G[k]+' · '+S[s],G[k]+' · '+S[s]];});});return o;})()};}
 function summary(P,mine){
   const K=cohorts(P,mine),endNow=K.endNow,PP=K.PP;
   const MN=MONTH_FULL[P.a.getMonth()],LM=MONTH_FULL[PP.a.getMonth()],NM=MONTH_FULL[(P.a.getMonth()+1)%12];
@@ -514,6 +555,30 @@ function summary(P,mine){
    <div class="sg"><h3>Renewed in ${MN}</h3><p>Everyone who renewed this month, whenever they were due.</p>
     <div class="sc c2">${m('From the '+MN+' cohort',n(ren.length))}${m('From earlier months',n(rPrev))}${m('Total renewed',n(tot),'hero')}${m('Renewal collection efficiency',pc(tot,C.length),bdc(tot,C.length),'','',mbar(Math.min(tot,C.length),C.length))}</div></div>
   </div>`);
+}
+/* Package completion: the month's cohort (original Package Expiry Date in the month) in three groups, each split by where the renewal stands */
+function completion(P,mine){
+  const K=cohorts(P,mine),C=K.due,MN=MONTH_FULL[P.a.getMonth()];
+  if(!C.length)return'';
+  const filled=C.filter(x=>x.done).length;
+  const NM=MONTH_FULL[(P.a.getMonth()+1)%12];
+  const G=[['c','Completed, no extension','Package completed, with no extension needed.','pcg-c'],['x','Extended','Extension days or a later New Package Expiry Date.','pcg-x'],
+    ['xi','Ending in '+MN,'The extension ends within '+MN+'.','pcg-x sub'],['xo','Into '+NM+' or later','The extension runs past the end of '+MN+'.','pcg-x sub'],
+    ['n','Not yet completed','No completion date yet, and no extension.','pcg-n']];
+  const cell=(k,cls)=>{const L=K[k];return L.length?`<button type="button" class="pcn ${cls}${LIST===k?' cur':''}" data-list="${k}" title="See these learners">${n(L.length)}</button>`:`<span class="pcn z">0</span>`;};
+  const bar=k=>{const a=K['pc_'+k].length,s=x=>a?(K['pc_'+k+'_'+x].length/a*100).toFixed(1):0;
+    return`<div class="pcb" aria-hidden="true"><i class="r" style="width:${s('ren')}%"></i><i class="w" style="width:${s('wnr')}%"></i><i class="y" style="width:${s('ytr')}%"></i></div>`;};
+  const rows=G.map(([k,t,d,cls])=>{const a=K['pc_'+k].length,r=K['pc_'+k+'_ren'].length;
+    return`<tr class="${cls}"><th><div class="pct"><i></i><div><b>${t}</b><small>${d}</small></div></div></th>
+      <td class="pcl">${cell('pc_'+k,'all')}<small>${cls.includes('sub')?pc(a,K.pc_x.length)+' of the extended':pc(a,C.length)+' of the cohort'}</small></td>
+      <td>${cell('pc_'+k+'_ren','ren')}</td><td>${cell('pc_'+k+'_wnr','wnr')}</td><td>${cell('pc_'+k+'_ytr','ytr')}</td>
+      <td class="pcp"><b>${pc(r,a)}</b>${bar(k)}</td></tr>`;}).join('');
+  const tot=x=>['c','x','n'].reduce((s,k)=>s+K['pc_'+k+(x?'_'+x:'')].length,0);
+  return section('l_pc','Package completion',`<span>${esc(MN)} cohort · ${n(C.length)} learners</span>`,`<div class="pcw">
+    <p class="pcn2">Learners whose package expires in ${esc(MN)}, by whether the package has been completed, and where their renewal stands. Click a number to see those learners.</p>
+    <div class="pcs"><table class="pctab"><thead><tr><th>Package</th><th>Learners</th><th><span class="dt r"></span>Renewed</th><th><span class="dt w"></span>Will not renew</th><th><span class="dt y"></span>Yet to renew</th><th>Renewal %</th></tr></thead>
+    <tbody>${rows}<tr class="pctot"><th>All due in ${esc(MN)}</th><td class="pcl"><span class="pcn">${n(tot(''))}</span></td><td><span class="pcn">${n(tot('ren'))}</span></td><td><span class="pcn">${n(tot('wnr'))}</span></td><td><span class="pcn">${n(tot('ytr'))}</span></td><td class="pcp"><b>${pc(tot('ren'),tot(''))}</b></td></tr></tbody></table></div>
+    <div class="pcfill${filled<C.length/2?' low':''}"><b>${n(filled)} of ${n(C.length)}</b> learners in this cohort have an Actual Package Completion Date filled in the sheet. Learners without one count as not yet completed.</div></div>`);
 }
 /* A 👀 card: open that list on the Learner lists view */
 function openList(k){LIST=k;try{localStorage.setItem('artium_rp_list',LIST);}catch(e){}FOLD.l_due=false;
@@ -625,7 +690,7 @@ function render(){
   const wnr=cohort.filter(x=>x.oc==='wnr'),ext=cohort.filter(x=>x.oc==='ext');
   const coh=mode==='month'?'current month cohort':'cohort due in this period';
   out.innerHTML=section('glance','At a glance',`<span>${esc(P.label)}${isCur?' · so far':''}</span>`,glance)
-    +(mode==='month'?summary(P,mine):'')
+    +(mode==='month'?summary(P,mine)+completion(P,mine):'')
     +section('wow','Week on Week view','',wow,'wowsec')
     +section('wnr','Will not renew',`<span class="ct r">${wnr.length}</span><span>${coh}</span>`,learnerList(wnr,false))
     +section('ext','Extended',`<span class="ct b">${ext.length}</span><span>${coh}</span>`,learnerList(ext,true));
@@ -736,7 +801,7 @@ function listView(P,mine,sel){
     ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],
     ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
     ['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex'),x=>x.ext?Math.round(x.ext):'','n'],
-    ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
+    ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Package completed',x=>tdc(x.doneOn?fmtD(x.doneOn):esc(x.done)),x=>x.doneOn||x.done||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
     ['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c'),x=>x.exp>0?x.exp:'','n'],
     ['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t']];
   const okR=(x,ocf,k)=>{const r=fl(k).ren;return r==='all'||(r==='ren')===(ocf(x)==='ren');};
@@ -759,7 +824,8 @@ function listView(P,mine,sel){
   const LM3=MONTH_FULL[(P.a.getMonth()+11)%12],MN3=MONTH_FULL[P.a.getMonth()];
   const chip=k=>`<button type="button" class="lc${LIST===k?' on':''}" data-list="${k}">${esc(NAMES[k][1])}<i>${K[k].length}</i></button>`;
   const pick=MV?`<div class="lpick"><div class="lg"><span class="lgl">${MN3} cohort</span><div class="lgb">${['due','ren','ytr','wnr','ext','spill','inm'].map(chip).join('')}</div></div>
-    <div class="lg"><span class="lgl">From ${LM3}</span><div class="lgb">${['oext','oexp'].map(chip).join('')}</div></div></div>`:'';
+    <div class="lg"><span class="lgl">From ${LM3}</span><div class="lgb">${['oext','oexp'].map(chip).join('')}</div></div>
+    <div class="lg"><span class="lgl">Package completion</span><div class="lgb">${[...new Set(['pc_c','pc_xi','pc_xo','pc_n'].concat(LIST.startsWith('pc_')?[LIST]:[]))].map(chip).join('')}</div></div></div>`:'';
   const sDue=pick+row2(subT('due',[['all','All renewals due',cAll.length],['ft','First-time renewals',cAll.filter(x=>x.tab==='fs').length],['rr','Repeated renewals',cAll.filter(x=>x.tab==='rn').length]]),'due')+tbl(tD);
 
   /* Learners with at least two 1-month renewals */
