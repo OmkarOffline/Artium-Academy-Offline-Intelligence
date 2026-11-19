@@ -320,39 +320,45 @@
     const on = g >= 2 && g <= 6 ? 'on ' + WDAY[d.getDay()] : 'on ' + d.getDate() + ' ' + MON3[d.getMonth()];
     return g === 0 ? ['today', 'yesterday', on] : g === 1 ? ['yesterday', 'today', on] : [on, 'recently'];
   }
-  const FU_T = [['Thank you for visiting', 'Same day or the next day, when they need time to think.'], ['First follow-up', 'A few days later. Called, but couldn’t connect.'], ['Second follow-up', 'Another attempt that didn’t connect.']];
+  /* Admissions: five templates in three groups */
+  const AD_T = [['First message', [['Thank you for visiting', 'Same day or the next day, when they need time to think.']]],
+    ['Called, but couldn’t connect', [['First follow-up', 'A few days later, after a call that didn’t connect.'], ['Second follow-up', 'Another attempt that didn’t connect.']]],
+    ['Message only, no call', [['First message', 'A friendly check-in, without calling.'], ['Second message', 'Following up on the first message.']]]];
   const MONF = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   /* Renewals: six templates in three groups. The date is the package end (the New Package Expiry Date when extended). */
   const RN_T = [['First messages', [['Experience and renewal', 'Ask how classes are going, and mention when the package ends.'], ['Renewal intention', 'They replied about their experience but not about renewing.']]],
     ['Called, but couldn’t connect', [['First follow-up', 'After a call that didn’t connect.'], ['Second follow-up', 'Another attempt that didn’t connect.']]],
     ['Message only, no call', [['First reminder', 'A gentle note that the package is ending.'], ['Second reminder', 'Following up on the first reminder.']]]];
+  // the course, with its emoji: 🎸 Guitar, 🎹 Keyboard, 🎤 vocals, 🎶 anything else
+  const withEmoji = c => { const e = /guitar/i.test(c) ? '🎸' : /keyboard|piano/i.test(c) ? '🎹' : /vocal|pfm|carnatic|hindustani|sing/i.test(c) ? '🎤' : '🎶'; return (c || 'music') + ' ' + e; };
   function rnText() {
-    const r = F.x.r, nm = cell(r, 4), course = cell(r, 8) || 'music', c = F.x.centre, me = (FEE && FEE.me) || '';
+    const r = F.x.r, nm = cell(r, 4), course = withEmoji(cell(r, 8)), c = F.x.centre, me = (FEE && FEE.me) || '';
     const e = F.end, ds = e ? e.getDate() + ' ' + MONF[e.getMonth()] : 'soon', past = F.past, ends = past ? 'ended' : 'ends';
-    const your = F.par ? nm + '’s' : 'your', Your = F.par ? nm + '’s' : 'Your', you = F.par ? nm : 'you';
-    const hi = F.par ? 'Hi,' : `Hi ${(F.sal ? F.sal + ' ' : '') + nm},`, sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
+    const your = F.par ? nm + "'s" : 'your', Your = F.par ? nm + "'s" : 'Your', you = F.par ? nm : 'you';
+    const keep = past ? `so ${you} can pick up right where ${F.par ? 'they' : 'you'} left off 🎶` : `so ${you} can keep the music going without a break 🎶`;
+    const name = (F.sal ? F.sal + ' ' : '') + nm, hi = F.par ? 'Hi 😊' : `Hi ${name} 😊`, hiW = F.par ? "Hi, I hope you're having a lovely week 🌸" : `Hi ${name}, I hope you're having a lovely week 🌸`;
+    const sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
     const T = [
-      `I hope you're doing well. I wanted to check in and see how ${your} ${course} classes at Artium Academy, ${c}, have been going. We'd love to hear about ${your} experience so far, and if there's anything we can do better.\n\nAlso, a quick note that ${your} current package ${ends} on ${ds}. Whenever you're ready, I'll be happy to share the renewal options with you.`,
-      `Thank you so much for sharing your feedback with us. It really helps.\n\nI also wanted to check if you've had a chance to think about renewing ${your} ${course} classes. ${Your} current package ${ends} on ${ds}, and I'd be happy to share the renewal options so ${you} can ${past ? 'pick up where ' + (F.par ? 'they' : 'you') + ' left off' : 'continue without a break'}.`,
-      `I tried calling you a little while ago but couldn't get through. I was calling about renewing ${your} ${course} classes at Artium Academy, ${c}, as ${your} current package ${ends} on ${ds}.\n\nPlease let me know a convenient time to talk, or simply reply here and I'll share the renewal options with you.`,
-      `I hope you're doing well. I tried reaching you again today but couldn't connect, so I thought I'd drop you a quick message.\n\n${Your} ${course} package ${ends} on ${ds}. We'd love for ${you} to continue learning with us, so please reply here whenever you can and I'll help you with the renewal.`,
-      `I hope you're doing well. Just a gentle reminder that ${your} current ${course} package at Artium Academy, ${c}, ${ends} on ${ds}.\n\nIf you'd like, I can share the renewal options with you so ${your} classes ${past ? 'can pick up where they left off' : 'continue without a break'}. Just reply here and I'll send them across.`,
-      `Just following up on my earlier message about renewing ${your} ${course} classes. ${Your} package ${ends} on ${ds}.\n\nIf you have any questions, or would like to talk it over, I'm happy to help. Just reply here whenever it's convenient for you.`];
-    return `${hi}\n\n${T[F.t]}${sign}`;
+      `${hi}\n\nI hope you're doing well! I wanted to check in and see how ${your} ${course} classes at Artium Academy, ${c}, have been going. We'd love to hear how ${F.par ? nm + ' is' : "you're"} enjoying them, and if there's anything we can do to make them even better.\n\nAlso, just a quick heads-up that ${your} current package ${ends} on ${ds}. Whenever you're ready, I'll happily share the renewal options with you.`,
+      `${hi}\n\nThank you so much for sharing your thoughts with us. It truly means a lot 🙏\n\nI also wanted to check if you've had a chance to think about renewing ${your} ${course} classes. ${Your} current package ${ends} on ${ds}, and I'd be glad to share the options ${keep}`,
+      `${hi}\n\nI tried giving you a call a little while ago but couldn't get through. I was calling about renewing ${your} ${course} classes at Artium Academy, ${c}, as ${your} current package ${ends} on ${ds}.\n\nPlease let me know a good time to chat, or simply reply here and I'll send the renewal options across.`,
+      `${hiW}\n\nI tried reaching you again today but couldn't connect, so I thought I'd drop you a quick message.\n\n${Your} ${course} package ${ends} on ${ds}. We'd really love for ${you} to keep learning with us, so just reply here whenever you can and I'll help you with the renewal 🙏`,
+      `${hi}\n\nJust a gentle reminder that ${your} current ${course} package at Artium Academy, ${c}, ${ends} on ${ds}.\n\nIf you'd like, I can share the renewal options ${past ? `so ${you} can pick up right where ${F.par ? 'they' : 'you'} left off 🎶` : `so ${your} classes continue without a break 🎶`} Just reply here and I'll send them right over.`,
+      `${hi}\n\nJust following up on my earlier message about renewing ${your} ${course} classes. ${Your} package ${ends} on ${ds}.\n\nIf you have any questions, or would like to talk it over, I'm always happy to help. Just reply here whenever it suits you 🙏`];
+    return T[F.t] + sign;
   }
   function fuText() {
     if (F.rn) return rnText();
-    const r = F.x.r, nm = cell(r, 1), course = cell(r, 6) || 'music', c = F.x.centre, me = (FEE && FEE.me) || '', who = F.par ? nm : '';
-    const hi = F.par ? 'Hi,' : `Hi ${(F.sal ? F.sal + ' ' : '') + nm},`, sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
-    if (F.t === 0) {
-      const enjoy = F.trial ? `we hope ${F.par ? who : 'you'} enjoyed the ${course} trial class` : `we hope ${F.par ? who : 'you'} enjoyed ${F.par ? 'the' : 'your'} visit`;
-      return `${hi}\n\nThank you for visiting Artium Academy, ${c}, ${F.par ? 'with ' + who + ' ' : ''}${F.when}. It was lovely to meet you${F.par ? ' both' : ''}, and ${enjoy}.\n\n`
-        + `We'd be delighted to have ${F.par ? who : 'you'} join us. If you have any questions about the course, batch timings or fees, please feel free to reach out to me here. I'm happy to help.` + sign;
-    }
-    if (F.t === 1) return `${hi}\n\nI tried calling you a little while ago but couldn't get through. I just wanted to check in and see if you've had a chance to think about ${F.par ? who + ' joining' : 'joining'} ${course} classes at Artium Academy, ${c}.\n\n`
-      + `If you'd like any more information, or would like to visit us again, please let me know. You can reply here or call me whenever it's convenient for you.` + sign;
-    return `${hi}\n\nI hope you're doing well. I tried reaching you again today but couldn't connect, so I thought I'd drop you a quick message.\n\n`
-      + `We'd love to have ${F.par ? who : 'you'} learn ${course} with us at Artium Academy, ${c}. If you're still deciding, or have any questions about batches, timings or fees, I'm happy to help. Just reply here whenever you're ready.` + sign;
+    const r = F.x.r, nm = cell(r, 1), course = withEmoji(cell(r, 6)), c = F.x.centre, me = (FEE && FEE.me) || '', P = F.par;
+    const name = (F.sal ? F.sal + ' ' : '') + nm, hi = P ? 'Hi 😊' : `Hi ${name} 😊`, hiW = P ? "Hi, I hope you're having a lovely week 🌸" : `Hi ${name}, I hope you're having a lovely week 🌸`;
+    const sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
+    const T = [
+      `${hi}\n\nThank you so much for visiting Artium Academy, ${c}, ${P ? 'with ' + nm + ' ' : ''}${F.when}! It was lovely meeting ${P ? 'you both' : 'you'}, and we hope ${P ? nm : 'you'} enjoyed ${F.trial ? 'the ' + course + ' trial class' : (P ? 'the' : 'your') + ' visit'}.\n\nWe'd be truly delighted to have ${P ? nm : 'you'} join our music family. If you have any questions about the course, batch timings or fees, just message me here. I'm always happy to help.`,
+      `${hi}\n\nI tried giving you a call a little while ago but couldn't get through. I just wanted to check in and see if you've had a chance to think about ${P ? nm + ' starting' : 'starting'} ${course} classes with us at Artium Academy, ${c}.\n\nIf you'd like more details, or would love to drop by again, just let me know. You can reply here or call me whenever it suits you.`,
+      `${hiW}\n\nI tried reaching you again today but couldn't connect, so I thought I'd send you a quick note.\n\nWe'd love to have ${P ? nm : 'you'} begin ${P ? 'their' : 'your'} ${course} journey with us at Artium Academy, ${c}. Whenever you're ready, or if anything's on your mind about batches, timings or fees, just reply here. I'm here to help 🙏`,
+      `${hi}\n\nI hope you're doing well! I just wanted to check in after your visit to Artium Academy, ${c}${P ? ', with ' + nm : ''}, and see if you've had a chance to think about ${P ? nm + ' starting' : 'starting'} ${course} classes with us.\n\nIf you have any questions about the course, batch timings or fees, just reply here. I'm always happy to help.`,
+      `${hi}\n\nJust following up on my earlier message about ${P ? nm + ' joining' : 'joining'} ${course} classes at Artium Academy, ${c}.\n\nWhenever you're ready, or if you'd like to visit us again, just reply here and I'll take care of the rest 🙏`];
+    return T[F.t] + sign;
   }
   function fuDraw() {
     let bg = document.getElementById('fu-bg'); if (!F) { if (bg) bg.remove(); return; }
@@ -362,15 +368,14 @@
     bg.innerHTML = `<div class="pk-bx" style="grid-template-columns:minmax(0,1fr) 430px"><div>
       <h2>Follow-up message · ${esc(nm)}</h2><div class="pk-sub">${esc(F.x.centre)} · ${RN ? (F.x.tab === 'rn' ? 'Renewals' : 'Fresh Sales') + ' · row ' + esc(r[40] || '') : 'Centre Visits · row ' + esc(r[18] || '')}</div>
       <div class="pk-k">${RN ? `<i>Package ${F.past ? 'ended' : 'ends'} ${F.end ? F.end.getDate() + ' ' + MON3[F.end.getMonth()] : '–'}</i><i>${esc(cell(r, 8))}${cell(r, 9) ? ' · ' + esc(cell(r, 9)) : ''}</i>` : `<i>Visited ${esc(cell(r, 0))}</i>${/^y/i.test(cell(r, 7)) ? `<i>${esc(cell(r, 6))} trial class taken</i>` : ''}`}${age ? `<i>Age group ${esc(age)}</i>` : ''}${ph ? `<i>${esc(phs)}</i>` : ''}</div>
-      ${RN ? (() => { let n = 0; return RN_T.map(([g, L]) => `<span class="pk-l" style="margin-top:12px">${g}</span><div class="fu-cards" style="grid-template-columns:repeat(2,1fr)">${L.map(t => { const i = n++; return `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`; }).join('')}</div>`).join(''); })()
-        : `<span class="pk-l" style="margin-top:6px">Message</span><div class="fu-cards">${FU_T.map((t, i) => `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`).join('')}</div>`}
+      ${(() => { let n = 0; return (RN ? RN_T : AD_T).map(([g, L]) => `<span class="pk-l" style="margin-top:12px">${g}</span><div class="fu-cards" style="grid-template-columns:repeat(2,1fr)">${L.map(t => { const i = n++; return `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`; }).join('')}</div>`).join(''); })()}
       <span class="pk-l" style="margin-top:16px">Speak to</span>
       <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="pk-seg fu-seg" style="display:inline-flex">${seg('par', 'false', RN ? 'Learner' : 'Visitor')}${seg('par', 'true', 'Parent')}</div>
         ${F.par ? `<span class="pk-sub" style="margin:0">${F.kid ? 'Parent, because the age group is ' + esc(age) + '.' : ''}</span>` : `<select data-fusal>${['', 'Mr.', 'Ms.', 'Mrs.'].map(s => `<option value="${s}"${F.sal === s ? ' selected' : ''}>${s ? 'Address as ' + s : 'No salutation'}</option>`).join('')}</select>`}</div>
       ${F.t === 0 && !RN ? `<span class="pk-l" style="margin-top:16px">Details</span><div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
         <label class="pk-tk" style="margin:0"><input type="checkbox" data-futr${F.trial ? ' checked' : ''}>Mention the trial class</label>
         <select data-fuwh>${whenOpts(pd(cell(r, 0))).map(w => `<option${w === F.when ? ' selected' : ''}>${w}</option>`).join('')}</select></div>` : ''}
-      <div class="fu-hint">${RN ? '“Experience and renewal” is suggested while the package is still running, and “First reminder” once it has ended. The end date is the New Package Expiry Date when the package was extended. Everything fills in from the learner’s row, and you can edit the text before copying.' : `“Thank you for visiting” is suggested on the day of the visit and the day after. From the third day, First follow-up is suggested. Everything fills in from the visitor's row, and you can edit the text before copying.`}</div></div>
+      <div class="fu-hint">${RN ? '“Experience and renewal” is suggested while the package is still running, and “First reminder” once it has ended. The end date is the New Package Expiry Date when the package was extended. Everything fills in from the learner’s row, and you can edit the text before copying.' : `“Thank you for visiting” is suggested on the day of the visit and the day after. From the third day, the first follow-up after a call is suggested. Everything fills in from the visitor's row, and you can edit the text before copying.`}</div></div>
       <div><div class="pk-mh"><b>Preview · as it will look on WhatsApp</b><span>${F.edit != null ? '<button data-fure>Back to the template</button>' : '<button data-fued>Edit the text</button>'} <button data-fux>Close</button></span></div>
         ${F.edit != null ? `<textarea class="pk-ta" data-futa>${esc(text)}</textarea>` : `<div class="pk-wa"><div class="pk-wt"><i></i><div><b>${esc(F.par ? nm + '’s parent' : (F.sal ? F.sal + ' ' : '') + nm)}</b><small>${ph ? '+91 ' + esc(phs) : ''}</small></div></div><div class="pk-wb">${esc(text)}<span class="t">now</span></div></div>`}
         <button class="pk-cp" data-fucp>Copy message</button></div></div>`;
