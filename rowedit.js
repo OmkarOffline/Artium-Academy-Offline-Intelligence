@@ -71,7 +71,7 @@
     const T = x && x.r && kind(x), n = T && T.row(x.r);
     if (!n) return '<td class="re-c"><span style="color:#B7B0CC">—</span></td>';
     const k = key(x), ln = T.link(x); REG[k] = x;
-    return `<td class="re-c"><b>${esc(n)}</b><small>${T.sheet(x)}</small>${ln ? `<a class="re-go" href="${ln}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : ''}${CAN.includes(x.centre) ? `<button type="button" class="re-ed" data-re="${esc(k)}">Edit</button><button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button>${x.kind === 'visit' ? `<button type="button" class="re-fu" data-fu="${esc(k)}">Follow-up message</button>` : ''}` : ''}</td>`;
+    return `<td class="re-c"><b>${esc(n)}</b><small>${T.sheet(x)}</small>${ln ? `<a class="re-go" href="${ln}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : ''}${CAN.includes(x.centre) ? `<button type="button" class="re-ed" data-re="${esc(k)}">Edit</button><button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button><button type="button" class="re-fu" data-fu="${esc(k)}">Follow-up message</button>` : ''}</td>`;
   }
   function draw() {
     let bg = document.getElementById('re-bg'); if (!OPEN) { if (bg) bg.remove(); return; }
@@ -126,7 +126,7 @@
       ArtiumAuth.call('sheetLinks', {}).then(j => { if (j && j.links) { LINKS = j.links; VISITS = j.visits || null; CAN = j.canEdit || []; if (onSaved) onSaved(null); } }).catch(() => {}); },
     cell: cellHTML,
     // for pages with their own row cells (Teacher Performance): the Create package button, and the row behind a button
-    pkgButton(x) { if (!x || !x.r || !CAN.includes(x.centre)) return ''; const k = key(x); REG[k] = x; return `<button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button>`; },
+    pkgButton(x) { if (!x || !x.r || !CAN.includes(x.centre)) return ''; const k = key(x); REG[k] = x; return `<button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button><button type="button" class="re-fu" data-fu="${esc(k)}">Follow-up message</button>`; },
     _reg: k => REG[k]
   };
 })();
@@ -175,6 +175,7 @@
   .fu-cd b{display:block;font-size:14.5px;color:#01073C}.fu-cd small{display:block;font-size:12.5px;color:#6A6488;margin-top:4px;line-height:1.4}.fu-cd.on{border-color:#C9502A;box-shadow:0 0 0 3px rgba(245,144,111,.25)}
   .fu-n{display:inline-block;margin-bottom:6px;font-size:11px;font-weight:700;color:#A8431E;background:#FFF1EA;border-radius:6px;padding:2px 7px}
   .fu-seg button{padding:7px 18px}
+  #fu-bg select{height:36px;border:1px solid #E6E0F3;border-radius:11px;padding:0 10px;font:inherit;font-size:13.5px;color:#01073C;background:#fff}
   .fu-hint{margin-top:18px;font-size:12.5px;color:#6A6488;background:#F7F5FC;border-radius:12px;padding:10px 12px;line-height:1.5}
   @media (max-width:980px){.fu-cards{grid-template-columns:1fr}}
   @media (max-width:980px){.pk-bx{grid-template-columns:1fr}.pk-row{grid-template-columns:1fr}.pk-sum{grid-template-columns:repeat(2,1fr)}}`;
@@ -320,7 +321,27 @@
     return g === 0 ? ['today', 'yesterday', on] : g === 1 ? ['yesterday', 'today', on] : [on, 'recently'];
   }
   const FU_T = [['Thank you for visiting', 'Same day or the next day, when they need time to think.'], ['First follow-up', 'A few days later. Called, but couldn’t connect.'], ['Second follow-up', 'Another attempt that didn’t connect.']];
+  const MONF = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  /* Renewals: six templates in three groups. The date is the package end (the New Package Expiry Date when extended). */
+  const RN_T = [['First messages', [['Experience and renewal', 'Ask how classes are going, and mention when the package ends.'], ['Renewal intention', 'They replied about their experience but not about renewing.']]],
+    ['Called, but couldn’t connect', [['First follow-up', 'After a call that didn’t connect.'], ['Second follow-up', 'Another attempt that didn’t connect.']]],
+    ['Message only, no call', [['First reminder', 'A gentle note that the package is ending.'], ['Second reminder', 'Following up on the first reminder.']]]];
+  function rnText() {
+    const r = F.x.r, nm = cell(r, 4), course = cell(r, 8) || 'music', c = F.x.centre, me = (FEE && FEE.me) || '';
+    const e = F.end, ds = e ? e.getDate() + ' ' + MONF[e.getMonth()] : 'soon', past = F.past, ends = past ? 'ended' : 'ends';
+    const your = F.par ? nm + '’s' : 'your', Your = F.par ? nm + '’s' : 'Your', you = F.par ? nm : 'you';
+    const hi = F.par ? 'Hi,' : `Hi ${(F.sal ? F.sal + ' ' : '') + nm},`, sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
+    const T = [
+      `I hope you're doing well. I wanted to check in and see how ${your} ${course} classes at Artium Academy, ${c}, have been going. We'd love to hear about ${your} experience so far, and if there's anything we can do better.\n\nAlso, a quick note that ${your} current package ${ends} on ${ds}. Whenever you're ready, I'll be happy to share the renewal options with you.`,
+      `Thank you so much for sharing your feedback with us. It really helps.\n\nI also wanted to check if you've had a chance to think about renewing ${your} ${course} classes. ${Your} current package ${ends} on ${ds}, and I'd be happy to share the renewal options so ${you} can ${past ? 'pick up where ' + (F.par ? 'they' : 'you') + ' left off' : 'continue without a break'}.`,
+      `I tried calling you a little while ago but couldn't get through. I was calling about renewing ${your} ${course} classes at Artium Academy, ${c}, as ${your} current package ${ends} on ${ds}.\n\nPlease let me know a convenient time to talk, or simply reply here and I'll share the renewal options with you.`,
+      `I hope you're doing well. I tried reaching you again today but couldn't connect, so I thought I'd drop you a quick message.\n\n${Your} ${course} package ${ends} on ${ds}. We'd love for ${you} to continue learning with us, so please reply here whenever you can and I'll help you with the renewal.`,
+      `I hope you're doing well. Just a gentle reminder that ${your} current ${course} package at Artium Academy, ${c}, ${ends} on ${ds}.\n\nIf you'd like, I can share the renewal options with you so ${your} classes ${past ? 'can pick up where they left off' : 'continue without a break'}. Just reply here and I'll send them across.`,
+      `Just following up on my earlier message about renewing ${your} ${course} classes. ${Your} package ${ends} on ${ds}.\n\nIf you have any questions, or would like to talk it over, I'm happy to help. Just reply here whenever it's convenient for you.`];
+    return `${hi}\n\n${T[F.t]}${sign}`;
+  }
   function fuText() {
+    if (F.rn) return rnText();
     const r = F.x.r, nm = cell(r, 1), course = cell(r, 6) || 'music', c = F.x.centre, me = (FEE && FEE.me) || '', who = F.par ? nm : '';
     const hi = F.par ? 'Hi,' : `Hi ${(F.sal ? F.sal + ' ' : '') + nm},`, sign = `\n\nWarm regards,\n${me}\nArtium Academy, ${c}`;
     if (F.t === 0) {
@@ -336,26 +357,32 @@
   function fuDraw() {
     let bg = document.getElementById('fu-bg'); if (!F) { if (bg) bg.remove(); return; }
     if (!bg) { bg = document.createElement('div'); bg.id = 'fu-bg'; bg.className = 'pk-bg'; document.body.appendChild(bg); bg.addEventListener('click', e => { if (e.target === bg) { F = null; fuDraw(); } }); }
-    const r = F.x.r, ph = cell(r, 2).replace(/\D/g, '').slice(-10), phs = ph.replace(/(\d{5})(\d{5})/, '$1 $2'), text = F.edit != null ? F.edit : fuText();
+    const r = F.x.r, RN = F.rn, nm = cell(r, RN ? 4 : 1), age = cell(r, RN ? 6 : 3), ph = cell(r, RN ? 7 : 2).replace(/\D/g, '').slice(-10), phs = ph.replace(/(\d{5})(\d{5})/, '$1 $2'), text = F.edit != null ? F.edit : fuText();
     const seg = (k, v, l) => `<button type="button" data-fu${k}="${v}" aria-pressed="${String(F[k === 'par' ? 'par' : k]) === String(v)}">${l}</button>`;
     bg.innerHTML = `<div class="pk-bx" style="grid-template-columns:minmax(0,1fr) 430px"><div>
-      <h2>Follow-up message · ${esc(cell(r, 1))}</h2><div class="pk-sub">${esc(F.x.centre)} · Centre Visits · row ${esc(r[18] || '')}</div>
-      <div class="pk-k"><i>Visited ${esc(cell(r, 0))}</i>${/^y/i.test(cell(r, 7)) ? `<i>${esc(cell(r, 6))} trial class taken</i>` : ''}${cell(r, 3) ? `<i>Age group ${esc(cell(r, 3))}</i>` : ''}${ph ? `<i>${esc(phs)}</i>` : ''}</div>
-      <span class="pk-l" style="margin-top:6px">Message</span>
-      <div class="fu-cards">${FU_T.map((t, i) => `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`).join('')}</div>
+      <h2>Follow-up message · ${esc(nm)}</h2><div class="pk-sub">${esc(F.x.centre)} · ${RN ? (F.x.tab === 'rn' ? 'Renewals' : 'Fresh Sales') + ' · row ' + esc(r[40] || '') : 'Centre Visits · row ' + esc(r[18] || '')}</div>
+      <div class="pk-k">${RN ? `<i>Package ${F.past ? 'ended' : 'ends'} ${F.end ? F.end.getDate() + ' ' + MON3[F.end.getMonth()] : '–'}</i><i>${esc(cell(r, 8))}${cell(r, 9) ? ' · ' + esc(cell(r, 9)) : ''}</i>` : `<i>Visited ${esc(cell(r, 0))}</i>${/^y/i.test(cell(r, 7)) ? `<i>${esc(cell(r, 6))} trial class taken</i>` : ''}`}${age ? `<i>Age group ${esc(age)}</i>` : ''}${ph ? `<i>${esc(phs)}</i>` : ''}</div>
+      ${RN ? (() => { let n = 0; return RN_T.map(([g, L]) => `<span class="pk-l" style="margin-top:12px">${g}</span><div class="fu-cards" style="grid-template-columns:repeat(2,1fr)">${L.map(t => { const i = n++; return `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`; }).join('')}</div>`).join(''); })()
+        : `<span class="pk-l" style="margin-top:6px">Message</span><div class="fu-cards">${FU_T.map((t, i) => `<button type="button" class="fu-cd${F.t === i ? ' on' : ''}" data-fut="${i}">${F.sug === i ? '<span class="fu-n">Suggested</span>' : ''}<b>${t[0]}</b><small>${t[1]}</small></button>`).join('')}</div>`}
       <span class="pk-l" style="margin-top:16px">Speak to</span>
-      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="pk-seg fu-seg" style="display:inline-flex">${seg('par', 'false', 'Visitor')}${seg('par', 'true', 'Parent')}</div>
-        ${F.par ? `<span class="pk-sub" style="margin:0">${F.kid ? 'Parent, because the age group is ' + esc(cell(r, 3)) + '.' : ''}</span>` : `<select data-fusal>${['', 'Mr.', 'Ms.', 'Mrs.'].map(s => `<option value="${s}"${F.sal === s ? ' selected' : ''}>${s ? 'Address as ' + s : 'No salutation'}</option>`).join('')}</select>`}</div>
-      ${F.t === 0 ? `<span class="pk-l" style="margin-top:16px">Details</span><div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="pk-seg fu-seg" style="display:inline-flex">${seg('par', 'false', RN ? 'Learner' : 'Visitor')}${seg('par', 'true', 'Parent')}</div>
+        ${F.par ? `<span class="pk-sub" style="margin:0">${F.kid ? 'Parent, because the age group is ' + esc(age) + '.' : ''}</span>` : `<select data-fusal>${['', 'Mr.', 'Ms.', 'Mrs.'].map(s => `<option value="${s}"${F.sal === s ? ' selected' : ''}>${s ? 'Address as ' + s : 'No salutation'}</option>`).join('')}</select>`}</div>
+      ${F.t === 0 && !RN ? `<span class="pk-l" style="margin-top:16px">Details</span><div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
         <label class="pk-tk" style="margin:0"><input type="checkbox" data-futr${F.trial ? ' checked' : ''}>Mention the trial class</label>
         <select data-fuwh>${whenOpts(pd(cell(r, 0))).map(w => `<option${w === F.when ? ' selected' : ''}>${w}</option>`).join('')}</select></div>` : ''}
-      <div class="fu-hint">“Thank you for visiting” is suggested on the day of the visit and the day after. From the third day, First follow-up is suggested. Everything fills in from the visitor's row, and you can edit the text before copying.</div></div>
+      <div class="fu-hint">${RN ? '“Experience and renewal” is suggested while the package is still running, and “First reminder” once it has ended. The end date is the New Package Expiry Date when the package was extended. Everything fills in from the learner’s row, and you can edit the text before copying.' : `“Thank you for visiting” is suggested on the day of the visit and the day after. From the third day, First follow-up is suggested. Everything fills in from the visitor's row, and you can edit the text before copying.`}</div></div>
       <div><div class="pk-mh"><b>Preview · as it will look on WhatsApp</b><span>${F.edit != null ? '<button data-fure>Back to the template</button>' : '<button data-fued>Edit the text</button>'} <button data-fux>Close</button></span></div>
-        ${F.edit != null ? `<textarea class="pk-ta" data-futa>${esc(text)}</textarea>` : `<div class="pk-wa"><div class="pk-wt"><i></i><div><b>${esc(F.par ? cell(r, 1) + '’s parent' : (F.sal ? F.sal + ' ' : '') + cell(r, 1))}</b><small>${ph ? '+91 ' + esc(phs) : ''}</small></div></div><div class="pk-wb">${esc(text)}<span class="t">now</span></div></div>`}
+        ${F.edit != null ? `<textarea class="pk-ta" data-futa>${esc(text)}</textarea>` : `<div class="pk-wa"><div class="pk-wt"><i></i><div><b>${esc(F.par ? nm + '’s parent' : (F.sal ? F.sal + ' ' : '') + nm)}</b><small>${ph ? '+91 ' + esc(phs) : ''}</small></div></div><div class="pk-wb">${esc(text)}<span class="t">now</span></div></div>`}
         <button class="pk-cp" data-fucp>Copy message</button></div></div>`;
   }
   function fuOpen(x) {
     if (!styled) { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); styled = true; }
+    if (x.kind !== 'visit') {   // a learner: the renewal templates
+      const r = x.r, end = pd(cell(r, 36)) || pd(cell(r, 23)), t0 = new Date(); t0.setHours(0, 0, 0, 0); const kid = /^(0 to 5|6 to 12)$/i.test(cell(r, 6));
+      const past = !!end && end < t0, sal = kid ? '' : /^m/i.test(cell(r, 5)) ? 'Mr.' : /^f/i.test(cell(r, 5)) ? 'Ms.' : '';
+      F = { x, rn: true, end, past, t: past ? 4 : 0, sug: past ? 4 : 0, kid, par: kid, sal, edit: null };
+      fuDraw(); load().then(() => { if (F) fuDraw(); }).catch(() => {}); return;
+    }
     const r = x.r, d = pd(cell(r, 0)), t = new Date(); t.setHours(0, 0, 0, 0); const g = d ? Math.round((t - d) / 864e5) : 9, kid = /^(0 to 5|6 to 12)$/i.test(cell(r, 3));
     F = { x, t: g <= 1 ? 0 : 1, sug: g <= 1 ? 0 : 1, kid, par: kid, sal: '', trial: /^y/i.test(cell(r, 7)), when: whenOpts(d)[0], edit: null };
     fuDraw(); load().then(() => { if (F) fuDraw(); }).catch(() => {});   // the sender's name comes with the fee data
