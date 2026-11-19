@@ -46,6 +46,7 @@
   .re-go{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#4101F7;text-decoration:none;border:1px solid #DCD0FB;border-radius:9px;padding:5px 9px}
   .re-go:hover{background:#F4EEFF}.re-go svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   .re-ed{margin-left:5px;font-size:12px;font-weight:700;color:#A3187F;background:#FCEAF7;border:0;border-radius:9px;padding:6px 10px;cursor:pointer}.re-ed:hover{background:#F8D5EF}
+  .re-pk{display:block;margin-top:6px;font-size:12px;font-weight:700;color:#2433B8;background:#EEF1FF;border:0;border-radius:9px;padding:6px 10px;cursor:pointer}.re-pk:hover{background:#DDE3FF}
   .re-bg{position:fixed;inset:0;z-index:80;background:rgba(1,6,76,.32);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
   .re-bx{width:min(880px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:24px;box-shadow:0 40px 80px -30px rgba(1,7,60,.6);padding:22px 24px;font-family:inherit;color:#4A4466}
   .re-h{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.re-h b{font-size:17px;color:#01073C}.re-h span{display:block;font-size:12.5px;color:#6A6488;margin-top:3px}
@@ -69,7 +70,7 @@
     const T = x && x.r && kind(x), n = T && T.row(x.r);
     if (!n) return '<td class="re-c"><span style="color:#B7B0CC">—</span></td>';
     const k = key(x), ln = T.link(x); REG[k] = x;
-    return `<td class="re-c"><b>${esc(n)}</b><small>${T.sheet(x)}</small>${ln ? `<a class="re-go" href="${ln}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : ''}${CAN.includes(x.centre) ? `<button type="button" class="re-ed" data-re="${esc(k)}">Edit</button>` : ''}</td>`;
+    return `<td class="re-c"><b>${esc(n)}</b><small>${T.sheet(x)}</small>${ln ? `<a class="re-go" href="${ln}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>` : ''}${CAN.includes(x.centre) ? `<button type="button" class="re-ed" data-re="${esc(k)}">Edit</button><button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button>` : ''}</td>`;
   }
   function draw() {
     let bg = document.getElementById('re-bg'); if (!OPEN) { if (bg) bg.remove(); return; }
@@ -122,6 +123,184 @@
   window.RowEdit = {
     start(cb) { onSaved = cb; const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
       ArtiumAuth.call('sheetLinks', {}).then(j => { if (j && j.links) { LINKS = j.links; VISITS = j.visits || null; CAN = j.canEdit || []; if (onSaved) onSaved(null); } }).catch(() => {}); },
-    cell: cellHTML
+    cell: cellHTML,
+    // for pages with their own row cells (Teacher Performance): the Create package button, and the row behind a button
+    pkgButton(x) { if (!x || !x.r || !CAN.includes(x.centre)) return ''; const k = key(x); REG[k] = x; return `<button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button>`; },
+    _reg: k => REG[k]
   };
+})();
+
+/* ── Create package: build one or more fee options for a learner or visitor, and a WhatsApp message to copy ──
+   Fees, discounts and classes per level come from the Basic Information sheet (feeData). Nothing is written anywhere.
+   Rules: fee = classes × fee per class of each level. Discount: Standard (Fresh Sales or Renewals column, by duration), or Special / Launch
+   (replaces Standard, no family discount), or Custom % (typed). Family / sibling adds its own % as a separate line.
+   Each level can hold at most its number of classes (Max Classes tab). A package bigger than the level is split across levels by the
+   person creating it: the builder only suggests a split; every part can be changed. */
+(function () {
+  const esc = t => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const cell = (r, i) => String(r && r[i] != null ? r[i] : '').trim();
+  const inr = v => '₹' + Math.round(v).toLocaleString('en-IN');
+  const pcs = v => (Math.round(v * 100) / 100) + '%';
+  let FEE = null, LOAD = null, P = null;
+  const norm = s => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  const find = (obj, k) => obj ? Object.keys(obj).find(x => norm(x) === norm(k)) : undefined;
+  function load() { if (!LOAD) LOAD = ArtiumAuth.call('feeData', {}).then(j => { FEE = j; return j; }).catch(e => { LOAD = null; throw e; }); return LOAD; }
+  const css = `.pk-bg{position:fixed;inset:0;z-index:80;background:rgba(1,6,76,.32);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
+  .pk-bx{width:min(1240px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:26px;box-shadow:0 40px 80px -30px rgba(1,7,60,.6);padding:22px 24px;display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;color:#4A4466;font-size:14px}
+  .pk-bx h2{font-size:19px;color:#01073C}.pk-sub{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:#6A6488;margin-top:6px}
+  .pk-sub select,.pk-op select,.pk-op input{height:36px;border:1px solid #E6E0F3;border-radius:11px;padding:0 10px;font:inherit;font-size:13.5px;color:#01073C;background:#fff}
+  .pk-k{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 14px}.pk-k i{font-style:normal;font-size:12px;font-weight:600;background:#F4EEFF;color:#4101F7;border-radius:7px;padding:4px 9px}.pk-k i.w{background:#FFF4DC;color:#8A5A00}
+  .pk-op{border:1px solid #E6E0F3;border-radius:20px;padding:16px 18px;margin-bottom:12px}.pk-oh{display:flex;justify-content:space-between;align-items:center}.pk-oh b{font-size:15px;color:#01073C}
+  .pk-rm{border:0;background:none;font:inherit;font-size:12px;color:#B0204F;font-weight:700;cursor:pointer}
+  .pk-row{display:grid;grid-template-columns:1.25fr 1.4fr .7fr;gap:14px;margin-top:12px}.pk-l{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6A6488;display:block;margin-bottom:6px}
+  .pk-seg{display:flex;gap:3px;background:#EFEAF9;border-radius:13px;padding:4px}.pk-seg button{flex:1;border:0;background:none;padding:7px 0;border-radius:10px;font:inherit;font-size:13px;font-weight:600;color:#4A4466;cursor:pointer;position:relative}
+  .pk-seg button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 8px 18px -12px rgba(201,80,42,.6)}.pk-seg button[aria-pressed="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+  .pk-tk{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#01073C;margin-top:8px;cursor:pointer}.pk-tk input{width:17px;height:17px;accent-color:#4101F7}.pk-tk.off{color:#B7B0CC;cursor:default}
+  .pk-cl{height:36px;border:1px solid #E6E0F3;border-radius:11px;display:flex;align-items:center;padding:0 12px;color:#01073C;font-weight:700}
+  .pk-sp{margin-top:12px;border-radius:14px;background:#F4EEFF;padding:10px 12px}.pk-sp .pk-pr{display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13px}.pk-sp .pk-pr select{flex:1}.pk-sp .pk-pr input{width:80px}
+  .pk-sp small{font-size:12px;color:#4101F7}
+  .pk-sum{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px;background:#F7F5FC;border-radius:14px;padding:12px 14px}.pk-sum small{display:block;font-size:11px;color:#6A6488;font-weight:600}.pk-sum b{font-size:16px;color:#01073C}.pk-sum .pay b{color:#4101F7;font-size:18px}
+  .pk-err{font-size:12.5px;color:#B0204F;background:#FFEDF2;border-radius:10px;padding:8px 12px;margin-top:10px}.pk-note{font-size:12px;color:#8A5A00;background:#FFF4DC;border-radius:10px;padding:8px 12px;margin-top:10px}
+  .pk-add{border:1.5px dashed #C9B5FA;background:none;border-radius:14px;padding:10px 16px;font:inherit;font-size:13.5px;font-weight:700;color:#4101F7;cursor:pointer}
+  .pk-mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.pk-mh b{font-size:14px;color:#01073C}.pk-mh span{display:flex;gap:14px}.pk-mh button{border:0;background:none;font:inherit;font-size:12.5px;font-weight:700;color:#4101F7;cursor:pointer}
+  .pk-wa{background:#EFEAE2 radial-gradient(rgba(0,0,0,.04) 1px,transparent 1px) 0 0/14px 14px;border-radius:18px;padding:0 0 16px;overflow:hidden}
+  .pk-wt{display:flex;align-items:center;gap:10px;background:#F0F2F5;padding:10px 14px;margin-bottom:12px}.pk-wt i{width:34px;height:34px;border-radius:50%;background:#DFE5E7}.pk-wt b{display:block;font-size:14px;color:#111B21}.pk-wt small{font-size:12px;color:#667781}
+  .pk-wb{position:relative;margin:0 14px 0 30px;background:#D9FDD3;border-radius:10px 0 10px 10px;padding:9px 11px 20px;font:400 13.6px/1.42 'Segoe UI',Helvetica,Arial,sans-serif;color:#111B21;box-shadow:0 1px .5px rgba(11,20,26,.13);white-space:pre-wrap;word-wrap:break-word}
+  .pk-wb .t{position:absolute;right:9px;bottom:4px;font-size:11px;color:#667781}
+  .pk-ta{width:100%;min-height:420px;border:1px solid #E6E0F3;border-radius:14px;padding:12px;font:13.5px/1.5 'Segoe UI',Helvetica,Arial,sans-serif;color:#111B21;resize:vertical}
+  .pk-cp{width:100%;margin-top:14px;border:0;border-radius:12px;padding:12px;font:inherit;font-size:14px;font-weight:700;color:#fff;background:linear-gradient(135deg,#4101F7,#6601FD);cursor:pointer}.pk-cp:disabled{opacity:.5;cursor:default}
+  .pk-x{position:absolute;top:14px;right:16px}
+  @media (max-width:980px){.pk-bx{grid-template-columns:1fr}.pk-row{grid-template-columns:1fr}.pk-sum{grid-template-columns:repeat(2,1fr)}}`;
+  let styled = false;
+  /* The person, from a learner row (Fresh Sales / Renewals) or a visitor row (Centre Visits) */
+  function person(x) {
+    if (x.kind === 'visit') return { name: cell(x.r, 1), phone: cell(x.r, 2).replace(/\D/g, '').slice(-10), age: cell(x.r, 3), gender: '', course: cell(x.r, 6), level: '', type: 'admission', centre: x.centre };
+    return { name: cell(x.r, 4), phone: cell(x.r, 7).replace(/\D/g, '').slice(-10), age: cell(x.r, 6), gender: cell(x.r, 5), course: cell(x.r, 8), level: cell(x.r, 9), type: 'renewal', centre: x.centre };
+  }
+  const kidAge = a => /^(0 to 5|6 to 12)$/i.test(String(a).trim());
+  const defSal = p => kidAge(p.age) ? '' : /^m/i.test(p.gender) ? 'Mr.' : /^f/i.test(p.gender) ? 'Ms.' : '';
+  const levelsOf = () => (FEE && FEE.levels && FEE.levels.length ? FEE.levels : ['Preparatory', 'Intermediate', 'Proficient', 'Advanced']);
+  const rateOf = (lv) => { const c = FEE.fees[P.p.centre] || {}, k = find(c, P.course); const L = k ? c[k] : null, lk = L ? find(L, lv) : null; return lk ? L[lk] : 0; };
+  const maxOf = (lv) => { const k = find(FEE.max, P.course), L = k ? FEE.max[k] : null, lk = L ? find(L, lv) : null; return lk ? L[lk] : Infinity; };
+  function suggest(o) {   // fill the current level, then the next ones (only as a starting point)
+    const D = FEE.disc[o.d], L = levelsOf(), parts = []; let left = D.classes, i = Math.max(0, L.findIndex(l => norm(l) === norm(P.level)));
+    while (left > 0 && i < L.length) { const n = Math.min(left, maxOf(L[i])); if (n > 0) parts.push({ lv: L[i], n }); left -= n; i++; }
+    if (left > 0) parts.push({ lv: L[L.length - 1], n: left });
+    return parts;
+  }
+  function calc(o) {
+    const D = FEE.disc[o.d]; if (!D) return { err: 'Pick a duration.' };
+    const parts = o.split ? o.parts : [{ lv: P.level, n: D.classes }], tot = parts.reduce((s, x) => s + (+x.n || 0), 0);
+    if (!P.level) return { err: 'Pick the course level.' };
+    for (const x of parts) {
+      if (!rateOf(x.lv)) return { err: `${P.course || 'This course'} at ${x.lv} isn't offered at ${P.p.centre} (no fee in the Fee Structure tab).` };
+      if (x.n > maxOf(x.lv)) return { err: o.split ? `${x.lv} has ${maxOf(x.lv)} classes, so it can't take ${x.n}.` : `${x.lv} has ${maxOf(x.lv)} classes, so ${D.classes} classes don't fit in it. Turn on “Split across levels” to choose how many go into each level.` };
+    }
+    if (tot !== D.classes) return { err: `The levels add up to ${tot} classes. A ${D.label.toLowerCase()} package has ${D.classes}.` };
+    const gross = parts.reduce((s, x) => s + x.n * rateOf(x.lv), 0);
+    const base = o.t === 'spl' ? D.spl : o.t === 'cus' ? Math.max(0, Math.min(100, +o.cus || 0)) : (P.p.type === 'admission' ? D.fs : D.rn);
+    const fam = o.fam && o.t !== 'spl' ? D.fam : 0, bAmt = Math.round(gross * base / 100), fAmt = Math.round(gross * fam / 100), pay = gross - bAmt - fAmt;
+    const std = P.p.type === 'admission' ? D.fs : D.rn;
+    return { D, parts, gross, base, fam, bAmt, fAmt, pay, pm: pay / (D.months || 1), custom: o.t === 'cus' && base !== std, std };
+  }
+  const clsText = c => c.parts.length === 1 ? `${c.D.classes} ${c.parts[0].lv}` : `${c.D.classes} (${c.parts.map(x => x.n + ' ' + x.lv).join(' + ')})`;
+  function message() {
+    const C = P.opts.map(calc); if (C.some(c => c.err)) return '';
+    const best = C.length > 1 ? C.reduce((b, c, i) => c.pm < C[b].pm ? i : b, 0) : -1, p = P.p, nm = (P.sal ? P.sal + ' ' : '') + p.name;
+    const one = C.length === 1, kind = p.type === 'admission' ? 'admission' : 'renewal';
+    let t = `Hi ${nm},\n\n` + (p.type === 'admission' ? `Thank you for choosing to learn ${P.course} with us at Artium Academy, ${p.centre}. We're so happy you're joining us.`
+      : `Thank you for learning ${P.course} with us at Artium Academy, ${p.centre}. It's been lovely to see your progress.`)
+      + `\n\nHere ${one ? 'is the ' + kind + ' option' : 'are the ' + kind + ' options'} we've put together for you:\n`;
+    C.forEach((c, i) => {
+      t += `\n*${one ? '' : 'Option ' + (i + 1) + ': '}${c.D.label}*${i === best ? ' ⭐ Best value' : ''}\n• Classes: ${clsText(c)}\n• Gross fee: ${inr(c.gross)}\n`
+        + (c.base ? `• Discount: ${pcs(c.base)} (${inr(c.bAmt)})\n` : '') + (c.fam ? `• Family / sibling discount: ${pcs(c.fam)} (${inr(c.fAmt)})\n` : '') + `• *Fee payable: ${inr(c.pay)}*\n`;
+    });
+    t += `\n${one ? 'Please take a look and let me know if you would like to go ahead.' : 'Please take a look and let me know which option works best for you.'} Once you confirm, I'll share the payment link right away.\n\nWarm regards,\n${FEE.me || ''}\nArtium Academy, ${p.centre}`;
+    return t;
+  }
+  const waHTML = t => esc(t).replace(/\*([^*\n]+)\*/g, '<b>$1</b>');
+  function draw() {
+    let bg = document.getElementById('pk-bg'); if (!P) { if (bg) bg.remove(); return; }
+    if (!bg) { bg = document.createElement('div'); bg.id = 'pk-bg'; bg.className = 'pk-bg'; document.body.appendChild(bg); bg.addEventListener('click', e => { if (e.target === bg) close(); }); }
+    if (!FEE) { bg.innerHTML = `<div class="pk-bx" style="display:block"><b>${P.err ? esc(P.err) : 'Loading the fee structure…'}</b>${P.err ? '<p style="margin-top:12px"><button class="pk-add" data-pkx>Close</button></p>' : ''}</div>`; return; }
+    const p = P.p, L = levelsOf(), courses = Object.keys(FEE.fees[p.centre] || {});
+    const opt = (o, i) => { const c = calc(o), D = FEE.disc;
+      return `<div class="pk-op"><div class="pk-oh"><b>Option ${i + 1}</b>${P.opts.length > 1 ? `<button class="pk-rm" data-pkrm="${i}">Remove</button>` : ''}</div>
+      <div class="pk-row"><div><span class="pk-l">Duration</span><div class="pk-seg">${D.map((d, j) => `<button type="button" data-pkd="${i}|${j}" aria-pressed="${o.d === j}">${d.months}M</button>`).join('')}</div></div>
+        <div><span class="pk-l">Discount</span><select data-pkt="${i}"><option value="std"${o.t === 'std' ? ' selected' : ''}>Standard ${p.type === 'admission' ? 'fresh sale' : 'renewal'} · ${pcs(p.type === 'admission' ? D[o.d].fs : D[o.d].rn)}</option>
+          <option value="spl"${o.t === 'spl' ? ' selected' : ''}>Special / Launch · ${pcs(D[o.d].spl)}</option><option value="cus"${o.t === 'cus' ? ' selected' : ''}>Custom %</option></select>
+          ${o.t === 'cus' ? `<input type="number" min="0" max="100" step="0.5" data-pkc="${i}" value="${esc(o.cus)}" placeholder="%" style="width:90px;margin-left:6px">` : ''}
+          ${D[o.d].fam ? `<label class="pk-tk${o.t === 'spl' ? ' off' : ''}"><input type="checkbox" data-pkf="${i}"${o.fam && o.t !== 'spl' ? ' checked' : ''}${o.t === 'spl' ? ' disabled' : ''}>Family / sibling discount · +${pcs(D[o.d].fam)}${o.t === 'spl' ? ' (not with Special / Launch)' : ''}</label>` : `<span class="pk-tk off">No family / sibling discount for ${esc(D[o.d].label.toLowerCase())}</span>`}</div>
+        <div><span class="pk-l">Classes</span><div class="pk-cl">${D[o.d].classes}</div></div></div>
+      <label class="pk-tk"><input type="checkbox" data-pks="${i}"${o.split ? ' checked' : ''}>Split across levels</label>
+      ${o.split ? `<div class="pk-sp"><small>Choose how many classes go into each level. They must add up to ${D[o.d].classes}.</small>${o.parts.map((x, k) => `<div class="pk-pr"><select data-pkpl="${i}|${k}">${L.map(l => `<option${norm(l) === norm(x.lv) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>
+        <input type="number" min="1" step="1" data-pkpn="${i}|${k}" value="${x.n}"> classes${rateOf(x.lv) ? ` × ${inr(rateOf(x.lv))} = ${inr(x.n * rateOf(x.lv))}` : ''}${o.parts.length > 1 ? ` <button class="pk-rm" data-pkpr="${i}|${k}">Remove</button>` : ''}</div>`).join('')}
+        <button class="pk-rm" style="color:#4101F7;margin-top:6px" data-pkpa="${i}">+ Add a level</button></div>` : ''}
+      ${c.err ? `<div class="pk-err">${esc(c.err)}</div>` : `<div class="pk-sum"><div><small>Gross fee</small><b>${inr(c.gross)}</b></div><div><small>Discount ${pcs(c.base)}</small><b>${c.base ? inr(c.bAmt) : '–'}</b></div><div><small>Family ${c.fam ? pcs(c.fam) : ''}</small><b>${c.fam ? inr(c.fAmt) : '–'}</b></div><div><small>Per month</small><b>${inr(c.pm)}</b></div><div class="pay"><small>Fee payable</small><b>${inr(c.pay)}</b></div></div>
+        ${c.custom ? `<div class="pk-note">Custom discount: the table gives ${pcs(c.std)} for ${c.D.label.toLowerCase()}.</div>` : ''}`}</div>`; };
+    const gen = message(), text = P.edit != null ? P.edit : gen;
+    bg.innerHTML = `<div class="pk-bx"><div>
+      <h2>Create package · ${esc(p.name)}</h2>
+      <div class="pk-sub"><select data-pksal>${['', 'Mr.', 'Ms.', 'Mrs.'].map(s => `<option value="${s}"${P.sal === s ? ' selected' : ''}>${s ? 'Address as ' + s : 'No salutation'}</option>`).join('')}</select>
+        <select data-pkty><option value="renewal"${p.type === 'renewal' ? ' selected' : ''}>Renewal</option><option value="admission"${p.type === 'admission' ? ' selected' : ''}>Admission</option></select>
+        <select data-pkco>${(courses.length ? courses : [P.course]).map(c => `<option${norm(c) === norm(P.course) ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select>
+        <select data-pklv><option value="">Course level</option>${L.map(l => `<option${norm(l) === norm(P.level) ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>
+        <span>${esc(p.centre)}${P.level && rateOf(P.level) ? ' · ' + inr(rateOf(P.level)) + ' a class' : ''}</span></div>
+      <div class="pk-k">${P.level && isFinite(maxOf(P.level)) ? `<i class="w">${esc(P.level)} has ${maxOf(P.level)} classes</i>` : ''}${p.phone ? `<i>${esc(p.phone.replace(/(\d{5})(\d{5})/, '$1 $2'))}</i>` : ''}</div>
+      ${P.opts.map(opt).join('')}
+      ${P.opts.length < 3 ? '<button class="pk-add" data-pkadd>+ Add another option</button>' : ''}</div>
+      <div><div class="pk-mh"><b>Preview · as it will look on WhatsApp</b><span>${P.edit != null ? '<button data-pkrs>Back to the generated text</button>' : '<button data-pked>Edit the text</button>'} <button data-pkx>Close</button></span></div>
+        ${P.edit != null ? `<textarea class="pk-ta" data-pkta>${esc(text)}</textarea>` : `<div class="pk-wa"><div class="pk-wt"><i></i><div><b>${esc((P.sal ? P.sal + ' ' : '') + p.name)}</b><small>${p.phone ? '+91 ' + esc(p.phone.replace(/(\d{5})(\d{5})/, '$1 $2')) : ''}</small></div></div>
+          ${text ? `<div class="pk-wb">${waHTML(text)}<span class="t">now</span></div>` : '<div class="pk-wb">Fix the options on the left to see the message.</div>'}</div>`}
+        <button class="pk-cp" data-pkcp${text ? '' : ' disabled'}>Copy message</button>
+        <div class="pk-sub">Paste it into the learner's WhatsApp chat. The bold comes through exactly as shown.</div></div></div>`;
+  }
+  function close() { P = null; draw(); }
+  function open(x) {
+    if (!styled) { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); styled = true; }
+    const p = person(x); P = { p, sal: defSal(p), course: p.course, level: p.level, opts: [], edit: null };
+    draw();
+    load().then(() => { if (!P) return; const D = FEE.disc, i3 = Math.max(0, D.findIndex(d => d.months === 3));
+      const ck = find(FEE.fees[p.centre], P.course); if (ck) P.course = ck; const lk = levelsOf().find(l => norm(l) === norm(P.level)); P.level = lk || (p.type === 'admission' ? levelsOf()[0] : P.level);
+      P.opts = [{ d: i3, t: 'std', cus: '', fam: false, split: false, parts: [] }]; draw(); })
+      .catch(e => { if (P) { P.err = 'Couldn’t load the fee structure: ' + (e.message || e); draw(); } });
+  }
+  const O = el => P.opts[+String(el).split('|')[0]];
+  document.addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (b && b.dataset.pkg !== undefined) { e.preventDefault(); e.stopPropagation(); const x = window.RowEdit && RowEdit._reg(b.dataset.pkg); if (x) open(x); return; }
+    if (!P || !b) return;
+    const d = b.dataset;
+    if (d.pkx !== undefined) close();
+    else if (d.pkd) { const [i, j] = d.pkd.split('|').map(Number), o = P.opts[i]; o.d = j; if (o.split) o.parts = suggest(o); P.edit = null; draw(); }
+    else if (d.pkrm) { P.opts.splice(+d.pkrm, 1); P.edit = null; draw(); }
+    else if (d.pkadd !== undefined) { const last = P.opts[P.opts.length - 1]; P.opts.push({ d: Math.min(FEE.disc.length - 1, (last ? last.d : 0) + 1), t: 'std', cus: '', fam: last ? last.fam : false, split: false, parts: [] }); P.edit = null; draw(); }
+    else if (d.pkpa) { const o = O(d.pkpa), L = levelsOf(), lastLv = o.parts.length ? o.parts[o.parts.length - 1].lv : P.level; o.parts.push({ lv: L[Math.min(L.length - 1, L.findIndex(l => norm(l) === norm(lastLv)) + 1)], n: 8 }); P.edit = null; draw(); }
+    else if (d.pkpr) { const [i, k] = d.pkpr.split('|').map(Number); P.opts[i].parts.splice(k, 1); P.edit = null; draw(); }
+    else if (d.pked !== undefined) { P.edit = message(); draw(); }
+    else if (d.pkrs !== undefined) { P.edit = null; draw(); }
+    else if (d.pkcp !== undefined) { const t = P.edit != null ? P.edit : message(); if (!t) return;
+      (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { b.textContent = 'Copied ✓'; setTimeout(() => { if (b.isConnected) b.textContent = 'Copy message'; }, 1800); })
+        .catch(() => { P.edit = t; draw(); const ta = document.querySelector('[data-pkta]'); if (ta) { ta.focus(); ta.select(); } }); }
+  }, true);
+  document.addEventListener('change', e => {
+    if (!P) return; const el = e.target, d = el.dataset;
+    if (d.pksal !== undefined) P.sal = el.value;
+    else if (d.pkty !== undefined) P.p.type = el.value;
+    else if (d.pkco !== undefined) P.course = el.value;
+    else if (d.pklv !== undefined) P.level = el.value;
+    else if (d.pkt) O(d.pkt).t = el.value;
+    else if (d.pkf) O(d.pkf).fam = el.checked;
+    else if (d.pks) { const o = O(d.pks); o.split = el.checked; if (o.split) o.parts = suggest(o); }
+    else if (d.pkpl) { const [i, k] = d.pkpl.split('|').map(Number); P.opts[i].parts[k].lv = el.value; }
+    else if (d.pkpn) { const [i, k] = d.pkpn.split('|').map(Number); P.opts[i].parts[k].n = Math.max(0, parseInt(el.value, 10) || 0); }
+    else if (d.pkc) O(d.pkc).cus = el.value;
+    else if (d.pkta !== undefined) { P.edit = el.value; return; }
+    else return;
+    if (d.pkta === undefined) P.edit = null;
+    clearTimeout(window.__pkT); window.__pkT = setTimeout(draw, 0);   // after the browser has finished with the field (avoids redrawing during blur)
+  });
+  document.addEventListener('input', e => { if (P && e.target.dataset.pkta !== undefined) P.edit = e.target.value; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && P) close(); });
+  window.Package = { open };
 })();

@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="rowedit.js"></script>
 <script src="cardnav.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -582,7 +583,7 @@ function plRender(tb){
     return`<span class="stt wait">Not renewed yet</span>`;};
   const row=x=>{const pp=f!=='other'&&pipeOf(x),r=x.r,ph=String(r[7]||'').replace(/\D/g,'').slice(-10),src=f==='other'&&x.prev?x.prev:x;
     return`<tr${pp?' class="inp"':''}><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td class="rw">${src.r[40]?`<b>${src.r[40]}</b><small>${src.tab==='rn'?'Renewals':'Fresh Sales'}</small>`:'<span class="mut">–</span>'}</td>
-      <td class="act">${src.r[40]&&LINKS?`<a class="go" href="${rowLink(src)}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>`:''}${CAN_NOTE.includes(src.centre)&&src.r[40]?`<button type="button" class="nt" data-note="${esc(rk(src))}">Edit</button>`:''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
+      <td class="act">${src.r[40]&&LINKS?`<a class="go" href="${rowLink(src)}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>`:''}${CAN_NOTE.includes(src.centre)&&src.r[40]?`<button type="button" class="nt" data-note="${esc(rk(src))}">Edit</button>`:''}${window.RowEdit?RowEdit.pkgButton(src):''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
       <td>${fd(src.end)}</td><td class="st">${st(x)}</td>${pc?`<td class="pc">${pp?fd(pp.d):'<span class="mut">–</span>'}</td><td class="pc">${pp?inrOf(pp.a):'<span class="mut">–</span>'}</td>`:''}<td class="ds">${(NROWS[rk(src)]=src.r,'')}${esc(cell(src.r,32))||'<span class="mut">–</span>'}</td></tr>
       ${NOTE&&NOTE.k===rk(src)?noteRow(src):''}`;};
   const chip=(v,l,n)=>`<button type="button" data-plf="${v}" aria-pressed="${f===v}">${l}<i>${n}</i></button>`;
@@ -645,6 +646,7 @@ async function load(){
     const t=new Date();
     document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('dot').className='dot';
+    RowEdit.start(()=>render());   // Create package (and the shared row tools)
     ArtiumAuth.call('sheetLinks',{}).then(j=>{if(j&&j.links){LINKS=j.links;CAN_NOTE=j.canEdit||[];render();}}).catch(()=>{});
     render();
   }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
