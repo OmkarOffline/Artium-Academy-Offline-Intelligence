@@ -192,12 +192,25 @@
   .card{border:0;border-radius:24px;padding:8px 18px 12px}
   table{font-size:13px}
   td{white-space:nowrap}
+  /* the insights and the "already spoken to" note wrap inside their column, so they never run under the next one */
+  td:has(.rins),td:has(.hint){white-space:normal;min-width:300px;max-width:520px}
+  td .rins,td .hint{white-space:normal;overflow-wrap:anywhere}
   th{font-size:10.5px;color:#6A6488;padding:12px 8px}
   td{padding:12px 8px}
   tbody tr:hover td{background:#FBF9FF}
   tr.done td{background:var(--done)}
   .day{background:#F1EAFE;color:#4101F7}
   @media (max-width:760px){.page{padding:24px 16px 48px}h1{font-size:34px;letter-spacing:-1px}.ptrack{flex-wrap:wrap;max-width:100%}.mo{padding:14px 16px}}
+
+  /* Recorded filter: the date pickers sit next to it; the strip above the table counts what was recorded, by checkpoint and by person */
+  .rr{display:inline-flex;align-items:center;gap:6px;background:#EFEAF9;border-radius:14px;padding:4px 6px;font:600 12.5px var(--body);color:#6A6488}
+  .rr input{height:32px;border:0;border-radius:10px;padding:0 8px;font:600 13px var(--body);color:#01073C;background:#fff}
+  .recsum{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:0 0 12px;padding:14px 18px;border-radius:18px;background:#F4EEFF}
+  .recsum[hidden]{display:none}
+  .recsum .rsn{font:500 15px var(--body);color:#01073C}.recsum .rsn b{font:800 20px var(--display);color:#4101F7;margin-right:2px}
+  .recsum .rsb{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font:500 13px var(--body);color:#4A4466}.recsum .rsb b{color:#01073C;margin-left:3px}
+  .recsum .rsb i{width:1px;height:16px;background:#D9CFF3}
+  .recsum .ca{margin-left:auto;border:0;background:none;color:#4101F7;font:700 12.5px var(--body);cursor:pointer}
 </style>
 </head>
 <body>
@@ -212,6 +225,7 @@
     <div class="mini" id="mini"></div>
   </div>
   <div class="bar" id="tabs"></div>
+  <div class="recsum" id="recsum" hidden></div>
   <div class="chips" id="chips" hidden></div>
   <div class="card"><table><thead id="thead"></thead><tbody id="rows"></tbody></table><div class="empty" id="empty" hidden></div></div>
 </div>
@@ -290,6 +304,18 @@ const appears=it=>daysBetween(TODAY,it.due)<=LEAD;                 // 5 days bef
 const missed=it=>!isDone(it)&&daysBetween(it.due,TODAY)>MISSED_AFTER;
 const dueNow=it=>!isDone(it)&&appears(it)&&!missed(it);
 let FCM='',FILT={},SORT=null;
+/* Recorded: show the check-ins recorded on a day or in a date range (by when they were recorded, whatever day they were due) */
+let REC='',RA='',RB='';
+const isoD=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function recRange(){
+  if(REC==='today')return[TODAY,TODAY];if(REC==='yday'){const y=addDays(TODAY,-1);return[y,y];}
+  if(REC==='7d')return[addDays(TODAY,-6),TODAY];
+  if(REC==='range'){const a=parseDate(RA)||TODAY,b=parseDate(RB)||a;return a<=b?[a,b]:[b,a];}
+  return null;
+}
+const recAt=it=>{const d=DONE[it.key],t=d&&d.at?new Date(d.at):null;return t&&!isNaN(t)?t:null;};
+const inRec=it=>{const R=recRange(),t=recAt(it);if(!R||!t)return false;const m=midnight(t);return m>=R[0]&&m<=R[1];};
+const recLabel=()=>{const R=recRange();if(!R)return'';return REC==='today'?'today':REC==='yday'?'yesterday':+R[0]===+R[1]?'on '+fmt(R[0]):'from '+fmtS(R[0])+' to '+fmt(R[1]);};
 const inCen=it=>CEN==='All'||it.centre===CEN;
 const inScope=it=>inCen(it)&&(FCM===''||(it.fc&&moIdx(it.fc)===FCM));   // centre, and the month of the first class
 const moIdx=d=>d.getFullYear()*12+d.getMonth();
@@ -320,7 +346,8 @@ function dd(id,label,val,opts,on,shown){
   const cur=opts.find(o=>String(o[0])===String(val)),sv=shown!==undefined?shown:(cur?cur[1]:'');
   return `<div class="dd" data-dd="${id}"><button type="button" class="ddb${on?' on':''}" aria-haspopup="listbox" aria-expanded="false"><span class="ddl">${label}</span><span class="ddv">${esc(sv)}</span>${CHEV}</button><div class="ddm" role="listbox" hidden>${opts.map(o=>`<button type="button" class="ddo${String(o[0])===String(val)?' sel':''}" role="option" data-v="${esc(o[0])}"><span>${esc(o[1])}</span>${String(o[0])===String(val)?TICK:''}</button>`).join('')}</div></div>`;
 }
-const DD={cen:v=>{CEN=v;try{localStorage.setItem('artium_ck_centre',CEN);}catch(x){}},fcm:v=>{FCM=v===''?'':+v;},more:v=>{TAB=v||'due';}};
+const DD={cen:v=>{CEN=v;try{localStorage.setItem('artium_ck_centre',CEN);}catch(x){}},fcm:v=>{FCM=v===''?'':+v;},more:v=>{TAB=v||'due';REC='';},
+  rec:v=>{REC=v;if(v){TAB='done';if(v==='range'&&!RA){RA=RB=isoD(TODAY);}}}};
 function drawTabs(){
   const el=document.getElementById('tabs'),T=tabsDef(),cnt=Object.fromEntries(T.map(t=>[t[0],t[2]])),main=T.filter(t=>/^(due|d\d+|done)$/.test(t[0]));
   const fcs=[...new Set(ITEMS.filter(inCen).map(it=>moIdx(it.fc)))].sort((a,b)=>a-b);
@@ -328,6 +355,8 @@ function drawTabs(){
   const moreOpts=[['','Main lists'],['missed','Missed ('+cnt.missed+')'],['nodate','No first class date ('+cnt.nodate+')']];
   el.innerHTML='<span class="ptrack">'+main.map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'</span><span class="sp"></span>'+
     (ME.scoped?'':dd('cen','Centre',CEN,[['All','All centres']].concat(CENTRES.map(c=>[c,c])),false))+
+    dd('rec','Recorded',REC,[['','Any date'],['today','Today'],['yday','Yesterday'],['7d','Last 7 days'],['range','Pick dates']],!!REC)+
+    (REC==='range'?`<span class="rr"><input type="date" id="ra" value="${RA}" max="${isoD(TODAY)}" aria-label="Recorded from"><span>to</span><input type="date" id="rb" value="${RB}" max="${isoD(TODAY)}" aria-label="Recorded to"></span>`:'')+
     dd('fcm','First class',FCM,fcOpts,FCM!=='')+
     dd('more','More lists',/^(missed|nodate)$/.test(TAB)?TAB:'',moreOpts,/^(missed|nodate)$/.test(TAB),/^(missed|nodate)$/.test(TAB)?(TAB==='missed'?'Missed':'No first class date'):'')
 }
@@ -374,7 +403,7 @@ function baseList(){
   let list;
   if(TAB==='due')list=c.filter(shown);
   else if(/^d\d+$/.test(TAB))list=c.filter(shown).filter(x=>'d'+x.day===TAB);
-  else if(TAB==='done')list=monthSet(MONTH,c).filter(isDone);
+  else if(TAB==='done')list=REC?c.filter(it=>isDone(it)&&inRec(it)):monthSet(MONTH,c).filter(isDone);
   else list=c.filter(missed);
   list.sort(TAB==='done'?(a,b)=>String(DONE[b.key].at).localeCompare(String(DONE[a.key].at)):(a,b)=>a.due-b.due||a.name.localeCompare(b.name));
   return list;
@@ -395,8 +424,13 @@ function draw(){
   const act=Object.keys(FILT).filter(k=>cols.some(c=>c[0]===k)),ch=document.getElementById('chips');
   ch.hidden=!act.length;
   ch.innerHTML=act.length?'<span class="cl">Filtered by</span>'+act.map(k=>{const v=[...FILT[k]];return `<span class="chip">${LABEL[k]}: ${esc(v.length<=2?v.join(', '):v.length+' selected')}<button type="button" data-fx="${k}" aria-label="Remove filter">×</button></span>`;}).join('')+'<button type="button" class="ca" data-fclear="1">Clear all</button>':'';
+  const rs=document.getElementById('recsum'),on=REC&&TAB==='done';rs.hidden=!on;
+  if(on){const by={},dy={};list.forEach(it=>{const d=DONE[it.key];const w=d.by||'Someone';by[w]=(by[w]||0)+1;dy[it.day]=(dy[it.day]||0)+1;});
+    rs.innerHTML=`<div class="rsn"><b>${list.length}</b> check-in${list.length===1?'':'s'} recorded ${esc(recLabel())}${CEN!=='All'?' at '+esc(CEN):''}.</div>`+
+      `<div class="rsb">${DAYS.map(n=>`<span>Day ${n} <b>${dy[n]||0}</b></span>`).join('')}${Object.keys(by).length?'<i></i>':''}${Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([w,n])=>`<span>${esc(w)} <b>${n}</b></span>`).join('')}</div>`+
+      `<button type="button" class="ca" data-recx="1">Show all done</button>`;}
   empty.hidden=!!list.length;
-  empty.textContent=act.length?'Nothing matches these filters.':{due:'Nothing is due right now.',done:'No check-ins are done for this month yet.',missed:'No missed check-ins.',nodate:'Everyone has a first class date.'}[TAB]||'Nothing is due for this checkpoint right now.';
+  empty.textContent=act.length?'Nothing matches these filters.':REC&&TAB==='done'?'No check-ins were recorded '+recLabel()+'.':{due:'Nothing is due right now.',done:'No check-ins are done for this month yet.',missed:'No missed check-ins.',nodate:'Everyone has a first class date.'}[TAB]||'Nothing is due for this checkpoint right now.';
 }
 /* Column filter: the same idea as a Google Sheet. Sort, search the values, tick the ones you want. */
 let FP=null;
@@ -435,10 +469,12 @@ document.addEventListener('click',e=>{
   const x=t.closest('[data-fx]');if(x){delete FILT[x.dataset.fx];draw();return;}
   if(t.closest('[data-fclear]')){FILT={};SORT=null;draw();return;}
   const b=t.closest('button');if(!b)return;
-  if(b.dataset.t){TAB=b.dataset.t;KEEP.clear();draw();}
+  if(b.dataset.recx){REC='';draw();return;}
+  if(b.dataset.t){TAB=b.dataset.t;if(TAB!=='done')REC='';KEEP.clear();draw();}
   else if(b.dataset.rec||b.dataset.view){const it=ITEMS.find(x=>x.key===(b.dataset.rec||b.dataset.view));if(it)openRec(it,!!b.dataset.view);}
   else if(b.dataset.edit)startEdit(b.dataset.edit);
 });
+document.addEventListener('change',e=>{const t=e.target;if(t.id==='ra'||t.id==='rb'){if(t.id==='ra')RA=t.value;else RB=t.value;draw();}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeFp();document.querySelectorAll('.ddm').forEach(m=>m.hidden=true);}});
 document.getElementById('mprev').onclick=()=>{MONTH--;draw();};
 document.getElementById('mnext').onclick=()=>{MONTH++;draw();};
