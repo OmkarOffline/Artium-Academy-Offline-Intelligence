@@ -338,6 +338,10 @@
   table.mx tr.total td.xg{background:#0B1156!important;border-color:rgba(255,255,255,.1)}
   .more>summary{border:0;border-radius:18px;background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.05),0 20px 40px -32px rgba(1,7,60,.4)}
   @media (max-width:900px){.page-header h1{font-size:34px;letter-spacing:-1px}.page-header .subtitle{font-size:15px}.centre-toggle{display:flex;width:100%}.ct-btn{flex:1;padding:9px 12px 11px}}
+  /* the pipeline tag beside Renewals Achieved and Conversions: it takes no space, so the actual number doesn't move */
+  table.mx .ppw{position:relative;display:inline-block;width:0;height:0;vertical-align:middle}
+  table.mx .pp{position:absolute;right:10px;top:50%;transform:translateY(-50%);white-space:nowrap;font-size:12px;font-weight:700;color:#A3187F;background:#FCEAF7;border-radius:999px;padding:3px 9px;line-height:1.3}
+  @media (max-width:760px){table.mx .ppw{display:block;width:auto;height:auto}table.mx .pp{position:static;transform:none;display:inline-block;margin-bottom:4px}}   /* phones: no room beside it, so it sits above */
 </style>
 </head>
 <body>
@@ -615,7 +619,13 @@ function mainTable(c){
       if(M&&r.t){const T=tgt(r.t);if(T){t=f(T.v)+(T.all?'':'<sup>*</sup>');if(!T.all)star.push(1);
         const mine=tot(add(r.id,T.has.filter(p=>ps.includes(p))));g=mine-T.v;}
         if(cur&&goneY)rr=f((so-(ti>=0?a[ti]:0))/goneY*allCal);}
-      h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(f(so),t,rr,M?gapTd(g,r.k,0):'')
+      // Renewals Achieved and Conversions: the open pipeline in the period, from the same rules as the Renewal and Admissions Pipeline pages.
+      // The tag hangs to the left of the number, so the number itself stays exactly where it was.
+      let av=f(so);
+      if(r.id==='rn'||r.id==='conv'){const k=r.id==='rn'?'rnPipe':'adPipe',lo=+ymd(P.a),hi=+ymd(M?P.full:P.b);
+        const pn=ps.reduce((s,p)=>s+((TR[p.c.name]||{})[k]||[]).filter(d=>d>=lo&&d<=hi).length,0);
+        if(pn)av=`<span class="ppw"><span class="pp" title="${pn} ${r.id==='rn'?'renewal':'admission'}${pn===1?'':'s'} promised in this period and not paid yet, as on the ${r.id==='rn'?'Renewal':'Admissions'} Pipeline page">+${fmtN(pn)} pipeline = ${fmtN(so+pn)}</span></span>${av}`;}
+      h+=`<tr class="${cls}"><td class="xm">${label}</td>`+summ(av,t,rr,M?gapTd(g,r.k,0):'')
         +ORD.map(i=>`<td class="${dcls(i)}${a[i]?'':' z'}">${a[i]?f(a[i]):'–'}</td>`).join('')+'</tr>';
       return;}
     // a rate or an average: numerator ÷ denominator
