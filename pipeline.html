@@ -368,6 +368,13 @@ button.pcn.cur{background:#fff;box-shadow:0 0 0 2px #4101F7}
 .pqtab>tbody>tr>td:first-child{font-weight:600}
 .pqtab>tbody>tr>td small{display:block;font:500 12px var(--f);color:#6A6488;margin-top:2px}
 .pqtab .tday{display:inline-block;font:700 11px var(--f);color:#A8431E;background:#FFF1EA;border-radius:6px;padding:2px 7px;margin-left:8px}
+.pqtt{border-top:1px solid #F1EDF9}.pqtl{font:700 11px var(--f);letter-spacing:.12em;text-transform:uppercase;color:#4101F7;padding:18px 26px 0}
+.pqg3{display:grid;grid-template-columns:repeat(3,1fr)}.pqg3 .pqt{padding-top:12px}
+.pqv{font:800 34px/1.1 var(--f);color:#01073C}.pqren{font-weight:700;color:#137A4F}
+@media (max-width:900px){.pqg3{grid-template-columns:1fr}}
+.pqt .t{display:block;line-height:1.5}.pqt .t i{display:inline-block;margin-right:7px;vertical-align:0}.pqib{vertical-align:-4px;margin-left:6px;width:17px;height:17px;font-size:10px;letter-spacing:0}.pqt .ipop{top:26px;left:-12px;width:300px}.pqg>.pqt:nth-child(n+4) .ipop,.pqg3>.pqt:last-child .ipop{left:auto;right:-12px}
+.pqt{position:relative}.sec:has(.pqt){overflow:visible}
+.pqpc{font:600 13px var(--f);color:#6A6488;margin-left:12px}
 .pqb{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#EFEAF9;width:150px;margin:6px 0 0 auto}.pqb i{display:block;height:100%}
 .pqtab>tbody>tr.tot>td{background:#FBFAFF;border-top:1px solid #E6E0F3}
 .pqtab>tbody>tr.grp>td{background:#F7F5FC;font-size:13.5px;padding-top:11px;padding-bottom:11px}
@@ -637,6 +644,7 @@ const pcIsExt=x=>x.ext>0||(x.newEnd&&x.end&&x.newEnd>x.end)||/extend/i.test(x.st
 const pcEnd=x=>x.newEnd||(x.ext>0?new Date(x.end.getFullYear(),x.end.getMonth(),x.end.getDate()+Math.round(x.ext)):x.end);
 function pcSplit(C,b){const X=C.filter(pcIsExt);
   return{all:C,c:C.filter(x=>!pcIsExt(x)&&x.done),xi:X.filter(x=>pcEnd(x)<=b),xo:X.filter(x=>pcEnd(x)>b),n:C.filter(x=>!pcIsExt(x)&&!x.done)};}
+const pcDone=S=>S.c.concat(S.xi.filter(x=>x.done),S.xo.filter(x=>x.done));   // completed = Actual Package Completion Date filled; an extended membership counts only when its date is filled too
 const pcO={ren:L=>L.filter(x=>x.st==='paid'),wnr:L=>L.filter(x=>x.st==='lost'),ytr:L=>L.filter(x=>x.st!=='paid'&&x.st!=='lost')};
 const pcDm=d=>d.getDate()+' '+MON[d.getMonth()];
 const pcRg=(a,b)=>iso(a)===iso(b)?pcDm(a):pcDm(a)+' to '+pcDm(b);
@@ -655,24 +663,35 @@ function pcTable(L){
 function pcPanel(sec){const k=PCO[sec],o=k&&PCL[k];if(!o)return'';
   return`<div class="pqp" data-s="${sec}"><div class="pqh"><b>${esc(o.title)}</b><span>${n(o.L.length)} learner${o.L.length===1?'':'s'}</span><button type="button" class="pqx" data-pq="${sec}|${k}">Close</button></div>${pcTable(o.L)}</div>`;}
 const pcOpen=(sec,pre)=>PCO[sec]&&PCO[sec].startsWith(pre)&&PCL[PCO[sec]];
-function pcBar(S){const a=S.all.length,w=k=>a?(S[k].length/a*100).toFixed(1):0;
+function pcBar(S){const a=S.all.length,w=k=>a?((k==='c'?S.c:S[k].filter(x=>x.done)).length/a*100).toFixed(1):0;
   return`<div class="pqb" aria-hidden="true"><i class="k-c" style="width:${w('c')}%"></i><i class="k-xi" style="width:${w('xi')}%"></i><i class="k-xo" style="width:${w('xo')}%"></i></div>`;}
 
 function pcView(P,mine){
   PCL={};
   const one=mode==='month',MN=one?MONTH_FULL[P.a.getMonth()]:'the period',NM=one?MONTH_FULL[(P.a.getMonth()+1)%12]:'later';
-  const C=DUE.filter(x=>mine(x)&&inP(x.end,P)),S=pcSplit(C,P.b),X=S.xi.concat(S.xo),acc=S.c.length+X.length;
+  const C=DUE.filter(x=>mine(x)&&inP(x.end,P)),S=pcSplit(C,P.b),X=S.xi.concat(S.xo),D=pcDone(S),acc=D.length,XD=X.filter(x=>x.done).length;
+  /* Turnaround times: extended memberships only (with no extension the new expiry date is the old one). Ended on time and the gap use only those with a completion date. */
+  const XT=(()=>{const ext=X.filter(x=>x.end&&pcEnd(x)>x.end),dated=ext.filter(x=>x.doneOn),avg=L=>L.length?Math.round(L.reduce((a,b)=>a+b,0)/L.length*10)/10:null;
+    return{ext,dated,ok:dated.filter(x=>x.doneOn<=pcEnd(x)),avgExt:avg(ext.map(x=>days(x.end,pcEnd(x)))),avgGap:avg(dated.map(x=>days(pcEnd(x),x.doneOn)))};})();
   const G=[['c','Completed, no extension'],['xi','Extended, ending in '+MN],['xo','Extended into '+NM],['n','Not yet completed']],GT=Object.fromEntries(G);
   const head=one?P.label:esc(P.label);
 
   /* 1 · at a glance */
-  const tile=(t,dot,key,L,pct,s,cls='')=>`<div class="pqt ${cls}"><div class="t">${dot?`<i class="k-${dot}"></i>`:''}${t}</div><div class="v">${pcNum('s1',key,L,t,'big')}${pct?`<small>${pct}</small>`:''}</div><div class="s">${s}</div></div>`;
-  const filled=C.filter(x=>x.done).length;
-  const s1=`<div class="pqg">${tile('Due in '+MN,'','s1:all',C,'','By the original Package Expiry Date.')}
-    ${tile('Completed, no extension','c','s1:c',S.c,pc(S.c.length,C.length),'Actual Package Completion Date filled.')}
-    ${tile('Extended','xi','s1:x',X,pc(X.length,C.length),`${pcNum('s1','s1:xi',S.xi,GT.xi)} ending in ${esc(MN)} · ${pcNum('s1','s1:xo',S.xo,GT.xo)} into ${esc(NM)}.`)}
-    ${tile('Not yet completed','n','s1:n',S.n,pc(S.n.length,C.length),'No completion date and no extension.')}
-    ${tile('Total completed','','s1:acc',S.c.concat(X),'of '+n(C.length)+' · '+pc(acc,C.length),'Completed or extended: someone has been in touch.','acc')}</div>
+  const pqi=t=>`<span class="ib pqib" role="button" tabindex="0" aria-label="What this means" data-info>i<span class="ipop"><p>${t}</p></span></span>`;
+  const tile=(t,dot,key,L,pct,s,info,cls='')=>`<div class="pqt ${cls}"><div class="t">${dot?`<i class="k-${dot}"></i>`:''}${t}${pqi(info)}</div><div class="v">${pcNum('s1',key,L,t,'big')}${pct?`<small>${pct}</small>`:''}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+  const tt=(t,v,unit,s,info)=>`<div class="pqt"><div class="t">${t}${pqi(info)}</div><div class="v"><span class="pqv">${v}</span>${unit?`<small>${unit}</small>`:''}</div>${s?`<div class="s">${s}</div>`:''}</div>`;
+  const dd=v=>v==null?'':'day'+(Math.abs(v)===1?'':'s');
+  const filled=C.filter(x=>x.done).length,okR=pcO.ren(XT.ok);
+  const s1=`<div class="pqg">${tile('Due in '+MN,'','s1:all',C,'','','Number of memberships that become due for renewal in '+esc(MN)+', based on their original Package Expiry Date.')}
+    ${tile('Completed, no extension','c','s1:c',S.c,pc(S.c.length,C.length),S.c.length?`<b class="pqren">${pc(pcO.ren(S.c).length,S.c.length)} renewed.</b>`:'','Number of memberships that were completed without needing any extension: the Actual Package Completion Date is filled and no extension was given. The green figure is the share of them that has renewed.')}
+    ${tile('Extended','xi','s1:x',X,pc(X.length,C.length),`${pcNum('s1','s1:xi',S.xi,GT.xi)} ending in ${esc(MN.slice(0,3))} · ${pcNum('s1','s1:xo',S.xo,GT.xo)} into ${esc(NM.slice(0,3))}.`,'Number of memberships given an extension: extension days, a later New Package Expiry Date, or the status Extended. They are split by whether the extension ends in '+esc(MN)+' or runs into '+esc(NM)+'.')}
+    ${tile('Not yet completed','n','s1:n',S.n,pc(S.n.length,C.length),'','Number of memberships with no Actual Package Completion Date and no extension. Many of these may simply not have their completion date filled in the sheet yet.')}
+    ${tile('Total completed','','s1:acc',D,'of '+n(C.length)+' · '+pc(acc,C.length),`${n(S.c.length)} no extension · ${pcNum('s1','s1:xd',X.filter(x=>x.done),'Extended, with a completion date')} extended.`,'Every membership with an Actual Package Completion Date filled: those completed with no extension, plus extended memberships whose completion date is also filled. An extended membership with no completion date does not count.','acc')}</div>
+    <div class="pqtt"><div class="pqtl">Turnaround times · extended memberships</div><div class="pqg3">
+    ${tt('Average extension',XT.avgExt==null?'–':XT.avgExt,dd(XT.avgExt),XT.ext.length?`Across ${pcNum('s1','s1:xall',XT.ext,'Extended, with extension days or a new expiry date')} memberships.`:'','The average number of days between the original and the new Package Expiry Date. Only memberships with extension days or a later New Package Expiry Date count. Those marked Extended in the status alone have nothing to measure.')}
+    ${tt('Ended on time',pc(XT.ok.length,XT.dated.length),XT.dated.length?`${pcNum('s1','s1:xok',XT.ok,'Extended, ended on or before the new expiry date')} of ${pcNum('s1','s1:xdt',XT.dated,'Extended, with a completion date')}`:'',XT.ok.length?`<b class="pqren">${pcNum('s1','s1:xokr',okR,'Extended, ended on time, renewed')} renewed (${pc(okR.length,XT.ok.length)}).</b>`:'','Of the extended memberships with an Actual Package Completion Date, the share that ended on or before their new Package Expiry Date. The green figure is how many of those renewed.')}
+    ${tt('New expiry to completion',XT.avgGap==null?'–':(XT.avgGap>0?'+':'')+XT.avgGap,dd(XT.avgGap),'','The average number of days from the new Package Expiry Date to the Actual Package Completion Date, for extended memberships with a completion date. A minus means the package was completed before the new expiry date. A plus means it ran past it.')}
+    </div></div>
     ${pcPanel('s1')}
     <div class="pcfill${filled<C.length/2?' low':''} pqf"><b>${n(filled)} of ${n(C.length)}</b> learners have an Actual Package Completion Date filled in the sheet. Learners without one, and with no extension, count as not yet completed.</div>`;
 
@@ -685,8 +704,8 @@ function pcView(P,mine){
   W.forEach(w=>w.S=pcSplit(w.L,P.b));
   const lbl=w=>`${w.l}${w.tag?`<span class="tday">${w.tag}</span>`:''}${w.s?`<small>${w.s}</small>`:''}`;
   const r2=(w,name)=>{const p=k=>pcNum('s2',`s2:${w.k}:${k}`,w.S[k],`${name} · ${k==='all'?'all due':GT[k]}`);
-    const a=w.S.c.length+w.S.xi.length+w.S.xo.length;
-    return`<tr class="${w.k==='all'?'tot':''}"><td>${w.k==='all'?name:lbl(w)}</td><td>${p('all')}</td><td>${p('c')}</td><td>${p('xi')}</td><td>${p('xo')}</td><td>${p('n')}</td><td>${pc(a,w.S.all.length)}${pcBar(w.S)}</td></tr>`
+    const a=pcDone(w.S).length;
+    return`<tr class="${w.k==='all'?'tot':''}"><td>${w.k==='all'?name:lbl(w)}</td><td>${p('all')}</td><td>${p('c')}</td><td>${p('xi')}</td><td>${p('xo')}</td><td>${p('n')}</td><td>${pcNum('s2',`s2:${w.k}:done`,pcDone(w.S),name+' · Total completed')}<span class="pqpc">${pc(a,w.S.all.length)}</span>${pcBar(w.S)}</td></tr>`
       +(pcOpen('s2',`s2:${w.k}:`)?`<tr class="pqr"><td colspan="7">${pcPanel('s2')}</td></tr>`:'');};
   const s2=`<div class="pqw"><table class="pqtab"><thead><tr><th>Original expiry</th><th>Due</th>${G.map(([k,t])=>`<th><i class="pd k-${k}"></i>${t}</th>`).join('')}<th>Total completed</th></tr></thead><tbody>`
     +W.map(w=>r2(w,w.l)).join('')+r2({k:'all',S},'All due in '+MN)+'</tbody></table></div>';
@@ -715,11 +734,11 @@ function pcView(P,mine){
     +`<tr class="sub"><td>Learners</td>${tdm(m=>pcNum('s4',`s4:${m.ym}:${g}`,m.S[g],`${m.t} · ${t}`))}</tr>`
     +`<tr class="sub"><td>Renewed</td>${tdm(m=>pcNum('s4',`s4:${m.ym}:${g}:ren`,pcO.ren(m.S[g]),`${m.t} · ${t} · Renewed`))}</tr>`
     +`<tr class="sub pcr"><td>Renewal %</td>${tdm(m=>{const a=m.S[g].length;return a?pc(pcO.ren(m.S[g]).length,a):'<span class="mut">–</span>';})}</tr>`;});
-  const tc=m=>m.S.c.concat(m.S.xi,m.S.xo);
+  const tc=m=>pcDone(m.S);
   r4+=`<tr class="tot"><td>Total completed</td>${tdm(m=>pcNum('s4',`s4:${m.ym}:tot`,tc(m),`${m.t} · Total completed`))}</tr>`
     +`<tr class="tot big2"><td>Package completion %</td>${tdm(m=>m.S.all.length?pc(tc(m).length,m.S.all.length):'<span class="mut">–</span>')}</tr>`;
   const s4=`<div class="pqm"><table class="pqtab mm"><thead><tr><th></th>${M.map(m=>`<th>${m.t}${m.cur?'<span class="cur2">Current</span>':''}</th>`).join('')}</tr></thead><tbody>${r4}</tbody></table></div>
-    ${pcPanel('s4')}<p class="pqn">Total completed is completed with no extension plus both kinds of extended. Package completion % is total completed out of those due for renewal.</p>`;
+    ${pcPanel('s4')}<p class="pqn">Total completed counts every learner with an Actual Package Completion Date filled: completed with no extension, plus extended learners whose completion date is also filled. Package completion % is total completed out of those due for renewal.</p>`;
 
   return section('pc1',one?MN+' at a glance':'At a glance',`<span>${n(C.length)} memberships whose original package expiry date is in ${esc(head)}</span>`,s1)
     +section('pc2','By expiry date',`<span>Today is ${pcDm(TODAY)}. Click any number to see those learners.</span>`,s2)
@@ -727,6 +746,7 @@ function pcView(P,mine){
     +section('pc4','Month by month',`<span>Package completion and renewals, by the month the package was due.${M.length>6?' Scroll right for older months.':''}</span>`,s4);
 }
 function bindPc(out){
+  out.querySelectorAll('[data-info]').forEach(b=>{b.onclick=e=>{e.stopPropagation();b.classList.toggle('open');};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();b.classList.toggle('open');}};});
   out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
   out.querySelectorAll('[data-pq]').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=b.dataset.pq.indexOf('|'),s=b.dataset.pq.slice(0,i),k=b.dataset.pq.slice(i+1);
     PCO[s]=PCO[s]===k?null:k;const y=window.scrollY;render();window.scrollTo(0,y);
