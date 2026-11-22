@@ -159,7 +159,25 @@
 
   @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
     .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.metric{min-width:200px;max-width:200px}}
+
+/* Explanations (Nov 2026): each definition is a card on the section (no outer box): a soft gradient header with the name and
+   a one-line meaning, then the formula, steps or ticks, and tinted hint rows */
+.defs-list.dg{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;align-items:start}
+.defs-list.dg[hidden]{display:none!important}
+.dg .dc{background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 18px 36px -28px rgba(1,7,60,.4);overflow:hidden;min-width:0}
+.dg .dh{padding:13px 16px 11px;background:linear-gradient(135deg,#F4EEFF,#FCEFFA)}
+.dg .dn{display:flex;align-items:center;gap:8px;font:700 14.5px/1.3 'Onest',system-ui,sans-serif;color:#01073C}.dg .dn::before{content:"";width:9px;height:9px;border-radius:3px;background:#4101F7;flex:none}
+.dg .dm{font:400 12.5px/1.45 'Onest',system-ui,sans-serif;color:#4A4466;margin-top:3px}
+.dg .db{padding:12px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.dg .dl{font:700 10px 'Onest',system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6A6488;margin-top:2px}
+.dg .dfm{font:600 13.5px/1.5 'Onest',system-ui,sans-serif;color:#01073C;padding:1px 0 1px 11px;border-left:3px solid #C9B8FF}.dg .dfm s{text-decoration:none;color:#4101F7;font-weight:800;margin:0 3px}
+.dg .dli{display:flex;gap:9px;align-items:flex-start;font:400 13px/1.4 'Onest',system-ui,sans-serif;color:#4A4466}.dg .dli b{color:#01073C;font-weight:700}
+.dg .dic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:700 10.5px 'Onest',system-ui,sans-serif;background:#EFEAF9;color:#4101F7}.dg .dic.n{background:#F4F1F9;color:#8A83A6}
+.dg .dtp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 'Onest',system-ui,sans-serif;color:#4A4466}.dg .dtp>i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:4px;background:#C9C2E0}.dg .dtp b{color:#01073C}
+.dg .dbs{display:flex;gap:6px;flex-wrap:wrap}.dg .dbs span{font:600 11.5px 'Onest',system-ui,sans-serif;border-radius:8px;padding:3px 8px}
+.dg .b-r{background:#FDE7EA;color:#B0204F}.dg .b-a{background:#FFF3D6;color:#8A5A00}.dg .b-g{background:#E3F7EE;color:#137A4F}.dg .b-b{background:#EAF0FF;color:#2F4DB8}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="page">
@@ -188,16 +206,16 @@
     <div class="tbl-wrap"><table id="mal"></table></div>
     <div class="defs">
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="defs-list" onclick="toggleDefs(this)"><span class="i">i</span>How these numbers are worked out</button>
-      <div class="defs-list" id="defs-list" hidden>
-        <div class="def"><div class="dt">Opening balance:</div><p>Last month's Monthly Active Learners.</p></div>
-        <div class="def"><div class="dt">New admissions:</div><p>Learners who joined during the month.</p></div>
-        <div class="def"><div class="dt">Due for renewal:</div><p>Memberships that end during the month, counted only up to today. First-time renewals are learners finishing their first membership; repeated renewals are learners finishing a membership they had already renewed.</p></div>
-        <div class="def"><div class="dt">Actually renewed:</div><p>Every renewal made during the month.</p></div>
-        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Total, minus the memberships due for renewal, plus the learners who actually renewed.</p></div>
-        <div class="def"><div class="dt">Net gain / loss:</div><p>This month's Monthly Active Learners minus last month's.</p></div>
-        <div class="def"><div class="dt">Win-back / Churn:</div><p>Learners who actually renewed minus the memberships due for renewal. <span class="pos">+</span> means more learners renewed than were due (win-back); <span class="neg">−</span> means learners were lost (churn).</p></div>
-        <div class="def"><div class="dt">Total capacity:</div><p>The most learners the centre can take: Alwarpet 540, Thoraipakkam 630, Borewell Road 720. For all centres, it adds up the centres that were open that month.</p></div>
-        <div class="def"><div class="dt">Capacity utilisation %:</div><p>Monthly Active Learners ÷ Total capacity. Red is below 40%, amber 40–55%, green 55–70%, and blue 70% or more.</p></div>
+      <div class="defs-list dg" id="defs-list" hidden>
+        <div class="dc"><div class="dh"><div class="dn">Opening balance</div><div class="dm">Where the month starts.</div></div><div class="db"><div class="dfm">Last month's Monthly Active Learners</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">New admissions</div><div class="dm">Learners who joined during the month.</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Due for renewal</div><div class="dm">Memberships that end during the month, counted only up to today.</div></div><div class="db"><div class="dl">Two kinds</div><div class="dli"><span class="dic">1</span><span><b>First-time:</b> finishing their first membership.</span></div><div class="dli"><span class="dic">2</span><span><b>Repeated:</b> finishing a membership they had already renewed.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Actually renewed</div><div class="dm">Every renewal made during the month.</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Monthly Active Learners</div><div class="dm">Learners active in the month.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Total <s>−</s> due for renewal <s>+</s> actually renewed</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Net gain / loss</div><div class="dm">How much the month grew or shrank.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">This month's Monthly Active Learners <s>−</s> last month's</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Win-back / Churn</div><div class="dm">Did more learners renew than were due?</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Actually renewed <s>−</s> due for renewal</div><div class="dtp"><i style="background:#3DDC97"></i><span><b>+</b> Win-back: more learners renewed than were due.</span></div><div class="dtp"><i style="background:#F58AA6"></i><span><b>−</b> Churn: learners were lost.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Total capacity</div><div class="dm">The most learners the centre can take.</div></div><div class="db"><div class="dli"><span class="dic">✓</span><span>Alwarpet 540.</span></div><div class="dli"><span class="dic">✓</span><span>Thoraipakkam 630.</span></div><div class="dli"><span class="dic">✓</span><span>Borewell Road 720.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>All centres adds up the centres open that month.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Capacity utilisation %</div><div class="dm">How full the centre is.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Monthly Active Learners <s>÷</s> Total capacity</div><div class="dl">Colours</div><div class="dbs"><span class="b-r">Below 40%</span><span class="b-a">40–55%</span><span class="b-g">55–70%</span><span class="b-b">70% or more</span></div></div></div>
       </div>
     </div>
   </section>
@@ -206,14 +224,14 @@
     <div class="tbl-wrap"><table class="ar" id="ar"></table></div>
     <div class="defs">
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="ar-defs" onclick="toggleDefs(this,'ar-defs')"><span class="i">i</span>How these numbers are worked out</button>
-      <div class="defs-list" id="ar-defs" hidden>
-        <div class="def"><div class="dt">No. of teachers:</div><p>Teachers at the centre for that course. South Vocals teachers take PFM - Tamil and Carnatic Classical; North Vocals teachers take PFM - Hindi and Hindustani Classical.</p></div>
-        <div class="def"><div class="dt">Allocation %:</div><p>Share of a teacher's time for the course: PFM - Tamil 80% / Carnatic Classical 20%, PFM - Hindi 80% / Hindustani Classical 20%, every other course 100%.</p></div>
-        <div class="def"><div class="dt">Capacity:</div><p>90 learners × No. of teachers × Allocation %.</p></div>
-        <div class="def"><div class="dt">Target:</div><p>70% of capacity.</p></div>
-        <div class="def"><div class="dt">Monthly Active Learners:</div><p>This month's active learners in the course, worked out as in the section above.</p></div>
-        <div class="def"><div class="dt">% Active utilisation:</div><p>Monthly Active Learners ÷ capacity.</p></div>
-        <div class="def"><div class="dt">Surplus / Deficit:</div><p>Target − Monthly Active Learners. A positive number is the admissions still needed; zero or below means no new admissions are needed.</p></div>
+      <div class="defs-list dg" id="ar-defs" hidden>
+        <div class="dc"><div class="dh"><div class="dn">No. of teachers</div><div class="dm">Teachers at the centre for that course.</div></div><div class="db"><div class="dl">Vocals teachers</div><div class="dli"><span class="dic">1</span><span><b>South Vocals</b> teachers take PFM - Tamil and Carnatic Classical.</span></div><div class="dli"><span class="dic">2</span><span><b>North Vocals</b> teachers take PFM - Hindi and Hindustani Classical.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Allocation %</div><div class="dm">Share of a teacher's time for the course.</div></div><div class="db"><div class="dli"><span class="dic">✓</span><span>PFM - Tamil 80% · Carnatic Classical 20%.</span></div><div class="dli"><span class="dic">✓</span><span>PFM - Hindi 80% · Hindustani Classical 20%.</span></div><div class="dli"><span class="dic">✓</span><span>Every other course 100%.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Capacity</div><div class="dm">The most learners the course can take.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">90 learners <s>×</s> No. of teachers <s>×</s> Allocation %</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Target</div><div class="dm">What the course should reach.</div></div><div class="db"><div class="dfm">70% of capacity</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Monthly Active Learners</div><div class="dm">This month's active learners in the course.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>Worked out as in the first section.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">% Active utilisation</div><div class="dm">How full the course is.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Monthly Active Learners <s>÷</s> capacity</div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Surplus / Deficit</div><div class="dm">Admissions still needed to reach the target.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Target <s>−</s> Monthly Active Learners</div><div class="dtp"><i style="background:#4101F7"></i><span><b>Above 0:</b> admissions still needed.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span><b>0 or below:</b> no new admissions needed.</span></div></div></div>
       </div>
     </div>
   </section>
@@ -222,9 +240,9 @@
     <div class="tbl-wrap"><table id="mal-c"></table></div>
     <div class="defs">
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="c-defs" onclick="toggleDefs(this,'c-defs')"><span class="i">i</span>How these numbers are worked out</button>
-      <div class="defs-list" id="c-defs" hidden>
-        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as in the first table, but only for that course. The Total row matches Monthly Active Learners in the first table.</p></div>
-        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no course filled in. They still count in the totals.</p></div>
+      <div class="defs-list dg" id="c-defs" hidden>
+        <div class="dc"><div class="dh"><div class="dn">Monthly Active Learners</div><div class="dm">Worked out exactly as in the first table, for each course.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>The Total row matches the first table.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Not mentioned</div><div class="dm">Admissions or renewals with no course filled in.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>They still count in the totals.</span></div></div></div>
       </div>
     </div>
   </section>
@@ -233,9 +251,9 @@
     <div class="tbl-wrap"><table id="mal-ag"></table></div>
     <div class="defs">
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="ag-defs" onclick="toggleDefs(this,'ag-defs')"><span class="i">i</span>How these numbers are worked out</button>
-      <div class="defs-list" id="ag-defs" hidden>
-        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as in the first table, but only for that age group. The Total row matches Monthly Active Learners in the first table.</p></div>
-        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no age group filled in. They still count in the totals.</p></div>
+      <div class="defs-list dg" id="ag-defs" hidden>
+        <div class="dc"><div class="dh"><div class="dn">Monthly Active Learners</div><div class="dm">Worked out exactly as in the first table, for each age group.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>The Total row matches the first table.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Not mentioned</div><div class="dm">Admissions or renewals with no age group filled in.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>They still count in the totals.</span></div></div></div>
       </div>
     </div>
   </section>
@@ -244,12 +262,12 @@
     <div class="tbl-wrap"><table id="mal-t"></table></div>
     <div class="defs">
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="t-defs" onclick="toggleDefs(this,'t-defs')"><span class="i">i</span>How these numbers are worked out</button>
-      <div class="defs-list" id="t-defs" hidden>
-        <div class="def"><div class="dt">Monthly Active Learners:</div><p>Worked out exactly as in the first table, but only for that teacher. The Total row matches Monthly Active Learners in the first table.</p></div>
-        <div class="def"><div class="dt">Not mentioned:</div><p>Admissions or renewals with no teacher filled in. They still count in the totals.</p></div>
-        <div class="def"><div class="dt">Current and past teachers:</div><p>Current teachers have active learners this month and an admission or renewal in the last 3 months; they're listed first, biggest first. Past teachers are listed below, with the month of their last admission or renewal. A past teacher can still show a learner or two while a long membership runs out.</p></div>
-        <div class="def"><div class="dt">Active months:</div><p>A teacher's numbers start in the month of their first admission or renewal and stop after the month their last membership ends — the last month a learner of theirs can still be active. Every other month shows 0.</p></div>
-        <div class="def"><div class="dt">Outside a teacher's active months:</div><p>Learners still counted against a teacher outside those months — usually a membership with no end date. They're kept here so the Total still matches the first table.</p></div>
+      <div class="defs-list dg" id="t-defs" hidden>
+        <div class="dc"><div class="dh"><div class="dn">Monthly Active Learners</div><div class="dm">Worked out exactly as in the first table, for each teacher.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>The Total row matches the first table.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Not mentioned</div><div class="dm">Admissions or renewals with no teacher filled in.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>They still count in the totals.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Current and past teachers</div><div class="dm">How the teachers are listed.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>Current:</b> active learners this month and an admission or renewal in the last 3 months. Listed first, biggest first.</span></div><div class="dli"><span class="dic">2</span><span><b>Past:</b> listed below, with the month of their last admission or renewal.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>A past teacher can still show a learner or two while a long membership runs out.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Active months</div><div class="dm">When a teacher's numbers show.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>Start:</b> the month of their first admission or renewal.</span></div><div class="dli"><span class="dic">2</span><span><b>Stop:</b> after the month their last membership ends, the last month a learner of theirs can be active.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Every other month shows 0.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Outside a teacher's active months</div><div class="dm">Learners counted against a teacher outside those months.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>Usually a membership with no end date.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Kept here so the Total still matches the first table.</span></div></div></div>
       </div>
     </div>
   </section>
