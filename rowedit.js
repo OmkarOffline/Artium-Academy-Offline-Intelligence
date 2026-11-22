@@ -127,7 +127,27 @@
     cell: cellHTML,
     // for pages with their own row cells (Teacher Performance): the Create package button, and the row behind a button
     pkgButton(x) { if (!x || !x.r || !CAN.includes(x.centre)) return ''; const k = key(x); REG[k] = x; return `<button type="button" class="re-pk" data-pkg="${esc(k)}">Create package</button><button type="button" class="re-fu" data-fu="${esc(k)}">Follow-up message</button>`; },
-    _reg: k => REG[k]
+    _reg: k => REG[k],
+    // can this person edit rows of that centre?
+    canEdit: c => CAN.includes(c),
+    /* Save a few learner fields straight from a list (no form): vals = {ext: '7', done: '2026-11-12'}. Same checks as Edit:
+       the row must match, each cell must still say what the page showed, nothing else is written. Resolves with the saved values. */
+    async quickSave(x, vals) {
+      const r = x.r, T = kind(x), F = T.fields(x), IDX = {}, TY = {}, LAB = {}, changes = {}, before = {};
+      F.forEach(([f, t, i, lab]) => { IDX[f] = i; TY[f] = t; LAB[f] = lab; });
+      Object.keys(vals).forEach(f => { const v = String(vals[f] == null ? '' : vals[f]).trim(); if (!(f in IDX)) return;
+        if (v !== shown(TY[f], cell(r, IDX[f]))) { changes[f] = v; before[f] = cell(r, IDX[f]); } });
+      if (!Object.keys(changes).length) return {};
+      const j = await ArtiumAuth.call(T.action, Object.assign(T.params(x, r), { changes, before }));
+      if (j && j.error === 'changed') { Object.keys(j.current || {}).forEach(f => r[IDX[f]] = j.current[f]);
+        throw new Error('Someone changed ' + j.fields.map(f => LAB[f]).join(', ') + ' in the sheet. The newer value is shown now. Nothing was saved.'); }
+      if (j && j.error) throw new Error(j.error === 'not-found' ? 'Couldn’t find exactly this row in the sheet. Nothing was saved. Please use Open row.'
+        : j.error === 'many' ? 'More than one row matches, so nothing was saved. Please use Open row.' : j.error === 'not-allowed' ? 'You can only edit rows for your own centre.' : j.error);
+      Object.keys(j.values || {}).forEach(f => r[IDX[f]] = j.values[f]);
+      toast('Saved to the sheet · ' + T.title(r));
+      return j.values || {};
+    },
+    toast
   };
 })();
 
