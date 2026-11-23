@@ -12,7 +12,7 @@
   };
   const ITEMS = {
     D: [
-      ['hyg', 'setup', 'Set up the centre as per SOP', { i: 'TV on with a video playing, air fresheners on, reception lights on, and soft music playing at a low volume. Waiting in the reception should feel musical and calm.' }],
+      ['hyg', 'setup', 'Set up the centre as per SOP', { i: 'Waiting in the reception should feel musical and calm.', list: ['TV on, with a video playing.', 'Air fresheners on.', 'Reception lights on.', 'Soft music playing, at a low volume.'] }],
       ['num', 'rp_review', 'Review the Renewal Pipeline', { link: 'pipeline' }],
       ['num', 'ap_review', 'Review the Admissions Pipeline', { link: 'admissions' }],
       ['num', 'dt_review', 'Review the Daily Tracker', { link: 'daily', i: 'Including the lead-to-visit and visit-to-conversion funnels.' }],
@@ -53,7 +53,7 @@
   .rzbar{height:10px;border-radius:6px;background:rgba(255,255,255,.9);margin-top:9px;overflow:hidden}.rzbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#4101F7,#6601FD 50%,#DD30B1);transition:width .5s cubic-bezier(.2,.8,.2,1)}
   .rzg{display:flex;gap:18px;flex-wrap:wrap;margin:14px 2px 0;font:500 13px var(--body,'Onest');color:#4A4466;align-items:center}
   .rzg span{display:inline-flex;align-items:center;gap:7px}.rzg b{color:#01073C;font-weight:700}.rzg .lv{font:700 12.5px var(--body,'Onest');color:#fff;border-radius:999px;padding:5px 12px;background:linear-gradient(135deg,#8A83A6,#B7B0CC)}
-  .rzg .rzi{display:inline-grid;gap:0}.rzg .rzi>span{display:none;left:auto;right:-10px;width:300px}.rzg .rzi:hover>span,.rzg .rzi:focus>span{display:block}
+  .rzg .rzi{display:inline-grid;gap:0}.rzg .rzq .qr>span:not(.qc),.rzg .rzq .qp>span{display:block}.rzg .rzi>.rzq{left:auto;right:-12px;width:330px}
   .rzg .lv1{background:linear-gradient(135deg,#8C7BD9,#B9AEDB)}.rzg .lv2{background:linear-gradient(135deg,#6B3FC7,#9B6BFF)}.rzg .lv3{background:linear-gradient(135deg,#6601FD,#B98BFF)}
   .rzg .lv4{background:linear-gradient(135deg,#4101F7,#6601FD)}.rzg .lv5{background:linear-gradient(135deg,#4101F7,#DD30B1)}.rzg .lv6{background:linear-gradient(135deg,#2B0256,#6601FD 55%,#DD30B1)}
   .rzg .lv7{background:linear-gradient(135deg,#01064C,#4101F7 40%,#DD30B1 75%,#F5906F);box-shadow:0 8px 20px -10px rgba(221,48,177,.7)}
@@ -73,8 +73,16 @@
   .rzk .tx{flex:1;min-width:0}.rzk .tl{font:600 13.5px/1.4 var(--body,'Onest');color:#01073C}.rzk small{display:block;font:400 12px/1.4 var(--body,'Onest');color:#6A6488;margin-top:3px}
   .rzk .soon{display:block;font:700 10px var(--body,'Onest');letter-spacing:.1em;text-transform:uppercase;color:#6A6488;margin-top:4px}
   .rzi{position:relative;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1.5px solid #B9AEDB;color:#6B3FC7;font:800 9.5px Georgia,serif;font-style:italic;margin-left:6px;vertical-align:1px;cursor:help}
-  .rzi span{display:none;position:absolute;left:-10px;top:22px;z-index:30;width:250px;background:#fff;border-radius:14px;padding:11px 13px;box-shadow:0 0 0 1px #E6E0F3,0 20px 40px -20px rgba(1,7,60,.45);font:400 12.5px/1.45 var(--body,'Onest');font-style:normal;color:#4A4466;text-align:left}
-  .rzi:hover span,.rzi:focus span{display:block}
+  /* Explainers: a card with a tinted header (name and one-line meaning), then ticked or numbered rows and dot hints */
+  .rzi>.rzq{display:none;position:absolute;left:-12px;top:24px;z-index:40;width:300px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 0 0 1px #E6E0F3,0 24px 48px -22px rgba(1,7,60,.45);font:400 13px/1.45 var(--body,'Onest');font-style:normal;color:#4A4466;text-align:left;cursor:default;letter-spacing:0;text-transform:none}
+  .rzi:hover>.rzq,.rzi:focus>.rzq{display:block}
+  .rzq .qh{padding:13px 15px 11px;background:linear-gradient(135deg,#F4EEFF,#FCEFFA)}.rzq .qt{display:flex;align-items:center;gap:8px;font:700 14.5px var(--body,'Onest');color:#01073C}.rzq .qt i{width:9px;height:9px;border-radius:3px;background:#4101F7;flex:none}
+  .rzq .qd{margin-top:3px;font:400 12.5px/1.45 var(--body,'Onest');color:#4A4466}
+  .rzq .qb{padding:11px 15px 14px;display:flex;flex-direction:column;gap:7px}.rzq .ql{font:700 10px var(--body,'Onest');letter-spacing:.12em;text-transform:uppercase;color:#6A6488;margin-top:3px}
+  .rzq .qr{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.4 var(--body,'Onest')}.rzq .qr b{color:#01073C;font-weight:700}
+  .rzq .qc{flex:none;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:9px;display:grid;place-items:center;font:700 10.5px var(--body,'Onest');background:#EFEAF9;color:#4101F7}
+  .rzq .qg{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px}.rzq .qg div{font:500 12.5px var(--body,'Onest');color:#4A4466}.rzq .qg b{color:#01073C}
+  .rzq .qp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 var(--body,'Onest')}.rzq .qp>i{flex:none;width:8px;height:8px;border-radius:50%;margin-top:5px}
   .rzl{all:unset;cursor:pointer;display:block;width:fit-content;margin-top:5px;font:600 12px var(--body,'Onest');color:#4101F7}
   .rzn{display:flex;align-items:center;gap:6px;margin-top:8px}.rzn .seg{display:flex;gap:4px}.rzn .seg i{width:14px;height:6px;border-radius:3px;background:#EFEAF9}.rzn .seg i.f{background:#4101F7}
   .rzn button{all:unset;cursor:pointer;width:22px;height:22px;border-radius:7px;background:#F4EEFF;color:#4101F7;font:700 14px/22px var(--body,'Onest');text-align:center}.rzn button:disabled{opacity:.35;cursor:default}
@@ -151,14 +159,21 @@
       : p >= .25 ? 'Good rhythm. Keep it going.' : p > 0 ? 'Nice start. One at a time.' : 'A fresh page. Start with the centre setup.';
   }
   const dm = d => { const p = String(d || '').split('-').map(Number); return p.length === 3 ? p[2] + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][p[1] - 1] : ''; };
-  const info = t => t ? `<span class="rzi" tabindex="0" aria-label="More">i<span>${esc(t)}</span></span>` : '';
+  const card2 = (title, meaning, body) => `<span class="rzi" tabindex="0" aria-label="About ${esc(title)}">i<div class="rzq"><div class="qh"><div class="qt"><i></i>${esc(title)}</div>${meaning ? `<div class="qd">${meaning}</div>` : ''}</div>${body ? `<div class="qb">${body}</div>` : ''}</div></span>`;
+  const info = (t, title, list) => t ? card2(title || 'About this', esc(t), list ? '<div class="ql">Check that</div>' + list.map(x => `<div class="qr"><span class="qc">✓</span><span>${esc(x)}</span></div>`).join('') : '') : '';
+  // How leagues work, in the same card style
+  const LGPOP = () => card2('How leagues work', 'Every month starts at zero. Your share of the most you can earn this month decides your league.',
+    '<div class="ql">Points</div>' + [['10', 'Each daily item.'], ['25', 'Each weekly item.'], ['2', 'Each call, parent or audit counted.'], ['20', 'Each step a society moves forward.'], ['+100', 'A society launch, on top.']]
+      .map(([n, t]) => `<div class="qr"><span class="qc">${n}</span><span>${t}</span></div>`).join('')
+    + '<div class="ql">Leagues</div><div class="qg">' + LEAGUES.map(l => `<div>${l[2]} <b>${l[1]}</b> · ${Math.round(l[0] * 1000) / 10}%</div>`).join('') + '</div>'
+    + '<div class="qp"><i style="background:#4101F7"></i><span><b>On pace for:</b> where the month is heading if today’s rate holds.</span></div>');
 
   function card(s, x, ed) {
     const [a, k, t, o] = x, v = val(OWN, per(s), k), n = o.n ? val(OWN, per(s), k + '_n') : 0, d = v > 0;
     if (o.off) return `<div class="rzk off"><button class="rzx" disabled aria-label="Not available yet"></button><div class="tx"><span class="tl">${esc(t)}</span><span class="soon">PostHog · soon</span></div></div>`;
     const ctr = o.n ? `<div class="rzn"><button data-rzc="${k}" data-d="-1"${!ed || n <= 0 ? ' disabled' : ''} aria-label="One less">−</button><span class="seg">${Array.from({ length: o.n }, (_, i) => `<i class="${i < n ? 'f' : ''}"></i>`).join('')}</span><button data-rzc="${k}" data-d="1"${!ed || n >= o.n ? ' disabled' : ''} aria-label="One more">+</button><span>${n} of ${o.n}</span></div>` : '';
     return `<div class="rzk${d ? ' dn' : ''}" data-k="${k}"><button class="rzx" role="checkbox" aria-checked="${d}" data-rzt="${k}"${ed ? '' : ' disabled'} aria-label="${esc(t)}"></button>
-      <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}</div></div>`;
+      <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i, t, o.list)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}</div></div>`;
   }
   function board(s, ed) {
     const groups = {}; ITEMS[s].forEach(x => (groups[x[0]] = groups[x[0]] || []).push(x));
@@ -195,7 +210,7 @@
     box.innerHTML = `<div class="rzb"><div class="rzt"><b>${name} Riyaz</b><span>${esc(sub)}</span></div>
       <div class="rzs" role="group" aria-label="Riyaz">${['D', 'W', 'M'].map(s => `<button type="button" data-rztab="${s}" aria-pressed="${s === TAB}">${{ D: 'Daily', W: 'Weekly', M: 'Monthly' }[s]}${me ? '' : `<i>${cnt[s][0]} of ${cnt[s][1]}</i>`}</button>`).join('')}</div>${pick}
       ${me ? '' : `<div class="rzp"><div class="a"><b>${d}<small>of ${t} ${TAB === 'M' ? 'launched' : 'done'}</small></b><em>${TAB === 'M' ? (launched ? 'Launched this month. Brilliant! 🎉' : 'Move a society along this week.') : cheer(d, t)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
-      ${me ? '' : `<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}<span class="rzi" tabindex="0" aria-label="How leagues work">i<span>Every month starts at zero. Points: 10 for each daily item, 25 for each weekly item, 2 for each call, parent or audit counted, 20 for each society step and 100 more for a launch. The league is your share of the most you can earn this month: Rookie to start, then Apprentice from 12.5%, Skilled from 25%, Contender from 37.5%, Pro from 50%, Elite from 62.5%, Master from 75% and Legend from 87.5%.</span></span></div>`}
+      ${me ? '' : `<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}${LGPOP()}</div>`}
       ${!ed && !me ? `<div class="rzro">Viewing ${esc(O.label)}’s Riyaz. Only its Centre Manager can tick it.${lu ? ` Last update ${esc(lu[5].slice(11))} by ${esc(lu[4])}.` : ' Nothing ticked yet today.'}</div>` : ''}
       ${body}${err ? `<div class="rzerr">${esc(err)}</div>` : ''}`;
     if (window.rzStory) window.rzStory();
