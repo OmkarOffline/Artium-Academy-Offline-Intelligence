@@ -30,12 +30,13 @@
       ['hyg', 'class_hyg', 'Review classroom hygiene', { i: 'Every classroom in order, instruments and requirements up to date, and teachers have what they need.' }],
       ['teach', 'audits', 'Audit 4 classes', { n: 4 }],
       ['admin', 'batch_opt', 'Optimise batches', { i: 'Make sure no teacher has dead hours or cold slots where the average batch size is low.' }],
-      ['data', 'loose', 'Fix this week’s Loose Ends', { link: 'loose' }]]
+      ['data', 'loose', 'Fix this week’s Loose Ends', { link: 'loose' }]],
+    M: [['teacher', 'teacher_rr', 'Conduct Teacher R&R', { i: 'Rewards and recognition for the teachers.' }]]
   };
   /* My Riyaz (the site's editor): worked Monday to Friday, with the week starting on Monday. */
   const MEAREAS = {
     sales: ['📞', '#DD30B1', 'Sales operations'], cm: ['🧭', '#2F4DB8', 'Centre Managers'], ppl: ['🎙️', '#E58BD8', 'People management'],
-    prod: ['🛠️', '#6A6488', 'Product and Tech'], eng: ['🎶', '#8C7BD9', 'Engagement'], mkt: ['📣', '#F5906F', 'Marketing']
+    prod: ['🛠️', '#6A6488', 'Product and Tech'], num: ['📊', '#6601FD', 'Numbers review'], eng: ['🎶', '#8C7BD9', 'Engagement'], mkt: ['📣', '#F5906F', 'Marketing']
   };
   const ME = {
     D: [
@@ -43,7 +44,11 @@
       ['sales', 'm_adm', 'Review the Admissions Pipeline', { link: 'admissions' }],
       ['sales', 'm_ren', 'Review the Renewal Pipeline', { link: 'pipeline' }],
       ['sales', 'm_pkg', 'Review Package completion', { link: 'pipeline', i: 'In the Renewal Pipeline, under the Package completion tab.' }],
-      ['cm', 'm_chk', 'Go through the day’s Check-ins', { link: 'checkins', i: 'The check-ins punched in by the Centre Managers for the day.' }]],
+      ['cm', 'm_chk', 'Go through the day’s Check-ins', { link: 'checkins', i: 'The check-ins punched in by the Centre Managers for the day.' }],
+      ['num', 'm_pulse', 'Review the Business Pulse page', { link: 'home' }],
+      ['num', 'm_ins', 'Add insights to the Execs Call and Weekly Offline Review pages', { links: [['Execs Call', 'execs'], ['Weekly Offline Review', 'review']] }],
+      ['ppl', 'm_teach', 'Speak to one teacher', {}],
+      ['eng', 'm_learn', 'Speak to 5 learners', { n: 5 }]],
     W: [
       ['ppl', 'm_tp', 'Review Teacher performance', { link: 'teachers', i: 'Demo conversion, renewal performance and the like.' }],
       ['prod', 'm_road', 'Review Product roadmap progress', { n: 2, sub: 'Twice a week.' }],
@@ -52,6 +57,7 @@
       ['sales', 'm_stat', 'Review admission statistics', { link: 'stats', i: 'Discount %, age-group-wise and subscription-wise admissions.' }]],
     M: [
       ['eng', 'm_eng', 'Learner engagement activity', { i: 'Plan at least one, and have it executed through the Centre Managers.', sub: 'Plan at least 1, executed through the Centre Managers.' }],
+      ['ppl', 'm_121', 'Conduct a 1:1 meeting with each staff member', { sub: 'Every staff member, once this month.' }],
       ['mkt', 'm_act', 'Offline activation or promotional activity', { i: 'Plan at least one offline activation event or promotional activity, and have it executed through the Centre Managers.', sub: 'Plan at least 1, executed through the Centre Managers.' }]]
   };
   const isMe = o => String(o).indexOf('me:') === 0;
@@ -59,7 +65,7 @@
   const areaOf = (o, a) => (isMe(o) ? MEAREAS : AREAS)[a];
   // the weekly off: Monday for the centres, Saturday and Sunday for My Riyaz
   const offDay = (o, w) => isMe(o) ? (w === 0 || w === 6) : w === 1;
-  const wkKey = o => isMe(o) ? ST.periods.WM : ST.periods.W;
+  const wkKey = o => (isMe(o) && ST.periods.WM) || ST.periods.W;
   const PTS = { D: 10, W: 25, M: 50 }, UNIT = 2, STEP_PTS = 20, LAUNCH_PTS = 100;
   const STEPS = ['Initial idea', 'Establish communication', 'Meet the committee', 'Pitch the initial idea', 'Final idea after the recce', 'Determine the logistics', 'Launch'];
   /* Monthly leagues: everyone starts the month at zero. The share of the month's maximum points decides the league. */
@@ -163,7 +169,7 @@
     const me = isMe(o), [y, m] = ST.periods.M.split('-').map(Number), last = new Date(y, m, 0).getDate(), unit = s => live(s, o).reduce((a, x) => a + PTS[s] + (x[3].n || 0) * UNIT, 0);
     let days = 0, gone = 0, weeks = 0; const t = +ST.periods.D.slice(8);
     for (let d = 1; d <= last; d++) { const w = new Date(y, m - 1, d).getDay(); if (!offDay(o, w)) { days++; if (d <= t) gone++; } if (w === (me ? 1 : 2)) weeks++; }
-    return { max: days * unit('D') + weeks * unit('W') + (me ? unit('M') : 6 * STEP_PTS + LAUNCH_PTS), days, gone };
+    return { max: days * unit('D') + weeks * unit('W') + unit('M') + (me ? 0 : 6 * STEP_PTS + LAUNCH_PTS), days, gone };
   }
   function league(o) {
     const pts = points(o, 'M'), mm = monthMax(o), f = mm.max ? pts / mm.max : 0, proj = mm.gone ? pts / mm.gone * mm.days / mm.max : 0;
@@ -201,7 +207,7 @@
     if (o.off) return `<div class="rzk off"><button class="rzx" disabled aria-label="Not available yet"></button><div class="tx"><span class="tl">${esc(t)}</span><span class="soon">PostHog · soon</span></div></div>`;
     const ctr = o.n ? `<div class="rzn"><button data-rzc="${k}" data-d="-1"${!ed || n <= 0 ? ' disabled' : ''} aria-label="One less">−</button><span class="seg">${Array.from({ length: o.n }, (_, i) => `<i class="${i < n ? 'f' : ''}"></i>`).join('')}</span><button data-rzc="${k}" data-d="1"${!ed || n >= o.n ? ' disabled' : ''} aria-label="One more">+</button><span>${n} of ${o.n}</span></div>` : '';
     return `<div class="rzk${d ? ' dn' : ''}" data-k="${k}"><button class="rzx" role="checkbox" aria-checked="${d}" data-rzt="${k}"${ed ? '' : ' disabled'} aria-label="${esc(t)}"></button>
-      <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i, t, o.list)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}</div></div>`;
+      <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i, t, o.list)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}${(o.links || []).map(l => `<button class="rzl" data-rzgo="${l[1]}">Open ${esc(l[0])} →</button>`).join('')}</div></div>`;
   }
   function board(s, ed) {
     const groups = {}; setOf(OWN)[s].forEach(x => (groups[x[0]] = groups[x[0]] || []).push(x));
@@ -227,17 +233,17 @@
     if (!ST || !ST.owners || !ST.owners.length) { box.hidden = true; return; }
     box.hidden = false; const O = own(), ed = O.edit, me = O.kind === 'me';
     const M = ST.periods.M, launched = ST.soc.filter(x => x.owner === OWN && x.step >= 6 && String(x.dates[6] || '').slice(0, 7) === M).length;
-    const cnt = { D: [done('D', OWN), live('D').length], W: [done('W', OWN), live('W').length], M: me ? [done('M', OWN), live('M').length] : [launched, 1] };
+    const cnt = { D: [done('D', OWN), live('D').length], W: [done('W', OWN), live('W').length], M: me ? [done('M', OWN), live('M').length] : [launched + done('M', OWN), 1 + live('M').length] };
     const [d, t] = cnt[TAB], name = { D: 'Daily', W: 'Weekly', M: 'Monthly' }[TAB];
     const sub = me ? (TAB === 'D' ? 'Your own Riyaz, Monday to Friday.' : TAB === 'W' ? `This week, ${wk()}. Starts again on Monday.` : 'Planned by you, executed through the Centre Managers.') : TAB === 'D' ? `Small habits that keep ${O.label} in tune.` : TAB === 'W' ? `This week, ${wk()}. Starts again on Tuesday.` : 'Society activation. Progress is checked every week.';
     const lg = league(OWN), sk = streak(OWN), pToday = points(OWN, 'D:' + ST.periods.D), lu = last(OWN, per(TAB === 'M' ? 'D' : TAB));
     const pick = ST.owners.length > 1 ? `<select class="rzo" id="rzown" aria-label="Whose Riyaz">${ST.owners.map(o => `<option value="${esc(o.key)}"${o.key === OWN ? ' selected' : ''}>${esc(o.kind === 'me' ? 'My Riyaz' : o.label + (o.edit ? '' : ' · view only'))}</option>`).join('')}</select>` : '';
     const wd = new Date(...ST.periods.D.split('-').map((x, i) => i === 1 ? x - 1 : +x)).getDay(), offToday = TAB === 'D' && offDay(OWN, wd);
     const offNote = offToday ? `<div class="rzempty" style="margin-top:14px;padding:18px 24px"><b>${me ? 'It’s the weekend.' : 'Monday is the weekly off.'}</b>${me ? 'The Daily Riyaz is off today. Rest well.' : 'The Daily Riyaz is off today. It starts again tomorrow.'}</div>` : '';
-    const body = offNote + (TAB === 'M' && !me ? societies(ed && !offToday) : board(TAB, ed && !offToday));
+    const body = offNote + (TAB === 'M' && !me ? board('M', ed) + societies(ed) : board(TAB, ed && !offToday));
     box.innerHTML = `<div class="rzb"><div class="rzt"><b>${name} Riyaz</b><span>${esc(sub)}</span></div>
       <div class="rzs" role="group" aria-label="Riyaz">${['D', 'W', 'M'].map(s => `<button type="button" data-rztab="${s}" aria-pressed="${s === TAB}">${{ D: 'Daily', W: 'Weekly', M: 'Monthly' }[s]}<i>${cnt[s][0]} of ${cnt[s][1]}</i></button>`).join('')}</div>${pick}
-      ${`<div class="rzp"><div class="a"><b>${d}<small>of ${t} ${TAB === 'M' && !me ? 'launched' : 'done'}</small></b><em>${TAB === 'M' && !me ? (launched ? 'Launched this month. Brilliant! 🎉' : 'Move a society along this week.') : cheer(d, t, me)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
+      ${`<div class="rzp"><div class="a"><b>${d}<small>of ${t} done</small></b><em>${TAB === 'M' && !me && !launched && d < t ? 'Move a society along this week.' : cheer(d, t, me)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
       ${`<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}${LGPOP()}</div>`}
       ${!ed && !me ? `<div class="rzro">Viewing ${esc(O.label)}’s Riyaz. Only its Centre Manager can tick it.${lu ? ` Last update ${esc(lu[5].slice(11))} by ${esc(lu[4])}.` : ' Nothing ticked yet today.'}</div>` : ''}
       ${body}${err ? `<div class="rzerr">${esc(err)}</div>` : ''}`;
