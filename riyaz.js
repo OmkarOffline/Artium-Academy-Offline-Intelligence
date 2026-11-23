@@ -32,7 +32,35 @@
       ['admin', 'batch_opt', 'Optimise batches', { i: 'Make sure no teacher has dead hours or cold slots where the average batch size is low.' }],
       ['data', 'loose', 'Fix this week’s Loose Ends', { link: 'loose' }]]
   };
-  const PTS = { D: 10, W: 25 }, UNIT = 2, STEP_PTS = 20, LAUNCH_PTS = 100;
+  /* My Riyaz (the site's editor): worked Monday to Friday, with the week starting on Monday. */
+  const MEAREAS = {
+    sales: ['📞', '#DD30B1', 'Sales operations'], cm: ['🧭', '#2F4DB8', 'Centre Managers'], ppl: ['🎙️', '#E58BD8', 'People management'],
+    prod: ['🛠️', '#6A6488', 'Product and Tech'], eng: ['🎶', '#8C7BD9', 'Engagement'], mkt: ['📣', '#F5906F', 'Marketing']
+  };
+  const ME = {
+    D: [
+      ['sales', 'm_daily', 'Review the Daily Tracker', { link: 'daily' }],
+      ['sales', 'm_adm', 'Review the Admissions Pipeline', { link: 'admissions' }],
+      ['sales', 'm_ren', 'Review the Renewal Pipeline', { link: 'pipeline' }],
+      ['sales', 'm_pkg', 'Review Package completion', { link: 'pipeline', i: 'In the Renewal Pipeline, under the Package completion tab.' }],
+      ['cm', 'm_chk', 'Go through the day’s Check-ins', { link: 'checkins', i: 'The check-ins punched in by the Centre Managers for the day.' }]],
+    W: [
+      ['ppl', 'm_tp', 'Review Teacher performance', { link: 'teachers', i: 'Demo conversion, renewal performance and the like.' }],
+      ['prod', 'm_road', 'Review Product roadmap progress', { n: 2, sub: 'Twice a week.' }],
+      ['eng', 'm_mal', 'Review Monthly Active Learners', { link: 'stats' }],
+      ['sales', 'm_req', 'Admissions against the requirement, course-wise', { link: 'admissions', i: 'Compare the admissions actually received with the requirement set at the start of the month.' }],
+      ['sales', 'm_stat', 'Review admission statistics', { link: 'stats', i: 'Discount %, age-group-wise and subscription-wise admissions.' }]],
+    M: [
+      ['eng', 'm_eng', 'Learner engagement activity', { i: 'Plan at least one, and have it executed through the Centre Managers.', sub: 'Plan at least 1, executed through the Centre Managers.' }],
+      ['mkt', 'm_act', 'Offline activation or promotional activity', { i: 'Plan at least one offline activation event or promotional activity, and have it executed through the Centre Managers.', sub: 'Plan at least 1, executed through the Centre Managers.' }]]
+  };
+  const isMe = o => String(o).indexOf('me:') === 0;
+  const setOf = o => isMe(o) ? ME : ITEMS;
+  const areaOf = (o, a) => (isMe(o) ? MEAREAS : AREAS)[a];
+  // the weekly off: Monday for the centres, Saturday and Sunday for My Riyaz
+  const offDay = (o, w) => isMe(o) ? (w === 0 || w === 6) : w === 1;
+  const wkKey = o => isMe(o) ? ST.periods.WM : ST.periods.W;
+  const PTS = { D: 10, W: 25, M: 50 }, UNIT = 2, STEP_PTS = 20, LAUNCH_PTS = 100;
   const STEPS = ['Initial idea', 'Establish communication', 'Meet the committee', 'Pitch the initial idea', 'Final idea after the recce', 'Determine the logistics', 'Launch'];
   /* Monthly leagues: everyone starts the month at zero. The share of the month's maximum points decides the league. */
   const LEAGUES = [[0, 'Rookie', '🌱'], [.125, 'Apprentice', '🎵'], [.25, 'Skilled', '🎯'], [.375, 'Contender', '🔥'], [.5, 'Pro', '⚡'], [.625, 'Elite', '💎'], [.75, 'Master', '🏆'], [.875, 'Legend', '👑']];   // a new league every 12.5%
@@ -114,11 +142,11 @@
 
   const $ = id => document.getElementById(id);
   const own = () => ST && ST.owners.find(o => o.key === OWN);
-  const per = s => s + ':' + ST.periods[s];
+  const per = (s, o) => s + ':' + (s === 'W' ? wkKey(o == null ? OWN : o) : ST.periods[s]);
   const val = (o, p, k) => { const r = ST.rows.find(x => x[0] === o && x[1] === p && x[2] === k); return r ? r[3] : 0; };
   const last = (o, p) => ST.rows.filter(x => x[0] === o && x[1] === p).sort((a, b) => a[5] < b[5] ? 1 : -1)[0];
-  const live = s => ITEMS[s].filter(x => !x[3].off);
-  function done(s, o, p) { return live(s).filter(x => val(o, p || per(s), x[1]) > 0).length; }
+  const live = (s, o) => setOf(o == null ? OWN : o)[s].filter(x => !x[3].off);
+  function done(s, o, p) { return live(s, o).filter(x => val(o, p || per(s, o), x[1]) > 0).length; }
   /* Points: every tick, every counted unit, and every society step on the day it was taken.
      pref picks the periods: 'D:2026-11-23' for a day; 'M' for the month (its days, the weeks that start in it, and society steps taken in it). */
   function points(o, pref) {
@@ -131,14 +159,14 @@
   }
   /* The most a centre can earn this month: every working day (Mondays off) of Daily Riyaz, every week that starts in the month,
      and one society taken from idea to launch. */
-  function monthMax() {
-    const [y, m] = ST.periods.M.split('-').map(Number), last = new Date(y, m, 0).getDate(), unit = s => live(s).reduce((a, x) => a + PTS[s] + (x[3].n || 0) * UNIT, 0);
+  function monthMax(o) {
+    const me = isMe(o), [y, m] = ST.periods.M.split('-').map(Number), last = new Date(y, m, 0).getDate(), unit = s => live(s, o).reduce((a, x) => a + PTS[s] + (x[3].n || 0) * UNIT, 0);
     let days = 0, gone = 0, weeks = 0; const t = +ST.periods.D.slice(8);
-    for (let d = 1; d <= last; d++) { const w = new Date(y, m - 1, d).getDay(); if (w !== 1) { days++; if (d <= t) gone++; } if (w === 2) weeks++; }
-    return { max: days * unit('D') + weeks * unit('W') + 6 * STEP_PTS + LAUNCH_PTS, days, gone };
+    for (let d = 1; d <= last; d++) { const w = new Date(y, m - 1, d).getDay(); if (!offDay(o, w)) { days++; if (d <= t) gone++; } if (w === (me ? 1 : 2)) weeks++; }
+    return { max: days * unit('D') + weeks * unit('W') + (me ? unit('M') : 6 * STEP_PTS + LAUNCH_PTS), days, gone };
   }
   function league(o) {
-    const pts = points(o, 'M'), mm = monthMax(), f = mm.max ? pts / mm.max : 0, proj = mm.gone ? pts / mm.gone * mm.days / mm.max : 0;
+    const pts = points(o, 'M'), mm = monthMax(o), f = mm.max ? pts / mm.max : 0, proj = mm.gone ? pts / mm.gone * mm.days / mm.max : 0;
     let i = 0; LEAGUES.forEach((l, k) => { if (f >= l[0]) i = k; });
     let j = 0; LEAGUES.forEach((l, k) => { if (proj >= l[0]) j = k; });
     const nx = LEAGUES[i + 1];
@@ -146,17 +174,17 @@
   }
   // a streak: days in a row (Mondays are off) with at least 80% of the Daily Riyaz done
   function streak(o) {
-    const N = live('D').length, ok = d => done('D', o, 'D:' + d) >= Math.ceil(N * 0.8);
+    const N = live('D', o).length, ok = d => done('D', o, 'D:' + d) >= Math.ceil(N * 0.8);
     const t = ST.periods.D.split('-').map(Number), day = new Date(t[0], t[1] - 1, t[2]);
     const key = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     let n = 0; if (!ok(key(day))) day.setDate(day.getDate() - 1);
-    for (let i = 0; i < 400; i++) { if (day.getDay() === 1) { day.setDate(day.getDate() - 1); continue; } if (!ok(key(day))) break; n++; day.setDate(day.getDate() - 1); }
+    for (let i = 0; i < 400; i++) { if (offDay(o, day.getDay())) { day.setDate(day.getDate() - 1); continue; } if (!ok(key(day))) break; n++; day.setDate(day.getDate() - 1); }
     return n;
   }
-  function cheer(d, t) {
+  function cheer(d, t, me) {
     const p = t ? d / t : 0;
     return p >= 1 ? 'Riyaz complete. Beautifully played! 🎉' : p >= .75 ? 'Almost there. Just a few to go.' : p >= .5 ? 'Past halfway. The finish is in sight.'
-      : p >= .25 ? 'Good rhythm. Keep it going.' : p > 0 ? 'Nice start. One at a time.' : 'A fresh page. Start with the centre setup.';
+      : p >= .25 ? 'Good rhythm. Keep it going.' : p > 0 ? 'Nice start. One at a time.' : me ? 'A fresh page. Start with the Daily Tracker.' : 'A fresh page. Start with the centre setup.';
   }
   const dm = d => { const p = String(d || '').split('-').map(Number); return p.length === 3 ? p[2] + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][p[1] - 1] : ''; };
   const card2 = (title, meaning, body) => `<span class="rzi" tabindex="0" aria-label="About ${esc(title)}">i<div class="rzq"><div class="qh"><div class="qt"><i></i>${esc(title)}</div>${meaning ? `<div class="qd">${meaning}</div>` : ''}</div>${body ? `<div class="qb">${body}</div>` : ''}</div></span>`;
@@ -176,9 +204,9 @@
       <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i, t, o.list)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}</div></div>`;
   }
   function board(s, ed) {
-    const groups = {}; ITEMS[s].forEach(x => (groups[x[0]] = groups[x[0]] || []).push(x));
+    const groups = {}; setOf(OWN)[s].forEach(x => (groups[x[0]] = groups[x[0]] || []).push(x));
     const cols = Object.keys(groups).map(a => { const L = groups[a], lv = L.filter(x => !x[3].off), dn = lv.filter(x => val(OWN, per(s), x[1]) > 0);
-      const open = L.filter(x => x[3].off || !(val(OWN, per(s), x[1]) > 0)), A = AREAS[a];
+      const open = L.filter(x => x[3].off || !(val(OWN, per(s), x[1]) > 0)), A = areaOf(OWN, a);
       return `<div class="rzc" style="--c:${A[1]}"><div class="rzh${lv.length && dn.length === lv.length ? ' full' : ''}"><span class="e">${A[0]}</span><b>${esc(A[2])}</b><span class="n">${dn.length === lv.length && lv.length ? '✓ ' : ''}${dn.length} of ${lv.length}</span></div>
         ${open.map(x => card(s, x, ed)).join('')}${dn.length ? `<div class="rzd">Done</div>${dn.map(x => card(s, x, ed)).join('')}` : ''}</div>`; }).join('');
     return `<div class="rzw"><div class="rzbd">${cols}</div>${Object.keys(groups).length > 4 ? '<div class="rzhint">Scroll sideways for more →</div>' : ''}</div>`;
@@ -199,23 +227,23 @@
     if (!ST || !ST.owners || !ST.owners.length) { box.hidden = true; return; }
     box.hidden = false; const O = own(), ed = O.edit, me = O.kind === 'me';
     const M = ST.periods.M, launched = ST.soc.filter(x => x.owner === OWN && x.step >= 6 && String(x.dates[6] || '').slice(0, 7) === M).length;
-    const cnt = { D: [done('D', OWN), live('D').length], W: [done('W', OWN), live('W').length], M: [launched, 1] };
+    const cnt = { D: [done('D', OWN), live('D').length], W: [done('W', OWN), live('W').length], M: me ? [done('M', OWN), live('M').length] : [launched, 1] };
     const [d, t] = cnt[TAB], name = { D: 'Daily', W: 'Weekly', M: 'Monthly' }[TAB];
-    const sub = me ? 'Your own Riyaz.' : TAB === 'D' ? `Small habits that keep ${O.label} in tune.` : TAB === 'W' ? `This week, ${wk()}. Starts again on Tuesday.` : 'Society activation. Progress is checked every week.';
+    const sub = me ? (TAB === 'D' ? 'Your own Riyaz, Monday to Friday.' : TAB === 'W' ? `This week, ${wk()}. Starts again on Monday.` : 'Planned by you, executed through the Centre Managers.') : TAB === 'D' ? `Small habits that keep ${O.label} in tune.` : TAB === 'W' ? `This week, ${wk()}. Starts again on Tuesday.` : 'Society activation. Progress is checked every week.';
     const lg = league(OWN), sk = streak(OWN), pToday = points(OWN, 'D:' + ST.periods.D), lu = last(OWN, per(TAB === 'M' ? 'D' : TAB));
     const pick = ST.owners.length > 1 ? `<select class="rzo" id="rzown" aria-label="Whose Riyaz">${ST.owners.map(o => `<option value="${esc(o.key)}"${o.key === OWN ? ' selected' : ''}>${esc(o.kind === 'me' ? 'My Riyaz' : o.label + (o.edit ? '' : ' · view only'))}</option>`).join('')}</select>` : '';
-    let body;
-    if (me) body = `<div class="rzempty"><b>Your Riyaz is being written.</b>Your own daily, weekly and monthly habits will appear here once they are set. Meanwhile, pick a centre above to follow its Riyaz through the day.</div>`;
-    else body = TAB === 'M' ? societies(ed) : board(TAB, ed);
+    const wd = new Date(...ST.periods.D.split('-').map((x, i) => i === 1 ? x - 1 : +x)).getDay(), offToday = TAB === 'D' && offDay(OWN, wd);
+    const offNote = offToday ? `<div class="rzempty" style="margin-top:14px;padding:18px 24px"><b>${me ? 'It’s the weekend.' : 'Monday is the weekly off.'}</b>${me ? 'The Daily Riyaz is off today. Rest well.' : 'The Daily Riyaz is off today. It starts again tomorrow.'}</div>` : '';
+    const body = offNote + (TAB === 'M' && !me ? societies(ed && !offToday) : board(TAB, ed && !offToday));
     box.innerHTML = `<div class="rzb"><div class="rzt"><b>${name} Riyaz</b><span>${esc(sub)}</span></div>
-      <div class="rzs" role="group" aria-label="Riyaz">${['D', 'W', 'M'].map(s => `<button type="button" data-rztab="${s}" aria-pressed="${s === TAB}">${{ D: 'Daily', W: 'Weekly', M: 'Monthly' }[s]}${me ? '' : `<i>${cnt[s][0]} of ${cnt[s][1]}</i>`}</button>`).join('')}</div>${pick}
-      ${me ? '' : `<div class="rzp"><div class="a"><b>${d}<small>of ${t} ${TAB === 'M' ? 'launched' : 'done'}</small></b><em>${TAB === 'M' ? (launched ? 'Launched this month. Brilliant! 🎉' : 'Move a society along this week.') : cheer(d, t)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
-      ${me ? '' : `<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}${LGPOP()}</div>`}
+      <div class="rzs" role="group" aria-label="Riyaz">${['D', 'W', 'M'].map(s => `<button type="button" data-rztab="${s}" aria-pressed="${s === TAB}">${{ D: 'Daily', W: 'Weekly', M: 'Monthly' }[s]}<i>${cnt[s][0]} of ${cnt[s][1]}</i></button>`).join('')}</div>${pick}
+      ${`<div class="rzp"><div class="a"><b>${d}<small>of ${t} ${TAB === 'M' && !me ? 'launched' : 'done'}</small></b><em>${TAB === 'M' && !me ? (launched ? 'Launched this month. Brilliant! 🎉' : 'Move a society along this week.') : cheer(d, t, me)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
+      ${`<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}${LGPOP()}</div>`}
       ${!ed && !me ? `<div class="rzro">Viewing ${esc(O.label)}’s Riyaz. Only its Centre Manager can tick it.${lu ? ` Last update ${esc(lu[5].slice(11))} by ${esc(lu[4])}.` : ' Nothing ticked yet today.'}</div>` : ''}
       ${body}${err ? `<div class="rzerr">${esc(err)}</div>` : ''}`;
     if (window.rzStory) window.rzStory();
   }
-  function wk() { const p = ST.periods.W.split('-').map(Number), a = new Date(p[0], p[1] - 1, p[2]), b = new Date(a); b.setDate(b.getDate() + 6);
+  function wk() { const p = wkKey(OWN).split('-').map(Number), a = new Date(p[0], p[1] - 1, p[2]), b = new Date(a); b.setDate(b.getDate() + (isMe(OWN) ? 4 : 6));
     const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']; return `${a.getDate()} ${M[a.getMonth()]} to ${b.getDate()} ${M[b.getMonth()]}`; }
   function confetti() {
     const c = document.createElement('div'); c.className = 'rzcf'; const C = ['#4101F7', '#6601FD', '#DD30B1', '#F1B6FA', '#F5906F', '#9BB6FF'];
@@ -246,7 +274,7 @@
     if (b.dataset.rzgo) { go(b.dataset.rzgo); return; }
     if (!O || !O.edit) return;
     if (b.dataset.rzt) { const k = b.dataset.rzt; tick(k, val(OWN, per(TAB), k) > 0 ? 0 : 1, TAB); return; }
-    if (b.dataset.rzc) { const k = b.dataset.rzc, x = ITEMS[TAB].find(y => y[1] === k), n = Math.max(0, Math.min(x[3].n, val(OWN, per(TAB), k + '_n') + (+b.dataset.d)));
+    if (b.dataset.rzc) { const k = b.dataset.rzc, x = setOf(OWN)[TAB].find(y => y[1] === k), n = Math.max(0, Math.min(x[3].n, val(OWN, per(TAB), k + '_n') + (+b.dataset.d)));
       tick(k + '_n', n, TAB); if (n >= x[3].n && !(val(OWN, per(TAB), k) > 0)) setTimeout(() => tick(k, 1, TAB), 400); return; }
     if (b.dataset.rzs) { const x = ST.soc.find(y => y.id === b.dataset.rzs); call('riyazSociety', { op: 'step', id: b.dataset.rzs, dir: +b.dataset.d }).then(ok => { if (ok && x && +b.dataset.d > 0 && x.step === 5) confetti(); }); return; }
     if (b.dataset.rzadd === 'open') { ADD = true; draw(); const i = $('rzsn'); if (i) i.focus(); return; }
@@ -260,11 +288,11 @@
       const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
       ArtiumAuth.call('riyaz', {}).then(j => { if (!j || j.error) return; ST = j; if (!ST.owners.length) return draw();
         let k = ''; try { k = localStorage.getItem('artium_rz_owner') || ''; } catch (e) {}
-        OWN = ST.owners.some(o => o.key === k) ? k : (ST.owners.find(o => o.edit && o.kind === 'centre') || ST.owners.find(o => o.kind === 'centre') || ST.owners[0]).key; draw(); }).catch(() => {});
+        OWN = ST.owners.some(o => o.key === k) ? k : (ST.owners.find(o => o.edit && o.kind === 'centre') || ST.owners.find(o => o.kind === 'me') || ST.owners[0]).key; draw(); }).catch(() => {});
     },
     // for the one-line story in the Delight view
     summary() { if (!ST || !ST.owners || !ST.owners.length) return null; const C = ST.owners.filter(o => o.kind === 'centre');
-      const mine = C.find(o => o.edit); const N = live('D').length;
+      const mine = C.find(o => o.edit); const N = live('D', 'x').length;
       if (mine) return { mine: true, centre: mine.key, done: done('D', mine.key), total: N };
       const t = C.reduce((s, o) => s + done('D', o.key), 0); return { mine: false, pct: C.length ? Math.round(t / (C.length * N) * 100) : 0 }; }
   };
