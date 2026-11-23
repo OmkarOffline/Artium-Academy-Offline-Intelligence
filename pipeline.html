@@ -388,6 +388,7 @@ button.pcn.cur{background:#fff;box-shadow:0 0 0 2px #4101F7}
 .sec[data-k="pc1"]{position:relative;z-index:3}.sec[data-k="pc1"]>.sb{overflow:visible}
 .qe{white-space:nowrap}.qrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .qin{height:34px;border:1px solid #E6E0F3;border-radius:10px;padding:0 10px;font:500 13.5px var(--f);color:#01073C;background:#fff}.qin.qn{width:70px}.qin:focus{outline:0;border-color:#4101F7;box-shadow:0 0 0 3px #EFEAF9}
+.qtk{font-size:15px;line-height:1}.qe .qrow{flex-wrap:nowrap}.qe .sub2{margin-top:5px}
 .qsv{border:0;background:linear-gradient(135deg,#4101F7,#6601FD);color:#fff;border-radius:10px;padding:8px 13px;font:700 12.5px var(--f);cursor:pointer}.qsv:disabled{opacity:.6}
 .pqtab>tbody>tr.tcr>td{background:#FBFAFE;font-weight:700}
 .pw .cur2{margin:0 2px}
@@ -683,13 +684,20 @@ function pcTable(L){
   /* Extension days and Actual Package Completion Date can be changed right here, for centres this person can edit (written to the sheet with the same checks as Edit) */
   const ed=x=>window.RowEdit&&RowEdit.canEdit&&RowEdit.canEdit(x.centre);
   const ex=x=>{const v=String(x.r[37]||'').trim();return/^\d+$/.test(v)?v:'';},dn=x=>x.doneOn?iso(x.doneOn):'';
-  const qe=x=>{if(!ed(x))return`<td>${ex(x)?ex(x)+' day'+(ex(x)==='1'?'':'s'):'<span class="mut">—</span>'}</td><td>${x.doneOn?fmtD(x.doneOn):x.done?esc(x.done):'<span class="mut">—</span>'}</td>`;
-    const k='q'+(PCQN++);PCQ[k]=x;
-    return`<td class="qe"><input type="number" min="0" step="1" class="qin qn" data-qf="ext" data-qk="${k}" value="${ex(x)}" placeholder="0" aria-label="Extension days"></td>`
-      +`<td class="qe"><span class="qrow"><input type="date" class="qin" data-qf="done" data-qk="${k}" value="${dn(x)}" aria-label="Actual package completion date">${x.done&&!x.doneOn?`<small class="sub2">Sheet says “${esc(x.done)}”.</small>`:''}<button type="button" class="qsv" data-qs="${k}" hidden>Save</button></span></td>`;};
-  return`<div class="tw pqs"><table class="lt"><thead><tr><th>Learner</th><th>Row</th><th>Package expiry</th><th>Extension · days</th><th>Actual completion date</th><th>Package</th><th>Renewal</th><th>Course</th><th>Teacher</th><th>Latest discussion</th></tr></thead><tbody>`
-    +L.slice().sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name)).map(x=>`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>${RowEdit.cell(x)}
-      <td>${fmtD(x.end)}</td>${qe(x)}<td>${pk(x)}</td><td>${oc(x)}</td><td>${esc(x.course)||'—'}</td><td>${esc(x.teacher)||'—'}</td><td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td></tr>`).join('')+'</tbody></table></div>';}
+  /* Extension days, Actual Package Completion Date and Actual Renewal Date: editable boxes for centres this person can edit, one Save per row */
+  const rd=x=>valid(parseDate(x.r[26])),xnote=x=>pcIsExt(x)&&pcEnd(x)>x.end?`<small class="sub2">New expiry ${fmtD(pcEnd(x))}.</small>`:'';
+  // ✅ = already filled in the sheet (so a box is never mistaken for one left blank)
+  const TK='<span class="qtk" title="Already filled in the sheet">✅</span>';
+  const dnote=x=>!x.doneOn&&x.done?`<small class="sub2">Sheet says “${esc(x.done)}”.</small>`:'';
+  const qe=(x,k)=>!k?[`<td>${ex(x)?ex(x)+' day'+(ex(x)==='1'?'':'s')+' '+TK:'<span class="mut">—</span>'}${xnote(x)}</td>`,`<td>${x.doneOn?fmtD(x.doneOn)+' '+TK:'<span class="mut">—</span>'}${dnote(x)}</td>`,`<td>${rd(x)?fmtD(rd(x)):'<span class="mut">—</span>'}</td>`]
+    :[`<td class="qe"><span class="qrow"><input type="number" min="0" step="1" class="qin qn" data-qf="ext" data-qk="${k}" value="${ex(x)}" placeholder="–" aria-label="Extension days">${ex(x)?TK:''}</span>${xnote(x)}</td>`,
+      `<td class="qe"><span class="qrow"><input type="date" class="qin" data-qf="done" data-qk="${k}" value="${dn(x)}" aria-label="Actual package completion date">${x.doneOn?TK:''}</span>${dnote(x)}</td>`,
+      `<td class="qe"><span class="qrow"><input type="date" class="qin" data-qf="renDate" data-qk="${k}" value="${rd(x)?iso(rd(x)):''}" aria-label="Actual renewal date"><button type="button" class="qsv" data-qs="${k}" hidden>Save</button></span></td>`];
+  const row=x=>{let k='';if(ed(x)){k='q'+(PCQN++);PCQ[k]=x;}const Q=qe(x,k);
+    return`<tr><td class="who"><b>${esc(x.name)||'—'}</b><span class="tg ${x.tab==='rn'?'rr':'ft'}">${x.tab==='rn'?'RR':'FTR'}</span><small>${esc(x.id)}${sel?'':' · '+esc(x.centre)}</small></td>${RowEdit.cell(x)}
+      <td>${fmtD(x.end)}</td>${Q[0]}${Q[1]}<td>${oc(x)}</td>${Q[2]}<td>${esc(x.course)||'—'}</td><td>${esc(x.teacher)||'—'}</td><td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td></tr>`;};
+  return`<div class="tw pqs"><table class="lt"><thead><tr><th>Learner</th><th>Row</th><th>Package expiry</th><th>Extension · days</th><th>Actual completion date</th><th>Renewal</th><th>Actual renewal date</th><th>Course</th><th>Teacher</th><th>Latest discussion</th></tr></thead><tbody>`
+    +L.slice().sort((a,b)=>a.end-b.end||a.name.localeCompare(b.name)).map(row).join('')+'</tbody></table></div>';}
 function pcPanel(sec){const k=PCO[sec],o=k&&PCL[k];if(!o)return'';
   return`<div class="pqp" data-s="${sec}"><div class="pqh"><b>${esc(o.title)}</b><span>${n(o.L.length)} learner${o.L.length===1?'':'s'}</span><button type="button" class="pqx" data-pq="${sec}|${k}">Close</button></div>${pcTable(o.L)}</div>`;}
 const pcOpen=(sec,pre)=>PCO[sec]&&PCO[sec].startsWith(pre)&&PCL[PCO[sec]];
