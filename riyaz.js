@@ -34,7 +34,8 @@
   };
   const PTS = { D: 10, W: 25 }, UNIT = 2, STEP_PTS = 20, LAUNCH_PTS = 100;
   const STEPS = ['Initial idea', 'Establish communication', 'Meet the committee', 'Pitch the initial idea', 'Final idea after the recce', 'Determine the logistics', 'Launch'];
-  const LEVELS = [[0, 'Beginner'], [200, 'Preparatory'], [600, 'Intermediate'], [1500, 'Proficient'], [3000, 'Advanced'], [6000, 'Maestro']];
+  /* Monthly leagues: everyone starts the month at zero. The share of the month's maximum points decides the league. */
+  const LEAGUES = [[0, 'Rookie', '🌱'], [.125, 'Apprentice', '🎵'], [.25, 'Skilled', '🎯'], [.375, 'Contender', '🔥'], [.5, 'Pro', '⚡'], [.625, 'Elite', '💎'], [.75, 'Master', '🏆'], [.875, 'Legend', '👑']];   // a new league every 12.5%
   let ST = null, OWN = null, TAB = 'D', BUSY = false, ADD = false;
   try { TAB = localStorage.getItem('artium_rz_tab') || 'D'; if (!/^[DWM]$/.test(TAB)) TAB = 'D'; } catch (e) {}
 
@@ -51,7 +52,11 @@
   .rzp .a em{font:600 13.5px var(--body,'Onest');font-style:normal;color:#4101F7;text-align:right}
   .rzbar{height:10px;border-radius:6px;background:rgba(255,255,255,.9);margin-top:9px;overflow:hidden}.rzbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#4101F7,#6601FD 50%,#DD30B1);transition:width .5s cubic-bezier(.2,.8,.2,1)}
   .rzg{display:flex;gap:18px;flex-wrap:wrap;margin:14px 2px 0;font:500 13px var(--body,'Onest');color:#4A4466;align-items:center}
-  .rzg span{display:inline-flex;align-items:center;gap:7px}.rzg b{color:#01073C;font-weight:700}.rzg .lv{font:700 12px var(--body,'Onest');color:#fff;background:linear-gradient(135deg,#4101F7,#DD30B1);border-radius:999px;padding:4px 11px}
+  .rzg span{display:inline-flex;align-items:center;gap:7px}.rzg b{color:#01073C;font-weight:700}.rzg .lv{font:700 12.5px var(--body,'Onest');color:#fff;border-radius:999px;padding:5px 12px;background:linear-gradient(135deg,#8A83A6,#B7B0CC)}
+  .rzg .rzi{display:inline-grid;gap:0}.rzg .rzi>span{display:none;left:auto;right:-10px;width:300px}.rzg .rzi:hover>span,.rzg .rzi:focus>span{display:block}
+  .rzg .lv1{background:linear-gradient(135deg,#8C7BD9,#B9AEDB)}.rzg .lv2{background:linear-gradient(135deg,#6B3FC7,#9B6BFF)}.rzg .lv3{background:linear-gradient(135deg,#6601FD,#B98BFF)}
+  .rzg .lv4{background:linear-gradient(135deg,#4101F7,#6601FD)}.rzg .lv5{background:linear-gradient(135deg,#4101F7,#DD30B1)}.rzg .lv6{background:linear-gradient(135deg,#2B0256,#6601FD 55%,#DD30B1)}
+  .rzg .lv7{background:linear-gradient(135deg,#01064C,#4101F7 40%,#DD30B1 75%,#F5906F);box-shadow:0 8px 20px -10px rgba(221,48,177,.7)}
   .rzro{margin:12px 2px 0;font:500 13px var(--body,'Onest');color:#6A6488}
   .rzw{position:relative;margin-top:18px}
   .rzbd{display:flex;gap:16px;overflow-x:auto;padding:2px 2px 14px;scroll-snap-type:x proximity;scrollbar-width:thin}
@@ -106,12 +111,30 @@
   const last = (o, p) => ST.rows.filter(x => x[0] === o && x[1] === p).sort((a, b) => a[5] < b[5] ? 1 : -1)[0];
   const live = s => ITEMS[s].filter(x => !x[3].off);
   function done(s, o, p) { return live(s).filter(x => val(o, p || per(s), x[1]) > 0).length; }
-  // points: every tick, every counted unit and every society step, all time
+  /* Points: every tick, every counted unit, and every society step on the day it was taken.
+     pref picks the periods: 'D:2026-11-23' for a day; 'M' for the month (its days, the weeks that start in it, and society steps taken in it). */
   function points(o, pref) {
-    let p = 0; ST.rows.filter(r => r[0] === o && (!pref || r[1].startsWith(pref))).forEach(r => { const s = r[1][0];
+    const M = ST.periods.M, inM = r => pref === 'M' ? (r[1].slice(2, 9) === M) : r[1].startsWith(pref);
+    let p = 0; ST.rows.filter(r => r[0] === o && inM(r)).forEach(r => { const s = r[1][0];
       if (/_n$/.test(r[2])) p += r[3] * UNIT; else if (r[3] > 0) p += PTS[s] || 0; });
-    if (!pref || pref === 'M:') ST.soc.filter(x => x.owner === o).forEach(x => { p += Math.min(x.step, 6) * STEP_PTS + (x.step >= 6 ? LAUNCH_PTS : 0); });
+    const day = pref === 'M' ? M : pref.slice(2);
+    ST.soc.filter(x => x.owner === o).forEach(x => x.dates.forEach((d, i) => { if (i > 0 && String(d || '').startsWith(day)) p += STEP_PTS + (i === 6 ? LAUNCH_PTS : 0); }));
     return p;
+  }
+  /* The most a centre can earn this month: every working day (Mondays off) of Daily Riyaz, every week that starts in the month,
+     and one society taken from idea to launch. */
+  function monthMax() {
+    const [y, m] = ST.periods.M.split('-').map(Number), last = new Date(y, m, 0).getDate(), unit = s => live(s).reduce((a, x) => a + PTS[s] + (x[3].n || 0) * UNIT, 0);
+    let days = 0, gone = 0, weeks = 0; const t = +ST.periods.D.slice(8);
+    for (let d = 1; d <= last; d++) { const w = new Date(y, m - 1, d).getDay(); if (w !== 1) { days++; if (d <= t) gone++; } if (w === 2) weeks++; }
+    return { max: days * unit('D') + weeks * unit('W') + 6 * STEP_PTS + LAUNCH_PTS, days, gone };
+  }
+  function league(o) {
+    const pts = points(o, 'M'), mm = monthMax(), f = mm.max ? pts / mm.max : 0, proj = mm.gone ? pts / mm.gone * mm.days / mm.max : 0;
+    let i = 0; LEAGUES.forEach((l, k) => { if (f >= l[0]) i = k; });
+    let j = 0; LEAGUES.forEach((l, k) => { if (proj >= l[0]) j = k; });
+    const nx = LEAGUES[i + 1];
+    return { pts, max: mm.max, cur: LEAGUES[i], i, next: nx ? { name: nx[1], need: Math.ceil(nx[0] * mm.max) - pts } : null, pace: LEAGUES[j], j };
   }
   // a streak: days in a row (Mondays are off) with at least 80% of the Daily Riyaz done
   function streak(o) {
@@ -122,7 +145,6 @@
     for (let i = 0; i < 400; i++) { if (day.getDay() === 1) { day.setDate(day.getDate() - 1); continue; } if (!ok(key(day))) break; n++; day.setDate(day.getDate() - 1); }
     return n;
   }
-  const level = p => { let i = 0; LEVELS.forEach((l, k) => { if (p >= l[0]) i = k; }); return { name: LEVELS[i][1], next: LEVELS[i + 1] }; };
   function cheer(d, t) {
     const p = t ? d / t : 0;
     return p >= 1 ? 'Riyaz complete. Beautifully played! 🎉' : p >= .75 ? 'Almost there. Just a few to go.' : p >= .5 ? 'Past halfway. The finish is in sight.'
@@ -165,7 +187,7 @@
     const cnt = { D: [done('D', OWN), live('D').length], W: [done('W', OWN), live('W').length], M: [launched, 1] };
     const [d, t] = cnt[TAB], name = { D: 'Daily', W: 'Weekly', M: 'Monthly' }[TAB];
     const sub = me ? 'Your own Riyaz.' : TAB === 'D' ? `Small habits that keep ${O.label} in tune.` : TAB === 'W' ? `This week, ${wk()}. Starts again on Tuesday.` : 'Society activation. Progress is checked every week.';
-    const pts = points(OWN), lv = level(pts), sk = streak(OWN), pToday = points(OWN, 'D:' + ST.periods.D), lu = last(OWN, per(TAB === 'M' ? 'D' : TAB));
+    const lg = league(OWN), sk = streak(OWN), pToday = points(OWN, 'D:' + ST.periods.D), lu = last(OWN, per(TAB === 'M' ? 'D' : TAB));
     const pick = ST.owners.length > 1 ? `<select class="rzo" id="rzown" aria-label="Whose Riyaz">${ST.owners.map(o => `<option value="${esc(o.key)}"${o.key === OWN ? ' selected' : ''}>${esc(o.kind === 'me' ? 'My Riyaz' : o.label + (o.edit ? '' : ' · view only'))}</option>`).join('')}</select>` : '';
     let body;
     if (me) body = `<div class="rzempty"><b>Your Riyaz is being written.</b>Your own daily, weekly and monthly habits will appear here once they are set. Meanwhile, pick a centre above to follow its Riyaz through the day.</div>`;
@@ -173,7 +195,7 @@
     box.innerHTML = `<div class="rzb"><div class="rzt"><b>${name} Riyaz</b><span>${esc(sub)}</span></div>
       <div class="rzs" role="group" aria-label="Riyaz">${['D', 'W', 'M'].map(s => `<button type="button" data-rztab="${s}" aria-pressed="${s === TAB}">${{ D: 'Daily', W: 'Weekly', M: 'Monthly' }[s]}${me ? '' : `<i>${cnt[s][0]} of ${cnt[s][1]}</i>`}</button>`).join('')}</div>${pick}
       ${me ? '' : `<div class="rzp"><div class="a"><b>${d}<small>of ${t} ${TAB === 'M' ? 'launched' : 'done'}</small></b><em>${TAB === 'M' ? (launched ? 'Launched this month. Brilliant! 🎉' : 'Move a society along this week.') : cheer(d, t)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
-      ${me ? '' : `<div class="rzg"><span class="lv">${lv.name}</span><span>⭐ <b>${pts.toLocaleString('en-IN')}</b> Riyaz points${lv.next ? ` · ${(lv.next[0] - pts).toLocaleString('en-IN')} to ${lv.next[1]}` : ''}</span><span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}</div>`}
+      ${me ? '' : `<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}<span class="rzi" tabindex="0" aria-label="How leagues work">i<span>Every month starts at zero. Points: 10 for each daily item, 25 for each weekly item, 2 for each call, parent or audit counted, 20 for each society step and 100 more for a launch. The league is your share of the most you can earn this month: Rookie to start, then Apprentice from 12.5%, Skilled from 25%, Contender from 37.5%, Pro from 50%, Elite from 62.5%, Master from 75% and Legend from 87.5%.</span></span></div>`}
       ${!ed && !me ? `<div class="rzro">Viewing ${esc(O.label)}’s Riyaz. Only its Centre Manager can tick it.${lu ? ` Last update ${esc(lu[5].slice(11))} by ${esc(lu[4])}.` : ' Nothing ticked yet today.'}</div>` : ''}
       ${body}${err ? `<div class="rzerr">${esc(err)}</div>` : ''}`;
     if (window.rzStory) window.rzStory();

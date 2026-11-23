@@ -459,12 +459,15 @@
   .vtg button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 10px 22px -14px rgba(1,7,60,.4)}
   .vtg svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .stage .data-state{top:62px!important}
+  @media (min-width:1101px){.stk.s4{top:100px}}
   .story{margin-top:22px;max-width:820px;font:400 24px/1.6 var(--body);letter-spacing:-.3px;color:#2E2850}
   .story b{font-weight:700;color:#01073C;background:linear-gradient(transparent 62%,rgba(241,182,250,.55) 62%);padding:0 2px}
   .story b.gr{background:linear-gradient(90deg,#4101F7,#DD30B1);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;padding:0}
   body.v-del #pulse,body.v-del .wrap,body.v-del #ckd,body.v-del #riyaz{display:none!important}
   body.v-del .stage{padding-bottom:56px}body.v-del .sub.hasstory{display:none}
-  body.v-pro .story{display:none}
+  body.v-pro .story,body.v-met .story{display:none}
+  body.v-pro #pulse,body.v-pro .wrap,body.v-pro #ckd{display:none!important}
+  body.v-met #riyaz{display:none!important}body.v-met .stage{padding-bottom:36px}body.v-met #pulse{margin-top:26px}
   body.v-pro .stage{padding-bottom:36px}body.v-pro #pulse{margin-top:26px}
   .story{max-width:740px}body.v-del .ask{margin-top:30px}
   @media (max-width:760px){.stage .vtg{position:static;margin-top:14px}.stage .data-state{top:auto!important}.story{font-size:19px}}
@@ -488,7 +491,7 @@
     </form>
     <div class="try" id="suggest"></div>
     <div class="data-state"><span class="dot loading" id="dot"></span><span id="state">Loading the numbers…</span></div>
-    <div class="vtg" id="vtg" role="group" aria-label="View"><button type="button" data-view="del"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z"/></svg>Delight</button><button type="button" data-view="pro"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Productivity</button></div>
+    <div class="vtg" id="vtg" role="group" aria-label="View"><button type="button" data-view="del"><svg viewBox="0 0 24 24"><path d="M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z"/></svg>Delight</button><button type="button" data-view="pro"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Productivity</button><button type="button" data-view="met"><svg viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-6"/><circle cx="12" cy="18" r="1.2"/></svg>Meter</button></div>
   </header>
 
   <section class="rz" id="riyaz" hidden aria-label="Riyaz"></section>
@@ -1123,11 +1126,11 @@ function paintPays(){
     <div class="pm">${[x.age,x.level,x.dur].filter(Boolean).map(esc).join(' · ')}</div>
     <div class="pw"><span class="tg${x.kind==='Renewal'?' r':''}">${x.kind}</span><span>${esc(x.centre)}</span></div></div>`).join(''):'<div class="tempty">No payments recorded yet today.</div>';
 }
-/* Delight or Productivity: remembered per person on this device. Delight is the first view. */
+/* Three views, remembered per person on this device: Delight (the first view), Productivity (Riyaz) and Meter (today's cards, to-do list, collections and check-ins) */
 (function views(){let v='del';try{v=localStorage.getItem('artium_home_view')||'del';}catch(e){}
-  const set=x=>{v=x;document.body.classList.toggle('v-del',v==='del');document.body.classList.toggle('v-pro',v==='pro');
+  const set=x=>{v=x;document.body.classList.toggle('v-del',v==='del');document.body.classList.toggle('v-pro',v==='pro');document.body.classList.toggle('v-met',v==='met');
     document.querySelectorAll('#vtg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v));try{localStorage.setItem('artium_home_view',v);}catch(e){}};
-  set(v==='pro'?'pro':'del');document.getElementById('vtg').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)set(b.dataset.view);});})();
+  set(['pro','met'].includes(v)?v:'del');document.getElementById('vtg').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)set(b.dataset.view);});})();
 /* The Delight view's one sentence: today's collections, and how the Daily Riyaz is going */
 window.rzStory=function(){const el=document.getElementById('story');if(!el)return;
   const S=window.Riyaz&&Riyaz.summary(),cm=S&&S.mine?S.centre:null;let s='';
