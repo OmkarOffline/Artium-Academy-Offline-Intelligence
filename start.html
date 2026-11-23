@@ -466,6 +466,10 @@
   body.v-del #pulse,body.v-del .wrap,body.v-del #ckd,body.v-del #riyaz{display:none!important}
   body.v-del .stage{padding-bottom:56px}body.v-del .sub.hasstory{display:none}
   body.v-pro .story,body.v-met .story{display:none}
+  /* Productivity and Meter: no greeting, Ask bar or stickers; only the view toggle and the data line stay at the top */
+  body.v-pro .stage>*:not(.vtg):not(.data-state),body.v-met .stage>*:not(.vtg):not(.data-state),body.v-pro #answer,body.v-met #answer,body.v-pro #jh,body.v-pro #links{display:none!important}
+  body.v-pro .stage,body.v-met .stage{min-height:104px;padding:0!important}
+  body.v-pro #riyaz{margin-top:0}body.v-met #pulse{margin-top:0!important}
   body.v-pro #pulse,body.v-pro .wrap,body.v-pro #ckd{display:none!important}
   body.v-met #riyaz{display:none!important}body.v-met .stage{padding-bottom:36px}body.v-met #pulse{margin-top:26px}
   body.v-pro .stage{padding-bottom:36px}body.v-pro #pulse{margin-top:26px}
