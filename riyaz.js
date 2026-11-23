@@ -65,12 +65,17 @@
   const areaOf = (o, a) => (isMe(o) ? MEAREAS : AREAS)[a];
   // the weekly off: Monday for the centres, Saturday and Sunday for My Riyaz
   const offDay = (o, w) => isMe(o) ? (w === 0 || w === 6) : w === 1;
-  const wkKey = o => (isMe(o) && ST.periods.WM) || ST.periods.W;
+  const curDay = () => DAY || ST.periods.D;
+  const NEWSRV = () => !!(ST && ST.periods && ST.periods.WM);   // the data service that can save a past day and the Monday week
+  const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const dateOf = t => { const p = t.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+  // the start of the week a day falls in: Monday for My Riyaz, Tuesday for the centres
+  const wkKey = o => { if (isMe(o) && !NEWSRV()) return ST.periods.W; const d = dateOf(curDay()), back = (d.getDay() - (isMe(o) ? 1 : 2) + 7) % 7; d.setDate(d.getDate() - back); return ymd(d); };
   const PTS = { D: 10, W: 25, M: 50 }, UNIT = 2, STEP_PTS = 20, LAUNCH_PTS = 100;
   const STEPS = ['Initial idea', 'Establish communication', 'Meet the committee', 'Pitch the initial idea', 'Final idea after the recce', 'Determine the logistics', 'Launch'];
   /* Monthly leagues: everyone starts the month at zero. The share of the month's maximum points decides the league. */
   const LEAGUES = [[0, 'Rookie', '🌱'], [.125, 'Apprentice', '🎵'], [.25, 'Skilled', '🎯'], [.375, 'Contender', '🔥'], [.5, 'Pro', '⚡'], [.625, 'Elite', '💎'], [.75, 'Master', '🏆'], [.875, 'Legend', '👑']];   // a new league every 12.5%
-  let ST = null, OWN = null, TAB = 'D', BUSY = false, ADD = false;
+  let ST = null, OWN = null, TAB = 'D', BUSY = false, ADD = false, DAY = '';
   try { TAB = localStorage.getItem('artium_rz_tab') || 'D'; if (!/^[DWM]$/.test(TAB)) TAB = 'D'; } catch (e) {}
 
   const css = `
@@ -80,8 +85,11 @@
   .rzs{display:inline-flex;gap:3px;background:rgba(255,255,255,.7);border-radius:16px;padding:4px}
   .rzs button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:12px;font:600 13.5px var(--body,'Onest');color:#4A4466}
   .rzs button i{font-style:normal;font-weight:700;font-size:11.5px;color:#6A6488}.rzs button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 10px 22px -14px rgba(1,7,60,.4)}.rzs button[aria-pressed="true"] i{color:#4101F7}
+  .rzdt{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);border-radius:12px;padding:5px 8px 5px 12px;font:600 13.5px var(--body,'Onest');color:#01073C}
+  .rzdt input{border:0;background:none;font:600 13.5px var(--body,'Onest');color:#01073C;outline:0;cursor:pointer}.rzdt.past{background:#fff;box-shadow:0 0 0 2px #B9AEDB}
+  .rzdt button{all:unset;cursor:pointer;font:700 12px var(--body,'Onest');color:#fff;background:linear-gradient(135deg,#4101F7,#6601FD);border-radius:8px;padding:5px 9px}
   .rzo{all:unset;cursor:pointer;font:600 13.5px var(--body,'Onest');color:#01073C;background:rgba(255,255,255,.75);border-radius:12px;padding:8px 34px 8px 12px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234A4466' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-  .rzp{margin-left:auto;min-width:240px;flex:1;max-width:420px}
+  .rzp{margin-left:auto;min-width:200px;flex:1;max-width:420px}
   .rzp .a{display:flex;justify-content:space-between;align-items:baseline;gap:12px}.rzp .a b{font:800 28px var(--display,'Onest');color:#01073C;white-space:nowrap}.rzp .a b small{font:600 14px var(--body,'Onest');color:#6A6488;margin-left:5px}
   .rzp .a em{font:600 13.5px var(--body,'Onest');font-style:normal;color:#4101F7;text-align:right}
   .rzbar{height:10px;border-radius:6px;background:rgba(255,255,255,.9);margin-top:9px;overflow:hidden}.rzbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#4101F7,#6601FD 50%,#DD30B1);transition:width .5s cubic-bezier(.2,.8,.2,1)}
@@ -93,8 +101,8 @@
   .rzg .lv7{background:linear-gradient(135deg,#01064C,#4101F7 40%,#DD30B1 75%,#F5906F);box-shadow:0 8px 20px -10px rgba(221,48,177,.7)}
   .rzro{margin:12px 2px 0;font:500 13px var(--body,'Onest');color:#6A6488}
   .rzw{position:relative;margin-top:18px}
-  .rzbd{display:flex;gap:16px;overflow-x:auto;padding:2px 2px 14px;scroll-snap-type:x proximity;scrollbar-width:thin}
-  .rzc{flex:0 0 252px;display:flex;flex-direction:column;gap:10px;scroll-snap-align:start}
+  .rzbd{display:grid;grid-template-columns:repeat(auto-fill,minmax(252px,1fr));gap:22px 16px;align-items:start;padding:2px 2px 14px}
+  .rzc{min-width:0;display:flex;flex-direction:column;gap:10px}
   .rzh{display:flex;align-items:center;gap:9px;padding:2px 4px 8px;border-bottom:3px solid var(--c)}.rzh .e{font-size:16px}.rzh b{font:700 14px/1.25 var(--body,'Onest');color:#01073C}.rzh .n{margin-left:auto;font:700 12px var(--body,'Onest');color:#4101F7;white-space:nowrap}
   .rzh.full{border-bottom-color:#3DDC97}.rzh.full .n{color:#137A4F}
   .rzk{display:flex;gap:11px;align-items:flex-start;background:#fff;border-radius:16px;padding:13px 14px;box-shadow:0 0 0 1px #EEE9F8,0 14px 28px -22px rgba(1,7,60,.4);position:relative;transition:transform .15s}
@@ -118,14 +126,14 @@
   .rzq .qg{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px}.rzq .qg div{font:500 12.5px var(--body,'Onest');color:#4A4466}.rzq .qg b{color:#01073C}
   .rzq .qp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 var(--body,'Onest')}.rzq .qp>i{flex:none;width:8px;height:8px;border-radius:50%;margin-top:5px}
   .rzl{all:unset;cursor:pointer;display:block;width:fit-content;margin-top:5px;font:600 12px var(--body,'Onest');color:#4101F7}
-  .rzn{display:flex;align-items:center;gap:6px;margin-top:8px}.rzn .seg{display:flex;gap:4px}.rzn .seg i{width:14px;height:6px;border-radius:3px;background:#EFEAF9}.rzn .seg i.f{background:#4101F7}
-  .rzn button{all:unset;cursor:pointer;width:22px;height:22px;border-radius:7px;background:#F4EEFF;color:#4101F7;font:700 14px/22px var(--body,'Onest');text-align:center}.rzn button:disabled{opacity:.35;cursor:default}
+  .rzn{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}
+  .rzn button.rzu{all:unset;cursor:pointer;width:20px;height:20px;border-radius:6px;border:2px solid #CFC6EA;background:#fff;box-sizing:border-box;display:grid;place-items:center;transition:all .15s}.rzn button.rzu:hover{border-color:#4101F7}.rzn button.rzu:disabled{cursor:default}.rzn button.rzu[aria-checked="true"]{border:0;background:linear-gradient(135deg,#4101F7,#6601FD)}.rzn button.rzu[aria-checked="true"]::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
   .rzn span{font:700 12px var(--body,'Onest');color:#4101F7;margin-left:2px}
   .rzd{font:700 10px var(--body,'Onest');letter-spacing:.14em;text-transform:uppercase;color:#8A83A6;margin:6px 4px 0}
   .rzpop{position:absolute;right:12px;top:8px;font:800 13px var(--body,'Onest');color:#4101F7;pointer-events:none;animation:rzup 1s ease-out forwards}
   @keyframes rzup{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-26px)}}
   .rzhint{margin-top:2px;font:600 12.5px var(--body,'Onest');color:#6A6488;text-align:right}
-  .rzm{display:grid;grid-template-columns:repeat(7,minmax(160px,1fr));gap:14px;overflow-x:auto;padding:2px 2px 14px}
+  .rzm{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px 14px;align-items:start;padding:2px 2px 14px}
   .rzm .rzc{flex:none}.rzsn{font:800 11px var(--body,'Onest');color:#fff;background:linear-gradient(135deg,#4101F7,#6601FD);width:20px;height:20px;border-radius:7px;display:grid;place-items:center;flex:none}
   .rzsc{background:#fff;border-radius:16px;padding:13px 14px;box-shadow:0 0 0 1px #EEE9F8,0 14px 28px -22px rgba(1,7,60,.4)}
   .rzsc b{display:block;font:700 14px var(--body,'Onest');color:#01073C}.rzsc small{display:block;font:400 12px/1.4 var(--body,'Onest');color:#6A6488;margin-top:3px}
@@ -148,7 +156,7 @@
 
   const $ = id => document.getElementById(id);
   const own = () => ST && ST.owners.find(o => o.key === OWN);
-  const per = (s, o) => s + ':' + (s === 'W' ? wkKey(o == null ? OWN : o) : ST.periods[s]);
+  const per = (s, o) => s + ':' + (s === 'W' ? wkKey(o == null ? OWN : o) : s === 'D' ? curDay() : curDay().slice(0, 7));
   const val = (o, p, k) => { const r = ST.rows.find(x => x[0] === o && x[1] === p && x[2] === k); return r ? r[3] : 0; };
   const last = (o, p) => ST.rows.filter(x => x[0] === o && x[1] === p).sort((a, b) => a[5] < b[5] ? 1 : -1)[0];
   const live = (s, o) => setOf(o == null ? OWN : o)[s].filter(x => !x[3].off);
@@ -192,6 +200,7 @@
     return p >= 1 ? 'Riyaz complete. Beautifully played! 🎉' : p >= .75 ? 'Almost there. Just a few to go.' : p >= .5 ? 'Past halfway. The finish is in sight.'
       : p >= .25 ? 'Good rhythm. Keep it going.' : p > 0 ? 'Nice start. One at a time.' : me ? 'A fresh page. Start with the Daily Tracker.' : 'A fresh page. Start with the centre setup.';
   }
+  const dlong = t => dateOf(t).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
   const dm = d => { const p = String(d || '').split('-').map(Number); return p.length === 3 ? p[2] + ' ' + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][p[1] - 1] : ''; };
   const card2 = (title, meaning, body) => `<span class="rzi" tabindex="0" aria-label="About ${esc(title)}">i<div class="rzq"><div class="qh"><div class="qt"><i></i>${esc(title)}</div>${meaning ? `<div class="qd">${meaning}</div>` : ''}</div>${body ? `<div class="qb">${body}</div>` : ''}</div></span>`;
   const info = (t, title, list) => t ? card2(title || 'About this', esc(t), list ? '<div class="ql">Check that</div>' + list.map(x => `<div class="qr"><span class="qc">✓</span><span>${esc(x)}</span></div>`).join('') : '') : '';
@@ -205,7 +214,7 @@
   function card(s, x, ed) {
     const [a, k, t, o] = x, v = val(OWN, per(s), k), n = o.n ? val(OWN, per(s), k + '_n') : 0, d = v > 0;
     if (o.off) return `<div class="rzk off"><button class="rzx" disabled aria-label="Not available yet"></button><div class="tx"><span class="tl">${esc(t)}</span><span class="soon">PostHog · soon</span></div></div>`;
-    const ctr = o.n ? `<div class="rzn"><button data-rzc="${k}" data-d="-1"${!ed || n <= 0 ? ' disabled' : ''} aria-label="One less">−</button><span class="seg">${Array.from({ length: o.n }, (_, i) => `<i class="${i < n ? 'f' : ''}"></i>`).join('')}</span><button data-rzc="${k}" data-d="1"${!ed || n >= o.n ? ' disabled' : ''} aria-label="One more">+</button><span>${n} of ${o.n}</span></div>` : '';
+    const ctr = o.n ? `<div class="rzn">${Array.from({ length: o.n }, (_, i) => `<button class="rzu" role="checkbox" aria-checked="${i < n}" data-rzu="${k}" data-i="${i}"${ed ? '' : ' disabled'} aria-label="${esc(t)}, ${i + 1} of ${o.n}"></button>`).join('')}<span>${n} of ${o.n}</span></div>` : '';
     return `<div class="rzk${d ? ' dn' : ''}" data-k="${k}"><button class="rzx" role="checkbox" aria-checked="${d}" data-rzt="${k}"${ed ? '' : ' disabled'} aria-label="${esc(t)}"></button>
       <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i, t, o.list)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}${(o.links || []).map(l => `<button class="rzl" data-rzgo="${l[1]}">Open ${esc(l[0])} →</button>`).join('')}</div></div>`;
   }
@@ -215,7 +224,7 @@
       const open = L.filter(x => x[3].off || !(val(OWN, per(s), x[1]) > 0)), A = areaOf(OWN, a);
       return `<div class="rzc" style="--c:${A[1]}"><div class="rzh${lv.length && dn.length === lv.length ? ' full' : ''}"><span class="e">${A[0]}</span><b>${esc(A[2])}</b><span class="n">${dn.length === lv.length && lv.length ? '✓ ' : ''}${dn.length} of ${lv.length}</span></div>
         ${open.map(x => card(s, x, ed)).join('')}${dn.length ? `<div class="rzd">Done</div>${dn.map(x => card(s, x, ed)).join('')}` : ''}</div>`; }).join('');
-    return `<div class="rzw"><div class="rzbd">${cols}</div>${Object.keys(groups).length > 4 ? '<div class="rzhint">Scroll sideways for more →</div>' : ''}</div>`;
+    return `<div class="rzw"><div class="rzbd">${cols}</div></div>`;
   }
   function societies(ed) {
     const M = ST.periods.M, L = ST.soc.filter(x => x.owner === OWN && (x.step < 6 || String(x.dates[6] || '').slice(0, 7) === M));
@@ -235,19 +244,24 @@
     const M = ST.periods.M, launched = ST.soc.filter(x => x.owner === OWN && x.step >= 6 && String(x.dates[6] || '').slice(0, 7) === M).length;
     const cnt = { D: [done('D', OWN), live('D').length], W: [done('W', OWN), live('W').length], M: me ? [done('M', OWN), live('M').length] : [launched + done('M', OWN), 1 + live('M').length] };
     const [d, t] = cnt[TAB], name = { D: 'Daily', W: 'Weekly', M: 'Monthly' }[TAB];
-    const sub = me ? (TAB === 'D' ? 'Your own Riyaz, Monday to Friday.' : TAB === 'W' ? `This week, ${wk()}. Starts again on Monday.` : 'Planned by you, executed through the Centre Managers.') : TAB === 'D' ? `Small habits that keep ${O.label} in tune.` : TAB === 'W' ? `This week, ${wk()}. Starts again on Tuesday.` : 'Society activation. Progress is checked every week.';
-    const lg = league(OWN), sk = streak(OWN), pToday = points(OWN, 'D:' + ST.periods.D), lu = last(OWN, per(TAB === 'M' ? 'D' : TAB));
+    const sub = me ? (TAB === 'D' ? (DAY && DAY !== ST.periods.D ? 'Editing ' + dlong(DAY) + '.' : 'Your own Riyaz, Monday to Friday.') : TAB === 'W' ? `This week, ${wk()}. Starts again on Monday.` : 'Planned by you, executed through the Centre Managers.') : TAB === 'D' ? (DAY && DAY !== ST.periods.D ? 'Editing ' + dlong(DAY) + '.' : `Small habits that keep ${O.label} in tune.`) : TAB === 'W' ? `This week, ${wk()}. Starts again on Tuesday.` : 'Society activation. Progress is checked every week.';
+    const lg = league(OWN), sk = streak(OWN), pToday = points(OWN, 'D:' + curDay()), lu = last(OWN, per(TAB === 'M' ? 'D' : TAB));
     const pick = ST.owners.length > 1 ? `<select class="rzo" id="rzown" aria-label="Whose Riyaz">${ST.owners.map(o => `<option value="${esc(o.key)}"${o.key === OWN ? ' selected' : ''}>${esc(o.kind === 'me' ? 'My Riyaz' : o.label + (o.edit ? '' : ' · view only'))}</option>`).join('')}</select>` : '';
-    const wd = new Date(...ST.periods.D.split('-').map((x, i) => i === 1 ? x - 1 : +x)).getDay(), offToday = TAB === 'D' && offDay(OWN, wd);
+    const wd = dateOf(curDay()).getDay(), offToday = TAB === 'D' && offDay(OWN, wd);
     const offNote = offToday ? `<div class="rzempty" style="margin-top:14px;padding:18px 24px"><b>${me ? 'It’s the weekend.' : 'Monday is the weekly off.'}</b>${me ? 'The Daily Riyaz is off today. Rest well.' : 'The Daily Riyaz is off today. It starts again tomorrow.'}</div>` : '';
     const body = offNote + (TAB === 'M' && !me ? board('M', ed) + societies(ed) : board(TAB, ed && !offToday));
     box.innerHTML = `<div class="rzb"><div class="rzt"><b>${name} Riyaz</b><span>${esc(sub)}</span></div>
       <div class="rzs" role="group" aria-label="Riyaz">${['D', 'W', 'M'].map(s => `<button type="button" data-rztab="${s}" aria-pressed="${s === TAB}">${{ D: 'Daily', W: 'Weekly', M: 'Monthly' }[s]}<i>${cnt[s][0]} of ${cnt[s][1]}</i></button>`).join('')}</div>${pick}
-      ${`<div class="rzp"><div class="a"><b>${d}<small>of ${t} done</small></b><em>${TAB === 'M' && !me && !launched && d < t ? 'Move a society along this week.' : cheer(d, t, me)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}</div>
-      ${`<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> today</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}${LGPOP()}</div>`}
+      ${`<div class="rzp"><div class="a"><b>${d}<small>of ${t} done</small></b><em>${TAB === 'M' && !me && !launched && d < t ? 'Move a society along this week.' : cheer(d, t, me)}</em></div><div class="rzbar"><i style="width:${t ? Math.min(100, d / t * 100) : 0}%"></i></div></div>`}${picker()}</div>
+      ${`<div class="rzg"><span class="lv lv${lg.i}">${lg.cur[2]} ${lg.cur[1]}</span><span>⭐ <b>${lg.pts.toLocaleString('en-IN')}</b> of ${lg.max.toLocaleString('en-IN')} points this month</span>${lg.next ? `<span>🎯 <b>${lg.next.need.toLocaleString('en-IN')}</b> to ${lg.next.name}</span>` : '<span>👑 The top league. Take a bow.</span>'}<span>✨ <b>+${pToday}</b> ${DAY && DAY !== ST.periods.D ? 'on this day' : 'today'}</span>${sk ? `<span>🔥 <b>${sk}-day</b> streak</span>` : ''}${lg.j > lg.i ? `<span>📈 On pace for <b>${lg.pace[1]}</b></span>` : ''}${LGPOP()}</div>`}
       ${!ed && !me ? `<div class="rzro">Viewing ${esc(O.label)}’s Riyaz. Only its Centre Manager can tick it.${lu ? ` Last update ${esc(lu[5].slice(11))} by ${esc(lu[4])}.` : ' Nothing ticked yet today.'}</div>` : ''}
       ${body}${err ? `<div class="rzerr">${esc(err)}</div>` : ''}`;
     if (window.rzStory) window.rzStory();
+  }
+  function picker() {
+    if (!NEWSRV() || !own().edit) return '';
+    const t = ST.periods.D, lo = dateOf(t), past = DAY && DAY !== t; lo.setDate(lo.getDate() - 45);
+    return `<label class="rzdt${past ? ' past' : ''}"><input type="date" id="rzday" value="${curDay()}" min="${ymd(lo)}" max="${t}" aria-label="Choose a day">${past ? '<button type="button" data-rztoday="1">Today</button>' : ''}</label>`;
   }
   function wk() { const p = wkKey(OWN).split('-').map(Number), a = new Date(p[0], p[1] - 1, p[2]), b = new Date(a); b.setDate(b.getDate() + (isMe(OWN) ? 4 : 6));
     const M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']; return `${a.getDate()} ${M[a.getMonth()]} to ${b.getDate()} ${M[b.getMonth()]}`; }
@@ -270,25 +284,27 @@
     if (r) r[3] = value; else ST.rows.push([OWN, p, item, value, '', '']);
     draw(); if (value > before) pop(item.replace(/_n$/, ''), /_n$/.test(item) ? UNIT : PTS[s]);
     if (!wasFull && done(s, OWN) === live(s).length) setTimeout(confetti, 150);
-    const ok = await call('riyazTick', { owner: OWN, scope: s, item, value });
+    const ok = await call('riyazTick', { owner: OWN, scope: s, item, value, day: DAY || '' });
     if (ok === false) { const q = ST.rows.find(x => x[0] === OWN && x[1] === p && x[2] === item); if (q) q[3] = before; }
   }
   document.addEventListener('click', e => {
-    const b = e.target.closest('[data-rztab],[data-rzt],[data-rzc],[data-rzgo],[data-rzs],[data-rzadd]'); if (!b || !ST) return;
+    const b = e.target.closest('[data-rztab],[data-rzt],[data-rzu],[data-rztoday],[data-rzgo],[data-rzs],[data-rzadd]'); if (!b || !ST) return;
     const O = own();
     if (b.dataset.rztab) { TAB = b.dataset.rztab; ADD = false; try { localStorage.setItem('artium_rz_tab', TAB); } catch (x) {} draw(); return; }
     if (b.dataset.rzgo) { go(b.dataset.rzgo); return; }
+    if (b.dataset.rztoday) { DAY = ''; draw(); return; }
     if (!O || !O.edit) return;
     if (b.dataset.rzt) { const k = b.dataset.rzt; tick(k, val(OWN, per(TAB), k) > 0 ? 0 : 1, TAB); return; }
-    if (b.dataset.rzc) { const k = b.dataset.rzc, x = setOf(OWN)[TAB].find(y => y[1] === k), n = Math.max(0, Math.min(x[3].n, val(OWN, per(TAB), k + '_n') + (+b.dataset.d)));
-      tick(k + '_n', n, TAB); if (n >= x[3].n && !(val(OWN, per(TAB), k) > 0)) setTimeout(() => tick(k, 1, TAB), 400); return; }
+    if (b.dataset.rzu) { const k = b.dataset.rzu, i = +b.dataset.i, x = setOf(OWN)[TAB].find(y => y[1] === k), cur = val(OWN, per(TAB), k + '_n'), n = i < cur ? i : i + 1;
+      tick(k + '_n', n, TAB); const t = val(OWN, per(TAB), k) > 0;
+      if (n >= x[3].n && !t) setTimeout(() => tick(k, 1, TAB), 400); else if (n < x[3].n && t) setTimeout(() => tick(k, 0, TAB), 400); return; }
     if (b.dataset.rzs) { const x = ST.soc.find(y => y.id === b.dataset.rzs); call('riyazSociety', { op: 'step', id: b.dataset.rzs, dir: +b.dataset.d }).then(ok => { if (ok && x && +b.dataset.d > 0 && x.step === 5) confetti(); }); return; }
     if (b.dataset.rzadd === 'open') { ADD = true; draw(); const i = $('rzsn'); if (i) i.focus(); return; }
     if (b.dataset.rzadd === 'cancel') { ADD = false; draw(); return; }
     if (b.dataset.rzadd === 'save') { const nm = ($('rzsn') || {}).value || '', no = ($('rzsno') || {}).value || ''; if (!nm.trim()) { $('rzsn').focus(); return; }
       ADD = false; call('riyazSociety', { op: 'add', owner: OWN, name: nm, note: no }); }
   });
-  document.addEventListener('change', e => { if (e.target.id === 'rzown') { OWN = e.target.value; try { localStorage.setItem('artium_rz_owner', OWN); } catch (x) {} ADD = false; draw(); } });
+  document.addEventListener('change', e => { if (e.target.id === 'rzday') { const v = e.target.value; DAY = !v || v >= ST.periods.D ? '' : v; draw(); return; } if (e.target.id === 'rzown') { OWN = e.target.value; try { localStorage.setItem('artium_rz_owner', OWN); } catch (x) {} ADD = false; draw(); } });
   window.Riyaz = {
     start() {
       const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
