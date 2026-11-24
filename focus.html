@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="insview.js"></script>
 <script src="cardnav.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -295,8 +296,8 @@ const REASONS=[['Personal Reasons'],['No Visible Progress'],['Unhappy with Curri
   ['Admission Restricted','Restricted by the academy due to behavioural or other relevant issues'],['Transferred to Online','The learner preferred to learn online due to relocation or other issues'],['Too young']];
 const RTYPE=['Reason','rsn'],ALLTYPES=TYPES.concat([RTYPE]);
 const reasonsOf=i=>i.type==='Reason'?String(i.theme).split(';').map(x=>x.trim()).filter(Boolean):[];
-const itemHTML=(i,T)=>i.type==='Reason'?`<li><span class="ty rsn">Reason</span><div><span class="rchips">${reasonsOf(i).map(r=>`<b class="rchip">${esc(r)}</b>`).join('')}</span>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`
-  :`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`;
+const itemHTML=(i,T)=>i.type==='Reason'?`<li><span class="ty rsn">Reason</span><div><span class="rchips">${reasonsOf(i).map(r=>`<b class="rchip">${esc(r)}</b>`).join('')}</span>${i.note?`<span class="nt">${InsView.plain(i.note)}</span>`:''}</div></li>`
+  :`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b>${i.note?`<span class="nt">${InsView.plain(i.note)}</span>`:''}</div></li>`;
 const entriesOf=p=>{if(!p)return[];const ids=new Set(p.ids.map(x=>x.id));return INS.filter(e=>e.ids.some(i=>ids.has(String(i).toUpperCase())));};
 const reasonCell=p=>{const r=entriesOf(p).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at)).flatMap(e=>e.items).find(i=>i.type==='Reason');
   return r?`<span class="rchips">${reasonsOf(r).map(x=>`<b class="rchip">${esc(x)}</b>`).join('')}</span>`:'<span style="color:var(--faint)">—</span>';};
@@ -527,20 +528,17 @@ function openIns(key,from){
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
 const blank=()=>({date:today(),with:'Parent',how:'Call',reasons:[],why:'',items:ctx==='drop'?[]:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
-function closeIns(){if(draft&&!editId&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>i.note.trim()||i.type==='Positive'&&i.theme))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
+function closeIns(){if(draft&&!editId&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>InsView.tidy(i.note)||i.type==='Positive'&&i.theme))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
 function startEdit(id){
   const e=INS.find(x=>x.id===id);if(!e||!cur)return;ctx='';
   draft={date:e.date,with:e.with,how:e.how,reasons:[],why:'',items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
   editId=id;paintIns();const f=document.getElementById('ins-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function paintIns(){
+  const INFO={name:cur.name,bits:[cur.ids.map(x=>x.id).join(' · '),cur.centres.join(', '),cur.age,[...new Set(cur.ids.map(x=>x.course).filter(Boolean))].join(', ')]};
   const list=entriesOf(cur).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
   const T=t=>(ALLTYPES.find(x=>x[0]===t)||['','neg'])[1];
-  document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv${e.id===hl?' hl':''}">
-      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span>${canEdit(e)?`<button type="button" class="link sm" data-edit="${esc(e.id)}">Edit</button>`:''}</div>
-      <ul>${e.items.slice().sort((a,b)=>(b.type==='Reason')-(a.type==='Reason')).map(i=>itemHTML(i,T)).join('')}</ul>
-      ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
-    </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
+  document.getElementById('ins-hist').innerHTML=!insReady?'<div class="ins-empty">Loading past conversations…</div>':list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>InsView.card(e,INFO,canEdit(e)?`<button type="button" class="iv-btn" data-edit="${esc(e.id)}">Edit</button>`:'',e.id===hl?'hl':'')).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
   const f=document.getElementById('ins-form');
   if(!draft){f.innerHTML=`<button type="button" class="btn-add" id="ins-new"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log a conversation</button>`;document.getElementById('ins-new').onclick=()=>{draft=blank();paintIns();};return;}
   const seg=(name,opts,val)=>`<div class="seg" data-f="${name}">${opts.map(o=>`<button type="button" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}</div>`;
@@ -567,7 +565,7 @@ function paintIns(){
   f.querySelectorAll('.seg[data-f]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{draft[g.dataset.f]=b.dataset.v;paintIns();}));
   f.querySelectorAll('.item').forEach(el=>{const it=draft.items[+el.dataset.i];
     el.querySelector('select').onchange=e=>it.theme=e.target.value;
-    el.querySelector('textarea').oninput=e=>it.note=e.target.value;
+    {const ta=el.querySelector('textarea');InsView.bullets(ta,()=>it.note=ta.value);}
     el.querySelectorAll('.ty-seg button').forEach(b=>b.onclick=()=>{it.type=b.dataset.v;paintIns();});
     const rm=el.querySelector('.rm');if(rm)rm.onclick=()=>{draft.items.splice(+rm.dataset.rm,1);paintIns();};});
   document.getElementById('f-date').onchange=e=>draft.date=e.target.value;
@@ -580,7 +578,7 @@ function paintIns(){
   document.getElementById('f-save').onclick=saveIns;
 }
 async function saveIns(){
-  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim()||i.type==='Positive');
+  const msg=document.getElementById('ins-msg'),items=draft.items.map(i=>({theme:i.theme,type:i.type,note:InsView.tidy(i.note)})).filter(i=>i.note||i.type==='Positive');
   if(ctx==='drop'&&!draft.reasons.length&&draft.why.trim()){msg.textContent='Pick at least one reason for discontinuing.';return;}
   if(draft.reasons.length)items.unshift({theme:REASONS.map(r=>r[0]).filter(r=>draft.reasons.includes(r)).join('; '),type:'Reason',note:draft.why.trim()});
   if(!items.length){msg.textContent=ctx==='drop'?'Pick a reason for discontinuing, or write an insight.':'Write at least one insight.';return;}

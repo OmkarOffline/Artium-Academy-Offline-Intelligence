@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="insview.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   [hidden]{display:none!important}
@@ -377,7 +378,7 @@ function hint(it){   // someone already spoke to this learner lately (Focus Grou
   return e?`<div class="hint">Already spoken to on ${dShow(e.date)} by ${esc(e.byName||String(e.by).split('@')[0])} (${esc(e.how)}, ${esc(e.src||'Focus Groups')}).</div>`:'';
 }
 function insCell(it,d){
-  const es=entriesOf(it.id).filter(x=>x.src==='Check-in Day '+it.day),e=es.length?{items:es.slice().sort((a,b)=>(a.date+a.at).localeCompare(b.date+b.at)).flatMap(x=>x.items)}:null,lines=e?e.items.map(i=>`<div><span class="tg ${TYC[i.type]||'neg'}">${esc(i.type)}</span>${i.type==='Reason'?`<b>${esc(i.theme)}.</b>`:`<b>${esc(i.theme)}.</b>`} ${esc(i.note)}</div>`).join(''):`<div>${esc(d.note)||'<span class="due">No notes.</span>'}</div>`;
+  const es=entriesOf(it.id).filter(x=>x.src==='Check-in Day '+it.day),e=es.length?{items:es.slice().sort((a,b)=>(a.date+a.at).localeCompare(b.date+b.at)).flatMap(x=>x.items)}:null,lines=e?InsView.body(e.items,{compact:true}):`<div>${esc(d.note)||'<span class="due">No notes.</span>'}</div>`;
   return `<div class="rins">${lines}</div><button class="lnk" data-view="${esc(it.key)}">Open conversation</button>`;
 }
 function row(it){
@@ -483,7 +484,7 @@ document.getElementById('refresh').onclick=()=>{ArtiumAuth.freshUntil=Date.now()
 /* ── Recording the call: the same Learner insights dialog as Focus Groups. Saving it marks the check-in done, and the conversation shows in Focus Groups too. ── */
 const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Artium App Experience','Other'];
 const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
-const itemHTML=i=>`<li><span class="ty ${TYC[i.type]||'neg'}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`;
+const itemHTML=i=>`<li><span class="ty ${TYC[i.type]||'neg'}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b>${i.note?`<span class="nt">${InsView.plain(i.note)}</span>`:''}</div></li>`;
 document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidden><div class="ins" role="dialog" aria-modal="true" aria-labelledby="ins-name">
   <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div><div id="ins-fam"></div></div>
     <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
@@ -499,19 +500,16 @@ function openRec(it,view){
   document.getElementById('ins-fam').innerHTML=famHTML(it.id);
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
-function closeIns(){if(draft&&draft.items.some(i=>i.note.trim()||i.type==='Positive'&&i.theme)&&!editId&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
+function closeIns(){if(draft&&draft.items.some(i=>InsView.tidy(i.note)||i.type==='Positive'&&i.theme)&&!editId&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
 function startEdit(id){
   const e=INS.find(x=>x.id===id);if(!e||!cur)return;
   draft={date:e.date,with:e.with,how:e.how,items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
   editId=id;paintIns();const f=document.getElementById('ins-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function paintIns(){
+  const INFO={name:cur.name,bits:[cur.id,cur.centre,cur.age,cur.course,cur.teacher?'Teacher '+cur.teacher:'']};
   const list=entriesOf(cur.id).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
-  document.getElementById('ins-hist').innerHTML=list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>`<article class="conv${e.id===hl?' hl':''}">
-      <div class="conv-top"><b>${dShow(e.date)}</b><span>${esc(e.with)} · ${esc(e.how)}</span>${e.src?`<span class="ty rsn">${esc(e.src)}</span>`:''}<span class="by">Logged by ${esc(e.byName||String(e.by).split('@')[0])}</span>${canEdit(e)?`<button type="button" class="lnk" data-edit="${esc(e.id)}">Edit</button>`:''}</div>
-      <ul>${e.items.map(itemHTML).join('')}</ul>
-      ${e.follow?`<div class="fu"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg><span><b>Follow-up:</b> ${esc(e.follow.action)}${e.follow.owner?' · '+esc(e.follow.owner):''}${e.follow.due?' · by '+dShow(e.follow.due):''}</span></div>`:''}
-    </article>`).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
+  document.getElementById('ins-hist').innerHTML=list.length?`<div class="ins-h">Past conversations <span>${list.length}</span></div>`+list.map(e=>InsView.card(e,INFO,canEdit(e)?`<button type="button" class="iv-btn" data-edit="${esc(e.id)}">Edit</button>`:'',e.id===hl?'hl':'')).join(''):'<div class="ins-empty">No conversations logged yet.</div>';
   const f=document.getElementById('ins-form');
   if(!draft){f.innerHTML='';return;}
   const seg=(name,opts,val)=>`<div class="seg" data-f="${name}">${opts.map(o=>`<button type="button" data-v="${o}" aria-pressed="${o===val}">${o}</button>`).join('')}</div>`;
@@ -533,7 +531,7 @@ function paintIns(){
   f.querySelectorAll('.seg[data-f]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{draft[g.dataset.f]=b.dataset.v;paintIns();}));
   f.querySelectorAll('.item').forEach(el=>{const it=draft.items[+el.dataset.i];
     el.querySelector('select').onchange=e=>it.theme=e.target.value;
-    el.querySelector('textarea').oninput=e=>it.note=e.target.value;
+    {const ta=el.querySelector('textarea');InsView.bullets(ta,()=>it.note=ta.value);}
     el.querySelectorAll('.ty-seg button').forEach(b=>b.onclick=()=>{it.type=b.dataset.v;paintIns();});
     const rm=el.querySelector('.rm');if(rm)rm.onclick=()=>{draft.items.splice(+rm.dataset.rm,1);paintIns();};});
   document.getElementById('f-date').onchange=e=>draft.date=e.target.value;
@@ -544,7 +542,7 @@ function paintIns(){
   document.getElementById('f-save').onclick=saveIns;
 }
 async function saveIns(){
-  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim()||i.type==='Positive');
+  const msg=document.getElementById('ins-msg'),items=draft.items.map(i=>({theme:i.theme,type:i.type,note:InsView.tidy(i.note)})).filter(i=>i.note||i.type==='Positive');
   if(!cur.id){msg.textContent='This learner has no learner ID in the sheet, so the conversation cannot be saved.';return;}
   if(!items.length){msg.textContent='Write at least one insight.';return;}
   if(items.some(i=>!i.theme||!i.type)){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
