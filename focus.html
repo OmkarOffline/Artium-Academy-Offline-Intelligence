@@ -296,7 +296,7 @@ const REASONS=[['Personal Reasons'],['No Visible Progress'],['Unhappy with Curri
 const RTYPE=['Reason','rsn'],ALLTYPES=TYPES.concat([RTYPE]);
 const reasonsOf=i=>i.type==='Reason'?String(i.theme).split(';').map(x=>x.trim()).filter(Boolean):[];
 const itemHTML=(i,T)=>i.type==='Reason'?`<li><span class="ty rsn">Reason</span><div><span class="rchips">${reasonsOf(i).map(r=>`<b class="rchip">${esc(r)}</b>`).join('')}</span>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`
-  :`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`;
+  :`<li><span class="ty ${T(i.type)}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`;
 const entriesOf=p=>{if(!p)return[];const ids=new Set(p.ids.map(x=>x.id));return INS.filter(e=>e.ids.some(i=>ids.has(String(i).toUpperCase())));};
 const reasonCell=p=>{const r=entriesOf(p).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at)).flatMap(e=>e.items).find(i=>i.type==='Reason');
   return r?`<span class="rchips">${reasonsOf(r).map(x=>`<b class="rchip">${esc(x)}</b>`).join('')}</span>`:'<span style="color:var(--faint)">—</span>';};
@@ -527,7 +527,7 @@ function openIns(key,from){
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
 const blank=()=>({date:today(),with:'Parent',how:'Call',reasons:[],why:'',items:ctx==='drop'?[]:[{theme:'',type:'',note:''}],follow:{action:'',owner:'',due:''},showFollow:false});
-function closeIns(){if(draft&&!editId&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>i.note.trim()))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
+function closeIns(){if(draft&&!editId&&(draft.reasons.length||draft.why.trim()||draft.items.some(i=>i.note.trim()||i.type==='Positive'&&i.theme))&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
 function startEdit(id){
   const e=INS.find(x=>x.id===id);if(!e||!cur)return;ctx='';
   draft={date:e.date,with:e.with,how:e.how,reasons:[],why:'',items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
@@ -555,7 +555,7 @@ function paintIns(){
       <div class="item-top"><select data-k="theme" aria-label="Theme"><option value="">Pick a theme</option>${THEMES.map(t=>`<option${t===it.theme?' selected':''}>${t}</option>`).join('')}</select>
         <div class="seg ty-seg" data-k="type">${TYPES.map(([t,c])=>`<button type="button" class="${c}" data-v="${t}" aria-pressed="${t===it.type}">${t}</button>`).join('')}</div>
         ${draft.items.length>1||ctx==='drop'?`<button type="button" class="rm" data-rm="${i}" aria-label="Remove this insight"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:''}</div>
-      <textarea data-k="note" rows="2" placeholder="What did they say?">${esc(it.note)}</textarea></div>`).join('')}</div>
+      <textarea data-k="note" rows="2" placeholder="${it.type==='Positive'?'Anything to add? (optional)':'What did they say?'}">${esc(it.note)}</textarea></div>`).join('')}</div>
     <button type="button" class="link" id="f-more"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>${draft.items.length?'Add another insight':'Add an insight'}</button>
     <div class="fu-box${draft.showFollow?' open':''}"><button type="button" class="link" id="f-fu">${draft.showFollow?'Follow-up':'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a follow-up (optional)'}</button>
       ${draft.showFollow?`<div class="frow"><label class="grow">What needs doing<input id="f-act" value="${esc(draft.follow.action)}" placeholder="e.g. Plan a student showcase next month"></label>
@@ -580,7 +580,7 @@ function paintIns(){
   document.getElementById('f-save').onclick=saveIns;
 }
 async function saveIns(){
-  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim());
+  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim()||i.type==='Positive');
   if(ctx==='drop'&&!draft.reasons.length&&draft.why.trim()){msg.textContent='Pick at least one reason for discontinuing.';return;}
   if(draft.reasons.length)items.unshift({theme:REASONS.map(r=>r[0]).filter(r=>draft.reasons.includes(r)).join('; '),type:'Reason',note:draft.why.trim()});
   if(!items.length){msg.textContent=ctx==='drop'?'Pick a reason for discontinuing, or write an insight.':'Write at least one insight.';return;}

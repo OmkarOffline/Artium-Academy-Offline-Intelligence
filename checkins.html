@@ -483,7 +483,7 @@ document.getElementById('refresh').onclick=()=>{ArtiumAuth.freshUntil=Date.now()
 /* ── Recording the call: the same Learner insights dialog as Focus Groups. Saving it marks the check-in done, and the conversation shows in Focus Groups too. ── */
 const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Artium App Experience','Other'];
 const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
-const itemHTML=i=>`<li><span class="ty ${TYC[i.type]||'neg'}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`;
+const itemHTML=i=>`<li><span class="ty ${TYC[i.type]||'neg'}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b>${i.note?`<span class="nt">${esc(i.note)}</span>`:''}</div></li>`;
 document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidden><div class="ins" role="dialog" aria-modal="true" aria-labelledby="ins-name">
   <div class="ins-head"><div><div class="eyebrow" id="ins-eye">Learner insights</div><h2 id="ins-name"></h2><div class="ins-meta" id="ins-meta"></div><div id="ins-fam"></div></div>
     <button type="button" class="ins-x" id="ins-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
@@ -499,7 +499,7 @@ function openRec(it,view){
   document.getElementById('ins-fam').innerHTML=famHTML(it.id);
   paintIns();document.getElementById('ins').hidden=false;document.body.style.overflow='hidden';
 }
-function closeIns(){if(draft&&draft.items.some(i=>i.note.trim())&&!editId&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
+function closeIns(){if(draft&&draft.items.some(i=>i.note.trim()||i.type==='Positive'&&i.theme)&&!editId&&!confirm('Close without saving this conversation?'))return;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draft=null;editId='';}
 function startEdit(id){
   const e=INS.find(x=>x.id===id);if(!e||!cur)return;
   draft={date:e.date,with:e.with,how:e.how,items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
@@ -522,7 +522,7 @@ function paintIns(){
       <div class="item-top"><select data-k="theme" aria-label="Theme"><option value="">Pick a theme</option>${THEMES.map(t=>`<option${t===it.theme?' selected':''}>${t}</option>`).join('')}</select>
         <div class="seg ty-seg" data-k="type">${TYPES.map(([t,c])=>`<button type="button" class="${c}" data-v="${t}" aria-pressed="${t===it.type}">${t}</button>`).join('')}</div>
         ${draft.items.length>1?`<button type="button" class="rm" data-rm="${i}" aria-label="Remove this insight"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:''}</div>
-      <textarea data-k="note" rows="2" placeholder="What did they say?">${esc(it.note)}</textarea></div>`).join('')}</div>
+      <textarea data-k="note" rows="2" placeholder="${it.type==='Positive'?'Anything to add? (optional)':'What did they say?'}">${esc(it.note)}</textarea></div>`).join('')}</div>
     <button type="button" class="link" id="f-more"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add another insight</button>
     <div class="fu-box${draft.showFollow?' open':''}"><button type="button" class="link" id="f-fu">${draft.showFollow?'Follow-up':'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a follow-up (optional)'}</button>
       ${draft.showFollow?`<div class="frow"><label class="grow">What needs doing<input id="f-act" value="${esc(draft.follow.action)}" placeholder="e.g. Plan a student showcase next month"></label>
@@ -544,7 +544,7 @@ function paintIns(){
   document.getElementById('f-save').onclick=saveIns;
 }
 async function saveIns(){
-  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim());
+  const msg=document.getElementById('ins-msg'),items=draft.items.filter(i=>i.note.trim()||i.type==='Positive');
   if(!cur.id){msg.textContent='This learner has no learner ID in the sheet, so the conversation cannot be saved.';return;}
   if(!items.length){msg.textContent='Write at least one insight.';return;}
   if(items.some(i=>!i.theme||!i.type)){msg.textContent='Pick a theme and Positive / Concern / Request for each insight.';return;}
