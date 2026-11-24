@@ -922,7 +922,7 @@ function render(){
   const dt=zero();Object.values(dv).forEach(a=>a.forEach((x,i)=>dt[i]+=x));
   const D=DK.map(([k,l,o])=>({l,v:dv[k],opt:o})).concat([{l:'Total pipeline',v:dt,cls:'acc strong tline'}]);
   // Week on Week: one part at a time, picked from the wheel by the button in the heading
-  const WP={wA:()=>part('wA','A','Renewal breakdown',SUM(['Due',n(due.length)],['Yet to renew',n(aY[W.length])],['Yet to commit',n(aC[W.length])]),wtable(W,P,A)),
+  const WP={wA:()=>part('wA','A','Overall breakdown',SUM(['Due',n(due.length)],['Yet to renew',n(aY[W.length])],['Yet to commit',n(aC[W.length])]),wtable(W,P,A)),
     wB:()=>part('wB','B','First-time renewals',B.sum,wtable(W,P,B.rows)),
     wC:()=>part('wC','C','Repeated renewals',C.sum,wtable(W,P,C.rows)),
     wD:()=>part('wD','D','Pipeline breakdown',SUM(['Total pipeline',n(pipe.length)]),wtable(W,P,D))};
@@ -1174,9 +1174,9 @@ async function load(){
    Due = memberships whose original package expiry date falls in the window; collected = Renewals entries paid in the window, under that entry's own course, teacher and so on. */
 const WCOL={course:8,teacher:29,level:9,age:6,gender:5};
 /* Week on Week: the picker wheel in the section heading chooses which part to show */
-ArtiumWheel.picker({btn:()=>document.querySelector('.wowsec .aw-pkb'),tag:'WEEK ON WEEK',hub:'Pick a view',sel:()=>WOWK,
-  items:[{k:'wA',art:'breakdown',label:'Renewal breakdown',short:'A · Breakdown'},{k:'wB',art:'first',label:'First-time renewals',short:'B · First-time'},
-    {k:'wC',art:'repeat',label:'Repeated renewals',short:'C · Repeated'},{k:'wD',art:'pipe',label:'Pipeline breakdown',short:'D · Pipeline'}],
+ArtiumWheel.picker({btn:()=>document.querySelector('.wowsec .aw-pkb'),hub:'Pick a view',sel:()=>WOWK,
+  items:[{k:'wA',lines:['Overall','breakdown'],short:'A · Overall'},{k:'wB',lines:['First-time','renewals'],short:'B · First-time'},
+    {k:'wC',lines:['Repeated','renewals'],short:'C · Repeated'},{k:'wD',lines:['Pipeline','breakdown'],short:'D · Pipeline'}],
   pick:k=>{WOWK=k;FOLD.wow=false;FOLD[k]=false;render();const t=document.querySelector('.wowsec');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}});
 ArtiumWheel.mount({hub:'Renewals',anchor:()=>document.getElementById('out'),table:k=>{
   if(!DUE)return null;

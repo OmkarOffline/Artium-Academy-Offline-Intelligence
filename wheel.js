@@ -45,9 +45,11 @@ const CSS=`
 .aw-pkb .ix{opacity:0;transform:rotate(-90deg) scale(.6)}.aw-pkb.on .ia{opacity:0;transform:rotate(90deg) scale(.6)}.aw-pkb.on .ix{opacity:1;transform:none}
 .aw-pkb.on{z-index:941}
 body.aw-pk-on .aw-fab{opacity:0;pointer-events:none}
-.aw-wheel.aw-pk{transform:scale(.05) rotate(-80deg)}.aw-wheel.aw-pk.on{transform:none}
-@media (max-width:620px),(max-height:620px){.aw-wheel.aw-pk.on{transform:scale(.62)}}
-.aw-spin{animation:aw-spin 6s linear infinite;transform-box:fill-box;transform-origin:center}
+.aw-wheel.aw-pk{width:340px;height:340px;margin:0;transform:scale(.08) rotate(-60deg)}.aw-wheel.aw-pk.on{transform:none}
+.aw-wheel.aw-pk svg.w{filter:drop-shadow(0 24px 44px rgba(1,7,60,.22))}
+.aw-wheel.aw-pk text.t1.pk{font-size:23px;font-weight:700}
+.aw-wheel.aw-pk .hubr{transform-origin:280px 280px}
+.aw-veil.aw-pkv{background:rgba(251,250,255,.35);backdrop-filter:none;-webkit-backdrop-filter:none}
 /* the table that slides in */
 .aw-slot{display:grid;grid-template-rows:0fr;transition:grid-template-rows .55s cubic-bezier(.2,.8,.2,1),margin .55s;margin:0}
 .aw-slot.open{grid-template-rows:1fr;margin:0 0 22px}
@@ -338,50 +340,35 @@ function count(k,W,items,date,key,amt,o={}){const g=grouper(k),M=new Map(),blank
   return{rows,total:mk(T),cur:Object.assign({cols:o.cols||['Admissions']},W.cur),prev:W.prev};}
 
 
-/* ── The picker: the same wheel, for choosing which part of a section to show ──
-   ArtiumWheel.picker({btn:()=>the button, items:[{k,label,short,still,live}], tag, hub, sel:()=>key, pick:k=>…});
-   The button is drawn with ArtiumWheel.pickerButton(). The wheel grows out of the button and goes back into it. */
-const board=(x,y,k)=>`<g transform="translate(${x} ${y}) scale(${k})"><path d="M2 0l6-20M50 0l-6-20" stroke="#5A6478" stroke-width="4" stroke-linecap="round"/><rect x="-6" y="-96" width="64" height="78" rx="7" fill="#fff" stroke="#D9CFF3" stroke-width="3.5"/>
-  <rect x="4" y="-46" width="10" height="16" rx="2" fill="#CDBDF7"/><rect x="18" y="-66" width="10" height="36" rx="2" fill="#7B61D9"/><rect x="32" y="-56" width="10" height="26" rx="2" fill="#A58BEF"/><path d="M4-80h24" stroke="#E7DEFB" stroke-width="4" stroke-linecap="round"/><path d="M2-28h46" stroke="#E7DEFB" stroke-width="2.5"/></g>`;
-const badge=(x,y,k,cls)=>`<g class="${cls||''}"><g transform="translate(${x} ${y}) scale(${k})"><path d="M-9 6l-7 20 8-4 5 7 5-17zM9 6l7 20-8-4-5 7-5-17z" fill="#DD30B1"/><circle r="15" fill="#4101F7"/><circle r="11" fill="none" stroke="#C9B8FF" stroke-width="1.5"/><text y="4.5" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="Onest,system-ui,sans-serif">1st</text></g></g>`;
-const calLoop=(x,y,k,spin)=>`<g transform="translate(${x} ${y}) scale(${k})"><rect x="-24" y="-24" width="48" height="46" rx="7" fill="#fff" stroke="#D9CFF3" stroke-width="3"/><rect x="-24" y="-24" width="48" height="13" rx="6" fill="#7B61D9"/><path d="M-12-30v10M12-30v10" stroke="#2D2F45" stroke-width="4" stroke-linecap="round"/>
-  <g class="${spin?'aw-spin':''}"><path d="M-10 6a10 10 0 0 1 17-7" fill="none" stroke="#4101F7" stroke-width="3.4" stroke-linecap="round"/><path d="M5-6l4 6-7 1z" fill="#4101F7"/><path d="M10 6a10 10 0 0 1-17 7" fill="none" stroke="#DD30B1" stroke-width="3.4" stroke-linecap="round"/><path d="M-5 18l-4-6 7-1z" fill="#DD30B1"/></g></g>`;
-const coin=(x,y,k,cls,d)=>`<g class="${cls||''}" style="animation-delay:${d||0}s"><g transform="translate(${x} ${y}) scale(${k})"><circle r="13" fill="#7B61D9"/><circle r="9.5" fill="none" stroke="#C9B8FF" stroke-width="1.5"/><text y="5" text-anchor="middle" font-size="13" font-weight="800" fill="#fff" font-family="Onest,system-ui,sans-serif">₹</text></g></g>`;
-const PK_ART={
-  breakdown:{still:(x,y)=>board(x-6,y,.62)+person('teacher',x-34,y,{sc:.42,armR:'out'}),
-    live:(x,y)=>board(x-2,y,.66)+person('teacher',x-32,y,{sc:.44,armR:'out',armL:'wave',wL:[.8,16,0],anim:1})+spark(x+42,y-70,.6,.3)},
-  first:{still:(x,y)=>person('kid',x-12,y,{sc:.6,armR:'hi'})+badge(x+22,y-56,.85),
-    live:(x,y)=>person('kid',x-14,y,{sc:.62,armR:'hi',wR:[.5,20,0],anim:1})+badge(x+22,y-60,.95,'aw-bob')+spark(x+44,y-80,.6,.2)+spark(x-40,y-70,.5,1)},
-  repeat:{still:(x,y)=>person('woman',x-20,y,{sc:.44})+calLoop(x+22,y-30,.8),
-    live:(x,y)=>person('woman',x-24,y,{sc:.46,armR:'out',anim:1})+calLoop(x+22,y-34,.9,1)},
-  pipe:{still:(x,y)=>phone(x-16,y,.6)+bubble(x+14,y-42,.6,'#A58BEF')+coin(x+20,y-12,.85),
-    live:(x,y)=>person('man',x-28,y,{sc:.48,armR:'mic',anim:1})+phone(x-14,y-52,.42)+bubble(x+20,y-78,.65,'#A58BEF','aw-pulse',0)+coin(x+30,y-44,.8,'aw-pulse',.5)+coin(x+16,y-16,.7,'aw-pulse',1)}};
+/* ── The picker: a small wheel that grows out of a button on the page, for choosing which part of a section to show ──
+   ArtiumWheel.picker({btn:()=>the button, items:[{k,lines:['First-time','renewals']}], tag, hub, sel:()=>key, pick:k=>…});
+   The button is drawn with ArtiumWheel.pickerButton(). The wheel opens beside the button and goes back into it. */
 const PICON='<path d="M8 3h9a2 2 0 0 1 2 2v12"/><rect x="5" y="6" width="11" height="15" rx="2"/><path d="M8 11h5M8 15h5"/>';
+const PK=340;   // the picker wheel's size on screen
 function pickerButton(label){return`<button type="button" class="aw-pkb" data-awpick aria-label="${esc(label||'Pick a view')}"><svg class="ia" viewBox="0 0 24 24">${PICON}</svg><svg class="ix" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`;}
-function wheelSvg(items,tag,hub,sel){const C=280,R=255,r=96,m=items.length,P=(a,rad)=>[C+rad*Math.cos(a),C+rad*Math.sin(a)];
+function pickerSvg(items,tag,hub,sel){const C=280,R=262,r=104,m=items.length,P=(a,rad)=>[C+rad*Math.cos(a),C+rad*Math.sin(a)];
   let h=`<svg class="w" viewBox="0 0 560 560"><defs><linearGradient id="aw-wv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4101F7"/><stop offset="1" stop-color="#6601FD"/></linearGradient></defs>`;
-  items.forEach((it,i)=>{const g=.014,a0=(-90-180/m+i*360/m)*Math.PI/180+g,a1=(-90+180/m+i*360/m)*Math.PI/180-g,am=(a0+a1)/2;
-    const [x0,y0]=P(a0,R),[x1,y1]=P(a1,R),[x2,y2]=P(a1,r),[x3,y3]=P(a0,r),[cx,cy]=P(am,(R+r)/2-4);
-    h+=`<g class="wedge${it.k===sel?' sel':''}" data-k="${it.k}" role="button" aria-label="${esc(it.label)}"><path class="seg-p" d="M${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${r} ${r} 0 0 0 ${x3} ${y3}Z"/>
-      <g class="art">${it.still(cx,cy+8)}</g><text class="t1" x="${cx}" y="${cy+30}">${esc(it.label)}</text></g>`;});
-  return h+`<circle cx="${C}" cy="${C}" r="${r-6}" fill="#F4EFFE"/><circle class="hub" cx="${C}" cy="${C}" r="${r-12}"/><circle class="hubr" cx="${C}" cy="${C}" r="${r-21}"/>
-    <g class="hubIdle"><text class="hubt" x="${C}" y="${C-6}" style="font-size:10px;font-weight:700;letter-spacing:2.4px;fill:#8A80AA">${esc(tag)}</text>
-    <text class="hubt" x="${C}" y="${C+15}" style="font-size:16px;font-weight:700;fill:#01073C">${esc(hub)}</text></g><g class="hubScene"></g></svg>`;}
-function picker(o){css();const items=o.items.map(it=>Object.assign({},PK_ART[it.art]||{},it));
-  const v=document.createElement('div');v.className='aw-veil';const w=document.createElement('div');w.className='aw-wheel aw-pk';document.body.append(v,w);
-  let hk=null;
-  const origin=()=>{const b=o.btn();if(!b)return;const r=b.getBoundingClientRect(),L=innerWidth/2-280,T=innerHeight/2-280;w.style.transformOrigin=`${r.left+r.width/2-L}px ${r.top+r.height/2-T}px`;};
-  const peekP=k=>{if(k===hk)return;hk=k;const sc=w.querySelector('.hubScene'),idle=w.querySelector('.hubIdle');if(!sc)return;
-    if(!k){sc.innerHTML='';idle.style.opacity=1;return;}const it=items.find(x=>x.k===k);idle.style.opacity=0;
-    sc.innerHTML=`<g class="in" style="transform-origin:280px 300px"><g transform="translate(280 300) scale(.82) translate(-280 -300)">${it.live(280,316)}</g><text class="hubt" x="280" y="334" style="font-size:12.5px;font-weight:700;fill:#4101F7">${esc(it.short||it.label)}</text></g>`;};
+  items.forEach((it,i)=>{const g=.016,a0=(-90-180/m+i*360/m)*Math.PI/180+g,a1=(-90+180/m+i*360/m)*Math.PI/180-g,am=(a0+a1)/2;
+    const [x0,y0]=P(a0,R),[x1,y1]=P(a1,R),[x2,y2]=P(a1,r),[x3,y3]=P(a0,r),[cx,cy]=P(am,(R+r)/2+4),L=it.lines||[it.label];
+    h+=`<g class="wedge${it.k===sel?' sel':''}" data-k="${it.k}" role="button" aria-label="${esc(L.join(' '))}"><path class="seg-p" d="M${x0} ${y0}A${R} ${R} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${r} ${r} 0 0 0 ${x3} ${y3}Z"/>
+      <text class="t1 pk" x="${cx}" y="${cy-(L.length-1)*14+9}">${L.map((t,j)=>`<tspan x="${cx}" dy="${j?29:0}">${esc(t)}</tspan>`).join('')}</text></g>`;});
+  return h+`<circle cx="${C}" cy="${C}" r="${r-6}" fill="#F4EFFE"/><circle class="hub" cx="${C}" cy="${C}" r="${r-12}"/><circle class="hubr" cx="${C}" cy="${C}" r="${r-22}"/>
+    ${tag?`<text class="hubt" x="${C}" y="${C-8}" style="font-size:15px;font-weight:700;letter-spacing:3px;fill:#8A80AA">${esc(tag)}</text>`:''}
+    <text class="hubt pkh" x="${C}" y="${tag?C+22:C+9}" style="font-size:24px;font-weight:700;fill:#01073C">${esc(hub)}</text></svg>`;}
+function picker(o){css();const items=o.items;
+  const v=document.createElement('div');v.className='aw-veil aw-pkv';const w=document.createElement('div');w.className='aw-wheel aw-pk';document.body.append(v,w);
   const isOn=()=>w.classList.contains('on');
-  const open=()=>{w.innerHTML=wheelSvg(items,o.tag||'',o.hub||'Pick a view',o.sel&&o.sel());hk=null;origin();void w.offsetWidth;w.classList.add('on');v.classList.add('on');document.body.classList.add('aw-pk-on');const b=o.btn();if(b)b.classList.add('on');};
-  const close=()=>{origin();w.classList.remove('on');v.classList.remove('on');document.body.classList.remove('aw-pk-on');const b=o.btn();if(b)b.classList.remove('on');};
+  // beside the button: the wheel's top-right corner tucks under the button, kept on screen; it grows from the button's centre
+  const place=()=>{const b=o.btn();if(!b)return;const r=b.getBoundingClientRect(),bx=r.left+r.width/2,by=r.top+r.height/2;
+    let L=Math.min(innerWidth-PK-12,r.right-PK+12),T=r.bottom+10;if(T+PK>innerHeight-12)T=Math.max(12,r.top-PK-10);L=Math.max(12,L);
+    w.style.left=L+'px';w.style.top=T+'px';w.style.transformOrigin=`${bx-L}px ${by-T}px`;};
+  const open=()=>{w.innerHTML=pickerSvg(items,o.tag||'',o.hub||'Pick a view',o.sel&&o.sel());place();void w.offsetWidth;w.classList.add('on');v.classList.add('on');document.body.classList.add('aw-pk-on');const b=o.btn();if(b)b.classList.add('on');};
+  const close=()=>{place();w.classList.remove('on');v.classList.remove('on');document.body.classList.remove('aw-pk-on');const b=o.btn();if(b)b.classList.remove('on');};
+  const pick=k=>{close();setTimeout(()=>o.pick(k),200);};
   document.addEventListener('click',e=>{const b=e.target.closest('[data-awpick]');if(!b||b!==o.btn())return;e.preventDefault();e.stopPropagation();isOn()?close():open();},true);
-  v.onclick=close;
-  w.addEventListener('click',e=>{const b=e.target.closest('.wedge');if(b){const k=b.dataset.k;close();setTimeout(()=>o.pick(k),180);}else if(e.target.closest('.hub'))close();});
-  w.addEventListener('mouseover',e=>{const x=e.target.closest('.wedge');peekP(x?x.dataset.k:null);});w.addEventListener('mouseleave',()=>peekP(null));
-  document.addEventListener('keydown',e=>{if(!isOn())return;if(e.key==='Escape'){close();return;}const it=items[+e.key-1];if(it){close();setTimeout(()=>o.pick(it.k),180);}});
+  v.onclick=close;addEventListener('scroll',()=>{if(isOn())close();},{passive:true});addEventListener('resize',()=>{if(isOn())close();});
+  w.addEventListener('click',e=>{const b=e.target.closest('.wedge');if(b)pick(b.dataset.k);else if(e.target.closest('.hub'))close();});
+  document.addEventListener('keydown',e=>{if(!isOn())return;if(e.key==='Escape'){close();return;}const it=items[+e.key-1];if(it)pick(it.k);});
   return{open,close};}
 window.ArtiumWheel={picker,pickerButton,mount,refresh,open:openW,close:closeW,windows,ratio,count,grouper,sortRows,pct,band,mi,ml,MF,MON};
 })();
