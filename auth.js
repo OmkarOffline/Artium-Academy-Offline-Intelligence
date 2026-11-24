@@ -13,7 +13,9 @@
   const SCOPES='openid email profile';
   const KEY='artium_oi_auth';
   // Each page file and the name used for it in the access list
-  const PAGE_OF={'start.html':'start','home.html':'home','daily.html':'daily','pipeline.html':'pipeline','renewperf.html':'renewperf','admissions.html':'admissions','targets.html':'targets','dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance','mom.html':'mom','review.html':'review','execs.html':'execs','learners.html':'learners','teachers.html':'teachers','courses.html':'courses','stats.html':'stats','analysis.html':'analysis','focus.html':'focus','calendar.html':'calendar','planner.html':'planner','goals.html':'goals','checkins.html':'checkins','loose.html':'loose','collections.html':'collections','updates.html':'updates','spotlight.html':'spotlight','texp.html':'texp','culture.html':'culture'};
+  // Renewal Collection Efficiency: open to everyone who can open Teacher Performance (it came out of that page)
+  const withRce=p=>p.includes('teachers')&&!p.includes('rce')?p.concat('rce'):p;
+  const PAGE_OF={'start.html':'start','home.html':'home','daily.html':'daily','pipeline.html':'pipeline','renewperf.html':'renewperf','admissions.html':'admissions','targets.html':'targets','dfd.html':'centres','dashboard.html':'dashboard','performance.html':'performance','mom.html':'mom','review.html':'review','execs.html':'execs','learners.html':'learners','teachers.html':'teachers','rce.html':'rce','courses.html':'courses','stats.html':'stats','analysis.html':'analysis','focus.html':'focus','calendar.html':'calendar','planner.html':'planner','goals.html':'goals','checkins.html':'checkins','loose.html':'loose','collections.html':'collections','updates.html':'updates','spotlight.html':'spotlight','texp.html':'texp','culture.html':'culture'};
 
   /* Phones: every page loads the shared phone stylesheet */
   try{ if(!document.querySelector('link[href*="mobile.css"]')){ const l=document.createElement('link');l.rel='stylesheet';l.href='mobile.css?v=1';(document.head||document.documentElement).appendChild(l); } }catch(e){}
@@ -126,7 +128,7 @@
     photo:photoOf,
     freshUntil:0,
     get user(){return session;},
-    get pages(){return session&&session.pages||[];},
+    get pages(){return withRce(session&&session.pages||[]);},
     fetchRows, signOut,
     // Any other request to the data service, e.g. call('initiatives') or call('saveInitiative',{item})
     async call(action,body){
@@ -248,7 +250,7 @@
   }
   function hideGate(){
     if(gate) gate.hidden=true;
-    const pages=session.pages||[];
+    const pages=withRce(session.pages||[]);
     document.querySelectorAll('.tab[data-tab]').forEach(t=>{ t.hidden=!pages.includes(t.dataset.tab); });
     showUser();
     loadPhotos();

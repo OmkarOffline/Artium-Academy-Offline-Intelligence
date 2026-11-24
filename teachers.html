@@ -402,6 +402,8 @@ table.rr.fold-sel th.gh:has([onclick*="'sel'"]) span{display:block;opacity:1;max
   .per{width:100%}.per .l{flex:1;min-width:0}
   .chips{margin-left:0}.pq .qdefs{padding:0 18px}
   .pq .top{padding:20px 18px}.pq .q{font-size:24px}.pq .n{width:100%}.pq .m{flex:1;min-width:0}.ch,.chn,.pq .chh{padding-left:18px;padding-right:18px}.ch .g{left:18px;right:18px}}
+/* Renewal Collection Efficiency now has its own page (rce.html) */
+#sec-act,#act-q,#act-per{display:none!important}
 </style>
 </head>
 <body>
@@ -951,10 +953,7 @@ CardNav.init({back:'All sections',cards:[
    preview:()=>LOADED()?rowsOf('mal-t').filter(r=>!/^total$|not mentioned$|^past teachers$|active months$/i.test(r[0])).sort((a,b)=>nowCol(b)-nowCol(a)).filter(r=>nowCol(r)>0).map(r=>[r[0],r[1]+' active']):null},
   {id:'sec-coh',k:'Renewals · by cohort',title:'Cohort Renewals',short:'Of the learners due each month, how many have renewed so far. Keeps updating as late payers renew.',go:'Open cohorts',
    icon:'<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2.5 20c.5-3 2.7-4.5 5.5-4.5s5 1.5 5.5 4.5M13 15.6c.9-.1 2-.1 3-.1 2.8 0 5 1.5 5.5 4.5"/>',
-   preview:()=>rrPreview('coh')},
-  {id:'sec-act',k:'Renewals · collection',title:'Renewal Collection Efficiency',short:'How good are we at collecting renewal payments?',go:'Open collection efficiency',
-   icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8.5 15.5l2.2 2.2 4.8-4.8"/>',
-   preview:()=>rrPreview('act')}
+   preview:()=>rrPreview('coh')}
 ]});
 load();
 </script>

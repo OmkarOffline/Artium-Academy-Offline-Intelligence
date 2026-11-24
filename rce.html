@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Renewal Collection Efficiency</title>
+<link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
+<link rel="apple-touch-icon" href="brand/emblem-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<script src="rowedit.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --display:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --bg:#F6F3FC;--border:#E6E0F5;--line:#EFEBF8;
+    --ink:#120e2b;--ink2:#4a4466;--muted:#6a6488;--faint:#7a7196;--ghost:#b7b0cc;
+    --accent:#4101f7;--accent-soft:#F1EAFE;--gold:#6b3fc7;--ok:#1F7A4D;--bad:#B4443A;--deep:#2B0256;
+    --shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35);
+  }
+  body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
+  .page{max-width:1600px;margin:-64px auto 0;padding:0 48px 64px}
+
+  /* Header: the site's deep-purple band */
+  .hero{background:radial-gradient(120% 140% at 85% -20%,#4101f7 0%,rgba(65,1,247,0) 55%),linear-gradient(135deg,#2B0256 0%,#160240 55%,#01064c 100%);padding:34px 48px 92px;color:#fff}
+  .hin{max-width:1504px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+  .eyebrow{font:700 11px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:#cec8ea;margin-bottom:10px}
+  h1{font:800 46px/1.05 var(--display);letter-spacing:-.02em;background:linear-gradient(90deg,#FFFFFF 0%,#F1B6FA 45%,#9BB6FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .subtitle{font:400 16px/24px var(--body);color:#cec8ea;margin-top:10px}
+  .updated{display:flex;align-items:center;gap:8px;font-size:13px;color:#cec8ea}
+  .dot{width:8px;height:8px;border-radius:50%;background:#4ade80}
+  .dot.loading{background:var(--gold);animation:pulse 1s infinite}
+  .dot.error{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* Centre toggle (same as Monthly Performance Analysis) */
+  .centre-toggle{position:relative;z-index:1;display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:26px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .centre-toggle::-webkit-scrollbar{display:none}
+  .ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left;transition:background .15s}
+  .ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .ct-btn span{font:700 15px/1.2 var(--display);color:var(--ink)}
+  .ct-btn:hover{background:#F4F1FB}
+  .ct-btn[aria-pressed="true"]{background:linear-gradient(135deg,#6601fd,#4101f7);box-shadow:0 8px 18px -10px rgba(65,1,247,.8)}
+  .ct-btn[aria-pressed="true"] span{color:#fff}
+  .ct-btn[aria-pressed="true"] small{color:#d9ccff}
+  .ct-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Filters (collapsible, like Lead to Purchase) */
+  .filters{background:#fff;border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);margin-bottom:26px}
+  .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 22px;cursor:pointer;user-select:none}
+  .filters-head .t{display:flex;align-items:center;gap:10px;font:600 16px var(--display);color:var(--ink)}
+  .filters-head .t svg{color:var(--accent)}
+  .f-badge{background:var(--accent-soft);color:var(--accent);font:600 12px var(--body);border-radius:999px;padding:3px 10px}
+  .f-badge.on{background:var(--accent);color:#fff}
+  .f-chev{width:32px;height:32px;border-radius:999px;background:#fff;border:1px solid var(--border);color:var(--muted);display:grid;place-items:center;transition:transform .2s}
+  .filters.closed .f-chev{transform:rotate(-90deg)}
+  .filters.closed .filters-body{display:none}
+  .filters-body{border-top:1px solid var(--line);padding:18px 22px 20px}
+  .f-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+  .f-group{display:flex;flex-direction:column;gap:6px}
+  .f-group label{font:600 12px var(--body);color:var(--ink2)}
+  .f-group select{height:42px;border:1px solid var(--border);border-radius:12px;background:var(--bg);padding:0 12px;font:500 14px var(--body);color:var(--ink);cursor:pointer}
+  .f-group select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,42,134,.12)}
+  .f-group select.set{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent);font-weight:600}
+  .f-clear{margin-top:14px;border:0;background:none;color:var(--accent);font:600 13px var(--body);cursor:pointer;padding:0}
+  .f-clear:disabled{color:var(--ghost);cursor:default}
+  @media (max-width:900px){.f-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+  /* Section tray */
+  .tray{background:#fff;border:1px solid var(--border);border-radius:26px;box-shadow:var(--shadow);padding:8px 24px 22px;margin-bottom:28px}
+  .tray-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 2px 14px}
+  .tray-title{position:relative;padding-left:16px;font:800 22px/1.3 var(--display);letter-spacing:-.01em;color:var(--ink)}
+  .tray-title::before{content:"";position:absolute;left:0;top:50%;width:4px;height:22px;transform:translateY(-50%);border-radius:4px;background:linear-gradient(180deg,#4101f7 0%,#dd30b1 100%)}
+  .badge{background:var(--accent-soft);color:var(--accent);font-weight:600;font-size:12px;border-radius:999px;padding:3px 10px}
+
+  /* Month-by-month table: newest month first, scroll right for history */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:18px;background:#fff}
+  table{border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;min-width:100%}   /* few months: columns stretch to fill */
+  th,td{padding:13px 16px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line);min-width:92px}
+  th{background:#FBFAFE;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);vertical-align:bottom}
+  thead tr.yr th{padding:14px 16px 4px;border-bottom:0;font:700 10px/1 var(--body);letter-spacing:.16em;color:var(--gold);text-align:left}
+  thead tr.mo th{padding-top:4px}
+  th.cur{color:var(--accent)}
+  th.cur small{display:block;font:500 10px/1.2 var(--body);letter-spacing:0;text-transform:none;color:var(--accent);opacity:.8}
+  .yb{border-left:1px solid var(--border)}
+  .metric{position:sticky;left:0;z-index:1;text-align:left;background:#fff;min-width:380px;max-width:380px;white-space:normal;padding-left:22px;border-right:1px solid var(--border)}
+  th.metric{background:#FBFAFE;z-index:2}
+  td{font:500 14px var(--display);color:var(--ink2)}
+  td.metric{font:500 14px var(--body);color:var(--ink)}
+  td.metric .k{display:inline-block;width:22px;font:700 11px var(--body);color:var(--gold);vertical-align:baseline}
+  td.metric .op{display:inline-block;width:46px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--faint);vertical-align:baseline}   /* notional Add / Less column */
+  tr.add td.metric .op{color:var(--ok)}
+  tr.less td.metric .op{color:var(--bad)}
+  td.metric .lb{display:inline-block;width:calc(100% - 46px);vertical-align:top}
+  thead tr.yr th.metric{padding-left:68px}   /* 'Particulars' lines up with the row names */
+  td.zero{color:var(--ghost);font-weight:400}
+  tr.sum td{font-weight:600;color:var(--ink);background:#FBFAFE}
+  tr.sum td.metric{font-weight:600}
+  tr.less td:not(.metric){color:var(--bad)}
+  tr.less td.zero{color:var(--ghost)}
+  tr.add td:not(.metric):not(.zero){color:var(--ok)}
+  tr.mal td{background:var(--accent-soft);font-weight:700;color:var(--accent)}
+  tr.signed td{font-weight:600}
+  tr.signed td.pos{color:var(--ok)}
+  tr.signed td.neg{color:var(--bad)}
+  tbody tr:last-child td{border-bottom:0}
+  tr.mal td.metric{font:700 15px var(--display);color:var(--accent)}
+  tr.spacer td{height:12px;padding:0;background:#FBFAFE;border-bottom:1px solid var(--line)}
+  tbody tr:not(.mal):not(.spacer):hover td{background:#FCFBFE}
+  .defs{padding:14px 2px 0}
+  .info-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px 6px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer}
+  .info-btn:hover{background:var(--accent-soft);border-color:#E0D4EE}
+  .info-btn .i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font:700 12px/1 Georgia,serif;font-style:italic}
+  .info-btn[aria-expanded="true"]{background:var(--accent-soft);border-color:#E0D4EE;color:var(--accent)}
+  .defs-list{margin:12px 0 0;padding:18px 22px;background:#fff;border:1px solid var(--border);border-radius:14px;display:flex;flex-direction:column;gap:16px}
+  .defs-list[hidden]{display:none}
+  .def .dt{font:600 13.5px/1.3 var(--display);color:var(--ink);margin-bottom:3px}
+  .def p{font-size:13.5px;line-height:1.6;color:var(--muted);max-width:980px}
+  .defs .pos{color:var(--ok);font-weight:700}
+  .defs .neg{color:var(--bad);font-weight:700}
+  table.ar{width:100%;table-layout:fixed}
+  table.ar th,table.ar td{min-width:0}
+  table.ar th{white-space:normal}
+  table.ar td.metric,table.ar th.metric{min-width:0;max-width:none;width:26%;padding-left:22px}
+  table.ar td.metric small{display:block;font:400 11.5px var(--body);color:var(--faint);margin-top:2px}
+  table.ar tr.pair td{border-bottom-color:transparent}
+  table.ar tr.total td{background:#FBFAFE;font-weight:700;color:var(--ink);border-top:1px solid var(--border)}
+  table.ar td.need,table.ar tr.total td.need{color:var(--bad);font-weight:700}
+  table.ar td.ok,table.ar tr.total td.ok{color:var(--ok);font-weight:700}
+  table.ar td.na{color:var(--ghost);font-weight:400}
+  .util{display:inline-block;min-width:58px;text-align:center;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
+  .util.hi{color:var(--ok);background:#E5F4EC}
+  .util.mid{color:#9A6200;background:#FBF1DC}
+  .util.lo{color:var(--bad);background:#FDECEB}
+  .util.top{color:#1D4ED8;background:#E6EEFB}
+  /* Monthly Active Learners split by course & teacher, and by age group */
+  tr.grp td{font-weight:600;color:var(--ink);background:#FBFAFE;cursor:pointer}
+  tr.grp td.metric{font:600 14px var(--display);color:var(--ink)}
+  tr.grp td.metric .ar{display:inline-block;width:16px;color:var(--muted);transition:transform .15s}
+  tr.grp.shut td.metric .ar{transform:rotate(-90deg)}
+  tr.sub td.metric{padding-left:46px;color:var(--ink2);font-weight:400}
+  tr.sub td{font-weight:400}
+  tr.nm td.metric{color:var(--faint);font-style:italic}
+  tr.tot td{background:var(--accent-soft);font-weight:700;color:var(--accent);border-bottom:0}
+  tr.tot td.metric{font:700 15px var(--display);color:var(--accent)}
+  td.neg{color:var(--bad)}
+  tr.sep td{background:#FBFAFE;font:700 10.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding-top:14px;padding-bottom:10px}
+  tr.past td{color:var(--faint)}
+  tr.past td.metric{color:var(--muted)}
+  tr.past td.metric small{color:var(--faint);font-size:11.5px}
+  /* Capacity utilisation: second most important row, a lighter version of the Monthly Active Learners row */
+  tr.cu td{background:#FBF8FD;border-top:1px solid #EFE7F6}
+  tr.cu td.metric{font:600 14.5px var(--display);color:var(--accent)}
+  .sample{display:inline-flex;align-items:center;gap:6px;background:#FFF6E5;border:1px solid #F0DDB5;color:#8A5A00;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:14px}
+
+  @media (max-width:900px){.page{padding:24px 16px 48px}.page-header{align-items:flex-start}h1{font-size:28px}
+    .tray{padding:4px 12px 14px;border-radius:22px}.tray-title{font-size:19px}.metric{min-width:200px;max-width:200px}}
+
+  /* Renewal tables: one cell per teacher per month — renewal % with renewed of due underneath */
+  table.rr td{padding-top:10px;padding-bottom:10px}
+  table.rr td .util{min-width:54px}
+  table.rr td small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
+  table.rr tr.tot td small{color:var(--accent);opacity:.75}
+  table.rr tr.past td .util{opacity:.75}
+
+  /* Summary groups before the months: fold away sideways with one click */
+  table.rr{min-width:0;width:max-content}   /* no stretching, so folded columns close right up */
+  table.rr .sg{min-width:0;padding:0;background:#FCFAFE}
+  table.rr thead .sg{background:#F6F1FB}
+  table.rr .sg .sw{max-width:140px;overflow:hidden;padding:10px 14px;white-space:nowrap;transition:max-width .32s cubic-bezier(.3,.7,.2,1),padding .32s,opacity .2s}
+  table.rr thead tr.mo .sg .sw{padding:4px 10px 12px}
+  table.rr .sg.g0{border-left:1px solid #E6DCF1}
+  table.rr th.gt .sw{padding:14px 14px 4px;font:700 10px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);text-align:left}
+  table.rr .gh{min-width:30px;width:30px;max-width:30px;padding:0;background:#F6F1FB;border-right:1px solid #E6DCF1}
+  table.rr tbody .gh{background:#F9F5FC}
+  .gbtn{display:flex;flex-direction:column;align-items:center;gap:8px;width:30px;height:100%;min-height:74px;padding:10px 0;border:0;background:none;color:var(--accent);cursor:pointer}
+  .gbtn:hover{background:#EDE3F7}
+  .gbtn svg{transition:transform .32s}
+  .gbtn span{writing-mode:vertical-rl;transform:rotate(180deg);font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;opacity:0;max-height:0;overflow:hidden;transition:opacity .2s}
+  .sbtn{border:0;background:none;font:600 11.5px/1.35 var(--body);letter-spacing:.03em;text-transform:uppercase;color:var(--ink2);cursor:pointer;padding:2px 4px;border-radius:6px}
+  .sbtn:hover{background:#EDE3F7;color:var(--accent)}
+  th.on .sbtn{color:var(--accent)}
+  table.rr.fold-perf .sg-perf .sw,table.rr.fold-year .sg-year .sw{max-width:0;padding-left:0!important;padding-right:0!important;opacity:0}
+  table.rr.fold-perf .sg-perf.g0,table.rr.fold-year .sg-year.g0{border-left-color:transparent}
+  table.rr.fold-perf th.gh:has([onclick*="'perf'"]) svg,table.rr.fold-year th.gh:has([onclick*="'year'"]) svg{transform:rotate(180deg)}
+  table.rr.fold-perf th.gh:has([onclick*="'perf'"]) span,table.rr.fold-year th.gh:has([onclick*="'year'"]) span{opacity:1;max-height:200px}
+  table.rr .num{font:600 14px var(--display);color:var(--ink)}
+  table.rr .num.left{color:var(--accent);font-weight:700}
+  table.rr .num.lost{color:var(--muted);font-weight:500}
+  table.rr .na{color:var(--ghost);font-weight:400}
+  table.rr .sg small{display:block;margin-top:3px;font:500 11.5px var(--body);color:var(--faint)}
+  table.rr tr.tot .sg{background:var(--accent-soft)}
+  table.rr tr.subt td{background:#F8F4FC;border-top:1px solid #E6DCF1;border-bottom:1px solid #E6DCF1}
+  table.rr tr.subt td.metric{font:600 14px var(--display);color:var(--accent)}
+  table.rr tr.subt td small{color:var(--accent);opacity:.75}
+  table.rr .metric{min-width:240px;max-width:240px}
+  .util.xtra{color:var(--accent);background:var(--accent-soft)}   /* renewals with nothing due: not a score, so no score colour */
+  .lgd{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:0 2px 12px;font-size:12.5px;color:var(--muted)}
+  .lgd .util{min-width:0;padding:2px 9px;font-size:11.5px}
+
+  /* Clickable cells and the learner list under the table */
+  table.rr td.pk{cursor:pointer;transition:background .15s}
+  table.rr td.pk:hover{background:#F4EFFF}
+  table.rr td.pk.sel{background:#EDE4FF;box-shadow:inset 0 0 0 2px #4101f7;border-radius:10px}
+  table.rr tr.tot td{background:var(--accent-soft)}table.rr tr.tot td.pk:hover{background:#E9DFFF}
+  .pl:empty{display:none}
+  .pl{margin-top:16px;border:1px solid var(--border);border-radius:18px;background:#fff;overflow:hidden}
+  .plh{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line);background:#FBFAFE}
+  .plh>div:first-child{flex:1;min-width:220px}.plh b{display:block;font:800 17px var(--display);color:var(--ink)}.plh span{display:block;font:500 13px var(--body);color:var(--muted);margin-top:3px}
+  .plt{display:inline-flex;flex-wrap:wrap;gap:4px;background:#fff;border:1px solid var(--border);border-radius:14px;padding:4px}
+  .plt button{border:0;background:none;border-radius:10px;padding:8px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;display:flex;align-items:center;gap:8px}
+  .plt button i{font-style:normal;font-weight:700;font-size:12px;background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:1px 8px}
+  .plt button[aria-pressed="true"]{background:linear-gradient(135deg,#6601fd,#4101f7);color:#fff}.plt button[aria-pressed="true"] i{background:rgba(255,255,255,.22);color:#fff}
+  .plx{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;font-size:13px}
+  .plx:hover{background:var(--accent-soft);color:var(--accent)}
+  .pln{margin:0;padding:12px 20px 0;font:400 13px/1.5 var(--body);color:var(--muted)}
+  .plw{overflow-x:auto}
+  table.plt2{min-width:100%;border-collapse:separate;border-spacing:0}
+  table.plt2 th,table.plt2 td{padding:13px 16px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);font:400 14px var(--body);color:var(--ink2);vertical-align:top;min-width:0}
+  table.plt2 th{font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);background:#fff}
+  table.plt2 tr:last-child td{border-bottom:0}
+  table.plt2 .who{position:sticky;left:0;background:#fff;z-index:1}table.plt2 td.who b{font-weight:700;color:var(--ink)}table.plt2 td.who small,table.plt2 td.st small{display:block;font-size:12px;color:var(--faint);margin-top:3px;white-space:normal;max-width:240px}
+  table.plt2 a{color:var(--accent);text-decoration:none;font-weight:600}
+  table.plt2 td.ds{white-space:normal;min-width:300px;max-width:440px;line-height:1.5;color:var(--ink)}table.plt2 .mut{color:var(--ghost)}
+  .stt{display:inline-block;border-radius:999px;padding:3px 10px;font:600 12.5px var(--body)}
+  .stt.ok{background:#E5F4EC;color:var(--ok)}.stt.pipe{background:#EDE5FF;color:var(--accent)}
+  table.plt2 tr.inp td{background:#F7F3FF}table.plt2 tr.inp td.who{box-shadow:inset 4px 0 0 var(--gold)}table.plt2 td.st small.pd{white-space:nowrap}table.plt2 td.st small.od{color:#8A5A00}
+  table.plt2 th.pc{color:var(--accent);background:#F8F5FF}table.plt2 td.pc{background:#FBF9FF}table.plt2 tr.inp td.pc{background:#F2ECFF}
+  .plt .sep{width:1px;background:var(--border);margin:4px 2px}.pln b{color:var(--accent);font-weight:600}.stt.bad{background:#FDECEB;color:var(--bad)}.stt.wait{background:#FBF1DC;color:#8A5A00}
+  .ple{padding:28px;text-align:center;color:var(--muted);font-size:14px}
+  /* landing cards in the brand colours */
+  body .cn-card::before{background:linear-gradient(90deg,#4101f7,#dd30b1)}
+  body .cn-card .ic{background:linear-gradient(135deg,#6601fd,#4101f7)}
+  @media (max-width:900px){.hero{padding:26px 16px 84px}h1{font-size:32px}}
+  /* Row, Open row and Add note */
+  table.plt2 td.rw b{display:block;font-size:15px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}table.plt2 td.rw small{display:block;font-size:11.5px;color:var(--muted,#6A6488);margin-top:2px;white-space:nowrap}
+  table.plt2 td.act{white-space:nowrap;text-align:right}
+  table.plt2 .go{display:inline-flex;align-items:center;gap:6px;font:700 12.5px var(--f,inherit);color:#4101F7;text-decoration:none;border:1px solid #DCD0FB;border-radius:10px;padding:6px 10px}
+  table.plt2 .go:hover{background:#F4EEFF}table.plt2 .go svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  table.plt2 .nt{margin-left:6px;font:700 12.5px var(--f,inherit);color:#A3187F;background:#FCEAF7;border:0;border-radius:10px;padding:7px 11px;cursor:pointer}
+  table.plt2 .nt:hover{background:#F8D5EF}
+  table.plt2 tr.ntr td{background:#FBF8FF;padding:0 14px 14px}
+  .ntb{position:sticky;left:14px;width:min(1180px,calc(100vw - 110px));background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 20px 40px -30px rgba(1,7,60,.4);padding:16px 18px}
+  .ntl b{font-size:14.5px;color:var(--ink)}.ntl span{margin-left:10px;font-size:12.5px;color:#6A6488}
+  .ntf{display:flex;gap:10px;align-items:flex-start;margin-top:10px;background:#F7F5FC;border-radius:14px;padding:10px 12px}
+  .ntd{font:700 13.5px var(--f,inherit);color:#4101F7;padding-top:3px;white-space:nowrap}
+  .ntf textarea{flex:1;border:0;background:none;resize:vertical;font:500 14px/1.5 var(--f,inherit);color:var(--ink);outline:0;min-height:44px}
+  .nta{display:flex;align-items:center;gap:10px;margin-top:10px}.nth{flex:1;font-size:12.5px;color:#6A6488}
+  .ntc{border:1px solid #E6E0F3;background:#fff;border-radius:10px;padding:8px 14px;font:600 13px var(--f,inherit);color:#4A4466;cursor:pointer}
+  .nts{border:0;background:linear-gradient(135deg,#4101F7,#6601FD);color:#fff;border-radius:10px;padding:9px 16px;font:700 13px var(--f,inherit);cursor:pointer}.nts:disabled{opacity:.6;cursor:default}
+  .nte{margin-top:10px;font-size:13px;color:#B0204F;background:#FFEDF2;border-radius:10px;padding:8px 12px}
+  .eh{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:flex-start}.eh b{font-size:16px;color:var(--ink)}.eh span{display:block;font-size:12.5px;color:#6A6488;margin-top:3px}
+  .ek{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:#6A6488}.ek span{display:inline!important;margin:0 2px 0 0!important}.ek i{font-style:normal;font-weight:600;background:#E3FAF0;color:#137A4F;border-radius:7px;padding:3px 8px}
+  .eg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px;margin-top:14px}
+  .ef{display:flex;flex-direction:column;gap:6px;min-width:0}.ef.wide{grid-column:span 3}
+  .efl{font:700 10.5px var(--f,inherit);letter-spacing:.12em;text-transform:uppercase;color:#6A6488}
+  .ef select,.ef input{height:40px;border:1px solid #E6E0F3;border-radius:12px;padding:0 12px;font:500 14px var(--f,inherit);color:var(--ink);background:#fff}
+  .ef select:focus,.ef input:focus,.ntf:focus-within{outline:0;border-color:#C9B5FA;box-shadow:0 0 0 4px rgba(65,1,247,.08)}
+  .ef small{font-size:12px;color:#6A6488}.ef small .mut{color:#B7B0CC}
+  .prev{font-size:13px;line-height:1.5;color:#4A4466;background:#FBFAFF;border-left:3px solid #E6E0F3;border-radius:6px;padding:8px 12px;white-space:pre-line;max-height:80px;overflow:auto}
+  @media (max-width:900px){.eg{grid-template-columns:1fr}.ef.wide{grid-column:auto}}
+  #tp-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:#01064C;color:#fff;font:600 14px var(--f,inherit);border-radius:14px;padding:12px 18px;box-shadow:0 20px 40px -20px rgba(1,7,60,.6);transition:all .25s;z-index:99;pointer-events:none}
+  #tp-toast.on{opacity:1;transform:translate(-50%,0)}
+  .stt.oth{background:#EEF1FF;color:#2433B8}
+
+/* Explanations (Nov 2026): each definition is a card on the section (no outer box): a soft gradient header with the name and
+   a one-line meaning, then the formula, steps or ticks, and tinted hint rows */
+.defs-list.dg{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;align-items:start}
+.defs-list.dg[hidden]{display:none!important}
+.dg .dc{background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 18px 36px -28px rgba(1,7,60,.4);overflow:hidden;min-width:0}
+.dg .dh{padding:13px 16px 11px;background:linear-gradient(135deg,#F4EEFF,#FCEFFA)}
+.dg .dn{display:flex;align-items:center;gap:8px;font:700 14.5px/1.3 'Onest',system-ui,sans-serif;color:#01073C}.dg .dn::before{content:"";width:9px;height:9px;border-radius:3px;background:#4101F7;flex:none}
+.dg .dm{font:400 12.5px/1.45 'Onest',system-ui,sans-serif;color:#4A4466;margin-top:3px}
+.dg .db{padding:12px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.dg .dl{font:700 10px 'Onest',system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6A6488;margin-top:2px}
+.dg .dfm{font:600 13.5px/1.5 'Onest',system-ui,sans-serif;color:#01073C;padding:1px 0 1px 11px;border-left:3px solid #C9B8FF}.dg .dfm s{text-decoration:none;color:#4101F7;font-weight:800;margin:0 3px}
+.dg .dli{display:flex;gap:9px;align-items:flex-start;font:400 13px/1.4 'Onest',system-ui,sans-serif;color:#4A4466}.dg .dli b{color:#01073C;font-weight:700}
+.dg .dic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:700 10.5px 'Onest',system-ui,sans-serif;background:#EFEAF9;color:#4101F7}.dg .dic.n{background:#F4F1F9;color:#8A83A6}
+.dg .dtp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 'Onest',system-ui,sans-serif;color:#4A4466}.dg .dtp>i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:4px;background:#C9C2E0}.dg .dtp b{color:#01073C}
+.dg .dbs{display:flex;gap:6px;flex-wrap:wrap}.dg .dbs span{font:600 11.5px 'Onest',system-ui,sans-serif;border-radius:8px;padding:3px 8px}
+.dg .b-r{background:#FDE7EA;color:#B0204F}.dg .b-a{background:#FFF3D6;color:#8A5A00}.dg .b-g{background:#E3F7EE;color:#137A4F}.dg .b-b{background:#EAF0FF;color:#2F4DB8}
+
+/* ── Colour Foundations refresh (Nov 2026): the same look as the Renewal Pipeline and My Performance pages.
+   Light header, the brand's segmented tabs, one calm surface per section. Ember = where you are (the centre and the month you picked) ·
+   Progress Violet = progress · green, amber and red = good, middling and bad bands. ── */
+body{background:#FBFAFF}
+.hero{background:none;padding:40px 48px 18px;color:var(--ink)}
+.hin{align-items:flex-start}
+.eyebrow{display:none}
+h1{font:700 50px/1.06 'Onest',system-ui,sans-serif;letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:#4A4466;font-size:17px;margin-top:8px}
+.updated{color:#6A6488;margin-top:10px}.dot{background:#3DDC97}.dot.loading{background:#F5906F}
+.page{margin-top:0}
+.tp-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.centre-toggle{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px;margin-bottom:0;gap:3px}
+.ct-btn{position:relative;border-radius:17px;padding:10px 22px 12px}
+.ct-btn small{color:#6A6488}.ct-btn span{color:#01073C}
+.ct-btn:hover{background:rgba(255,255,255,.55)}
+.ct-btn[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.ct-btn[aria-pressed="true"] span{color:#01073C}.ct-btn[aria-pressed="true"] small{color:#A8431E}
+.ct-btn[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.tray{border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);padding:6px 28px 24px;margin-bottom:22px}
+.tray-head{padding:18px 0 14px;border-bottom:1px solid #F1EDF9;margin:0 -28px 16px;padding-left:28px;padding-right:28px}
+.tray-title,body.cn-sub section.tray.cn-on .tray-title{padding-left:0;font:700 21px/1.3 'Onest',system-ui,sans-serif;color:#01073C}
+.tray-title::before{display:none}
+.badge{background:#F4EFFE;color:#4101F7;font-size:12.5px;padding:5px 12px}
+.tbl-wrap{border:0;border-radius:18px;box-shadow:inset 0 0 0 1px #F1EDF9}
+th,th.metric,table.rr thead .sg{background:#F7F5FC}
+th{color:#6A6488;font-weight:700;font-size:10.5px;letter-spacing:.14em}
+th,td{border-bottom-color:#F1EDF9}
+td.metric{font-weight:600;color:#01073C}
+tr.tot td,table.rr tr.tot td,table.rr tr.tot .sg{background:#F4EFFE}
+.util.lo{color:#B0204F;background:#FFEDF2}.util.mid{color:#8A5A00;background:#FFF3D6}.util.hi{color:#137A4F;background:#E3F7EE}.util.top{color:#2F4DB8;background:#EEF1FF}
+.info-btn{border:0;background:#F4EFFE;color:#4101F7;border-radius:14px;padding:10px 16px 10px 12px;font:600 14px 'Onest',system-ui,sans-serif}
+.info-btn .i{background:none;border:1.5px solid #4101F7;color:#4101F7}
+.info-btn:hover,.info-btn[aria-expanded="true"]{background:#EDE4FF;color:#4101F7}
+.cn-back{border:0;background:#EFEAF9;box-shadow:none}
+/* The month you picked on Renewal Collection Efficiency: Ember, "where you are" */
+table.rr th.pick{color:#A8431E;background:#FFF4EE}table.rr th.pick small{color:#A8431E}
+table.rr td.pick{background:#FFF8F3}table.rr tr.tot td.pick{background:#FCEBDF}
+table.rr.fold-sel .sg-sel .sw{max-width:0;padding-left:0!important;padding-right:0!important;opacity:0}
+table.rr.fold-sel .sg-sel.g0{border-left-color:transparent}
+table.rr th.gh:has([onclick*="'sel'"]) span{display:none}
+table.rr.fold-sel th.gh:has([onclick*="'sel'"]) svg{transform:rotate(180deg)}
+table.rr.fold-sel th.gh:has([onclick*="'sel'"]) span{display:block;opacity:1;max-height:200px}
+/* Period picker */
+.per{display:flex;align-items:center;gap:8px;background:#EFEAF9;border-radius:18px;padding:5px;flex-wrap:wrap}
+.per[hidden]{display:none}
+.per .t{display:inline-flex}
+.per .t button{border:0;background:none;padding:8px 14px;border-radius:13px;font:600 13.5px 'Onest',system-ui,sans-serif;color:#4A4466;cursor:pointer}
+.per .t button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+.per .mb{width:34px;height:36px;border:0;border-radius:12px;background:#fff;color:#4A4466;font-size:16px;font-weight:700;cursor:pointer}
+.per .mb:disabled{opacity:.4;cursor:default}
+.per .l{min-width:150px;text-align:center;font:700 15px 'Onest',system-ui,sans-serif;color:#01073C}
+.per .rg{display:flex;align-items:center;gap:6px;font-size:13px;color:#6A6488}
+.per .rg[hidden]{display:none}
+.per .rg input{height:36px;border:0;border-radius:12px;background:#fff;padding:0 10px;font:600 13.5px 'Onest',system-ui,sans-serif;color:#01073C}
+/* The question this page answers */
+.pq{border-radius:28px;background:radial-gradient(70% 140% at 0% 0%,#F4EEFF 0%,rgba(244,238,255,0) 60%),#fff;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);margin-bottom:22px;overflow:hidden}
+.pq[hidden]{display:none}
+.pq .top{display:flex;align-items:stretch;gap:18px;padding:24px 26px 20px 30px;flex-wrap:wrap}
+.pq .b{flex:1;min-width:300px}
+.pq .tg{display:inline-flex;align-items:center;gap:8px;font:700 11px 'Onest',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6A6488}
+.pq .tg i{width:22px;height:22px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,#4101F7,#DD30B1);color:#fff;font:800 13px 'Onest',system-ui,sans-serif;font-style:normal;letter-spacing:0}
+.pq .q{font:700 32px/1.15 'Onest',system-ui,sans-serif;letter-spacing:-.8px;color:#01073C;margin-top:12px}
+.pq .ans{font-size:16px;line-height:1.55;color:#4A4466;margin-top:8px;max-width:860px}.pq .ans b{color:#01073C;font-weight:600}
+.pq .n{display:flex;gap:14px}
+.pq .m{background:#F7F5FC;border-radius:18px;padding:16px 20px;min-width:200px;display:flex;flex-direction:column}
+.pq .m .t{font:600 13.5px 'Onest',system-ui,sans-serif;color:#4A4466}.pq .m .v{font:700 32px 'Onest',system-ui,sans-serif;color:#01073C;letter-spacing:-.8px;margin-top:6px}
+.pq .m .s{font-size:12.5px;color:#6A6488;margin-top:auto;padding-top:6px;line-height:1.45}
+.pq .m.hero{background:linear-gradient(140deg,#2D0B9E 0%,#4101F7 55%,#6601FD 100%);box-shadow:0 18px 34px -22px rgba(65,1,247,.8)}.pq .m.hero .t,.pq .m.hero .s{color:#E4DAFF}.pq .m.hero .v{color:#fff}
+.pq .dup,.pq .ddn{display:inline-block;margin-top:4px;font-weight:700;border-radius:8px;padding:1px 7px}.pq .dup{background:#E3F7EE;color:#137A4F}.pq .ddn{background:#FFEDF2;color:#B0204F}
+.pq .chh{display:flex;align-items:baseline;gap:12px;padding:16px 30px 0;border-top:1px solid #F1EDF9}
+.pq .chh b{font:700 16px 'Onest',system-ui,sans-serif;color:#01073C}.pq .chh span{font-size:13px;color:#6A6488}
+.ch{position:relative;display:flex;align-items:flex-end;gap:6px;height:210px;padding:26px 30px 0;overflow-x:auto;scrollbar-width:thin}
+.ch .g{position:absolute;left:30px;right:30px;border-top:1px dashed #D9CFF3;pointer-events:none}.ch .g em{position:absolute;right:0;top:-17px;font:600 10.5px 'Onest',system-ui,sans-serif;font-style:normal;color:#8A80AA}
+.ch button{flex:1 0 34px;max-width:64px;height:100%;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-family:'Onest',system-ui,sans-serif}
+.ch button .p{font:700 11.5px 'Onest',system-ui,sans-serif;color:#4A4466;margin-bottom:4px;white-space:nowrap}
+.ch button .bar{width:70%;max-width:30px;min-height:3px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#8B5CFF,#4101F7);transition:filter .15s}
+.ch button.now .bar{background:repeating-linear-gradient(135deg,#B9A2FF 0 5px,#D8CBFF 5px 10px)}
+.ch button.na .bar{background:#EEE9F8}
+.ch button:hover .bar{filter:brightness(1.12)}
+.ch button .mo{height:40px;padding-top:8px;font:600 11px/1.3 'Onest',system-ui,sans-serif;color:#6A6488;white-space:nowrap;text-align:center;border-bottom:3px solid transparent;width:100%}
+.ch button.on .mo{color:#A8431E;border-bottom-color:#E07A55}.ch button.on .p{color:#A8431E}
+.chn{display:none}
+.pq .qdefs{padding:0 30px}.pq .qdefs .dg{margin:0 0 20px}
+.pq .info-btn{margin-top:14px}
+.pq .chh{align-items:center;flex-wrap:wrap;gap:10px;padding:16px 30px 0}
+.sg3{display:inline-flex;gap:2px;background:#EFEAF9;border-radius:14px;padding:4px}
+.sg3 button{border:0;background:none;border-radius:10px;padding:6px 12px;font:600 13px 'Onest',system-ui,sans-serif;color:#4A4466;cursor:pointer}
+.sg3 button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 8px 18px -12px rgba(1,7,60,.45)}
+.sg3[hidden]{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.chips span{font:600 12.5px 'Onest',system-ui,sans-serif;color:#4A4466;background:#F7F5FC;border-radius:10px;padding:6px 10px}
+.chips b{font-weight:700}.pq .chips .cu{color:#137A4F}.pq .chips .cd{color:#B0204F}
+.ch{height:236px;padding:36px 30px 14px}
+.ch .chi{position:relative;display:flex;align-items:flex-end;gap:6px;height:100%;min-width:100%}
+.ch .g{left:0;right:0}
+.ch .chi button{max-width:none}
+.ch svg.tl{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0}
+.ch .chi button{position:relative;z-index:1}
+.ch button .p{background:#fff;border-radius:6px;padding:1px 4px;box-shadow:0 0 0 2px #fff}
+.pq .chips .av i{display:inline-block;width:14px;height:0;border-top:2px solid #DD30B1;vertical-align:4px;margin-right:6px}.pq .chips .tl i{display:inline-block;width:14px;height:0;border-top:2px dashed #8A80AA;vertical-align:4px;margin-right:6px}
+.pq .chips .av b{color:#A3187F}
+.pq .chips .tl{display:inline-flex;align-items:center}.pq .chips .tl b{margin-left:4px}
+.pq .chips .ti{margin-left:8px;width:20px;height:20px;border-radius:50%;border:1.5px solid #4101F7;background:#fff;color:#4101F7;font:italic 700 12px/1 Georgia,serif;cursor:pointer;display:grid;place-items:center;padding:0}
+.pq .chips .ti:hover,.pq .chips .ti[aria-expanded="true"]{background:#4101F7;color:#fff}
+.pq .qdefs.trd .dg{margin:16px 0 0}
+.ch button .bar{position:relative;display:flex;justify-content:center}
+.ch button .md{position:absolute;top:5px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:800 10.5px 'Onest',system-ui,sans-serif;font-style:normal;color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
+.ch button.m1 .bar{background:linear-gradient(180deg,#F6D365,#D9A21B)}.ch button.m1 .md{background:#B7860B}
+.ch button.m2 .bar{background:linear-gradient(180deg,#E3E7EE,#9EA7B5)}.ch button.m2 .md{background:#7D8796}
+.ch button.m3 .bar{background:linear-gradient(180deg,#E9B48A,#B8703E)}.ch button.m3 .md{background:#93552B}
+.ch button.m1 .p{color:#9A6F00}.ch button.m2 .p{color:#5E6878}.ch button.m3 .p{color:#93552B}
+@media (max-width:900px){.hero{padding:24px 16px 12px}h1{font-size:34px;letter-spacing:-1px}.page{padding:0 16px 48px}
+  .tray{padding:4px 16px 18px}.tray-head{margin:0 -16px 14px;padding-left:16px;padding-right:16px}
+  .per{width:100%}.per .l{flex:1;min-width:0}
+  .chips{margin-left:0}.pq .qdefs{padding:0 18px}
+  .pq .top{padding:20px 18px}.pq .q{font-size:24px}.pq .n{width:100%}.pq .m{flex:1;min-width:0}.ch,.chn,.pq .chh{padding-left:18px;padding-right:18px}.ch .g{left:18px;right:18px}}
+
+/* Sub-pages: one segmented track, the open one raised with the Ember underline (as on My Performance) */
+.tsub{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:20px;padding:6px;margin:0 0 18px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tsub button{position:relative;flex:none;display:flex;align-items:center;gap:8px;border:0;background:none;border-radius:15px;padding:11px 20px;color:#4A4466;font:600 14.5px 'Onest',system-ui,sans-serif;cursor:pointer}
+.tsub button:hover{background:rgba(255,255,255,.55);color:#01073C}
+.tsub button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.tsub button[aria-pressed="true"]::after{content:"";position:absolute;left:16px;right:16px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.tsub svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:900px){.tsub button{padding:10px 14px;font-size:13px}}
+/* Hover on a month: how the collected renewals split by package length */
+#mix{position:fixed;z-index:60;pointer-events:none;background:#fff;border-radius:16px;box-shadow:0 0 0 1px #E6E0F3,0 22px 44px -22px rgba(1,7,60,.45);padding:12px 14px;min-width:180px;font:500 13px 'Onest',system-ui,sans-serif;color:#4A4466}
+#mix[hidden]{display:none}
+#mix .h{font:700 11px 'Onest',system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6A6488;margin-bottom:8px}
+#mix .r{display:flex;justify-content:space-between;gap:18px;padding:3px 0}#mix .r b{color:#01073C;font-weight:700}
+#mix .t{display:flex;justify-content:space-between;gap:18px;margin-top:6px;padding-top:7px;border-top:1px solid #F1EDF9;color:#4101F7;font-weight:700}
+</style>
+</head>
+<body>
+<div class="hero"><div class="hin">
+    <div>
+      <div class="eyebrow" id="eyebrow">All centres</div>
+      <h1>Renewal Collection Efficiency</h1>
+      <div class="subtitle" id="subtitle">Active learners and renewals, teacher by teacher</div>
+    </div>
+    <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
+</div></div>
+<div class="page">
+  <nav class="tsub" id="tsub" aria-label="Sub-pages"><button type="button" data-dim="s" data-h="summary"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Summary</button><button type="button" data-dim="t" data-h="teacher"><svg viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/></svg>By teacher</button><button type="button" data-dim="a" data-h="age"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>By age group</button><button type="button" data-dim="c" data-h="course"><svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>By course</button><button type="button" data-dim="l" data-h="level"><svg viewBox="0 0 24 24"><path d="M4 20V14M10 20V9M16 20V4"/></svg>By course level</button></nav>
+  <div class="tp-bar"><nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+    <div class="per" id="act-per">
+      <div class="t"><button type="button" data-pm="m" aria-pressed="true">Month</button><button type="button" data-pm="r" aria-pressed="false">Date range</button></div>
+      <span id="per-m" style="display:contents"><button type="button" class="mb" data-pstep="-1" aria-label="Previous month">‹</button><span class="l" id="per-l">—</span><button type="button" class="mb" data-pstep="1" aria-label="Next month">›</button></span>
+      <span class="rg" id="per-r" hidden><input type="date" id="per-from" aria-label="From">to<input type="date" id="per-to" aria-label="To"></span>
+    </div></div>
+
+  <div class="pq" id="act-q" hidden>
+    <div class="top"><div class="b"><span class="tg"><i>?</i>The question this page answers</span>
+      <div class="q">How good are we at collecting renewal payments?</div>
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="q-defs" onclick="toggleDefs(this,'q-defs')"><span class="i">i</span>What this measures</button></div>
+      <div class="n" id="act-tiles"></div></div>
+    <div class="qdefs"><div class="defs-list dg" id="q-defs" hidden><div class="dc"><div class="dh"><div class="dn">Collection efficiency</div><div class="dm">How much of what fell due we actually collected.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Collected <s>÷</s> due</div><div class="dtp"><i style="background:#4101F7"></i><span>Can go above 100% when win-backs and pre-renewals come in.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>All current teachers together, the same as the Total row below.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Due</div><div class="dm">Memberships whose original package expiry date falls in the period.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>An extension does not move a membership to another period.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Counted under the teacher who taught them.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Collected</div><div class="dm">Renewals whose date of renewal falls in the period.</div></div><div class="db"><div class="dl">Includes</div><div class="dli"><span class="dic">✓</span><span>Learners due in the period who paid on time.</span></div><div class="dli"><span class="dic">✓</span><span><b>Win-backs:</b> learners due earlier who paid late.</span></div><div class="dli"><span class="dic">✓</span><span><b>Pre-renewals:</b> learners who paid in advance.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Date of renewal is column A of the Renewals tab.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Counted under the Teacher Name on the renewal row.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Each period stands on its own</div><div class="dm">A payment counts in the period it was made.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span>A learner due in September who pays in October counts in October.</span></div><div class="dli"><span class="dic">2</span><span>September stays as it was, so months compare fairly.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">The chart</div><div class="dm">Every period side by side.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>MoM, QoQ, YoY:</b> by month, quarter or year.</span></div><div class="dli"><span class="dic">2</span><span><b>3M to All:</b> how many months to show.</span></div><div class="dli"><span class="dic">3</span><span>Click a bar to pick that month, quarter or year.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>The pink line is the average of the finished periods shown: everything collected ÷ everything due.</span></div><div class="dtp"><i style="background:#8A80AA"></i><span>The dashed line is the trend: whether the periods shown are rising or falling.</span></div><div class="dtp"><i style="background:#E0B33A"></i><span>Gold, silver and bronze mark the three best periods shown.</span></div><div class="dtp"><i style="background:#C8B8FF"></i><span>The striped bar is the current period. It is not ranked until it ends.</span></div></div></div></div></div>
+    <div class="chh"><div class="sg3" id="ch-v"><button type="button" data-chv="m">MoM</button><button type="button" data-chv="q">QoQ</button><button type="button" data-chv="y">YoY</button></div>
+      <div class="sg3" id="ch-r"><button type="button" data-chr="3">3M</button><button type="button" data-chr="6">6M</button><button type="button" data-chr="9">9M</button><button type="button" data-chr="12">12M</button><button type="button" data-chr="all">All</button></div>
+      <span class="chips" id="ch-cmp"></span></div>
+    <div class="qdefs trd"><div class="defs-list dg" id="tr-defs" hidden><div class="dc"><div class="dh"><div class="dn">Trend</div><div class="dm">Which way collection efficiency is moving, and how fast.</div></div><div class="db"><div class="dl">For example</div><div class="dfm">▲ 0.4 pts a month</div><div class="dtp"><i style="background:#4101F7"></i><span>Rising by about 0.4 percentage points every month.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>Over 12 months that adds up to about 5 points: a typical 70% month a year ago is a typical 75% month now.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">How it is worked out</div><div class="dm">The dashed line that best fits every bar shown.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span>It looks at all the finished bars, not just the first and the last.</span></div><div class="dli"><span class="dic">2</span><span>So one very good or very bad month does not swing it much.</span></div><div class="dli"><span class="dic">3</span><span>Its slope is the pts a month figure.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The current month is left out until it ends.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Average and trend together</div><div class="dm">Two different questions.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>Average:</b> how good are we, typically?</span></div><div class="dli"><span class="dic">2</span><span><b>Trend:</b> are we getting better or worse, and how fast?</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>A good average with a ▼ trend means we are slipping.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">How big is big</div><div class="dm">Reading the number.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span><b>Under 0.5 pts:</b> steady, not really changing.</span></div><div class="dtp"><i style="background:#4101F7"></i><span><b>About 1 to 2 pts:</b> clear, steady improvement.</span></div><div class="dtp"><i style="background:#4101F7"></i><span><b>More than that:</b> a big shift. Check whether one standout month is behind it.</span></div><div class="dtp"><i style="background:#D0335E"></i><span><b>▼ in red:</b> we are slipping.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Pick the window</div><div class="dm">3M, 6M, 9M, 12M or All change what it covers.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>3M:</b> recent momentum, useful after a new push.</span></div><div class="dli"><span class="dic">2</span><span><b>12M or All:</b> the longer direction.</span></div><div class="dtp"><i style="background:#1F9D6B"></i><span>3M ▲ with 12M ▼ means things have started turning around.</span></div></div></div></div></div>
+    <div class="ch" id="act-ch"></div>
+  </div>
+  <section class="tray" id="sec-act">
+    <div class="tray-head"><div class="tray-title">Collected against due</div><span class="badge" id="act-badge">—</span></div>
+    <div class="lgd" id="act-lgd"></div>
+    <div class="tbl-wrap"><table class="rr" id="act"></table></div>
+    <div class="pl" id="act-pl"></div>
+    <div class="defs">
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="act-defs" onclick="toggleDefs(this,'act-defs')"><span class="i">i</span>How these numbers are worked out</button>
+      <div class="defs-list dg" id="act-defs" hidden>
+        <div class="dc"><div class="dh"><div class="dn">Due</div><div class="dm">Memberships whose original package expiry date falls in the month.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>An extension does not move a membership to another month.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Under the teacher who taught them.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Collected</div><div class="dm">Every renewal whose date of renewal (column A of the Renewals tab) falls in the month.</div></div><div class="db"><div class="dl">Includes</div><div class="dli"><span class="dic">✓</span><span>Learners due that month.</span></div><div class="dli"><span class="dic">✓</span><span>Learners due earlier who paid late (win-backs).</span></div><div class="dli"><span class="dic">✓</span><span>Learners who paid in advance.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Each renewal counts under the Teacher Name on its own row in the Renewals tab.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>A learner due in September who pays in October counts in October, so September's figure stays as it was.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Month or Date range</div><div class="dm">The picker at the top sets the period.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>Month:</b> the tile shows that month, and its column is marked in orange.</span></div><div class="dli"><span class="dic">2</span><span><b>Date range:</b> due by original expiry date between the dates, collected by date of renewal between the dates, in a Selected column.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The chart shows every month. Click a bar to pick that month.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Last 3M, 6M, 12M and Lifetime</div><div class="dm">Those months put together.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Collected <s>÷</s> due, completed months only</div><div class="dtp"><i style="background:#C9C2E0"></i><span>This month is left out until it's over.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Rows and Total</div><div class="dm">By teacher: current teachers only. By age group, course and course level: every learner, with blanks under Not given.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>Those with an admission or renewal in the last 3 months.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Total adds up the teachers shown.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">The learners in a cell</div><div class="dm">Click any percentage to list the learners due in that month.</div></div><div class="db"><div class="dl">How it works</div><div class="dli"><span class="dic">1</span><span>Each learner shows whether they have renewed.</span></div><div class="dli"><span class="dic">2</span><span>Filter to All due, Renewed or Not renewed.</span></div><div class="dli"><span class="dic">3</span><span>Click the cell again, or ✕, to close the list.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>Renewals paid in the month for a membership due in another month (late or in advance) have their own filter, since the cell counts them too.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Folding and sorting</div><div class="dm">Arrange the summary columns.</div></div><div class="db"><div class="dtp"><i style="background:#4101F7"></i><span>The arrow beside the summary columns folds them away, and brings them back.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>Click a summary column's heading to rank teachers by it. Click again for the usual order.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Collection efficiency</div><div class="dm">Collected against due for the period.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Collected <s>÷</s> due</div><div class="dtp"><i style="background:#4101F7"></i><span>Can go above 100% when late payments and advance renewals come in.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The month's figure is final once the month is over.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The totals match Renewal collection efficiency on the Renewal Pipeline page.</span></div></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const CENTRES=[
+  {city:'Chennai',   name:'Alwarpet'},
+  {city:'Chennai',   name:'Thoraipakkam'},
+  {city:'Bangalore', name:'Borewell Road'}
+];
+const START={y:2024,m:4};   // May 2024 — Alwarpet, the first centre, opened
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const mi=d=>d.getFullYear()*12+d.getMonth();
+const valid=d=>d&&d.getFullYear()>=2020?d:null;
+async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
+const esc=t=>String(t||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cell=(r,c)=>String(r[c]||'').trim();
+
+const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate()),FIRST=START.y*12+START.m,LAST=mi(now);
+let DATA={},MONTHS=[];
+function firstMonth(names){
+  let f=LAST;
+  names.forEach(n=>{const d=DATA[n];if(!d)return;d.fs.concat(d.rn).forEach(r=>{const t=parseDate(r[0]);if(t&&t.getFullYear()>=2020){const k=mi(t);if(k<f)f=k;}});});
+  return Math.max(f,FIRST);
+}
+
+/* ── Monthly Active Learners by Teacher: the same calculation as the Monthly Active Learners page ── */
+function countsFor(name,pred){
+  const d=DATA[name],c={};
+  const bump=(k,key)=>{(c[k]=c[k]||{adm:0,due:0,ren:0})[key]++;};
+  const end=r=>{const t=parseDate(r[23]);return t&&t.getFullYear()>=2020&&t<=TODAY?t:null;};
+  d.fs.filter(pred).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'adm');const e=end(r);if(e)bump(mi(e),'due');});
+  d.rn.filter(pred).forEach(r=>{const t=parseDate(r[0]);if(t)bump(mi(t),'ren');const e=end(r);if(e)bump(mi(e),'due');});
+  return c;
+}
+function malSeries(names,pred){
+  const per=names.map(n=>countsFor(n,pred)),out={};let open=0;
+  for(let k=FIRST;k<=LAST;k++){const s={adm:0,due:0,ren:0};per.forEach(c=>{const x=c[k];if(x)for(const f in s)s[f]+=x[f];});open=open+s.adm-s.due+s.ren;out[k]=open;}
+  return MONTHS.map(k=>out[k]);
+}
+const yb=k=>(k===MONTHS[0]||Math.floor(k/12)!==Math.floor((k+1)/12))?' yb':'';
+function malCells(vals){return vals.map((x,i)=>`<td class="${x===0?'zero':x<0?'neg':''}${yb(MONTHS[i])}">${x<0?'−':''}${Math.abs(x).toLocaleString('en-IN')}</td>`).join('');}
+function head(label){
+  const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
+  return`<thead><tr class="yr"><th class="metric" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">${label}</th>${years.map(y=>`<th class="yb" colspan="${y.n}">${y.y}</th>`).join('')}</tr>
+    <tr class="mo">${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+}
+function renderMAL(names){
+  const el=document.getElementById('mal-t');
+  const rows=names.flatMap(n=>DATA[n].fs.concat(DATA[n].rn));
+  const totals=malSeries(names,()=>true);
+  const span={};
+  rows.forEach(r=>{const t=cell(r,29);if(!t)return;const d=parseDate(r[0]),e=parseDate(r[23]);const x=span[t]=span[t]||{first:Infinity,last:-Infinity,end:-Infinity};
+    if(d){x.first=Math.min(x.first,mi(d));x.last=Math.max(x.last,mi(d));}if(e&&e.getFullYear()>=2020)x.end=Math.max(x.end,mi(e));});
+  const adj=MONTHS.map(()=>0);
+  const tRows=Object.keys(span).map(t=>{const x=span[t],stop=Math.max(x.end,x.last),raw=malSeries(names,r=>cell(r,29)===t);
+    const vals=raw.map((val,i)=>{const k=MONTHS[i];if(k<x.first||k>stop){adj[i]+=val;return 0;}return val;});
+    return{t,vals,active:x.last>=LAST-2&&vals[0]>0};}).filter(x=>x.vals.some(y=>y!==0));
+  const act=tRows.filter(x=>x.active).sort((a,b)=>b.vals[0]-a.vals[0]||a.t.localeCompare(b.t));
+  const past=tRows.filter(x=>!x.active).sort((a,b)=>span[b.t].last-span[a.t].last||a.t.localeCompare(b.t));
+  // current teachers only: past teachers, entries with no teacher and the adjustment row are left out, so the Total adds up the rows shown
+  const sumV=MONTHS.map((_,i)=>act.reduce((s2,x)=>s2+x.vals[i],0));
+  let body=act.map(x=>`<tr><td class="metric">${esc(x.t)}</td>${malCells(x.vals)}</tr>`).join('');
+  el.innerHTML=head('Teacher')+'<tbody>'+body+`<tr class="tot"><td class="metric">Total</td>${malCells(sumV)}</tr></tbody>`;
+  document.getElementById('t-badge').textContent=MON[LAST%12]+' '+Math.floor(LAST/12)+': '+sumV[0].toLocaleString('en-IN')+' active · '+act.length+' current teacher'+(act.length===1?'':'s');
+}
+
+/* ── Renewals by teacher ──
+   Every row of Fresh Sales and Renewals is one membership (A date · D Learner ID · X end date · Z Renewal Status · AD teacher).
+   A membership counts as renewed when the same Learner ID has a later Renewals entry, or its Renewal Status says Renewed.
+   Cohort: memberships ending in the month (whole month), and how many of them have renewed so far — under the membership's teacher.
+   Collection efficiency: the same dues, against every renewal paid in the month — under the Teacher Name on the renewal row. */
+const DIMS={t:['Teacher',29],a:['Age group',6],c:['Course',8],l:['Course level',9]};
+let DIM=(()=>{const h=location.hash.slice(1),m={summary:'s',teacher:'t',age:'a',course:'c',level:'l'};if(m[h])return m[h];try{return localStorage.getItem('artium_rce_dim')||'s';}catch(e){return's';}})();
+const DK=()=>DIM==='s'?'t':DIM;   // Summary counts like By teacher: current teachers together
+const keyOf=t=>DK()==='t'?t.teacher:(cell(t.r,DIMS[DK()][1])||'Not given');
+function renewals(names){
+  const T=[];
+  names.forEach(n=>[['fs',DATA[n].fs],['rn',DATA[n].rn]].forEach(([tab,rows])=>rows.forEach(r=>{const date=parseDate(r[0]);if(!date)return;
+    T.push({tab,date,id:cell(r,3).toUpperCase(),end:valid(parseDate(r[23])),status:cell(r,25),teacher:cell(r,29),r,centre:n});})));
+  const byId=new Map();T.forEach(t=>{if(t.id)(byId.get(t.id)||byId.set(t.id,[]).get(t.id)).push(t);});
+  byId.forEach(l=>{l.sort((a,b)=>a.date-b.date);l.forEach((t,i)=>{
+    if(t.tab==='rn'&&i>0)t.prevTeacher=l[i-1].teacher;
+    const nx=l.find(x=>x!==t&&x.tab==='rn'&&x.date>t.date);if(t.tab==='rn'&&i>0)t.prev=l[i-1];
+    t.renewed=!!nx||/^renewed$/i.test(t.status);t.renOn=nx?nx.date:valid(parseDate(t.r[26]));});});
+  T.forEach(t=>{if(!t.id)t.renewed=/^renewed$/i.test(t.status);});
+  const coh={},act={},put=(o,t,k,f)=>{const a=o[t]=o[t]||{};(a[k]=a[k]||{due:0,ren:0,lost:0})[f]++;};
+  const DUEL={},PAIDL={},add=(o,t,k,x)=>{const a=o[t]=o[t]||{};(a[k]=a[k]||[]).push(x);};   // the learners behind each cell, for the list under the table
+  T.forEach(t=>{
+    if(t.end){const k=mi(t.end);if(k<=LAST){put(coh,t.teacher,k,'due');if(t.renewed)put(coh,t.teacher,k,'ren');else if(/will not renew|discontinu|refund/i.test(t.status))put(coh,t.teacher,k,'lost');put(act,keyOf(t),k,'due');add(DUEL,keyOf(t),k,t);}}
+    if(t.tab==='rn'){const k=mi(t.date),who=keyOf(t);put(act,who,k,'ren');add(PAIDL,who,k,t);}   // under the Teacher Name on the renewal row, as the sheet shows it
+  });
+  // When did each teacher last have an admission or renewal? (current = in the last 3 months)
+  const lastEntry={};T.forEach(t=>{if(t.teacher)lastEntry[t.teacher]=Math.max(lastEntry[t.teacher]||-Infinity,mi(t.date));});
+  if(DK()!=='t')Object.keys(act).forEach(k=>lastEntry[k]=LAST);   // age group, course, level: every row counts
+  return{coh,act,lastEntry,DUEL,PAIDL};
+}
+const band=p=>{const r=Math.round(p);return r>90?'top':r>70?'hi':r>50?'mid':'lo';};   // up to 50% red · 51–70% amber · 71–90% green · above 90% blue
+function rrCell(x,k,pk){
+  const c=yb(k)+(pk&&pk.startsWith('act|')&&PER.mode==='m'&&k===PER.k?' pick':''),on=pk&&SELP&&SELP.key===pk?' sel':'',at=pk?` data-pk="${esc(pk)}" tabindex="0" role="button" title="See these learners"`:'';
+  if(!x||(!x.due&&!x.ren))return`<td class="zero${c}">—</td>`;
+  if(!x.due)return`<td class="pk${c}${on}"${at}><span class="util xtra">+${x.ren}</span><small>none due</small></td>`;
+  const p=x.ren/x.due*100;
+  return`<td class="pk${c}${on}"${at}><span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren} of ${x.due}</small></td>`;
+}
+/* Summary columns before the months, in groups that fold away sideways with one click (remembered per table):
+   Over time — Last 3, 6, 12 months and Lifetime, all completed months only (the current month is left out); renewed and due are added up first, then the %.
+   This year so far (Cohort Renewals only) — memberships ending from January to this month: due, renewed, still to renew. */
+const GROUPS={
+  sel:{title:'Selected',cols:[['sel','Dates']]},   // Renewal Collection Efficiency, Date range only
+  perf:{title:'Over time',cols:[['m3','Last 3M',3],['m6','Last 6M',6],['m12','Last 12M',12],['life','Lifetime',Infinity]]},
+  year:{title:()=>Math.floor(LAST/12)+' so far',cols:[['ydue','Due'],['yren','Renewed'],['ypct','% Renewed'],['yleft','Yet to renew'],['ylost',"Will not renew"],['yopp','Opportunity']]}
+};
+const FOLD=(()=>{try{return JSON.parse(localStorage.getItem('artium_tp_fold')||'{}');}catch(e){return{};}})();
+const SORT={};
+function fold(id,g){FOLD[id+'.'+g]=!FOLD[id+'.'+g];try{localStorage.setItem('artium_tp_fold',JSON.stringify(FOLD));}catch(e){}
+  document.getElementById(id).classList.toggle('fold-'+g,!!FOLD[id+'.'+g]);}
+function sortBy(id,key){SORT[id]=SORT[id]===key?null:key;render();}
+function sumWin(m,a,b){const s={due:0,ren:0,lost:0};if(!m)return s;for(const k in m){const n=+k;if(n>=a&&n<=b){s.due+=m[k].due;s.ren+=m[k].ren;s.lost+=m[k].lost||0;}}return s;}
+function stats(m){
+  const r={sel:(m&&m.__sel)||{due:0,ren:0,lost:0}};GROUPS.perf.cols.forEach(([key,,n])=>r[key]=sumWin(m,n===Infinity?-Infinity:LAST-n,LAST-1));
+  const y=sumWin(m,Math.floor(LAST/12)*12,LAST);r.ydue=y.due;r.yren=y.ren;r.yleft=y.due-y.ren;r.ylost=y.lost;r.yopp=r.yleft-r.ylost;r.ypct=y.due?y.ren/y.due*100:null;
+  return r;
+}
+const pctOf=x=>x&&x.due?x.ren/x.due*100:null;
+function sumCells(g,s){
+  if(g==='perf'||g==='sel')return GROUPS[g].cols.map(([key],i)=>{const x=s[key],p=pctOf(x);
+    return`<td class="sg sg-${g}${i===0?' g0':''}"><div class="sw">${p==null?'<span class="na">—</span>':`<span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren.toLocaleString('en-IN')} of ${x.due.toLocaleString('en-IN')}</small>`}</div></td>`;}).join('')+'<td class="gh"></td>';
+  const n=v=>v?v.toLocaleString('en-IN'):'<span class="na">0</span>';
+  return`<td class="sg sg-year g0"><div class="sw"><b class="num">${n(s.ydue)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num">${n(s.yren)}</b></div></td><td class="sg sg-year"><div class="sw">${s.ypct==null?'<span class="na">—</span>':`<span class="util ${band(s.ypct)}">${Math.round(s.ypct)}%</span>`}</div></td>
+    <td class="sg sg-year"><div class="sw"><b class="num">${n(s.yleft)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num lost">${n(s.ylost)}</b></div></td>
+    <td class="sg sg-year"><div class="sw"><b class="num left">${n(s.yopp)}</b></div></td><td class="gh"></td>`;
+}
+function rrTable(id,o,lastEntry,groups){
+  const all={};Object.values(o).forEach(a=>Object.keys(a).forEach(k=>{const s=all[k]=all[k]||{due:0,ren:0,lost:0};s.due+=a[k].due;s.ren+=a[k].ren;s.lost+=a[k].lost||0;}));
+  const inView=t=>MONTHS.some(k=>o[t][k]&&(o[t][k].due||o[t][k].ren));
+  const names=Object.keys(o).filter(t=>t&&inView(t));
+  const ST={};names.concat(['']).forEach(t=>ST[t]=stats(o[t]));const STall=stats(all);
+  const cur=names.filter(t=>lastEntry[t]>=LAST-2),past=names.filter(t=>!(lastEntry[t]>=LAST-2));
+  const dueNow=t=>((o[t][LAST]||{}).due||0)+((o[t][LAST-1]||{}).due||0);
+  const sk=SORT[id],val=t=>{const v=ST[t][sk];return v==null?-1:typeof v==='number'?v:pctOf(v)==null?-1:pctOf(v);};
+  const order=(a,b)=>sk?val(b)-val(a)||a.localeCompare(b):dueNow(b)-dueNow(a)||a.localeCompare(b);
+  cur.sort(order);
+  if(id==='act'&&!sk&&DK()!=='t'){const ag=DK()==='a',nv=x=>x==='Not given'?1:0;cur.sort((a,b)=>nv(a)-nv(b)||(ag?(parseInt(a)||999)-(parseInt(b)||999):0)||(ag?0:dueNow(b)-dueNow(a))||a.localeCompare(b));}   // age groups youngest first; Not given lastpast.sort((a,b)=>sk?order(a,b):(lastEntry[b]||0)-(lastEntry[a]||0)||a.localeCompare(b));
+  const sums=s=>groups.map(g=>sumCells(g,s)).join('');
+  const row=(t,cls,label)=>`<tr class="${cls}"><td class="metric">${label}</td>${sums(ST[t])}${MONTHS.map(k=>rrCell(o[t][k],k,id+'|'+t+'|'+k)).join('')}</tr>`;
+  let body=cur.map(t=>row(t,'',esc(t))).join('');
+  // current teachers only (past teachers and entries with no teacher are left out), and their total
+  const curAll={};cur.forEach(t=>Object.keys(o[t]).forEach(k=>{const s=curAll[k]=curAll[k]||{due:0,ren:0,lost:0};s.due+=o[t][k].due;s.ren+=o[t][k].ren;s.lost+=o[t][k].lost||0;}));
+  body+=`<tr class="tot"><td class="metric">Total</td>${sums(stats(curAll))}${MONTHS.map(k=>rrCell(curAll[k],k,id+'|*|'+k)).join('')}</tr>`;
+  // Header: the group's title spans its columns; a slim handle at the end folds the group away and stays as a vertical tab
+  const CHEV='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
+  const gTop=groups.map(g=>{const G=GROUPS[g],t=typeof G.title==='function'?G.title():G.title;
+    return`<th class="sg sg-${g} g0 gt" colspan="${G.cols.length}"><div class="sw">${t}</div></th><th class="gh" rowspan="2"><button type="button" class="gbtn" onclick="fold('${id}','${g}')" aria-label="Show or hide ${t}">${CHEV}<span>${t}</span></button></th>`;}).join('');
+  const gMo=groups.map(g=>GROUPS[g].cols.map(([key,l],i)=>`<th class="sg sg-${g}${i===0?' g0':''}${sk===key?' on':''}"><div class="sw"><button type="button" class="sbtn" onclick="sortBy('${id}','${key}')">${l}${sk===key?' ↓':''}</button></div></th>`).join('')).join('');
+  const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
+  const hd=`<thead><tr class="yr"><th class="metric" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">${id==='act'?DIMS[DK()][0]:'Teacher'}</th>${gTop}${years.map(y=>`<th class="yb" colspan="${y.n}">${y.y}</th>`).join('')}</tr>
+    <tr class="mo">${gMo}${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}${id==='act'&&PER.mode==='m'&&k===PER.k?' pick':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+  const el=document.getElementById(id);el.innerHTML=hd+'<tbody>'+body+'</tbody>';
+  groups.forEach(g=>el.classList.toggle('fold-'+g,!!FOLD[id+'.'+g]));
+  return{all:curAll,cur};
+}
+const LGD='<span class="util lo">Up to 50%</span><span class="util mid">51–70%</span><span class="util hi">71–90%</span><span class="util top">Above 90%</span><span>Each cell: renewal % and renewed of due. Click one to see the learners.</span>';
+
+/* ── The learners behind a cell: click a pill and the list opens under the table ──
+   Due = memberships ending in that month under that teacher. Each shows whether it has renewed (whenever it was paid).
+   On Renewals Closed in the Month, renewals paid in the month for a membership due in another month (late or in advance) are listed separately. */
+const PER={mode:'m',k:LAST,from:'',to:''};   // Renewal Collection Efficiency: the month, or the dates, picked at the top
+let SELP=null;   // {key:'act|Balu|24310', tb, t, k, f:'all'|'ren'|'not'|'other'}
+const fd=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'–';
+const ml=k=>MON[k%12]+' '+String(Math.floor(k/12)).slice(2);
+/* In the pipeline = not renewed, not marked Will not renew, and has a promised payment date (column 34) and an expected amount (column 35), the same rule as the Renewal Pipeline page */
+const numOf=s=>s?parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0:0;
+const inrOf=x=>'₹'+Math.round(x).toLocaleString('en-IN');
+const lostOf=x=>/will not renew|discontinu|refund/i.test(x.status);
+// any other status the team has written in the sheet (Transfer to Online, Paused, Inactive…): shown as it is, and left out of To call
+const sheetSt=x=>{const s=String(x.status||'').trim();return s&&!/^(due|not yet due|renewed)$/i.test(s)&&!lostOf(x)?s:'';};
+const pipeOf=x=>{if(x.pp===undefined){const d=valid(parseDate(x.r[33])),a=numOf(x.r[34]);x.pp=!x.renewed&&!lostOf(x)&&d&&a>0?{d,a}:null;}return x.pp;};
+function cellLists(tb,t,k){
+  if(!R)return{due:[],other:[]};const rn=R.rn,cur=R[tb==='coh'?'a':'b'].cur,who=t==='*'?cur:[t];
+  const due=[],paid=[];who.forEach(w=>{((rn.DUEL[w]||{})[k]||[]).forEach(x=>due.push(x));((rn.PAIDL[w]||{})[k]||[]).forEach(x=>paid.push(x));});
+  // paid in the month, but for a membership that was due in another month
+  const other=tb==='act'?paid.filter(x=>!(x.prev&&x.prev.end&&mi(x.prev.end)===k)):[];
+  return{due,other};
+}
+/* Open row and Add note. The data service sends each entry's row number in its tab (r[40]) and, for the links, each centre's sheet and tab ids.
+   Add note writes only to the Latest Discussion cell: the note goes on top, dated, and what was there stays below it. */
+let LINKS=null,CAN_NOTE=[],NOTE=null;const NROWS={};
+const rk=x=>[x.centre,x.tab,cell(x.r,3).toUpperCase(),cell(x.r,23)].join('|');
+const rowLink=x=>{const L=LINKS&&LINKS[x.centre];if(!L)return'#';return`https://docs.google.com/spreadsheets/d/${encodeURIComponent(L.id)}/edit#gid=${L.gids[x.tab==='rn'?'Renewals':'Fresh Sales']}&range=A${x.r[40]}`;};
+const today=()=>{const d=new Date();return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();};
+const STATUS_OPTS=['Renewed','Due','Not Yet Due','Will Not Renew','Extended','Paused','May Resume Later','Inactive','Dormant','Course Completed','Refund','Transfer to Other centre','Transfer to Online'];   // from the sheet's own dropdown when live
+const statusOpts=x=>{const L=LINKS&&LINKS[x.centre],o=(L&&L.status&&L.status[x.tab==='rn'?'Renewals':'Fresh Sales'])||STATUS_OPTS,c=cell(x.r,25);return c&&!o.includes(c)?[c].concat(o):o;};
+const isoOf=s=>{const d=valid(parseDate(s));return d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'';};
+function noteRow(x){
+  const r=x.r,v=(i,ph)=>esc(cell(r,i))||`<span class="mut">${ph||'Empty'}</span>`;
+  const fld=(lab,now,inp)=>`<label class="ef"><span class="efl">${lab}</span>${inp}<small>In the sheet now: ${now}</small></label>`;
+  return`<tr class="ntr"><td colspan="20"><div class="ntb">
+    <div class="eh"><div><b>Update ${esc(cell(r,4))}</b><span>${esc(x.centre)} · ${x.tab==='rn'?'Renewals':'Fresh Sales'} · row ${r[40]}</span></div>
+      <div class="ek"><span>Checked before saving:</span><i>ID ${esc(cell(r,3))}</i><i>${esc(cell(r,4))}</i><i>${esc(String(cell(r,7)).replace(/\D/g,'').slice(-10))}</i><i>Expiry ${esc(cell(r,23))}</i></div></div>
+    <div class="eg">
+      <div class="ef wide"><span class="efl">Latest discussion · add a note</span><div class="ntf"><span class="ntd">${today()}:</span><textarea id="ntx" rows="2" placeholder="What was discussed? e.g. Spoke to the parent, will pay after the 25th.">${esc(NOTE.t||'')}</textarea></div>
+        <small>Goes on top with today's date, then a line break, then what's already there:</small><div class="prev">${v(32,'No discussion yet')}</div></div>
+      ${fld('Expected payment date',v(33),`<input type="date" id="e-pay" value="${isoOf(cell(r,33))}">`)}
+      ${fld('Expected collections',v(34),`<input type="number" min="0" step="1" id="e-coll" value="${esc(/^\d+(\.\d+)?$/.test(cell(r,34).replace(/[,\s₹]/g,''))?String(Math.round(+cell(r,34).replace(/[,\s₹]/g,''))):'')}" placeholder="₹">`)}
+      ${fld('Renewal status',v(25),`<select id="e-st">${cell(r,25)?'':'<option value="">Not set</option>'}${statusOpts(x).map(o=>`<option${o===cell(r,25)?' selected':''}>${o}</option>`).join('')}</select>`)}
+      ${fld('Actual renewal date',v(26),`<input type="date" id="e-rd" value="${isoOf(cell(r,26))}">`)}
+      ${fld('Actual package completion date',v(39),`<input type="date" id="e-cd" value="${isoOf(cell(r,39))}">`)}
+      ${fld('No. of compensations due',v(38),`<input type="number" min="0" step="1" id="e-cp" value="${esc(cell(r,38))}" placeholder="0">`)}
+      ${fld('Extension · no. of days',v(37),`<input type="number" min="0" step="1" id="e-ex" value="${esc(cell(r,37))}" placeholder="0">`)}
+    </div>
+    <div class="nta"><span class="nth">Only the details you change are written. If anyone has changed one of these cells since you opened this, nothing is saved and you'll see the newer value.</span>
+    <button type="button" class="ntc" data-notex>Cancel</button><button type="button" class="nts" data-notes${NOTE.busy?' disabled':''}>${NOTE.busy?'Saving…':'Save to sheet'}</button></div>
+    ${NOTE.err?`<div class="nte">${esc(NOTE.err)}</div>`:''}</div></td></tr>`;
+}
+/* Save: only what changed is sent, with what the page showed, so the service can check nobody changed it in the meantime */
+const FIELD={desc:32,status:25,renDate:26,done:39,comp:38,ext:37,pay:33,coll:34};
+async function saveNote(){
+  const rr=NROWS[NOTE.k];if(!rr)return;
+  const [c,tab]=NOTE.k.split('|'),val=id=>(document.getElementById(id)||{}).value||'';
+  const form={desc:val('ntx').trim(),status:val('e-st'),renDate:val('e-rd'),done:val('e-cd'),comp:val('e-cp').trim(),ext:val('e-ex').trim(),pay:val('e-pay'),coll:val('e-coll').trim()};
+  const cur={desc:'',status:cell(rr,25),renDate:isoOf(cell(rr,26)),done:isoOf(cell(rr,39)),comp:/^\d+$/.test(cell(rr,38))?cell(rr,38):'',ext:/^\d+$/.test(cell(rr,37))?cell(rr,37):'',pay:isoOf(cell(rr,33)),coll:/^\d+(\.\d+)?$/.test(cell(rr,34).replace(/[,\s₹]/g,''))?String(Math.round(+cell(rr,34).replace(/[,\s₹]/g,''))):''};   // a non-number in the sheet shows as empty and is left alone unless you type one
+  const changes={},before={};
+  Object.keys(form).forEach(f=>{if(f==='desc'?form.desc:form[f]!==cur[f]){changes[f]=form[f];before[f]=cell(rr,FIELD[f]);}});
+  NOTE.t=form.desc;
+  if(!Object.keys(changes).length){NOTE.err='Nothing has changed yet.';plRender(NOTE.tb);return;}
+  NOTE.busy=true;NOTE.err='';plRender(NOTE.tb);
+  try{
+    const j=await ArtiumAuth.call('learnerUpdate',{centre:c,tab:tab==='rn'?'Renewals':'Fresh Sales',id:cell(rr,3),name:cell(rr,4),phone:cell(rr,7),end:cell(rr,23),changes,before});
+    if(j&&j.error==='changed'){Object.keys(j.current||{}).forEach(f=>rr[FIELD[f]]=j.current[f]);if(j.row)rr[40]=j.row;
+      throw new Error('Someone changed '+j.fields.map(f=>({desc:'Latest Discussion',status:'Renewal Status',renDate:'Actual Renewal Date',done:'Actual Package Completion Date',comp:'Compensations',ext:'Extension',pay:'Expected Payment Date',coll:'Expected Collections'})[f]).join(', ')+' in the sheet after you opened this. The newer value is shown now. Nothing was saved, so please check and save again.');}
+    if(j&&j.error)throw new Error(j.error==='not-found'?'Couldn’t find exactly this learner in the sheet (the Student ID, name, phone number or package expiry date has changed). Nothing was saved. Please use Open row.'
+      :j.error==='many'?'More than one row has this Student ID, name, phone number and expiry date, so nothing was saved. Please use Open row.':j.error==='not-allowed'?'You can only edit learners at your own centre.':j.error);
+    Object.keys(j.values||{}).forEach(f=>rr[FIELD[f]]=j.values[f]);if(j.row)rr[40]=String(j.row);
+    const nm=cell(rr,4);NOTE=null;plRender(SELP.tb);toast('Saved to the sheet · '+nm);return;
+  }catch(e){NOTE.busy=false;NOTE.err=e.message||String(e);}
+  plRender(SELP.tb);
+}
+function toast(t){let el=document.getElementById('tp-toast');if(!el){el=document.createElement('div');el.id='tp-toast';document.body.appendChild(el);}
+  el.textContent=t;el.className='on';clearTimeout(el._t);el._t=setTimeout(()=>el.className='',3200);}
+function plRender(tb){
+  const box=document.getElementById(tb+'-pl');if(!box)return;
+  if(!SELP||SELP.tb!==tb||!R){box.innerHTML='';return;}
+  const {t,k}=SELP,{due,other}=cellLists(tb,t,k),ren=due.filter(x=>x.renewed),not=due.filter(x=>!x.renewed),pip=not.filter(pipeOf),call=not.filter(x=>!pipeOf(x)&&!lostOf(x)&&!sheetSt(x));
+  const f=SELP.f==='other'&&!other.length?'all':SELP.f,list=(f==='ren'?ren:f==='not'?not:f==='call'?call:f==='pipe'?pip:f==='other'?other:due).slice().sort((a,b)=>(a.end||a.date)-(b.end||b.date));
+  const allC=selCentre==='All',many=t==='*',pc=f!=='ren'&&f!=='other',td0=new Date();td0.setHours(0,0,0,0);
+  const st=x=>{if(f==='other'){const pe=x.prev&&x.prev.end;return`<span class="stt ok">Renewed ${fd(x.date)}</span><small>${pe?(mi(pe)<k?'was due '+ml(mi(pe))+' (late)':'due '+ml(mi(pe))+' (in advance)'):'no earlier membership found'}</small>`;}
+    if(x.renewed)return`<span class="stt ok">Renewed${x.renOn?' '+fd(x.renOn):''}</span>`;
+    if(/will not renew|discontinu|refund/i.test(x.status))return`<span class="stt bad">Will not renew</span>${cell(x.r,28)?`<small>${esc(cell(x.r,28))}</small>`:''}`;
+    const pp=pipeOf(x);if(pp)return`<span class="stt pipe">In pipeline</span><small class="pd${pp.d<td0?' od':''}">Promised for ${fd(pp.d)}${pp.d<td0?' · overdue':''}</small>`;
+    const ss=sheetSt(x);if(ss)return`<span class="stt oth">${esc(ss)}</span><small>(Not renewed yet)</small>`;   // what the team wrote, then what the dates say
+    return`<span class="stt wait">Not renewed yet</span>`;};
+  const row=x=>{const pp=f!=='other'&&pipeOf(x),r=x.r,ph=String(r[7]||'').replace(/\D/g,'').slice(-10),src=f==='other'&&x.prev?x.prev:x;
+    return`<tr${pp?' class="inp"':''}><td class="who"><b>${esc(cell(r,4))||'–'}</b>${allC?`<small>${esc(x.centre)}</small>`:''}</td><td class="rw">${src.r[40]?`<b>${src.r[40]}</b><small>${src.tab==='rn'?'Renewals':'Fresh Sales'}</small>`:'<span class="mut">–</span>'}</td>
+      <td class="act">${src.r[40]&&LINKS?`<a class="go" href="${rowLink(src)}" target="artium_sheet" rel="noopener" title="Opens in one Google Sheets tab, reused for every row">Open row<svg viewBox="0 0 24 24"><path d="M7 17L17 7M8 7h9v9"/></svg></a>`:''}${CAN_NOTE.includes(src.centre)&&src.r[40]?`<button type="button" class="nt" data-note="${esc(rk(src))}">Edit</button>`:''}${window.RowEdit?RowEdit.pkgButton(src):''}</td><td>${ph?`<a href="tel:${ph}">${ph.replace(/(\d{5})(\d{5})/,'$1 $2')}</a>`:'–'}</td><td>${esc(cell(r,8))||'–'}</td><td>${esc(cell(r,6))||'–'}</td><td>${esc(cell(r,9))||'–'}</td>${many?`<td>${esc(f==='other'&&x.prev?x.prev.teacher:x.teacher)||'–'}</td>`:''}
+      <td>${fd(src.end)}</td><td class="st">${st(x)}</td>${pc?`<td class="pc">${pp?fd(pp.d):'<span class="mut">–</span>'}</td><td class="pc">${pp?inrOf(pp.a):'<span class="mut">–</span>'}</td>`:''}<td class="ds">${(NROWS[rk(src)]=src.r,'')}${esc(cell(src.r,32))||'<span class="mut">–</span>'}</td></tr>
+      ${NOTE&&NOTE.k===rk(src)?noteRow(src):''}`;};
+  const chip=(v,l,n)=>`<button type="button" data-plf="${v}" aria-pressed="${f===v}">${l}<i>${n}</i></button>`;
+  const title=(many?(DK()==='t'?'All current teachers':'All learners'):esc(t))+' · '+(tb==='act'?'due in ':'cohort ending ')+ml(k);
+  box.innerHTML=`<div class="plh"><div><b>${title}</b><span>${due.length} due · ${ren.length} renewed · ${not.length} not renewed · ${pip.length} in pipeline · ${call.length} to call</span></div>
+    <div class="plt" role="group" aria-label="Show">${chip('all','All due',due.length)}${chip('ren','Renewed',ren.length)}${chip('not','Not renewed',not.length)}<span class="sep"></span>${chip('call','To call',call.length)}${chip('pipe','In pipeline',pip.length)}${other.length?chip('other','Paid in '+MON[k%12]+', due another month',other.length):''}</div>
+    <button type="button" class="plx" data-plx aria-label="Close the list">✕</button></div>
+    ${pc&&list.some(x=>pipeOf(x))?`<p class="pln">Learners shaded in violet are <b>already in the pipeline</b>: they have a promised payment date and an expected amount, so they don't need a call. To call leaves out the pipeline, anyone marked Will not renew, and anyone with another status in the sheet (such as Transfer to Online or Paused).</p>`:''}
+    ${tb==='act'&&other.length&&f!=='other'?`<p class="pln">The renewed figure in the cell counts every renewal paid in ${ml(k)}, including ${other.length} late or advance payment${other.length===1?'':'s'} listed under the last button.</p>`:''}
+    ${list.length?`<div class="plw"><table class="plt2"><thead><tr><th class="who">Learner</th><th>Row</th><th></th><th>Mobile</th><th>Course</th><th>Age group</th><th>Course level</th>${many?'<th>Teacher</th>':''}<th>Membership end date</th><th>Status</th>${pc?'<th class="pc">Expected payment date</th><th class="pc">Expected collections</th>':''}<th>Latest discussion</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div>`
+      :'<div class="ple">No learners here.</div>'}`;
+}
+function plOpen(pk){
+  const [tb,t,k]=pk.split('|');
+  if(SELP&&SELP.key===pk)SELP=null;else SELP={key:pk,tb,t,k:+k,f:(SELP&&SELP.f)||'all'};
+  document.querySelectorAll('table.rr td.pk').forEach(td=>td.classList.toggle('sel',!!SELP&&td.dataset.pk===SELP.key));
+  plRender('act');
+  if(SELP){const b=document.getElementById(tb+'-pl');if(b)b.scrollIntoView({behavior:'smooth',block:'nearest'});}
+}
+document.addEventListener('click',e=>{
+  const c=e.target.closest('td.pk[data-pk]');if(c){plOpen(c.dataset.pk);return;}
+  const f=e.target.closest('[data-plf]');if(f&&SELP){SELP.f=f.dataset.plf;plRender(SELP.tb);return;}
+  const nb=e.target.closest('[data-note]');if(nb&&SELP){NOTE=NOTE&&NOTE.k===nb.dataset.note?null:{k:nb.dataset.note,tb:SELP.tb,t:''};plRender(SELP.tb);const tx=document.getElementById('ntx');if(tx)tx.focus();return;}
+  if(e.target.closest('[data-notex]')){NOTE=null;if(SELP)plRender(SELP.tb);return;}
+  if(e.target.closest('[data-notes]')){saveNote();return;}
+  if(e.target.closest('[data-plx]')){SELP=null;document.querySelectorAll('table.rr td.pk.sel').forEach(td=>td.classList.remove('sel'));plRender('act');}
+});
+document.addEventListener('keydown',e=>{const c=e.target.closest&&e.target.closest('td.pk[data-pk]');if(c&&(e.key==='Enter'||e.key===' ')){e.preventDefault();plOpen(c.dataset.pk);}});
+
+let selCentre=(()=>{try{const v=localStorage.getItem('artium_tp_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
+document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;SELP=null;try{localStorage.setItem('artium_tp_centre',selCentre);}catch(e){}render();});
+
+let R=null;
+function render(){
+  const sel=CENTRES.find(c=>c.name===selCentre);
+  document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
+  hdr();
+  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
+  const names=sel?[sel.name]:CENTRES.map(c=>c.name);
+  if(!LOADED()){document.getElementById('act').innerHTML='<tbody><tr><td class="metric">Loading…</td></tr></tbody>';return;}
+  const from=firstMonth(names);MONTHS=[];for(let k=LAST;k>=from;k--)MONTHS.push(k);
+  const rn=renewals(names);
+  const rg=PER.mode==='r'?rangeAttach(rn,rn.act):null;
+  const b=rrTable('act',rn.act,rn.lastEntry,rg?['sel','perf']:['perf']),a=b;
+  const pc=x=>x&&x.due?Math.round(x.ren/x.due*100)+'%':'—',lbl=MON[LAST%12]+' '+Math.floor(LAST/12);
+  document.getElementById('act-lgd').innerHTML=LGD.replace('renewal % and renewed of due','collection % and collected of due');
+  actView(b,rg);
+  R={a,b,rn};
+  plRender('act');
+}
+/* ── Renewal Collection Efficiency ──
+   Due = memberships whose original package expiry date (column X) falls in the period.
+   Collected = renewals whose date of renewal (column A of the Renewals tab) falls in the period, whichever month they were due in.
+   So a learner due in September who pays in October counts in October, and September's figure stays as it was. */
+const TT={'sec-t':'Learners by Teacher','sec-coh':'Cohort Renewals','sec-act':'Renewal Collection Efficiency'};
+function hdr(){
+  const sel=CENTRES.find(c=>c.name===selCentre),place=sel?sel.name+', '+sel.city:'All centres';
+  document.getElementById('subtitle').textContent=place+'.';
+  document.querySelectorAll('[data-dim]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.dim===DIM));
+  const q=document.getElementById('act-q'),s=document.getElementById('sec-act');
+  q.hidden=DIM!=='s';s.hidden=DIM==='s';
+  document.querySelector('#sec-act .tray-title').textContent=DIM==='s'?'':'Collected against due, by '+DIMS[DIM][0].toLowerCase();
+  if(DIM==='s')requestAnimationFrame(()=>{chScroll();if(CHP.length)drawTrend(Math.max(100,...CHP.filter(o=>o.v!=null).map(o=>o.v))*1.08);});
+}
+function setDim(d,push){DIM=d;SELP=null;try{localStorage.setItem('artium_rce_dim',d);}catch(e){}
+  const h=(document.querySelector(`[data-dim="${d}"]`)||{}).dataset;if(h&&push!==false)history.replaceState(null,'','#'+h.h);render();window.scrollTo(0,0);}
+document.getElementById('tsub').addEventListener('click',e=>{const b=e.target.closest('[data-dim]');if(b)setDim(b.dataset.dim);});
+window.addEventListener('hashchange',()=>{const m={summary:'s',teacher:'t',age:'a',course:'c',level:'l'}[location.hash.slice(1)];if(m&&m!==DIM)setDim(m,false);});
+/* Hover on a month's cell: the collected renewals split by package length (No. of Months), e.g. 1M × 6 · 3M × 3 · 6M × 1 = 10 */
+(function(){
+  const tip=document.body.appendChild(Object.assign(document.createElement('div'),{id:'mix',hidden:true}));
+  document.addEventListener('mouseover',e=>{
+    const td=e.target.closest&&e.target.closest('#act td.pk[data-pk]');
+    if(!td||!R){tip.hidden=true;return;}
+    const [,w,k]=td.dataset.pk.split('|'),K=+k,rn=R.rn,who=w==='*'?R.b.cur:[w];
+    const paid=[];who.forEach(x=>((rn.PAIDL[x]||{})[K]||[]).forEach(y=>paid.push(y)));
+    if(!paid.length){tip.hidden=true;return;}
+    const c={};paid.forEach(x=>{const m=numOf(x.r[12])||0;c[m]=(c[m]||0)+1;});
+    const ks=Object.keys(c).map(Number).sort((a,b)=>a-b);
+    tip.innerHTML=`<div class="h">Collected · ${esc(w==='*'?'Total':w)} · ${ml(K)}</div>`+ks.map(m=>`<div class="r"><span>${m?m+'M':'Not given'}</span><b>× ${c[m]}</b></div>`).join('')+`<div class="t"><span>Total</span><span>${paid.length}</span></div>`;
+    tip.hidden=false;const r=td.getBoundingClientRect(),W=tip.offsetWidth,H=tip.offsetHeight;
+    let x=r.left+r.width/2-W/2,y=r.top-H-10;if(y<8)y=r.bottom+10;x=Math.max(8,Math.min(innerWidth-W-8,x));
+    tip.style.left=x+'px';tip.style.top=y+'px';
+  });
+  document.addEventListener('scroll',()=>tip.hidden=true,true);
+})();
+const dIn=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const dOut=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dShort=(d,y)=>d.getDate()+' '+MON[d.getMonth()]+(y?' '+String(d.getFullYear()).slice(2):'');
+function rangeAttach(rn,o){
+  const f=dIn(PER.from),t=dIn(PER.to);if(!f||!t||f>t)return null;
+  const a=mi(f),b=Math.min(mi(t),LAST);
+  new Set(Object.keys(rn.DUEL).concat(Object.keys(rn.PAIDL))).forEach(w=>{let due=0,ren=0;
+    for(let k=a;k<=b;k++){((rn.DUEL[w]||{})[k]||[]).forEach(x=>{if(x.end>=f&&x.end<=t)due++;});((rn.PAIDL[w]||{})[k]||[]).forEach(x=>{if(x.date>=f&&x.date<=t)ren++;});}
+    if(due||ren){o[w]=o[w]||{};o[w].__sel={due,ren,lost:0};}});
+  const yy=f.getFullYear()!==t.getFullYear();GROUPS.sel.cols[0][1]=dShort(f,yy)+' – '+dShort(t,yy);
+  return{f,t};
+}
+const pcN=x=>x&&x.due?x.ren/x.due*100:null;
+function actView(b,rg){
+  const all=b.all,MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const lab=k=>MN[k%12]+' '+Math.floor(k/12);
+  // the picker
+  document.querySelectorAll('[data-pm]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.pm===PER.mode));
+  document.getElementById('per-m').style.display=PER.mode==='m'?'contents':'none';document.getElementById('per-r').hidden=PER.mode!=='r';
+  document.getElementById('per-l').textContent=lab(PER.k);
+  const lo=MONTHS[MONTHS.length-1];
+  document.querySelector('[data-pstep="-1"]').disabled=PER.k<=lo;document.querySelector('[data-pstep="1"]').disabled=PER.k>=LAST;
+  // the two tiles
+  let x,when,cmp='';
+  if(PER.mode==='r'){x=rg?all.__sel:null;when=rg?dShort(rg.f,true)+' to '+dShort(rg.t,true):'Pick both dates';}
+  else{x=all[PER.k];when=lab(PER.k)+(PER.k===LAST?' so far':'');
+    const p=pcN(x),q=pcN(all[PER.k-1]);
+    if(p!=null&&q!=null&&PER.k!==LAST){const d=Math.round(p)-Math.round(q);cmp=d?`<span class="${d>0?'dup':'ddn'}">${d>0?'▲':'▼'} ${Math.abs(d)} pts on ${ml(PER.k-1)}</span>`:`<span>Same as ${ml(PER.k-1)}.</span>`;}}
+  const p=pcN(x),l3=sumWin(all,LAST-3,LAST-1),p3=pcN(l3);
+  document.getElementById('act-tiles').innerHTML=
+    `<div class="m hero"><span class="t">Collection efficiency</span><span class="v">${p==null?'—':Math.round(p)+'%'}</span><span class="s">${x&&x.due?x.ren.toLocaleString('en-IN')+' collected of '+x.due.toLocaleString('en-IN')+' due, ':''}${esc(when)}.${cmp?'<br>'+cmp:''}</span></div>`+
+    `<div class="m"><span class="t">Last 3 months</span><span class="v">${p3==null?'—':Math.round(p3)+'%'}</span><span class="s">${l3.ren.toLocaleString('en-IN')} of ${l3.due.toLocaleString('en-IN')}, ${ml(LAST-3)} to ${ml(LAST-1)}.</span></div>`;
+  document.getElementById('act-badge').textContent=(PER.mode==='r'?(rg?dShort(rg.f,true)+' – '+dShort(rg.t,true):'Dates'):lab(PER.k))+': '+(p==null?'—':Math.round(p)+'%')+(PER.mode==='m'&&PER.k===LAST?' so far':'');
+  chart(all,lab);
+}
+/* The chart under the question: MoM, QoQ or YoY, the trend line, and gold, silver and bronze for the three best periods shown */
+const CH={v:'m',r:12};
+function chPeriods(all){
+  const ks=MONTHS.slice().reverse(),yy=k=>String(Math.floor(k/12)).slice(2);
+  if(CH.v==='m'){const L=ks.map(k=>({a:k,b:k,l:[MON[k%12],yy(k)],x:all[k]||{due:0,ren:0}}));return CH.r==='all'?L:L.slice(-CH.r);}
+  const G=new Map();ks.forEach(k=>{const g=CH.v==='q'?Math.floor(k/3):Math.floor(k/12);let o=G.get(g);
+    if(!o)G.set(g,o={a:k,b:k,l:CH.v==='q'?['Q'+(g%4+1),yy(k)]:[String(Math.floor(k/12)),''],x:{due:0,ren:0}});
+    o.b=k;const x=all[k];if(x){o.x.due+=x.due;o.x.ren+=x.ren;}});
+  return[...G.values()];
+}
+const pLab=P=>P.l[1]?P.l[0]+' '+P.l[1]:P.l[0];
+function pRange(P){return{f:new Date(Math.floor(P.a/12),P.a%12,1),t:P.b===LAST?TODAY:new Date(Math.floor(P.b/12),P.b%12+1,0)};}
+function chart(all,lab){
+  document.querySelectorAll('[data-chv]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.chv===CH.v));
+  document.querySelectorAll('[data-chr]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.chr===String(CH.r)));
+  document.getElementById('ch-r').hidden=CH.v!=='m';
+  const P=chPeriods(all);P.forEach(o=>{o.v=pcN(o.x);o.now=o.b===LAST;
+    if(CH.v==='m')o.on=PER.mode==='m'&&o.a===PER.k;else{const r=pRange(o);o.on=PER.mode==='r'&&PER.from===dOut(r.f)&&PER.to===dOut(r.t);}});
+  const done=P.filter(o=>o.v!=null&&!o.now);
+  done.slice().sort((p,q)=>q.v-p.v||q.a-p.a).slice(0,3).forEach((o,i)=>o.md=i+1);
+  const top=Math.max(100,...P.filter(o=>o.v!=null).map(o=>o.v))*1.08,H=186,PL=H-60;
+  const ch=document.getElementById('act-ch');
+  ch.innerHTML=`<div class="chi"><div class="g" style="bottom:${40+PL*100/top}px"><em>100%</em></div>`+P.map((o,i)=>{const cls=(o.v==null?' na':'')+(o.now?' now':'')+(o.on?' on':'')+(o.md?' m'+o.md:'');
+    return`<button type="button" class="${cls.trim()}" data-chi="${i}" title="${esc(pLab(o))}${o.v==null?'':': '+Math.round(o.v)+'%, '+o.x.ren+' collected of '+o.x.due+' due'}${o.now?', so far':''}${o.md?', number '+o.md:''}."><span class="p">${o.v==null?'—':Math.round(o.v)+'%'}</span><span class="bar" style="height:calc(${o.v==null?0:(o.v/top).toFixed(4)} * (100% - 60px))">${o.md?`<i class="md">${o.md}</i>`:''}</span><span class="mo">${o.l[0]}${o.l[1]?'<br>'+o.l[1]:''}</span></button>`;}).join('')+'</div>';
+  CHP=P;
+  // quick comparison: the last finished period against the one before it, and the trend
+  const nm={m:'month',q:'quarter',y:'year'}[CH.v],chips=[];
+  if(done.length>=2){const x=done[done.length-1],y=done[done.length-2],d=Math.round(x.v)-Math.round(y.v);
+    chips.push(`<span>${esc(pLab(x))} vs ${esc(pLab(y))}: <b class="${d>0?'cu':d<0?'cd':''}">${d>0?'▲ ':d<0?'▼ ':''}${d?Math.abs(d)+' pts':'no change'}</b></span>`);}
+  const avg=avgOf(P);if(avg!=null)chips.push(`<span class="av"><i></i>Average: <b>${Math.round(avg)}%</b></span>`);
+  const tr=trendOf(P);
+  if(tr){const op=!document.getElementById('tr-defs').hidden;chips.push(`<span class="tl"><i></i>Trend: <b class="${tr.m>0.05?'cu':tr.m<-0.05?'cd':''}">${Math.abs(tr.m)<0.05?'flat':(tr.m>0?'▲ ':'▼ ')+(Math.abs(tr.m)<1?Math.abs(tr.m).toFixed(1):Math.round(Math.abs(tr.m)))+' pts a '+nm}</b><button type="button" class="ti" data-tri aria-expanded="${op}" aria-controls="tr-defs" title="What the trend means">i</button></span>`);}
+  document.getElementById('ch-cmp').innerHTML=chips.join('');
+  requestAnimationFrame(()=>{drawTrend(top);chScroll();});
+}
+let CHP=[];
+// Average of the finished periods shown: everything collected ÷ everything due, so bigger months weigh more
+function avgOf(P){let d=0,r=0;P.forEach(o=>{if(!o.now&&o.x.due){d+=o.x.due;r+=o.x.ren;}});return d?r/d*100:null;}
+function trendOf(P){
+  const pts=P.map((o,i)=>[i,o.v,o]).filter(p=>p[1]!=null&&!p[2].now);if(pts.length<3)return null;
+  const n=pts.length,sx=pts.reduce((s,p)=>s+p[0],0),sy=pts.reduce((s,p)=>s+p[1],0),sxx=pts.reduce((s,p)=>s+p[0]*p[0],0),sxy=pts.reduce((s,p)=>s+p[0]*p[1],0);
+  const m=(n*sxy-sx*sy)/(n*sxx-sx*sx),c=(sy-m*sx)/n;return{m,c,i0:pts[0][0],i1:pts[n-1][0]};
+}
+function drawTrend(top){
+  const ch=document.getElementById('act-ch'),chi=ch.querySelector('.chi');if(!chi)return;const tr=trendOf(CHP),avg=avgOf(CHP);const old=chi.querySelector('svg.tl');if(old)old.remove();if(!tr&&avg==null)return;
+  const bs=chi.querySelectorAll('button');if(!bs.length||!bs[0].offsetHeight)return;
+  const R=chi.getBoundingClientRect(),PL=bs[0].offsetHeight-60;
+  const pt=i=>{const br=bs[i].querySelector('.bar').getBoundingClientRect(),v=tr.m*i+tr.c;return[br.left+br.width/2-R.left,br.bottom-R.top-Math.max(0,v)/top*PL];};
+  const W=chi.scrollWidth,base=bs[0].querySelector('.bar').getBoundingClientRect().bottom-R.top;let h='';
+  if(avg!=null){const y=base-avg/top*PL;h+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#DD30B1" stroke-width="1.6"/>`;}
+  if(tr){const [x0,y0]=pt(tr.i0),[x1,y1]=pt(tr.i1);h+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#8A80AA" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"/>`;}
+  const sv=document.createElementNS('http://www.w3.org/2000/svg','svg');sv.setAttribute('class','tl');sv.setAttribute('width',W);sv.setAttribute('height',chi.offsetHeight);
+  sv.innerHTML=h;chi.insertBefore(sv,chi.firstChild);
+}
+window.addEventListener('resize',()=>{if(CHP.length)drawTrend(Math.max(100,...CHP.filter(o=>o.v!=null).map(o=>o.v))*1.08);});
+function chScroll(){const ch=document.getElementById('act-ch'),on=ch.querySelector('button.on');ch.scrollLeft=on?on.offsetLeft-ch.clientWidth/2:ch.scrollWidth;}
+document.addEventListener('click',e=>{
+  const m=e.target.closest('[data-pm]');
+  if(m){PER.mode=m.dataset.pm;if(PER.mode==='r'&&!PER.from){const f=new Date(Math.floor(PER.k/12),PER.k%12,1),t=PER.k===LAST?TODAY:new Date(Math.floor(PER.k/12),PER.k%12+1,0);
+      PER.from=dOut(f);PER.to=dOut(t);document.getElementById('per-from').value=PER.from;document.getElementById('per-to').value=PER.to;}
+    SELP=null;render();return;}
+  const st=e.target.closest('[data-pstep]');if(st&&!st.disabled){PER.k=Math.max(MONTHS[MONTHS.length-1],Math.min(LAST,PER.k+ +st.dataset.pstep));SELP=null;render();return;}
+  if(e.target.closest('[data-tri]')){const d=document.getElementById('tr-defs');d.hidden=!d.hidden;document.querySelectorAll('[data-tri]').forEach(b=>b.setAttribute('aria-expanded',!d.hidden));requestAnimationFrame(()=>drawTrend(Math.max(100,...CHP.filter(o=>o.v!=null).map(o=>o.v))*1.08));return;}
+  const v=e.target.closest('[data-chv]');if(v){CH.v=v.dataset.chv;render();return;}
+  const r=e.target.closest('[data-chr]');if(r){CH.r=r.dataset.chr==='all'?'all':+r.dataset.chr;render();return;}
+  const c=e.target.closest('[data-chi]');if(c){const o=CHP[+c.dataset.chi];if(!o)return;
+    if(CH.v==='m'){PER.mode='m';PER.k=o.a;}else{const g=pRange(o);PER.mode='r';PER.from=dOut(g.f);PER.to=dOut(g.t);document.getElementById('per-from').value=PER.from;document.getElementById('per-to').value=PER.to;}
+    SELP=null;render();}
+});
+['per-from','per-to'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{PER.from=document.getElementById('per-from').value;PER.to=document.getElementById('per-to').value;SELP=null;render();}));
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
+    const t=new Date();
+    document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';
+    RowEdit.start(()=>render());   // Create package (and the shared row tools)
+    ArtiumAuth.call('sheetLinks',{}).then(j=>{if(j&&j.links){LINKS=j.links;CAN_NOTE=j.canEdit||[];render();}}).catch(()=>{});
+    render();
+  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+}
+function toggleDefs(b,id){const l=document.getElementById(id);l.hidden=!l.hidden;b.setAttribute('aria-expanded',!l.hidden);}
+
+/* Landing: one card per section (see cardnav.js) */
+const LOADED=()=>CENTRES.every(c=>DATA[c.name]);
+const rowsOf=id=>[...document.querySelectorAll('#'+id+' tbody tr')].map(r=>[...r.cells].map(c=>c.innerText.trim())).filter(r=>r.length>1&&r[0]);
+const nowCol=r=>parseInt(String(r[1]).replace(/[^\d\-−]/g,'').replace('−','-'),10)||0;
+// Renewal previews: last full month, current teachers with the most due
+function rrPreview(key){
+  if(!LOADED()||!R)return null;const o=R.rn[key],k=LAST-1;
+  return R[key==='coh'?'a':'b'].cur.map(t=>[t,o[t][k]]).filter(x=>x[1]&&x[1].due).sort((p,q)=>q[1].due-p[1].due).slice(0,3)
+    .map(([t,x])=>[t+' · '+MON[k%12],Math.round(x.ren/x.due*100)+'% · '+x.ren+' of '+x.due]);
+}
+load();
+</script>
+</body>
+</html>
