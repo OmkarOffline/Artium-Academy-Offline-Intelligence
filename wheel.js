@@ -54,25 +54,38 @@ const CSS=`
 .aw-slot .aw-an .x{margin-left:14px;display:flex;gap:8px}
 .aw-slot .aw-an .x button{height:34px;border:0;border-radius:12px;background:#F4EFFE;color:#4101F7;font:600 13px 'Onest',system-ui,sans-serif;padding:0 14px;cursor:pointer;display:flex;align-items:center;gap:7px}
 .aw-slot .aw-an .x button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.aw-slot .aw-an .tw{margin:16px 26px 24px;border-radius:18px;box-shadow:inset 0 0 0 1px #F1EDF9;overflow:auto}
-.aw-slot .aw-an table{border-collapse:collapse;width:100%;min-width:760px}
-.aw-slot .aw-an th{font:700 10.5px 'Onest',system-ui,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#6A6488;background:#F7F5FC;padding:13px 10px;text-align:center;border:0}
-.aw-slot .aw-an th small{display:block;font:500 11px 'Onest',system-ui,sans-serif;letter-spacing:0;text-transform:none;margin-top:2px}
-.aw-slot .aw-an th:first-child,.aw-slot .aw-an td:first-child{text-align:left;padding-left:22px}
-.aw-slot .aw-an td{padding:11px 10px;text-align:center;border:0;border-top:1px solid #F1EDF9;font-size:12px;color:#6A6488;background:#fff}
-.aw-slot .aw-an td:first-child{font:600 14.5px 'Onest',system-ui,sans-serif;color:#01073C}
-.aw-slot .aw-an th.now,.aw-slot .aw-an th.cmp{background:#F1EAFE;color:#4101F7}.aw-slot .aw-an th.cmp{color:#7B6BB0}
-.aw-slot .aw-an td.now,.aw-slot .aw-an td.cmp{background:#FAF7FF}
-.aw-slot .aw-an th.cmp,.aw-slot .aw-an td.cmp{border-left:1px dashed #DCD0FA;border-right:6px solid #fff;box-shadow:inset -1px 0 0 #E2D6FF}
-.aw-slot .aw-an td i{display:block;width:fit-content;margin:0 auto 3px;font:700 13px 'Onest',system-ui,sans-serif;font-style:normal;border-radius:99px;padding:3px 11px}
-.aw-slot .aw-an td i.n{background:none;color:#01073C;font-size:15px;padding:0}
-.aw-slot .aw-an .bd-r{background:#FFEDF2;color:#B0204F}.aw-slot .aw-an .bd-a{background:#FFF3D6;color:#8A5A00}.aw-slot .aw-an .bd-g{background:#E3F7EE;color:#137A4F}.aw-slot .aw-an .bd-b{background:#EEF1FF;color:#2F4DB8}.aw-slot .aw-an .bd-{background:#F4F2F8;color:#6A6488}
-.aw-slot .aw-an td .dl{display:block;margin-top:3px;font:700 11px 'Onest',system-ui,sans-serif}.aw-slot .aw-an .dup{color:#137A4F}.aw-slot .aw-an .ddn{color:#B0204F}.aw-slot .aw-an .dz{color:#6A6488}
-.aw-slot .aw-an tr.tot td{background:#F4EFFE;color:#4101F7;font-weight:700}.aw-slot .aw-an tr.tot td:first-child{color:#4101F7}
-.aw-slot .aw-an tr.row{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}.aw-slot.open .aw-an tr.row{opacity:1;transform:none}
+.aw-slot .aw-an .w-gw{overflow-x:auto;padding:18px 26px 8px}
+.aw-slot .aw-an .w-g{display:grid;position:relative;min-width:max-content}
+.aw-slot .aw-an .w-g>*{position:relative;z-index:1}
+.aw-slot .aw-an .w-g>.w-bgc{z-index:0;border-radius:22px;background:#fff;box-shadow:0 0 0 1px #EEEAF6,0 24px 50px -30px rgba(65,1,247,.35),0 6px 14px -8px rgba(1,7,60,.08)}
+.aw-slot .aw-an .w-g>.w-bgc::before{content:"";position:absolute;left:22px;right:22px;top:0;height:3px;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#4101F7,#DD30B1)}
+.aw-slot .aw-an .w-g>.w-bgp{z-index:0;border-radius:22px;background:#F8F7FB}
+.aw-slot .aw-an .w-gh{padding:22px 22px 4px}.aw-slot .aw-an .w-gh.w-p{padding-left:24px}
+.aw-slot .aw-an .w-gh .w-k,.aw-slot .aw-an .w-lh{font:700 10px 'Onest',system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#8A84A3}
+.aw-slot .aw-an .w-lh{align-self:end;padding:0 0 14px 4px}
+.aw-slot .aw-an .w-gh .w-m{white-space:nowrap;font:700 19px 'Onest',system-ui,sans-serif;letter-spacing:-.3px;margin-top:3px;background:linear-gradient(90deg,#4101F7,#B42BD6 70%,#DD30B1);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content}
+.aw-slot .aw-an .w-gh .w-m small{display:inline;font:500 13px 'Onest',system-ui,sans-serif;color:#8A84A3;-webkit-text-fill-color:#8A84A3;margin-left:6px}
+.aw-slot .aw-an .w-gh.w-p .w-m{background:none;color:#4A4466;-webkit-text-fill-color:#4A4466;font-size:15px;margin-top:6px}
+.aw-slot .aw-an .w-ch{font:700 10px 'Onest',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#01073C;padding:12px 22px 14px;border-bottom:1px solid #F1EEF7;white-space:nowrap}
+.aw-slot .aw-an .w-ch.w-p{color:#9C97B0;text-align:center;padding:12px 10px 14px;border-bottom-color:#ECEAF2}
+.aw-slot .aw-an .w-nm{display:flex;flex-direction:column;justify-content:center;font:600 16px 'Onest',system-ui,sans-serif;color:#01073C;padding:14px 18px 14px 4px;border-bottom:1px solid #F3F1F7}
+.aw-slot .aw-an .w-cc{padding:16px 22px;border-bottom:1px solid #F1EEF7;color:#4A4466}
+.aw-slot .aw-an .w-pc{padding:14px 10px;border-bottom:1px solid #ECEAF2;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.aw-slot .aw-an .w-big{font:700 30px/1 'Onest',system-ui,sans-serif;letter-spacing:-1px;color:#01073C}.aw-slot .aw-an .w-big em{display:inline;font-style:normal;font-size:17px;margin-left:1px}.aw-slot .aw-an .w-big.w-z{color:#C4C0D3}
+.aw-slot .aw-an .w-of{font-size:12px;color:#8A84A3;margin-top:5px}
+.aw-slot .aw-an .w-bar{height:5px;border-radius:5px;background:#F0EDF6;margin-top:9px;display:flex;overflow:hidden;width:130px}
+.aw-slot .aw-an .w-bar i{display:block;height:100%}.aw-slot .aw-an .w-bar .w-c{background:currentColor}.aw-slot .aw-an .w-bar .w-p{background:repeating-linear-gradient(135deg,#C9BDF3 0 3px,#E4DCFA 3px 6px)}
+.aw-slot .aw-an .w-vs{font:600 11px 'Onest',system-ui,sans-serif;margin-top:8px}.aw-slot .aw-an .w-vs.w-dn{color:#B0204F}.aw-slot .aw-an .w-vs.w-up{color:#137A4F}.aw-slot .aw-an .w-vs.w-eq{color:#8A84A3}
+.aw-slot .aw-an .w-reach{font:600 12px 'Onest',system-ui,sans-serif;margin-top:9px}.aw-slot .aw-an .w-reach b{font-weight:800}.aw-slot .aw-an .w-reach.w-none{color:#B0204F}
+.aw-slot .aw-an .w-pv{font:700 17.5px 'Onest',system-ui,sans-serif;color:#01073C}.aw-slot .aw-an .w-pc small{display:block;font-size:12px;color:#9C97B0;margin-top:3px}
+.aw-slot .aw-an .w-t-r{color:#C2245A}.aw-slot .aw-an .w-t-a{color:#B07A00}.aw-slot .aw-an .w-t-g{color:#1A8A5A}.aw-slot .aw-an .w-t-b{color:#3552C9}.aw-slot .aw-an .w-t-{color:#8A84A3}
+.aw-slot .aw-an .w-tot{border-bottom:0!important}.aw-slot .aw-an .w-nm.w-tot{font-weight:800}.aw-slot .aw-an .w-cc.w-tot{padding-bottom:24px}
+.aw-slot .aw-an .w-lg{display:flex;gap:18px;padding:6px 26px 22px;font-size:12px;color:#8A84A3;align-items:center;flex-wrap:wrap}
+.aw-slot .aw-an .w-lg i{display:inline-block;width:18px;height:5px;border-radius:5px;vertical-align:1px;margin-right:7px}
+.aw-slot .aw-an .w-rw{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}.aw-slot.open .aw-an .w-rw{opacity:1;transform:none}
+.aw-slot .aw-an .pt{display:block;width:fit-content;margin-top:4px;font:600 10.5px 'Onest',system-ui,sans-serif;letter-spacing:.04em;color:#6A6488;background:#F1EEF7;border-radius:6px;padding:2px 7px}
 .aw-slot .aw-an .emp{padding:30px 26px;color:#6A6488;font-size:14px}
-.aw-slot .aw-an .nt{padding:0 26px 20px;margin-top:-10px;font-size:12px;color:#6A6488}
-.aw-slot .aw-an tr.row:hover td{background:#FBF9FF}.aw-slot .aw-an tr.row:hover td.now,.aw-slot .aw-an tr.row:hover td.cmp{background:#F6F1FF}
+.aw-slot .aw-an .nt{padding:0 26px 18px;font-size:12px;color:#8A84A3}
 `;
 const SK={a:'#C98E66',b:'#B07650',c:'#9A6444',d:'#D6A07A'};
 const CAST={kid:{kind:'boy',skin:SK.d,hair:'#2B1D16',hs:'short',top:'#6F7FD9',bottom:'#2E3A59',shoe:'#F2F2F2',s:.62},
@@ -159,6 +172,12 @@ const band=(a,b)=>{if(!b)return'';const r=Math.round(a/b*100);return r<=40?'r':r
 const pct=(a,b)=>b?Math.round(a/b*100):null;
 const n=v=>Math.round(v).toLocaleString('en-IN');
 
+/* Current teachers (Offline Team tab). A sheet name matches a teacher when the full names match, or the first names match,
+   ignoring capitals, any "h" and doubled letters (as Code.gs does); a first name shared by two teachers is not guessed. */
+let ROSTER=null,RKEY=[];const rk=t=>String(t||'').toLowerCase().replace(/[^a-z]/g,'').replace(/h/g,'').replace(/(.)\1+/g,'$1');
+function setRoster(list){ROSTER=(list||[]).map(x=>x.name).filter(Boolean);RKEY=ROSTER.map(nm=>({nm,full:rk(nm),first:rk(nm.split(/\s+/)[0])}));}
+const MEMO={};function teacherOf(v){if(!ROSTER||!ROSTER.length)return null;if(v in MEMO)return MEMO[v];
+  const full=rk(v),first=rk(String(v).split(/\s+/)[0]);let h=RKEY.filter(x=>x.full===full);if(h.length!==1)h=RKEY.filter(x=>x.first===first);return MEMO[v]=h.length===1?h[0].nm:null;}
 let cfg=null,wheel,fab,veil,slot,an,opts=[],CUR=null,HK=null;
 function css(){if(document.getElementById('aw-css'))return;const s=document.createElement('style');s.id='aw-css';s.textContent=CSS;document.head.appendChild(s);}
 function draw(){const C=280,R=255,r=96,S=cfg.slices,m=S.length,P=(a,rad)=>[C+rad*Math.cos(a),C+rad*Math.sin(a)];
@@ -178,25 +197,49 @@ function peek(k){if(k===HK)return;HK=k;const sc=wheel.querySelector('.hubScene')
   if(!k){sc.innerHTML='';idle.style.opacity=1;return;}
   idle.style.opacity=0;sc.innerHTML=`<g class="in" style="transform-origin:280px 300px"><g transform="translate(280 300) scale(.82) translate(-280 -300)">${ART[k].live(280,316)}</g><text class="hubt" x="280" y="334" style="font-size:12.5px;font-weight:700;fill:#4101F7">${esc(nm(k))}</text></g>`;}
 
-/* A cell: {a,b} collected of due (a percentage in its colour band, then "a of b"), or {v} a count, with an optional sub-line and change (d, in points or as a count). */
-function cell(c,cls){if(!c)return`<td class="${cls||''}">–</td>`;
-  let top,sub='';
-  if('b' in c){const p=pct(c.a,c.b);top=`<i class="bd-${band(c.a,c.b)}">${p==null?'–':p+'%'}</i>`;sub=c.b?`${n(c.a)} of ${n(c.b)}`:(c.a?`${n(c.a)} collected`:'');}
-  else{top=`<i class="n">${n(c.v||0)}</i>`;sub=c.s||'';}
-  let dl='';if(c.d!=null){const u=c.u!=null?c.u:' pts';dl=c.d===0?`<span class="dl dz">No change</span>`:`<span class="dl ${c.d>0?'dup':'ddn'}">${c.d>0?'▲':'▼'} ${n(Math.abs(c.d))}${u}</span>`;}
-  return`<td class="${cls||''}">${top}${sub}${dl}</td>`;}
-/* spec: {title, sub, cols:[{h,sm,title}], rows:[{name,cells,rank,tie,skip}], total:{cells}, note, empty} — the first two columns are this period and the one before it */
+/* Cells.
+   This period: {a,b} collected of due (a large percentage in its colour band, "a of b", a bar, and the change against the month before: d, vs);
+     with p, the bar shows the pipeline as a striped extension. {pipe, reach:{a,b}}: the number in the pipeline and what it could reach.
+     {v, s, d, vs}: a count (with an optional second line, s).
+   Previous periods: {a,b} a percentage in its colour band and "a of b"; {v, s} a count. */
+const tb=(a,b)=>'w-t-'+band(a,b);
+function nowCell(c){if(!c)return'<span class="w-of">–</span>';
+  const vs=c.d==null?'':`<div class="w-vs ${c.d<0?'w-dn':c.d>0?'w-up':'w-eq'}">${c.d===0?'No change':(c.d<0?'▼ ':'▲ ')+n(Math.abs(c.d))+(c.u!=null?c.u:' pts')} ${esc(c.vs||'')}</div>`;
+  if('pipe' in c){const r=c.reach||{};return c.pipe?`<div class="w-big">+${n(c.pipe)}</div><div class="w-of">in pipeline</div><div class="w-reach ${tb(r.a,r.b)}">Could reach <b>${pct(r.a,r.b)}%</b></div>`
+    :`<div class="w-big w-z">0</div><div class="w-of">in pipeline</div>${r.b?'<div class="w-reach w-none">Nothing in the pipeline</div>':''}`;}
+  if('b' in c){const p=pct(c.a,c.b);if(p==null)return`<div class="w-big w-z">–</div><div class="w-of">${c.a?n(c.a)+' collected, none due':'Nothing due'}</div>`;
+    const cw=Math.min(100,c.a/c.b*100),pw=c.p?Math.min(100-cw,c.p/c.b*100):0;
+    return`<div class="w-big ${tb(c.a,c.b)}">${p}<em>%</em></div><div class="w-of">${n(c.a)} of ${n(c.b)}</div><div class="w-bar ${tb(c.a,c.b)}"><i class="w-c" style="width:${cw}%"></i>${pw?`<i class="w-p" style="width:${pw}%"></i>`:''}</div>${vs}`;}
+  return`<div class="w-big${c.v?'':' w-z'}">${n(c.v||0)}</div>${c.s?`<div class="w-of">${esc(c.s)}</div>`:''}${vs}`;}
+function prevCell(c){if(!c)return'<span class="w-pv w-t-">–</span>';
+  if('b' in c){const p=pct(c.a,c.b);return p==null?`<span class="w-pv w-t-">–</span><small>${c.a?n(c.a)+' collected':'Nothing due'}</small>`:`<span class="w-pv ${tb(c.a,c.b)}">${p}%</span><small>${n(c.a)} of ${n(c.b)}</small>`;}
+  return`<span class="w-pv">${n(c.v||0)}</span>${c.s?`<small>${esc(c.s)}</small>`:''}`;}
+/* spec: {title, sub, cur:{k,m,note,cols:[label]}, prev:{k,m,cols:[label]}, rows:[{name,now:[cells],prev:[cells],rank,tie,line,skip,blank}], total:{now,prev}, note, legend} */
 function render(k,anim){const spec=cfg.table(k);CUR=k;opts.forEach(b=>b.classList.toggle('sel',b.dataset.k===k));
   const head=`<div class="hd"><div><span class="tg">Analysis</span><b class="tt">${esc(spec&&spec.title||nm(k))}</b>${spec&&spec.sub?`<span class="sub">${esc(spec.sub)}</span>`:''}</div>`;
   let pod='',body='';
   if(!spec||spec.empty||!spec.rows||!spec.rows.length){body=`<div class="emp">${esc(spec&&spec.empty||(spec?'Nothing to show for this period.':'Loading…'))}</div>`;}
   else{
+    let hid=0;if(k==='teacher'&&ROSTER&&ROSTER.length){const live=c=>c&&('b' in c?(c.a||c.b):c.v);
+      spec.rows=spec.rows.filter(r=>{if(r.blank||ROSTER.includes(r.name))return true;if(live(r.now[0])){r.past=r.skip=true;return true;}hid++;return false;});}
+    if(hid)spec.note=(spec.note?spec.note+' ':'')+'Past teachers appear only when they have learners in this period; the total still counts all of them.';
     const rk=spec.rows.map((r,i)=>[i,r.rank,r.tie||0]).filter(x=>x[1]!=null&&!spec.rows[x[0]].skip).sort((a,b)=>b[1]-a[1]||b[2]-a[2]).slice(0,3);
     pod=rk.length?`<div class="pod">${rk.map(([i],m)=>`<div>${medal(m)}<span><b>${esc(spec.rows[i].name)}</b><em>${esc(spec.rows[i].line||'')}</em></span></div>`).join('')}</div>`:'';
-    const cls=j=>j===0?'now':j===1?'cmp':'';
-    const tr=(r,j,t)=>`<tr class="row${t?' tot':''}" style="transition-delay:${anim?200+j*50:0}ms"><td>${esc(r.name)}</td>${r.cells.map((c,i)=>cell(c,cls(i))).join('')}</tr>`;
-    body=`<div class="tw"><table><thead><tr><th>${esc(nm(k))}</th>${spec.cols.map((c,i)=>`<th class="${cls(i)}"${c.title?` title="${esc(c.title)}"`:''}>${esc(c.h)}${c.sm?`<small>${esc(c.sm)}</small>`:''}</th>`).join('')}</tr></thead>
-      <tbody>${spec.rows.map((r,j)=>tr(r,j)).join('')}${spec.total?tr({name:'Total',cells:spec.total.cells},spec.rows.length,1):''}</tbody></table></div>${spec.note?`<div class="nt">${esc(spec.note)}</div>`:''}`;}
+    const C=spec.cur.cols.length,P=spec.prev.cols.length,all=spec.rows.concat(spec.total?[Object.assign({name:'Total',tot:1},spec.total)]:[]),R=all.length;
+    const cw=spec.cur.w||(C>1?190:250);
+    const tpl=`minmax(170px,230px) repeat(${C},${cw}px) 20px repeat(${P},minmax(92px,1fr))`;
+    let g=`<div class="w-bgc" style="grid-column:2/${2+C};grid-row:1/${R+3}"></div><div class="w-bgp" style="grid-column:${3+C}/${3+C+P};grid-row:1/${R+3}"></div>`;
+    g+=`<div class="w-lh" style="grid-column:1;grid-row:1/3">${esc(nm(k))}</div>`;
+    g+=`<div class="w-gh" style="grid-column:2/${2+C};grid-row:1"><div class="w-k">${esc(spec.cur.k)}</div><div class="w-m">${esc(spec.cur.m)}${spec.cur.note?`<small>${esc(spec.cur.note)}</small>`:''}</div></div>`;
+    g+=`<div class="w-gh w-p" style="grid-column:${3+C}/${3+C+P};grid-row:1"><div class="w-k">${esc(spec.prev.k)}</div><div class="w-m">${esc(spec.prev.m)}</div></div>`;
+    spec.cur.cols.forEach((h,i)=>g+=`<div class="w-ch" style="grid-column:${2+i};grid-row:2">${esc(h)}</div>`);
+    spec.prev.cols.forEach((h,i)=>g+=`<div class="w-ch w-p" style="grid-column:${3+C+i};grid-row:2"${spec.prev.titles&&spec.prev.titles[i]?` title="${esc(spec.prev.titles[i])}"`:''}>${esc(h)}</div>`);
+    all.forEach((r,j)=>{const row=3+j,t=r.tot?' w-tot':'',dl=anim?` style="transition-delay:${200+j*50}ms;grid-row:${row}`:` style="grid-row:${row}`;
+      g+=`<div class="w-nm w-rw${t}"${dl};grid-column:1">${esc(r.name)}${r.past?'<span class="pt">Past teacher</span>':''}</div>`;
+      r.now.forEach((c,i)=>g+=`<div class="w-cc w-rw${t}"${dl};grid-column:${2+i}">${nowCell(c)}</div>`);
+      r.prev.forEach((c,i)=>g+=`<div class="w-pc w-rw${t}"${dl};grid-column:${3+C+i}">${prevCell(c)}</div>`);});
+    body=`<div class="w-gw"><div class="w-g" style="grid-template-columns:${tpl}">${g}</div></div>`+
+      (spec.legend?`<div class="w-lg">${spec.legend}</div>`:'')+(spec.note?`<div class="nt">${esc(spec.note)}</div>`:'');}
   an.innerHTML=head+pod+`<div class="x"><button type="button" data-aw="switch"><svg viewBox="0 0 24 24">${ICON}</svg>Switch</button><button type="button" data-aw="hide"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>Collapse</button></div></div>`+body;
   if(anim){slot.classList.remove('open','done');void slot.offsetWidth;slot.classList.add('open');setTimeout(()=>slot.classList.contains('open')&&slot.classList.add('done'),600);
     const t=slot.getBoundingClientRect().top+window.scrollY-20;window.scrollTo({top:Math.max(0,t),behavior:'smooth'});}
@@ -209,8 +252,9 @@ function mount(c){cfg=Object.assign({slices:['course','teacher','level','age','g
   slot=document.createElement('div');slot.className='aw-slot';slot.innerHTML='<div><section class="aw-an" aria-live="polite"></section></div>';an=slot.querySelector('.aw-an');
   veil=document.createElement('div');veil.className='aw-veil';wheel=document.createElement('div');wheel.className='aw-wheel';
   fab=document.createElement('button');fab.type='button';fab.className='aw-fab';fab.setAttribute('aria-label','Analyse');
-  fab.innerHTML=`<span class="lb">Analyse</span><svg class="ia" viewBox="0 0 24 24">${ICON}</svg><svg class="ix" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
+  fab.innerHTML=`<svg class="ia" viewBox="0 0 24 24">${ICON}</svg><svg class="ix" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>`;
   document.body.append(veil,wheel,fab);place();draw();
+  if(cfg.slices.includes('teacher')&&window.ArtiumAuth&&ArtiumAuth.roster)ArtiumAuth.roster().then(l=>{setRoster(l);refresh();}).catch(()=>{});
   fab.onclick=()=>wheel.classList.contains('on')?closeW():openW();veil.onclick=closeW;
   wheel.addEventListener('click',e=>{const b=e.target.closest('.wedge');if(b)show(b.dataset.k);else if(e.target.closest('.hub'))closeW();});
   wheel.addEventListener('mouseover',e=>{const w=e.target.closest('.wedge');peek(w?w.dataset.k:null);});
@@ -229,36 +273,47 @@ function windows(a,b,o={}){const k=mi(a),mon=o.month!==false;
   let prev;if(mon)prev={h:ml(k-1),a:mStart(k-1),b:mEnd(k-1),title:MF[(k+11)%12]+' '+Math.floor((k-1)/12)};
   else{const len=b-a;prev={h:'Before',sm:'same length',a:new Date(a-len-864e5),b:new Date(a-1)};}
   const last=nn=>({h:'Last '+nn+'M',a:mStart(k-nn),b:mEnd(k-1),title:MF[(k-nn+1200)%12]+' '+Math.floor((k-nn)/12)+' to '+MF[(k+1199)%12]+' '+Math.floor((k-1)/12)});
-  return[cur,prev,last(3),last(6),last(12),{h:'Lifetime',a:null,b:null}];}
+  const W=[cur,prev,last(3),last(6),last(12),{h:'Lifetime',a:null,b:null}];
+  W.cur={k:mon?'This month':'Selected period',m:mon?MF[k%12]+' '+Math.floor(k/12):o.label||'',note:o.soFar?'so far':''};
+  W.vs=mon?'vs '+MON[(k+11)%12]:'vs before';
+  W.prev={k:mon?'Previous months':'Before this',m:'For comparison',cols:W.slice(1).map(w=>w.h),titles:W.slice(1).map(w=>w.title||'')};
+  return W;}
 const inW=(d,w)=>!!d&&(!w.a||(d>=w.a&&d<=w.b));
 const ORDER={level:['Preparatory','Intermediate','Proficient','Advanced'],age:['0 to 5','6 to 12','13 to 21','22 to 30','31 to 40','40+'],gender:['Female','Male']};
 const BLANK={teacher:'Unassigned',source:'Not given'};
 /* Groups items by a label, matching case-insensitively; blanks become "Not given" (or "Unassigned" for teachers) */
 function grouper(k){const seen=new Map(),blank=BLANK[k]||'Not given';
-  return v=>{v=String(v==null?'':v).trim().replace(/\s+/g,' ');if(!v)return blank;const l=v.toLowerCase();if(!seen.has(l))seen.set(l,v);return seen.get(l);};}
+  return v=>{v=String(v==null?'':v).trim().replace(/\s+/g,' ');if(!v)return blank;if(k==='teacher'){const t=teacherOf(v);if(t)return t;}const l=v.toLowerCase();if(!seen.has(l))seen.set(l,v);return seen.get(l);};}
 function sortRows(k,rows,by){const o=ORDER[k];return rows.sort((x,y)=>{if(x.blank!==y.blank)return x.blank?1:-1;
   if(o){const i=(o.indexOf(x.name)+1||99)-(o.indexOf(y.name)+1||99);if(i)return i;}return by(y)-by(x)||x.name.localeCompare(y.name);});}
-/* Collected of due, per label and window: den = the "due" items, num = the "collected" items. */
-function ratio(k,W,den,dDate,num,nDate,key){const g=grouper(k),M=new Map(),blank=BLANK[k]||'Not given';
-  const get=l=>M.get(l)||M.set(l,W.map(()=>({a:0,b:0}))).get(l);
-  den.forEach(x=>{const d=dDate(x);W.forEach((w,i)=>{if(inW(d,w))get(g(key(x)))[i].b++;});});
-  num.forEach(x=>{const d=nDate(x);W.forEach((w,i)=>{if(inW(d,w))get(g(key(x)))[i].a++;});});
-  const T=W.map((w,i)=>({a:0,b:0}));M.forEach(v=>v.forEach((c,i)=>{T[i].a+=c.a;T[i].b+=c.b;}));
-  const delta=v=>{const p0=pct(v[0].a,v[0].b),p1=pct(v[1].a,v[1].b);return Object.assign({},v[1],{d:p0!=null&&p1!=null?p0-p1:null});};
-  let rows=[...M].filter(([l,v])=>v.slice(0,5).some(c=>c.a||c.b)).map(([l,v])=>({name:l,blank:l===blank,skip:l===blank,cells:[v[0],delta(v),...v.slice(2)],
-    rank:v[0].b?pct(v[0].a,v[0].b):null,tie:v[0].a,line:v[0].b?pct(v[0].a,v[0].b)+'% · '+n(v[0].a)+' of '+n(v[0].b):''}));
-  rows=sortRows(k,rows,r=>r.cells[0].b*1e4+r.cells[4].b);
-  return{rows,total:{cells:[T[0],delta(T),...T.slice(2)]}};}
+/* Collected of due, per label and window: den = the "due" items, num = the "collected" items.
+   o.pipe (optional): items still expected this period, counted per label; they add an "In pipeline" column. */
+function ratio(k,W,den,dDate,num,nDate,key,o={}){const g=grouper(k),M=new Map(),blank=BLANK[k]||'Not given';
+  const get=l=>M.get(l)||M.set(l,{c:W.map(()=>({a:0,b:0})),p:0}).get(l);
+  den.forEach(x=>{const d=dDate(x);W.forEach((w,i)=>{if(inW(d,w))get(g(key(x))).c[i].b++;});});
+  num.forEach(x=>{const d=nDate(x);W.forEach((w,i)=>{if(inW(d,w))get(g(key(x))).c[i].a++;});});
+  if(o.pipe)o.pipe.forEach(x=>get(g(key(x))).p++);
+  const T={c:W.map(()=>({a:0,b:0})),p:0};M.forEach(v=>{v.c.forEach((c,i)=>{T.c[i].a+=c.a;T.c[i].b+=c.b;});T.p+=v.p;});
+  const pipeOn=!!o.pipe;
+  const mk=v=>{const c=v.c,p0=pct(c[0].a,c[0].b),p1=pct(c[1].a,c[1].b);
+    const now=[Object.assign({},c[0],{d:p0!=null&&p1!=null?p0-p1:null,vs:W.vs,p:pipeOn?v.p:0})];
+    if(pipeOn)now.push({pipe:v.p,reach:{a:c[0].a+v.p,b:c[0].b}});
+    return{now,prev:c.slice(1)};};
+  let rows=[...M].filter(([l,v])=>v.p||v.c.slice(0,5).some(c=>c.a||c.b)).map(([l,v])=>Object.assign({name:l,blank:l===blank,skip:l===blank,
+    rank:v.c[0].b?pct(v.c[0].a,v.c[0].b):null,tie:v.c[0].a,line:v.c[0].b?pct(v.c[0].a,v.c[0].b)+'% · '+n(v.c[0].a)+' of '+n(v.c[0].b):'',x:v.c},mk(v)));
+  rows=sortRows(k,rows,r=>r.x[0].b*1e4+r.x[4].b);
+  return{rows,total:mk(T),cur:Object.assign({cols:o.cols||(pipeOn?['Collected','In pipeline']:['This period'])},W.cur),prev:W.prev,
+    legend:pipeOn?'<span><i style="background:#8A84A3"></i>Collected (in its colour band)</span><span><i style="background:repeating-linear-gradient(135deg,#C9BDF3 0 3px,#E4DCFA 3px 6px)"></i>In pipeline</span>':''};}
 /* Counts (and an optional amount) per label and window */
-function count(k,W,items,date,key,amt){const g=grouper(k),M=new Map(),blank=BLANK[k]||'Not given';
+function count(k,W,items,date,key,amt,o={}){const g=grouper(k),M=new Map(),blank=BLANK[k]||'Not given';
   const get=l=>M.get(l)||M.set(l,W.map(()=>({v:0,m:0}))).get(l);
   items.forEach(x=>{const d=date(x);W.forEach((w,i)=>{if(inW(d,w)){const c=get(g(key(x)))[i];c.v++;if(amt)c.m+=amt(x)||0;}});});
   const T=W.map(()=>({v:0,m:0}));M.forEach(v=>v.forEach((c,i)=>{T[i].v+=c.v;T[i].m+=c.m;}));
   const inr=x=>'₹'+n(x);
-  const fin=v=>v.map((c,i)=>Object.assign({v:c.v,s:amt?inr(c.m):''},i===1?{d:v[0].v-v[1].v,u:''}:{}));
-  let rows=[...M].filter(([l,v])=>v.slice(0,5).some(c=>c.v)).map(([l,v])=>({name:l,blank:l===blank,skip:l===blank,cells:fin(v),rank:v[0].v||null,tie:v[0].m,line:n(v[0].v)+(amt?' · '+inr(v[0].m):'')}));
-  rows=sortRows(k,rows,r=>r.cells[0].v*1e4+r.cells[4].v);
-  return{rows,total:{cells:fin(T)}};}
+  const mk=v=>({now:[{v:v[0].v,s:amt?inr(v[0].m):'',d:v[0].v-v[1].v,u:'',vs:W.vs}],prev:v.slice(1).map(c=>({v:c.v,s:amt?inr(c.m):''}))});
+  let rows=[...M].filter(([l,v])=>v.slice(0,5).some(c=>c.v)).map(([l,v])=>Object.assign({name:l,blank:l===blank,skip:l===blank,rank:v[0].v||null,tie:v[0].m,line:n(v[0].v)+(amt?' · '+inr(v[0].m):''),x:v},mk(v)));
+  rows=sortRows(k,rows,r=>r.x[0].v*1e4+r.x[4].v);
+  return{rows,total:mk(T),cur:Object.assign({cols:o.cols||['Admissions']},W.cur),prev:W.prev};}
 
-window.ArtiumWheel={mount,refresh,open:openW,close:closeW,windows,ratio,count,grouper,sortRows,pct,band,mi,ml,MF};
+window.ArtiumWheel={mount,refresh,open:openW,close:closeW,windows,ratio,count,grouper,sortRows,pct,band,mi,ml,MF,MON};
 })();

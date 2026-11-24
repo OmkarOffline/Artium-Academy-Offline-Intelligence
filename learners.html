@@ -560,13 +560,14 @@ ArtiumWheel.mount({hub:'Active learners',anchor:()=>document.getElementById('sec
   const labels=new Set();names.forEach(nn=>{const d=DATA[nn];d.fs.concat(d.rn).filter(passes).forEach(r=>labels.add(g(r[col])));});
   const K=[LAST,LAST-1,LAST-3,LAST-6,LAST-12],ml=ArtiumWheel.ml,blank=k==='teacher'?'Unassigned':'Not given';
   const rows=[...labels].map(l=>{const v=build(names,r=>passes(r)&&g(r[col])===l);const x=K.map(m=>v[m]?v[m].H:0);
-    return{name:l,blank:l===blank,skip:l===blank,x,cells:x.map((c,i)=>i===1?{v:c,d:x[0]-c,u:''}:{v:c}),rank:x[0]||null,tie:x[1],line:x[0].toLocaleString('en-IN')+' active'};}).filter(r=>r.x.some(c=>c));
+    return{name:l,blank:l===blank,skip:l===blank,x,now:[{v:x[0],d:x[0]-x[1],u:'',vs:'vs '+ArtiumWheel.MON[(LAST+11)%12]}],prev:x.slice(1).map(v=>({v})),rank:x[0]||null,tie:x[1],line:x[0].toLocaleString('en-IN')+' active'};}).filter(r=>r.x.some(c=>c));
   ArtiumWheel.sortRows(k,rows,r=>r.x[0]*1e4+r.x[1]);
   const T=K.map((m,i)=>rows.reduce((s,r)=>s+r.x[i],0));
   return{title:'Active learners by '+{course:'course',teacher:'teacher',level:'course level',age:'age group',gender:'gender'}[k],
-    sub:'Monthly Active Learners at the end of each month · this month till date.',
-    cols:[{h:ml(LAST),sm:'till date'},{h:ml(LAST-1)},{h:'3M ago',sm:ml(LAST-3)},{h:'6M ago',sm:ml(LAST-6)},{h:'12M ago',sm:ml(LAST-12)}],
-    rows,total:{cells:T.map((c,i)=>i===1?{v:c,d:T[0]-c,u:''}:{v:c})}};}});
+    sub:'Monthly Active Learners at the end of each month.',
+    cur:{k:'This month',m:ArtiumWheel.MF[LAST%12]+' '+Math.floor(LAST/12),note:'till date',cols:['Active learners']},
+    prev:{k:'Earlier',m:'For comparison',cols:[ml(LAST-1),'3M ago','6M ago','12M ago'],titles:['',ml(LAST-3),ml(LAST-6),ml(LAST-12)]},
+    rows,total:{now:[{v:T[0],d:T[0]-T[1],u:'',vs:'vs '+ArtiumWheel.MON[(LAST+11)%12]}],prev:T.slice(1).map(v=>({v}))}};}});
 load();
 </script>
 </body>

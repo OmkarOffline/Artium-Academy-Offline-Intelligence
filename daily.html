@@ -857,11 +857,11 @@ ArtiumWheel.mount({hub:'Admissions',anchor:()=>document.getElementById('mxcap'),
   const mine=x=>selCentre==='All'||x.centre===selCentre,P=period(),M=mode==='month';
   const isCur=M&&viewY===now.getFullYear()&&viewM===now.getMonth();
   const b=new Date(P.b.getFullYear(),P.b.getMonth(),P.b.getDate(),23,59,59);
-  const W=ArtiumWheel.windows(P.a,b,{month:M,soFar:isCur});
-  const R=ArtiumWheel.count(k,W,WFS.filter(mine),x=>x.date,x=>x.r[WCOL[k]],x=>x.amt);
-  const nm={course:'course',teacher:'teacher',level:'course level',age:'age group',gender:'gender'}[k];
   const lbl=P.label||(P.a.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' to '+P.b.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}));
-  return{title:'Admissions by '+nm,sub:'New admissions and what they paid · '+lbl+(isCur?' so far':'')+'.',cols:W,...R};}});
+  const W=ArtiumWheel.windows(P.a,b,{month:M,soFar:isCur,label:lbl});
+  const R=ArtiumWheel.count(k,W,WFS.filter(mine),x=>x.date,x=>x.r[WCOL[k]],x=>x.amt,{cols:['Admissions']});
+  const nm={course:'course',teacher:'teacher',level:'course level',age:'age group',gender:'gender'}[k];
+  return{title:'Admissions by '+nm,sub:'New admissions (Fresh Sales) and what they paid.',...R};}});
 load();setTimeout(wLoad,1500);
 </script>
 </body>

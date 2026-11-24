@@ -141,6 +141,8 @@
     },
     // Teachers per centre and course (counts only), from the Basic Information sheet
     async teachers(){ const j=await service({action:'teachers'}); if(j.error) throw new Error(j.error==='expired'?'Your session has expired — sign in again':j.error); return j.teachers||{}; },
+    // Names of the current teachers (Offline Team tab, Functional Role = Teacher): [{name, centre}]. Empty until Code.gs sends them.
+    async roster(){ const j=await service({action:'teachers'}); if(j.error) throw new Error(j.error); return j.roster||[]; },
     // Runs once sign-in is confirmed and the page list is fresh from the access sheet (not the copy saved at the last sign-in)
     onReady(fn){ ready?fn(session):listeners.push(fn); }
   };

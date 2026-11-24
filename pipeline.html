@@ -1169,10 +1169,12 @@ ArtiumWheel.mount({hub:'Renewals',anchor:()=>document.getElementById('out'),tabl
   if(!DUE)return null;
   const sel=CENTRES.find(c=>c.name===selCentre),mine=x=>!sel||x.centre===sel.name,P=period();
   const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
-  const W=ArtiumWheel.windows(P.a,P.b,{month:mode==='month',soFar:isCur});
-  const R=ArtiumWheel.ratio(k,W,DUE.filter(mine),x=>x.end,ALL.filter(x=>mine(x)&&x.tab==='rn'),x=>x.date,x=>x.r[WCOL[k]]);
+  const W=ArtiumWheel.windows(P.a,P.b,{month:mode==='month',soFar:isCur,label:P.label});
+  // In pipeline: promised payments due in this period that have not been paid yet (as Expected payments in At a glance)
+  const pipe=(ITEMS||[]).filter(x=>mine(x)&&inP(x.ncd,P)&&(x.state==='wait'||x.state==='late'));
+  const R=ArtiumWheel.ratio(k,W,DUE.filter(mine),x=>x.end,ALL.filter(x=>mine(x)&&x.tab==='rn'),x=>x.date,x=>x.r[WCOL[k]],{pipe});
   const nm={course:'course',teacher:'teacher',level:'course level',age:'age group',gender:'gender'}[k];
-  return{title:'Renewals by '+nm,sub:'Collected of due · '+P.label+(isCur?' so far':'')+'.',cols:W,...R};}});
+  return{title:'Renewals by '+nm,sub:'Collected of due, with what is still to come.',...R};}});
 load();
 
 </script>
