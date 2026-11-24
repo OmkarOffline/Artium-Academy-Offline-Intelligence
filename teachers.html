@@ -284,6 +284,124 @@
 .dg .dtp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 'Onest',system-ui,sans-serif;color:#4A4466}.dg .dtp>i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:4px;background:#C9C2E0}.dg .dtp b{color:#01073C}
 .dg .dbs{display:flex;gap:6px;flex-wrap:wrap}.dg .dbs span{font:600 11.5px 'Onest',system-ui,sans-serif;border-radius:8px;padding:3px 8px}
 .dg .b-r{background:#FDE7EA;color:#B0204F}.dg .b-a{background:#FFF3D6;color:#8A5A00}.dg .b-g{background:#E3F7EE;color:#137A4F}.dg .b-b{background:#EAF0FF;color:#2F4DB8}
+
+/* ── Colour Foundations refresh (Nov 2026): the same look as the Renewal Pipeline and My Performance pages.
+   Light header, the brand's segmented tabs, one calm surface per section. Ember = where you are (the centre and the month you picked) ·
+   Progress Violet = progress · green, amber and red = good, middling and bad bands. ── */
+body{background:#FBFAFF}
+.hero{background:none;padding:40px 48px 18px;color:var(--ink)}
+.hin{align-items:flex-start}
+.eyebrow{display:none}
+h1{font:700 50px/1.06 'Onest',system-ui,sans-serif;letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:#4A4466;font-size:17px;margin-top:8px}
+.updated{color:#6A6488;margin-top:10px}.dot{background:#3DDC97}.dot.loading{background:#F5906F}
+.page{margin-top:0}
+.tp-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.centre-toggle{background:#EFEAF9;border:0;box-shadow:none;border-radius:22px;padding:6px;margin-bottom:0;gap:3px}
+.ct-btn{position:relative;border-radius:17px;padding:10px 22px 12px}
+.ct-btn small{color:#6A6488}.ct-btn span{color:#01073C}
+.ct-btn:hover{background:rgba(255,255,255,.55)}
+.ct-btn[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.ct-btn[aria-pressed="true"] span{color:#01073C}.ct-btn[aria-pressed="true"] small{color:#A8431E}
+.ct-btn[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.tray{border:0;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);padding:6px 28px 24px;margin-bottom:22px}
+.tray-head{padding:18px 0 14px;border-bottom:1px solid #F1EDF9;margin:0 -28px 16px;padding-left:28px;padding-right:28px}
+.tray-title,body.cn-sub section.tray.cn-on .tray-title{padding-left:0;font:700 21px/1.3 'Onest',system-ui,sans-serif;color:#01073C}
+.tray-title::before{display:none}
+.badge{background:#F4EFFE;color:#4101F7;font-size:12.5px;padding:5px 12px}
+.tbl-wrap{border:0;border-radius:18px;box-shadow:inset 0 0 0 1px #F1EDF9}
+th,th.metric,table.rr thead .sg{background:#F7F5FC}
+th{color:#6A6488;font-weight:700;font-size:10.5px;letter-spacing:.14em}
+th,td{border-bottom-color:#F1EDF9}
+td.metric{font-weight:600;color:#01073C}
+tr.tot td,table.rr tr.tot td,table.rr tr.tot .sg{background:#F4EFFE}
+.util.lo{color:#B0204F;background:#FFEDF2}.util.mid{color:#8A5A00;background:#FFF3D6}.util.hi{color:#137A4F;background:#E3F7EE}.util.top{color:#2F4DB8;background:#EEF1FF}
+.info-btn{border:0;background:#F4EFFE;color:#4101F7;border-radius:14px;padding:10px 16px 10px 12px;font:600 14px 'Onest',system-ui,sans-serif}
+.info-btn .i{background:none;border:1.5px solid #4101F7;color:#4101F7}
+.info-btn:hover,.info-btn[aria-expanded="true"]{background:#EDE4FF;color:#4101F7}
+.cn-back{border:0;background:#EFEAF9;box-shadow:none}
+/* The month you picked on Renewal Collection Efficiency: Ember, "where you are" */
+table.rr th.pick{color:#A8431E;background:#FFF4EE}table.rr th.pick small{color:#A8431E}
+table.rr td.pick{background:#FFF8F3}table.rr tr.tot td.pick{background:#FCEBDF}
+table.rr.fold-sel .sg-sel .sw{max-width:0;padding-left:0!important;padding-right:0!important;opacity:0}
+table.rr.fold-sel .sg-sel.g0{border-left-color:transparent}
+table.rr th.gh:has([onclick*="'sel'"]) span{display:none}
+table.rr.fold-sel th.gh:has([onclick*="'sel'"]) svg{transform:rotate(180deg)}
+table.rr.fold-sel th.gh:has([onclick*="'sel'"]) span{display:block;opacity:1;max-height:200px}
+/* Period picker */
+.per{display:flex;align-items:center;gap:8px;background:#EFEAF9;border-radius:18px;padding:5px;flex-wrap:wrap}
+.per[hidden]{display:none}
+.per .t{display:inline-flex}
+.per .t button{border:0;background:none;padding:8px 14px;border-radius:13px;font:600 13.5px 'Onest',system-ui,sans-serif;color:#4A4466;cursor:pointer}
+.per .t button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+.per .mb{width:34px;height:36px;border:0;border-radius:12px;background:#fff;color:#4A4466;font-size:16px;font-weight:700;cursor:pointer}
+.per .mb:disabled{opacity:.4;cursor:default}
+.per .l{min-width:150px;text-align:center;font:700 15px 'Onest',system-ui,sans-serif;color:#01073C}
+.per .rg{display:flex;align-items:center;gap:6px;font-size:13px;color:#6A6488}
+.per .rg[hidden]{display:none}
+.per .rg input{height:36px;border:0;border-radius:12px;background:#fff;padding:0 10px;font:600 13.5px 'Onest',system-ui,sans-serif;color:#01073C}
+/* The question this page answers */
+.pq{border-radius:28px;background:radial-gradient(70% 140% at 0% 0%,#F4EEFF 0%,rgba(244,238,255,0) 60%),#fff;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);margin-bottom:22px;overflow:hidden}
+.pq[hidden]{display:none}
+.pq .top{display:flex;align-items:stretch;gap:18px;padding:24px 26px 20px 30px;flex-wrap:wrap}
+.pq .b{flex:1;min-width:300px}
+.pq .tg{display:inline-flex;align-items:center;gap:8px;font:700 11px 'Onest',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6A6488}
+.pq .tg i{width:22px;height:22px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(135deg,#4101F7,#DD30B1);color:#fff;font:800 13px 'Onest',system-ui,sans-serif;font-style:normal;letter-spacing:0}
+.pq .q{font:700 32px/1.15 'Onest',system-ui,sans-serif;letter-spacing:-.8px;color:#01073C;margin-top:12px}
+.pq .ans{font-size:16px;line-height:1.55;color:#4A4466;margin-top:8px;max-width:860px}.pq .ans b{color:#01073C;font-weight:600}
+.pq .n{display:flex;gap:14px}
+.pq .m{background:#F7F5FC;border-radius:18px;padding:16px 20px;min-width:200px;display:flex;flex-direction:column}
+.pq .m .t{font:600 13.5px 'Onest',system-ui,sans-serif;color:#4A4466}.pq .m .v{font:700 32px 'Onest',system-ui,sans-serif;color:#01073C;letter-spacing:-.8px;margin-top:6px}
+.pq .m .s{font-size:12.5px;color:#6A6488;margin-top:auto;padding-top:6px;line-height:1.45}
+.pq .m.hero{background:linear-gradient(140deg,#2D0B9E 0%,#4101F7 55%,#6601FD 100%);box-shadow:0 18px 34px -22px rgba(65,1,247,.8)}.pq .m.hero .t,.pq .m.hero .s{color:#E4DAFF}.pq .m.hero .v{color:#fff}
+.pq .dup,.pq .ddn{display:inline-block;margin-top:4px;font-weight:700;border-radius:8px;padding:1px 7px}.pq .dup{background:#E3F7EE;color:#137A4F}.pq .ddn{background:#FFEDF2;color:#B0204F}
+.pq .chh{display:flex;align-items:baseline;gap:12px;padding:16px 30px 0;border-top:1px solid #F1EDF9}
+.pq .chh b{font:700 16px 'Onest',system-ui,sans-serif;color:#01073C}.pq .chh span{font-size:13px;color:#6A6488}
+.ch{position:relative;display:flex;align-items:flex-end;gap:6px;height:210px;padding:26px 30px 0;overflow-x:auto;scrollbar-width:thin}
+.ch .g{position:absolute;left:30px;right:30px;border-top:1px dashed #D9CFF3;pointer-events:none}.ch .g em{position:absolute;right:0;top:-17px;font:600 10.5px 'Onest',system-ui,sans-serif;font-style:normal;color:#8A80AA}
+.ch button{flex:1 0 34px;max-width:64px;height:100%;border:0;background:none;padding:0;cursor:pointer;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font-family:'Onest',system-ui,sans-serif}
+.ch button .p{font:700 11.5px 'Onest',system-ui,sans-serif;color:#4A4466;margin-bottom:4px;white-space:nowrap}
+.ch button .bar{width:70%;max-width:30px;min-height:3px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,#8B5CFF,#4101F7);transition:filter .15s}
+.ch button.now .bar{background:repeating-linear-gradient(135deg,#B9A2FF 0 5px,#D8CBFF 5px 10px)}
+.ch button.na .bar{background:#EEE9F8}
+.ch button:hover .bar{filter:brightness(1.12)}
+.ch button .mo{height:40px;padding-top:8px;font:600 11px/1.3 'Onest',system-ui,sans-serif;color:#6A6488;white-space:nowrap;text-align:center;border-bottom:3px solid transparent;width:100%}
+.ch button.on .mo{color:#A8431E;border-bottom-color:#E07A55}.ch button.on .p{color:#A8431E}
+.chn{display:none}
+.pq .qdefs{padding:0 30px}.pq .qdefs .dg{margin:0 0 20px}
+.pq .info-btn{margin-top:14px}
+.pq .chh{align-items:center;flex-wrap:wrap;gap:10px;padding:16px 30px 0}
+.sg3{display:inline-flex;gap:2px;background:#EFEAF9;border-radius:14px;padding:4px}
+.sg3 button{border:0;background:none;border-radius:10px;padding:6px 12px;font:600 13px 'Onest',system-ui,sans-serif;color:#4A4466;cursor:pointer}
+.sg3 button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.06),0 8px 18px -12px rgba(1,7,60,.45)}
+.sg3[hidden]{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.chips span{font:600 12.5px 'Onest',system-ui,sans-serif;color:#4A4466;background:#F7F5FC;border-radius:10px;padding:6px 10px}
+.chips b{font-weight:700}.pq .chips .cu{color:#137A4F}.pq .chips .cd{color:#B0204F}
+.ch{height:236px;padding:36px 30px 14px}
+.ch .chi{position:relative;display:flex;align-items:flex-end;gap:6px;height:100%;min-width:100%}
+.ch .g{left:0;right:0}
+.ch .chi button{max-width:none}
+.ch svg.tl{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0}
+.ch .chi button{position:relative;z-index:1}
+.ch button .p{background:#fff;border-radius:6px;padding:1px 4px;box-shadow:0 0 0 2px #fff}
+.pq .chips .av i{display:inline-block;width:14px;height:0;border-top:2px solid #DD30B1;vertical-align:4px;margin-right:6px}.pq .chips .tl i{display:inline-block;width:14px;height:0;border-top:2px dashed #8A80AA;vertical-align:4px;margin-right:6px}
+.pq .chips .av b{color:#A3187F}
+.pq .chips .tl{display:inline-flex;align-items:center}.pq .chips .tl b{margin-left:4px}
+.pq .chips .ti{margin-left:8px;width:20px;height:20px;border-radius:50%;border:1.5px solid #4101F7;background:#fff;color:#4101F7;font:italic 700 12px/1 Georgia,serif;cursor:pointer;display:grid;place-items:center;padding:0}
+.pq .chips .ti:hover,.pq .chips .ti[aria-expanded="true"]{background:#4101F7;color:#fff}
+.pq .qdefs.trd .dg{margin:16px 0 0}
+.ch button .bar{position:relative;display:flex;justify-content:center}
+.ch button .md{position:absolute;top:5px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:800 10.5px 'Onest',system-ui,sans-serif;font-style:normal;color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
+.ch button.m1 .bar{background:linear-gradient(180deg,#F6D365,#D9A21B)}.ch button.m1 .md{background:#B7860B}
+.ch button.m2 .bar{background:linear-gradient(180deg,#E3E7EE,#9EA7B5)}.ch button.m2 .md{background:#7D8796}
+.ch button.m3 .bar{background:linear-gradient(180deg,#E9B48A,#B8703E)}.ch button.m3 .md{background:#93552B}
+.ch button.m1 .p{color:#9A6F00}.ch button.m2 .p{color:#5E6878}.ch button.m3 .p{color:#93552B}
+@media (max-width:900px){.hero{padding:24px 16px 12px}h1{font-size:34px;letter-spacing:-1px}.page{padding:0 16px 48px}
+  .tray{padding:4px 16px 18px}.tray-head{margin:0 -16px 14px;padding-left:16px;padding-right:16px}
+  .per{width:100%}.per .l{flex:1;min-width:0}
+  .chips{margin-left:0}.pq .qdefs{padding:0 18px}
+  .pq .top{padding:20px 18px}.pq .q{font-size:24px}.pq .n{width:100%}.pq .m{flex:1;min-width:0}.ch,.chn,.pq .chh{padding-left:18px;padding-right:18px}.ch .g{left:18px;right:18px}}
 </style>
 </head>
 <body>
@@ -296,7 +414,12 @@
     <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
 </div></div>
 <div class="page">
-  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+  <div class="tp-bar"><nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
+    <div class="per" id="act-per" hidden>
+      <div class="t"><button type="button" data-pm="m" aria-pressed="true">Month</button><button type="button" data-pm="r" aria-pressed="false">Date range</button></div>
+      <span id="per-m" style="display:contents"><button type="button" class="mb" data-pstep="-1" aria-label="Previous month">‹</button><span class="l" id="per-l">—</span><button type="button" class="mb" data-pstep="1" aria-label="Next month">›</button></span>
+      <span class="rg" id="per-r" hidden><input type="date" id="per-from" aria-label="From">to<input type="date" id="per-to" aria-label="To"></span>
+    </div></div>
 
   <section class="tray" id="sec-t">
     <div class="tray-head"><div class="tray-title">Monthly Active Learners by Teacher</div><span class="badge" id="t-badge">—</span></div>
@@ -334,21 +457,33 @@
     </div>
   </section>
 
+  <div class="pq" id="act-q" hidden>
+    <div class="top"><div class="b"><span class="tg"><i>?</i>The question this page answers</span>
+      <div class="q">How good are we at collecting renewal payments?</div>
+      <button class="info-btn" type="button" aria-expanded="false" aria-controls="q-defs" onclick="toggleDefs(this,'q-defs')"><span class="i">i</span>What this measures</button></div>
+      <div class="n" id="act-tiles"></div></div>
+    <div class="qdefs"><div class="defs-list dg" id="q-defs" hidden><div class="dc"><div class="dh"><div class="dn">Collection efficiency</div><div class="dm">How much of what fell due we actually collected.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Collected <s>÷</s> due</div><div class="dtp"><i style="background:#4101F7"></i><span>Can go above 100% when win-backs and pre-renewals come in.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>All current teachers together, the same as the Total row below.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Due</div><div class="dm">Memberships whose original package expiry date falls in the period.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>An extension does not move a membership to another period.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Counted under the teacher who taught them.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Collected</div><div class="dm">Renewals whose date of renewal falls in the period.</div></div><div class="db"><div class="dl">Includes</div><div class="dli"><span class="dic">✓</span><span>Learners due in the period who paid on time.</span></div><div class="dli"><span class="dic">✓</span><span><b>Win-backs:</b> learners due earlier who paid late.</span></div><div class="dli"><span class="dic">✓</span><span><b>Pre-renewals:</b> learners who paid in advance.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Date of renewal is column A of the Renewals tab.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Each period stands on its own</div><div class="dm">A payment counts in the period it was made.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span>A learner due in September who pays in October counts in October.</span></div><div class="dli"><span class="dic">2</span><span>September stays as it was, so months compare fairly.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">The chart</div><div class="dm">Every period side by side.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>MoM, QoQ, YoY:</b> by month, quarter or year.</span></div><div class="dli"><span class="dic">2</span><span><b>3M to All:</b> how many months to show.</span></div><div class="dli"><span class="dic">3</span><span>Click a bar to pick that month, quarter or year.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>The pink line is the average of the finished periods shown: everything collected ÷ everything due.</span></div><div class="dtp"><i style="background:#8A80AA"></i><span>The dashed line is the trend: whether the periods shown are rising or falling.</span></div><div class="dtp"><i style="background:#E0B33A"></i><span>Gold, silver and bronze mark the three best periods shown.</span></div><div class="dtp"><i style="background:#C8B8FF"></i><span>The striped bar is the current period. It is not ranked until it ends.</span></div></div></div></div></div>
+    <div class="chh"><div class="sg3" id="ch-v"><button type="button" data-chv="m">MoM</button><button type="button" data-chv="q">QoQ</button><button type="button" data-chv="y">YoY</button></div>
+      <div class="sg3" id="ch-r"><button type="button" data-chr="3">3M</button><button type="button" data-chr="6">6M</button><button type="button" data-chr="9">9M</button><button type="button" data-chr="12">12M</button><button type="button" data-chr="all">All</button></div>
+      <span class="chips" id="ch-cmp"></span></div>
+    <div class="qdefs trd"><div class="defs-list dg" id="tr-defs" hidden><div class="dc"><div class="dh"><div class="dn">Trend</div><div class="dm">Which way collection efficiency is moving, and how fast.</div></div><div class="db"><div class="dl">For example</div><div class="dfm">▲ 0.4 pts a month</div><div class="dtp"><i style="background:#4101F7"></i><span>Rising by about 0.4 percentage points every month.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>Over 12 months that adds up to about 5 points: a typical 70% month a year ago is a typical 75% month now.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">How it is worked out</div><div class="dm">The dashed line that best fits every bar shown.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span>It looks at all the finished bars, not just the first and the last.</span></div><div class="dli"><span class="dic">2</span><span>So one very good or very bad month does not swing it much.</span></div><div class="dli"><span class="dic">3</span><span>Its slope is the pts a month figure.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The current month is left out until it ends.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Average and trend together</div><div class="dm">Two different questions.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>Average:</b> how good are we, typically?</span></div><div class="dli"><span class="dic">2</span><span><b>Trend:</b> are we getting better or worse, and how fast?</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>A good average with a ▼ trend means we are slipping.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">How big is big</div><div class="dm">Reading the number.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span><b>Under 0.5 pts:</b> steady, not really changing.</span></div><div class="dtp"><i style="background:#4101F7"></i><span><b>About 1 to 2 pts:</b> clear, steady improvement.</span></div><div class="dtp"><i style="background:#4101F7"></i><span><b>More than that:</b> a big shift. Check whether one standout month is behind it.</span></div><div class="dtp"><i style="background:#D0335E"></i><span><b>▼ in red:</b> we are slipping.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Pick the window</div><div class="dm">3M, 6M, 9M, 12M or All change what it covers.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>3M:</b> recent momentum, useful after a new push.</span></div><div class="dli"><span class="dic">2</span><span><b>12M or All:</b> the longer direction.</span></div><div class="dtp"><i style="background:#1F9D6B"></i><span>3M ▲ with 12M ▼ means things have started turning around.</span></div></div></div></div></div>
+    <div class="ch" id="act-ch"></div>
+  </div>
   <section class="tray" id="sec-act">
-    <div class="tray-head"><div class="tray-title">Renewals Closed in the Month</div><span class="badge" id="act-badge">—</span></div>
+    <div class="tray-head"><div class="tray-title">Collected against due</div><span class="badge" id="act-badge">—</span></div>
     <div class="lgd" id="act-lgd"></div>
     <div class="tbl-wrap"><table class="rr" id="act"></table></div>
     <div class="pl" id="act-pl"></div>
     <div class="defs">
       <button class="info-btn" type="button" aria-expanded="false" aria-controls="act-defs" onclick="toggleDefs(this,'act-defs')"><span class="i">i</span>How these numbers are worked out</button>
       <div class="defs-list dg" id="act-defs" hidden>
-        <div class="dc"><div class="dh"><div class="dn">Due</div><div class="dm">Memberships ending in that month.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>Under the teacher who taught them.</span></div></div></div>
-        <div class="dc"><div class="dh"><div class="dn">Renewed</div><div class="dm">Every renewal paid in that month.</div></div><div class="db"><div class="dl">Includes</div><div class="dli"><span class="dic">✓</span><span>Learners due that month.</span></div><div class="dli"><span class="dic">✓</span><span>Learners due earlier who paid late.</span></div><div class="dli"><span class="dic">✓</span><span>Learners who paid in advance.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Each renewal counts under the teacher of the membership being renewed.</span></div></div></div>
-        <div class="dc"><div class="dh"><div class="dn">Last 3M, 6M, 12M and Lifetime</div><div class="dm">Those months put together.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Renewals closed <s>÷</s> everything due, completed months only</div><div class="dtp"><i style="background:#C9C2E0"></i><span>This month is left out until it's over.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Due</div><div class="dm">Memberships whose original package expiry date falls in the month.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>An extension does not move a membership to another month.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Under the teacher who taught them.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Collected</div><div class="dm">Every renewal whose date of renewal (column A of the Renewals tab) falls in the month.</div></div><div class="db"><div class="dl">Includes</div><div class="dli"><span class="dic">✓</span><span>Learners due that month.</span></div><div class="dli"><span class="dic">✓</span><span>Learners due earlier who paid late (win-backs).</span></div><div class="dli"><span class="dic">✓</span><span>Learners who paid in advance.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Each renewal counts under the teacher of the membership being renewed.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>A learner due in September who pays in October counts in October, so September's figure stays as it was.</span></div></div></div><div class="dc"><div class="dh"><div class="dn">Month or Date range</div><div class="dm">The picker at the top sets the period.</div></div><div class="db"><div class="dli"><span class="dic">1</span><span><b>Month:</b> the tile shows that month, and its column is marked in orange.</span></div><div class="dli"><span class="dic">2</span><span><b>Date range:</b> due by original expiry date between the dates, collected by date of renewal between the dates, in a Selected column.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The chart shows every month. Click a bar to pick that month.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Last 3M, 6M, 12M and Lifetime</div><div class="dm">Those months put together.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Collected <s>÷</s> due, completed months only</div><div class="dtp"><i style="background:#C9C2E0"></i><span>This month is left out until it's over.</span></div></div></div>
         <div class="dc"><div class="dh"><div class="dn">Teachers and Total</div><div class="dm">Current teachers only.</div></div><div class="db"><div class="dtp"><i style="background:#C9C2E0"></i><span>Those with an admission or renewal in the last 3 months.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>Total adds up the teachers shown.</span></div></div></div>
         <div class="dc"><div class="dh"><div class="dn">The learners in a cell</div><div class="dm">Click any percentage to list the learners due in that month.</div></div><div class="db"><div class="dl">How it works</div><div class="dli"><span class="dic">1</span><span>Each learner shows whether they have renewed.</span></div><div class="dli"><span class="dic">2</span><span>Filter to All due, Renewed or Not renewed.</span></div><div class="dli"><span class="dic">3</span><span>Click the cell again, or ✕, to close the list.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>Renewals paid in the month for a membership due in another month (late or in advance) have their own filter, since the cell counts them too.</span></div></div></div>
         <div class="dc"><div class="dh"><div class="dn">Folding and sorting</div><div class="dm">Arrange the summary columns.</div></div><div class="db"><div class="dtp"><i style="background:#4101F7"></i><span>The arrow beside the summary columns folds them away, and brings them back.</span></div><div class="dtp"><i style="background:#4101F7"></i><span>Click a summary column's heading to rank teachers by it. Click again for the usual order.</span></div></div></div>
-        <div class="dc"><div class="dh"><div class="dn">Renewal %</div><div class="dm">Renewed against due for that month.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Renewed <s>÷</s> due</div><div class="dtp"><i style="background:#4101F7"></i><span>Can go above 100% when late payments and advance renewals come in.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The month's figure is final once the month is over.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The totals match Renewal collection efficiency on the Renewal Pipeline page.</span></div></div></div>
+        <div class="dc"><div class="dh"><div class="dn">Collection efficiency</div><div class="dm">Collected against due for the period.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Collected <s>÷</s> due</div><div class="dtp"><i style="background:#4101F7"></i><span>Can go above 100% when late payments and advance renewals come in.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The month's figure is final once the month is over.</span></div><div class="dtp"><i style="background:#C9C2E0"></i><span>The totals match Renewal collection efficiency on the Renewal Pipeline page.</span></div></div></div>
       </div>
     </div>
   </section>
@@ -452,7 +587,7 @@ function renewals(names){
 }
 const band=p=>{const r=Math.round(p);return r>90?'top':r>70?'hi':r>50?'mid':'lo';};   // up to 50% red · 51–70% amber · 71–90% green · above 90% blue
 function rrCell(x,k,pk){
-  const c=yb(k),on=pk&&SELP&&SELP.key===pk?' sel':'',at=pk?` data-pk="${esc(pk)}" tabindex="0" role="button" title="See these learners"`:'';
+  const c=yb(k)+(pk&&pk.startsWith('act|')&&PER.mode==='m'&&k===PER.k?' pick':''),on=pk&&SELP&&SELP.key===pk?' sel':'',at=pk?` data-pk="${esc(pk)}" tabindex="0" role="button" title="See these learners"`:'';
   if(!x||(!x.due&&!x.ren))return`<td class="zero${c}">—</td>`;
   if(!x.due)return`<td class="pk${c}${on}"${at}><span class="util xtra">+${x.ren}</span><small>none due</small></td>`;
   const p=x.ren/x.due*100;
@@ -462,6 +597,7 @@ function rrCell(x,k,pk){
    Over time — Last 3, 6, 12 months and Lifetime, all completed months only (the current month is left out); renewed and due are added up first, then the %.
    This year so far (Cohort Renewals only) — memberships ending from January to this month: due, renewed, still to renew. */
 const GROUPS={
+  sel:{title:'Selected',cols:[['sel','Dates']]},   // Renewal Collection Efficiency, Date range only
   perf:{title:'Over time',cols:[['m3','Last 3M',3],['m6','Last 6M',6],['m12','Last 12M',12],['life','Lifetime',Infinity]]},
   year:{title:()=>Math.floor(LAST/12)+' so far',cols:[['ydue','Due'],['yren','Renewed'],['ypct','% Renewed'],['yleft','Yet to renew'],['ylost',"Will not renew"],['yopp','Opportunity']]}
 };
@@ -472,14 +608,14 @@ function fold(id,g){FOLD[id+'.'+g]=!FOLD[id+'.'+g];try{localStorage.setItem('art
 function sortBy(id,key){SORT[id]=SORT[id]===key?null:key;render();}
 function sumWin(m,a,b){const s={due:0,ren:0,lost:0};if(!m)return s;for(const k in m){const n=+k;if(n>=a&&n<=b){s.due+=m[k].due;s.ren+=m[k].ren;s.lost+=m[k].lost||0;}}return s;}
 function stats(m){
-  const r={};GROUPS.perf.cols.forEach(([key,,n])=>r[key]=sumWin(m,n===Infinity?-Infinity:LAST-n,LAST-1));
+  const r={sel:(m&&m.__sel)||{due:0,ren:0,lost:0}};GROUPS.perf.cols.forEach(([key,,n])=>r[key]=sumWin(m,n===Infinity?-Infinity:LAST-n,LAST-1));
   const y=sumWin(m,Math.floor(LAST/12)*12,LAST);r.ydue=y.due;r.yren=y.ren;r.yleft=y.due-y.ren;r.ylost=y.lost;r.yopp=r.yleft-r.ylost;r.ypct=y.due?y.ren/y.due*100:null;
   return r;
 }
 const pctOf=x=>x&&x.due?x.ren/x.due*100:null;
 function sumCells(g,s){
-  if(g==='perf')return GROUPS.perf.cols.map(([key],i)=>{const x=s[key],p=pctOf(x);
-    return`<td class="sg sg-perf${i===0?' g0':''}"><div class="sw">${p==null?'<span class="na">—</span>':`<span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren.toLocaleString('en-IN')} of ${x.due.toLocaleString('en-IN')}</small>`}</div></td>`;}).join('')+'<td class="gh"></td>';
+  if(g==='perf'||g==='sel')return GROUPS[g].cols.map(([key],i)=>{const x=s[key],p=pctOf(x);
+    return`<td class="sg sg-${g}${i===0?' g0':''}"><div class="sw">${p==null?'<span class="na">—</span>':`<span class="util ${band(p)}">${Math.round(p)}%</span><small>${x.ren.toLocaleString('en-IN')} of ${x.due.toLocaleString('en-IN')}</small>`}</div></td>`;}).join('')+'<td class="gh"></td>';
   const n=v=>v?v.toLocaleString('en-IN'):'<span class="na">0</span>';
   return`<td class="sg sg-year g0"><div class="sw"><b class="num">${n(s.ydue)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num">${n(s.yren)}</b></div></td><td class="sg sg-year"><div class="sw">${s.ypct==null?'<span class="na">—</span>':`<span class="util ${band(s.ypct)}">${Math.round(s.ypct)}%</span>`}</div></td>
     <td class="sg sg-year"><div class="sw"><b class="num">${n(s.yleft)}</b></div></td><td class="sg sg-year"><div class="sw"><b class="num lost">${n(s.ylost)}</b></div></td>
@@ -508,7 +644,7 @@ function rrTable(id,o,lastEntry,groups){
   const gMo=groups.map(g=>GROUPS[g].cols.map(([key,l],i)=>`<th class="sg sg-${g}${i===0?' g0':''}${sk===key?' on':''}"><div class="sw"><button type="button" class="sbtn" onclick="sortBy('${id}','${key}')">${l}${sk===key?' ↓':''}</button></div></th>`).join('')).join('');
   const years=[];MONTHS.forEach(k=>{const y=Math.floor(k/12);if(!years.length||years[years.length-1].y!==y)years.push({y,n:0});years[years.length-1].n++;});
   const hd=`<thead><tr class="yr"><th class="metric" rowspan="2" style="vertical-align:bottom;padding-bottom:14px">Teacher</th>${gTop}${years.map(y=>`<th class="yb" colspan="${y.n}">${y.y}</th>`).join('')}</tr>
-    <tr class="mo">${gMo}${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
+    <tr class="mo">${gMo}${MONTHS.map(k=>`<th class="${yb(k).trim()} ${k===LAST?'cur':''}${id==='act'&&PER.mode==='m'&&k===PER.k?' pick':''}">${MON[k%12]} ${String(Math.floor(k/12)).slice(2)}${k===LAST?'<small>till date</small>':''}</th>`).join('')}</tr></thead>`;
   const el=document.getElementById(id);el.innerHTML=hd+'<tbody>'+body+'</tbody>';
   groups.forEach(g=>el.classList.toggle('fold-'+g,!!FOLD[id+'.'+g]));
   return{all:curAll,cur};
@@ -518,6 +654,7 @@ const LGD='<span class="util lo">Up to 50%</span><span class="util mid">51–70%
 /* ── The learners behind a cell: click a pill and the list opens under the table ──
    Due = memberships ending in that month under that teacher. Each shows whether it has renewed (whenever it was paid).
    On Renewals Closed in the Month, renewals paid in the month for a membership due in another month (late or in advance) are listed separately. */
+const PER={mode:'m',k:LAST,from:'',to:''};   // Renewal Collection Efficiency: the month, or the dates, picked at the top
 let SELP=null;   // {key:'act|Balu|24310', tb, t, k, f:'all'|'ren'|'not'|'other'}
 const fd=d=>d?String(d.getDate()).padStart(2,'0')+'-'+MON[d.getMonth()]+'-'+String(d.getFullYear()).slice(2):'–';
 const ml=k=>MON[k%12]+' '+String(Math.floor(k/12)).slice(2);
@@ -643,22 +780,146 @@ let R=null;
 function render(){
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
-  document.getElementById('subtitle').textContent='Active learners and renewals, teacher by teacher — '+(sel?sel.name+', '+sel.city:'all centres combined');
+  hdr();
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   const names=sel?[sel.name]:CENTRES.map(c=>c.name);
   if(!LOADED()){['mal-t','coh','act'].forEach(id=>document.getElementById(id).innerHTML='<tbody><tr><td class="metric">Loading…</td></tr></tbody>');if(window.CardNav)CardNav.refresh();return;}
   const from=firstMonth(names);MONTHS=[];for(let k=LAST;k>=from;k--)MONTHS.push(k);
   renderMAL(names);
   const rn=renewals(names);
-  const a=rrTable('coh',rn.coh,rn.lastEntry,['perf','year']),b=rrTable('act',rn.act,rn.lastEntry,['perf']);
+  const rg=PER.mode==='r'?rangeAttach(rn,rn.act):null;
+  const a=rrTable('coh',rn.coh,rn.lastEntry,['perf','year']),b=rrTable('act',rn.act,rn.lastEntry,rg?['sel','perf']:['perf']);
   const pc=x=>x&&x.due?Math.round(x.ren/x.due*100)+'%':'—',lbl=MON[LAST%12]+' '+Math.floor(LAST/12);
   document.getElementById('coh-badge').textContent=lbl+' cohort: '+pc(a.all[LAST])+' renewed so far';
-  document.getElementById('act-badge').textContent=lbl+': '+pc(b.all[LAST])+' till date';
-  document.getElementById('coh-lgd').innerHTML=document.getElementById('act-lgd').innerHTML=LGD;
+  document.getElementById('coh-lgd').innerHTML=LGD;
+  document.getElementById('act-lgd').innerHTML=LGD.replace('renewal % and renewed of due','collection % and collected of due');
+  actView(b,rg);
   R={a,b,rn};
   ['coh','act'].forEach(plRender);
   if(window.CardNav)CardNav.refresh();
 }
+/* ── Renewal Collection Efficiency ──
+   Due = memberships whose original package expiry date (column X) falls in the period.
+   Collected = renewals whose date of renewal (column A of the Renewals tab) falls in the period, whichever month they were due in.
+   So a learner due in September who pays in October counts in October, and September's figure stays as it was. */
+const TT={'sec-t':'Learners by Teacher','sec-coh':'Cohort Renewals','sec-act':'Renewal Collection Efficiency'};
+function hdr(){
+  const on=document.body.classList.contains('cn-sub')?document.querySelector('section.tray.cn-on'):null,id=on?on.id:null;
+  const sel=CENTRES.find(c=>c.name===selCentre),place=sel?sel.name+', '+sel.city:'All centres';
+  document.querySelector('.hin h1').textContent=id?TT[id]:'Teacher Performance';
+  document.getElementById('subtitle').textContent=id?'Teacher Performance · '+place+'.':'Active learners and renewals, teacher by teacher · '+place+'.';
+  document.title=id?TT[id]:'Teacher Performance';
+  const isA=id==='sec-act',q=document.getElementById('act-q'),s=document.getElementById('sec-act');
+  q.hidden=!isA;document.getElementById('act-per').hidden=!isA;
+  if(isA&&q.nextElementSibling!==s)s.parentNode.insertBefore(q,s);
+  if(isA)requestAnimationFrame(chScroll);
+}
+const dIn=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const dOut=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dShort=(d,y)=>d.getDate()+' '+MON[d.getMonth()]+(y?' '+String(d.getFullYear()).slice(2):'');
+function rangeAttach(rn,o){
+  const f=dIn(PER.from),t=dIn(PER.to);if(!f||!t||f>t)return null;
+  const a=mi(f),b=Math.min(mi(t),LAST);
+  new Set(Object.keys(rn.DUEL).concat(Object.keys(rn.PAIDL))).forEach(w=>{let due=0,ren=0;
+    for(let k=a;k<=b;k++){((rn.DUEL[w]||{})[k]||[]).forEach(x=>{if(x.end>=f&&x.end<=t)due++;});((rn.PAIDL[w]||{})[k]||[]).forEach(x=>{if(x.date>=f&&x.date<=t)ren++;});}
+    if(due||ren){o[w]=o[w]||{};o[w].__sel={due,ren,lost:0};}});
+  const yy=f.getFullYear()!==t.getFullYear();GROUPS.sel.cols[0][1]=dShort(f,yy)+' – '+dShort(t,yy);
+  return{f,t};
+}
+const pcN=x=>x&&x.due?x.ren/x.due*100:null;
+function actView(b,rg){
+  const all=b.all,MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const lab=k=>MN[k%12]+' '+Math.floor(k/12);
+  // the picker
+  document.querySelectorAll('[data-pm]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.pm===PER.mode));
+  document.getElementById('per-m').style.display=PER.mode==='m'?'contents':'none';document.getElementById('per-r').hidden=PER.mode!=='r';
+  document.getElementById('per-l').textContent=lab(PER.k);
+  const lo=MONTHS[MONTHS.length-1];
+  document.querySelector('[data-pstep="-1"]').disabled=PER.k<=lo;document.querySelector('[data-pstep="1"]').disabled=PER.k>=LAST;
+  // the two tiles
+  let x,when,cmp='';
+  if(PER.mode==='r'){x=rg?all.__sel:null;when=rg?dShort(rg.f,true)+' to '+dShort(rg.t,true):'Pick both dates';}
+  else{x=all[PER.k];when=lab(PER.k)+(PER.k===LAST?' so far':'');
+    const p=pcN(x),q=pcN(all[PER.k-1]);
+    if(p!=null&&q!=null&&PER.k!==LAST){const d=Math.round(p)-Math.round(q);cmp=d?`<span class="${d>0?'dup':'ddn'}">${d>0?'▲':'▼'} ${Math.abs(d)} pts on ${ml(PER.k-1)}</span>`:`<span>Same as ${ml(PER.k-1)}.</span>`;}}
+  const p=pcN(x),l3=sumWin(all,LAST-3,LAST-1),p3=pcN(l3);
+  document.getElementById('act-tiles').innerHTML=
+    `<div class="m hero"><span class="t">Collection efficiency</span><span class="v">${p==null?'—':Math.round(p)+'%'}</span><span class="s">${x&&x.due?x.ren.toLocaleString('en-IN')+' collected of '+x.due.toLocaleString('en-IN')+' due, ':''}${esc(when)}.${cmp?'<br>'+cmp:''}</span></div>`+
+    `<div class="m"><span class="t">Last 3 months</span><span class="v">${p3==null?'—':Math.round(p3)+'%'}</span><span class="s">${l3.ren.toLocaleString('en-IN')} of ${l3.due.toLocaleString('en-IN')}, ${ml(LAST-3)} to ${ml(LAST-1)}.</span></div>`;
+  document.getElementById('act-badge').textContent=(PER.mode==='r'?(rg?dShort(rg.f,true)+' – '+dShort(rg.t,true):'Dates'):lab(PER.k))+': '+(p==null?'—':Math.round(p)+'%')+(PER.mode==='m'&&PER.k===LAST?' so far':'');
+  chart(all,lab);
+}
+/* The chart under the question: MoM, QoQ or YoY, the trend line, and gold, silver and bronze for the three best periods shown */
+const CH={v:'m',r:12};
+function chPeriods(all){
+  const ks=MONTHS.slice().reverse(),yy=k=>String(Math.floor(k/12)).slice(2);
+  if(CH.v==='m'){const L=ks.map(k=>({a:k,b:k,l:[MON[k%12],yy(k)],x:all[k]||{due:0,ren:0}}));return CH.r==='all'?L:L.slice(-CH.r);}
+  const G=new Map();ks.forEach(k=>{const g=CH.v==='q'?Math.floor(k/3):Math.floor(k/12);let o=G.get(g);
+    if(!o)G.set(g,o={a:k,b:k,l:CH.v==='q'?['Q'+(g%4+1),yy(k)]:[String(Math.floor(k/12)),''],x:{due:0,ren:0}});
+    o.b=k;const x=all[k];if(x){o.x.due+=x.due;o.x.ren+=x.ren;}});
+  return[...G.values()];
+}
+const pLab=P=>P.l[1]?P.l[0]+' '+P.l[1]:P.l[0];
+function pRange(P){return{f:new Date(Math.floor(P.a/12),P.a%12,1),t:P.b===LAST?TODAY:new Date(Math.floor(P.b/12),P.b%12+1,0)};}
+function chart(all,lab){
+  document.querySelectorAll('[data-chv]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.chv===CH.v));
+  document.querySelectorAll('[data-chr]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.chr===String(CH.r)));
+  document.getElementById('ch-r').hidden=CH.v!=='m';
+  const P=chPeriods(all);P.forEach(o=>{o.v=pcN(o.x);o.now=o.b===LAST;
+    if(CH.v==='m')o.on=PER.mode==='m'&&o.a===PER.k;else{const r=pRange(o);o.on=PER.mode==='r'&&PER.from===dOut(r.f)&&PER.to===dOut(r.t);}});
+  const done=P.filter(o=>o.v!=null&&!o.now);
+  done.slice().sort((p,q)=>q.v-p.v||q.a-p.a).slice(0,3).forEach((o,i)=>o.md=i+1);
+  const top=Math.max(100,...P.filter(o=>o.v!=null).map(o=>o.v))*1.08,H=186,PL=H-60;
+  const ch=document.getElementById('act-ch');
+  ch.innerHTML=`<div class="chi"><div class="g" style="bottom:${40+PL*100/top}px"><em>100%</em></div>`+P.map((o,i)=>{const cls=(o.v==null?' na':'')+(o.now?' now':'')+(o.on?' on':'')+(o.md?' m'+o.md:'');
+    return`<button type="button" class="${cls.trim()}" data-chi="${i}" title="${esc(pLab(o))}${o.v==null?'':': '+Math.round(o.v)+'%, '+o.x.ren+' collected of '+o.x.due+' due'}${o.now?', so far':''}${o.md?', number '+o.md:''}."><span class="p">${o.v==null?'—':Math.round(o.v)+'%'}</span><span class="bar" style="height:calc(${o.v==null?0:(o.v/top).toFixed(4)} * (100% - 60px))">${o.md?`<i class="md">${o.md}</i>`:''}</span><span class="mo">${o.l[0]}${o.l[1]?'<br>'+o.l[1]:''}</span></button>`;}).join('')+'</div>';
+  CHP=P;
+  // quick comparison: the last finished period against the one before it, and the trend
+  const nm={m:'month',q:'quarter',y:'year'}[CH.v],chips=[];
+  if(done.length>=2){const x=done[done.length-1],y=done[done.length-2],d=Math.round(x.v)-Math.round(y.v);
+    chips.push(`<span>${esc(pLab(x))} vs ${esc(pLab(y))}: <b class="${d>0?'cu':d<0?'cd':''}">${d>0?'▲ ':d<0?'▼ ':''}${d?Math.abs(d)+' pts':'no change'}</b></span>`);}
+  const avg=avgOf(P);if(avg!=null)chips.push(`<span class="av"><i></i>Average: <b>${Math.round(avg)}%</b></span>`);
+  const tr=trendOf(P);
+  if(tr){const op=!document.getElementById('tr-defs').hidden;chips.push(`<span class="tl"><i></i>Trend: <b class="${tr.m>0.05?'cu':tr.m<-0.05?'cd':''}">${Math.abs(tr.m)<0.05?'flat':(tr.m>0?'▲ ':'▼ ')+(Math.abs(tr.m)<1?Math.abs(tr.m).toFixed(1):Math.round(Math.abs(tr.m)))+' pts a '+nm}</b><button type="button" class="ti" data-tri aria-expanded="${op}" aria-controls="tr-defs" title="What the trend means">i</button></span>`);}
+  document.getElementById('ch-cmp').innerHTML=chips.join('');
+  requestAnimationFrame(()=>{drawTrend(top);chScroll();});
+}
+let CHP=[];
+// Average of the finished periods shown: everything collected ÷ everything due, so bigger months weigh more
+function avgOf(P){let d=0,r=0;P.forEach(o=>{if(!o.now&&o.x.due){d+=o.x.due;r+=o.x.ren;}});return d?r/d*100:null;}
+function trendOf(P){
+  const pts=P.map((o,i)=>[i,o.v,o]).filter(p=>p[1]!=null&&!p[2].now);if(pts.length<3)return null;
+  const n=pts.length,sx=pts.reduce((s,p)=>s+p[0],0),sy=pts.reduce((s,p)=>s+p[1],0),sxx=pts.reduce((s,p)=>s+p[0]*p[0],0),sxy=pts.reduce((s,p)=>s+p[0]*p[1],0);
+  const m=(n*sxy-sx*sy)/(n*sxx-sx*sx),c=(sy-m*sx)/n;return{m,c,i0:pts[0][0],i1:pts[n-1][0]};
+}
+function drawTrend(top){
+  const ch=document.getElementById('act-ch'),chi=ch.querySelector('.chi');if(!chi)return;const tr=trendOf(CHP),avg=avgOf(CHP);const old=chi.querySelector('svg.tl');if(old)old.remove();if(!tr&&avg==null)return;
+  const bs=chi.querySelectorAll('button');if(!bs.length||!bs[0].offsetHeight)return;
+  const R=chi.getBoundingClientRect(),PL=bs[0].offsetHeight-60;
+  const pt=i=>{const br=bs[i].querySelector('.bar').getBoundingClientRect(),v=tr.m*i+tr.c;return[br.left+br.width/2-R.left,br.bottom-R.top-Math.max(0,v)/top*PL];};
+  const W=chi.scrollWidth,base=bs[0].querySelector('.bar').getBoundingClientRect().bottom-R.top;let h='';
+  if(avg!=null){const y=base-avg/top*PL;h+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#DD30B1" stroke-width="1.6"/>`;}
+  if(tr){const [x0,y0]=pt(tr.i0),[x1,y1]=pt(tr.i1);h+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="#8A80AA" stroke-width="2" stroke-dasharray="6 5" stroke-linecap="round"/>`;}
+  const sv=document.createElementNS('http://www.w3.org/2000/svg','svg');sv.setAttribute('class','tl');sv.setAttribute('width',W);sv.setAttribute('height',chi.offsetHeight);
+  sv.innerHTML=h;chi.insertBefore(sv,chi.firstChild);
+}
+window.addEventListener('resize',()=>{if(CHP.length)drawTrend(Math.max(100,...CHP.filter(o=>o.v!=null).map(o=>o.v))*1.08);});
+function chScroll(){const ch=document.getElementById('act-ch'),on=ch.querySelector('button.on');ch.scrollLeft=on?on.offsetLeft-ch.clientWidth/2:ch.scrollWidth;}
+document.addEventListener('click',e=>{
+  const m=e.target.closest('[data-pm]');
+  if(m){PER.mode=m.dataset.pm;if(PER.mode==='r'&&!PER.from){const f=new Date(Math.floor(PER.k/12),PER.k%12,1),t=PER.k===LAST?TODAY:new Date(Math.floor(PER.k/12),PER.k%12+1,0);
+      PER.from=dOut(f);PER.to=dOut(t);document.getElementById('per-from').value=PER.from;document.getElementById('per-to').value=PER.to;}
+    SELP=null;render();return;}
+  const st=e.target.closest('[data-pstep]');if(st&&!st.disabled){PER.k=Math.max(MONTHS[MONTHS.length-1],Math.min(LAST,PER.k+ +st.dataset.pstep));SELP=null;render();return;}
+  if(e.target.closest('[data-tri]')){const d=document.getElementById('tr-defs');d.hidden=!d.hidden;document.querySelectorAll('[data-tri]').forEach(b=>b.setAttribute('aria-expanded',!d.hidden));requestAnimationFrame(()=>drawTrend(Math.max(100,...CHP.filter(o=>o.v!=null).map(o=>o.v))*1.08));return;}
+  const v=e.target.closest('[data-chv]');if(v){CH.v=v.dataset.chv;render();return;}
+  const r=e.target.closest('[data-chr]');if(r){CH.r=r.dataset.chr==='all'?'all':+r.dataset.chr;render();return;}
+  const c=e.target.closest('[data-chi]');if(c){const o=CHP[+c.dataset.chi];if(!o)return;
+    if(CH.v==='m'){PER.mode='m';PER.k=o.a;}else{const g=pRange(o);PER.mode='r';PER.from=dOut(g.f);PER.to=dOut(g.t);document.getElementById('per-from').value=PER.from;document.getElementById('per-to').value=PER.to;}
+    SELP=null;render();}
+});
+['per-from','per-to'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{PER.from=document.getElementById('per-from').value;PER.to=document.getElementById('per-to').value;SELP=null;render();}));
+new MutationObserver(hdr).observe(document.body,{attributes:true,attributeFilter:['class']});
 async function load(){
   render();
   try{
@@ -691,7 +952,7 @@ CardNav.init({back:'All sections',cards:[
   {id:'sec-coh',k:'Renewals · by cohort',title:'Cohort Renewals',short:'Of the learners due each month, how many have renewed so far. Keeps updating as late payers renew.',go:'Open cohorts',
    icon:'<circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2.5 20c.5-3 2.7-4.5 5.5-4.5s5 1.5 5.5 4.5M13 15.6c.9-.1 2-.1 3-.1 2.8 0 5 1.5 5.5 4.5"/>',
    preview:()=>rrPreview('coh')},
-  {id:'sec-act',k:'Renewals · by month',title:'Renewals Closed in the Month',short:'Every renewal paid in the month — on time, late or in advance — against what was due.',go:'Open monthly renewals',
+  {id:'sec-act',k:'Renewals · collection',title:'Renewal Collection Efficiency',short:'How good are we at collecting renewal payments?',go:'Open collection efficiency',
    icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="M8.5 15.5l2.2 2.2 4.8-4.8"/>',
    preview:()=>rrPreview('act')}
 ]});
