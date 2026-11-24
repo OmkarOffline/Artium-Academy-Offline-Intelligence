@@ -62,6 +62,7 @@ h1{font:800 46px/1.05 var(--f);letter-spacing:-.02em;background:linear-gradient(
 .k.rr{background:linear-gradient(140deg,#6601fd 0%,#4101f7 60%,#2B0256 130%);border:0;color:#fff;box-shadow:0 14px 30px -18px rgba(65,1,247,.9)}
 .k.rr .t{color:#d9ccff}.k.rr .v{color:#fff}.k.rr .eq{font-size:12.5px;color:#cec8ea;margin-top:6px}
 .k.rr .pg .x{color:#d9ccff}.k.rr .pg .x b{color:#fff}.k.rr .pg .tr{background:rgba(255,255,255,.2)}.k.rr .pg .tr i{background:linear-gradient(90deg,#F1B6FA,#fff)}
+.wowsec{position:relative}.wowsec>.aw-pkb{position:absolute;right:76px;top:15px;z-index:2}
 .wvb{padding:18px;display:flex;flex-direction:column;gap:14px;background:#FAF8FE}
 .wc{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden}
 .wh{display:flex;align-items:center;gap:12px;padding:14px 18px}.wc:not(.closed) .wh{border-bottom:1px solid var(--edge)}
@@ -798,7 +799,7 @@ function pcView(P,mine){
 }
 function bindPc(out){
   out.querySelectorAll('[data-info]').forEach(b=>{b.onclick=e=>{e.stopPropagation();b.classList.toggle('open');};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();b.classList.toggle('open');}};});
-  out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
+  out.querySelectorAll('[data-k]>button:not(.aw-pkb)').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
   out.querySelectorAll('[data-pq]').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=b.dataset.pq.indexOf('|'),s=b.dataset.pq.slice(0,i),k=b.dataset.pq.slice(i+1);
     PCO[s]=PCO[s]===k?null:k;const y=window.scrollY;render();window.scrollTo(0,y);
     if(PCO[s])requestAnimationFrame(()=>{const p=document.querySelector(`.pqp[data-s="${s}"]`);if(p)p.scrollIntoView({behavior:'smooth',block:'nearest'});});});
@@ -820,6 +821,7 @@ function bindPc(out){
 function openList(k){LIST=k;try{localStorage.setItem('artium_rp_list',LIST);}catch(e){}FOLD.l_due=false;
   if(view!=='list'){view='list';try{localStorage.setItem('artium_rp_view','list');}catch(e){}}
   render();const t=document.getElementById('lists');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
+let WOWK='wA';   // the Week on Week part on show
 function render(){
   if(window.ArtiumWheel)ArtiumWheel.refresh();
   const sel=CENTRES.find(c=>c.name===selCentre);
@@ -919,20 +921,21 @@ function render(){
   pipe.forEach(x=>{const e=x.end;const k=!e?'none':inP(e,P)?'cur':e>P.b?'fut':e>=pm?(x.ext>0?'xprev':'prev'):(x.ext>0?'xpast':'past');put(dv[k],x.ncd);});
   const dt=zero();Object.values(dv).forEach(a=>a.forEach((x,i)=>dt[i]+=x));
   const D=DK.map(([k,l,o])=>({l,v:dv[k],opt:o})).concat([{l:'Total pipeline',v:dt,cls:'acc strong tline'}]);
-  const wow=`<div class="wvb">
-    ${part('wA','A','Renewal breakdown',SUM(['Due',n(due.length)],['Yet to renew',n(aY[W.length])],['Yet to commit',n(aC[W.length])]),wtable(W,P,A))}
-    ${part('wB','B','First-time renewals',B.sum,wtable(W,P,B.rows))}
-    ${part('wC','C','Repeated renewals',C.sum,wtable(W,P,C.rows))}
-    ${part('wD','D','Pipeline breakdown',SUM(['Total pipeline',n(pipe.length)]),wtable(W,P,D))}</div>`;
+  // Week on Week: one part at a time, picked from the wheel by the button in the heading
+  const WP={wA:()=>part('wA','A','Renewal breakdown',SUM(['Due',n(due.length)],['Yet to renew',n(aY[W.length])],['Yet to commit',n(aC[W.length])]),wtable(W,P,A)),
+    wB:()=>part('wB','B','First-time renewals',B.sum,wtable(W,P,B.rows)),
+    wC:()=>part('wC','C','Repeated renewals',C.sum,wtable(W,P,C.rows)),
+    wD:()=>part('wD','D','Pipeline breakdown',SUM(['Total pipeline',n(pipe.length)]),wtable(W,P,D))};
+  const wow=`<div class="wvb">${(WP[WOWK]||WP.wA)()}</div>`;
 
   const wnr=cohort.filter(x=>x.oc==='wnr'),ext=cohort.filter(x=>x.oc==='ext');
   const coh=mode==='month'?'current month cohort':'cohort due in this period';
   out.innerHTML=section('glance',mode==='month'?'Are we on track to hit this month\'s renewal target?':'How are renewals tracking in this period?','',glance,'qsec')
     +(mode==='month'?summary(P,mine):'')
-    +section('wow','Week on Week view','',wow,'wowsec')
+    +(window.ArtiumWheel&&ArtiumWheel.pickerButton?section('wow','Week on Week view','',wow,'wowsec').replace('<button type="button" class="sh"',ArtiumWheel.pickerButton('Pick a Week on Week view')+'<button type="button" class="sh"'):section('wow','Week on Week view','',wow,'wowsec'))
     +section('wnr','Will not renew',`<span class="ct r">${wnr.length}</span><span>${coh}</span>`,learnerList(wnr,false))
     +section('ext','Extended',`<span class="ct b">${ext.length}</span><span>${coh}</span>`,learnerList(ext,true));
-  out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
+  out.querySelectorAll('[data-k]>button:not(.aw-pkb)').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
   out.querySelectorAll('[data-ol]').forEach(b=>b.onclick=e=>{e.stopPropagation();OPENL[b.dataset.ol]=!OPENL[b.dataset.ol];try{localStorage.setItem('artium_rp_lists',JSON.stringify(OPENL));}catch(err){}render();});
   out.querySelectorAll('[data-list]').forEach(b=>b.onclick=()=>openList(b.dataset.list));
   out.querySelectorAll('[data-info]').forEach(b=>{b.onclick=e=>{e.stopPropagation();b.classList.toggle('open');};b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();b.classList.toggle('open');}};});
@@ -1138,7 +1141,7 @@ function bindList(out){
   out.querySelectorAll('[data-pkg]').forEach(b=>b.onclick=()=>setF(b.dataset.lk,{pkg:b.dataset.pkg}));
   out.querySelectorAll('[data-ren]').forEach(b=>b.onclick=()=>setF(b.dataset.lk,{ren:b.dataset.ren}));
   out.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{LSUB[b.dataset.sub]=b.dataset.v;try{localStorage.setItem('artium_rp_lsub',JSON.stringify(LSUB));}catch(e){}render();});
-  out.querySelectorAll('[data-k]>button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
+  out.querySelectorAll('[data-k]>button:not(.aw-pkb)').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.k;FOLD[k]=!fold(k);try{localStorage.setItem('artium_rp_fold',JSON.stringify(FOLD));}catch(e){}render();});
 }
 document.addEventListener('click',e=>{if(OPEN_F&&!e.target.closest('.ms')){OPEN_F=null;render();}if(MENU&&!e.target.closest('.cmenu,th.hc')){MENU=null;render();}});
 window.addEventListener('scroll',()=>{if(MENU){MENU=null;render();}},{passive:true});
@@ -1170,6 +1173,11 @@ async function load(){
 /* Analysis wheel: renewal collection efficiency by course, teacher, course level, age group and gender.
    Due = memberships whose original package expiry date falls in the window; collected = Renewals entries paid in the window, under that entry's own course, teacher and so on. */
 const WCOL={course:8,teacher:29,level:9,age:6,gender:5};
+/* Week on Week: the picker wheel in the section heading chooses which part to show */
+ArtiumWheel.picker({btn:()=>document.querySelector('.wowsec .aw-pkb'),tag:'WEEK ON WEEK',hub:'Pick a view',sel:()=>WOWK,
+  items:[{k:'wA',art:'breakdown',label:'Renewal breakdown',short:'A · Breakdown'},{k:'wB',art:'first',label:'First-time renewals',short:'B · First-time'},
+    {k:'wC',art:'repeat',label:'Repeated renewals',short:'C · Repeated'},{k:'wD',art:'pipe',label:'Pipeline breakdown',short:'D · Pipeline'}],
+  pick:k=>{WOWK=k;FOLD.wow=false;FOLD[k]=false;render();const t=document.querySelector('.wowsec');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}});
 ArtiumWheel.mount({hub:'Renewals',anchor:()=>document.getElementById('out'),table:k=>{
   if(!DUE)return null;
   const sel=CENTRES.find(c=>c.name===selCentre),mine=x=>!sel||x.centre===sel.name,P=period();
