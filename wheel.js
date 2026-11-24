@@ -366,7 +366,9 @@ function picker(o){css();const items=o.items;
   const close=()=>{place();w.classList.remove('on');v.classList.remove('on');document.body.classList.remove('aw-pk-on');const b=o.btn();if(b)b.classList.remove('on');};
   const pick=k=>{close();setTimeout(()=>o.pick(k),200);};
   document.addEventListener('click',e=>{const b=e.target.closest('[data-awpick]');if(!b||b!==o.btn())return;e.preventDefault();e.stopPropagation();isOn()?close():open();},true);
-  v.onclick=close;addEventListener('scroll',()=>{if(isOn())close();},{passive:true});addEventListener('resize',()=>{if(isOn())close();});
+  v.onclick=close;// while the page scrolls the wheel follows the button, and closes only once the button has left the screen
+  addEventListener('scroll',()=>{if(!isOn())return;const b=o.btn();if(!b){close();return;}const r=b.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)close();else place();},{passive:true});
+  addEventListener('resize',()=>{if(isOn())place();});
   w.addEventListener('click',e=>{const b=e.target.closest('.wedge');if(b)pick(b.dataset.k);else if(e.target.closest('.hub'))close();});
   document.addEventListener('keydown',e=>{if(!isOn())return;if(e.key==='Escape'){close();return;}const it=items[+e.key-1];if(it)pick(it.k);});
   return{open,close};}
