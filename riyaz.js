@@ -25,7 +25,7 @@
       ['teach', 'practice', 'Practice plans issued', { off: 1 }], ['teach', 'aha', 'Aha moments created', { off: 1 }], ['teach', 'curric', 'Curriculum progress', { off: 1 }],
       ['teacher', 'teacher_talk', 'Talk to a teacher for 5 to 10 minutes', { i: 'A different teacher each day, so every teacher is covered within the week. Ask how it’s going and whether they need help.' }],
       ['parent', 'parents', 'Meet 2 parents in the reception', { n: 2, i: 'Ask about their child’s progress and build rapport.' }],
-      ['parent', 'catchup', 'Make catch-up calls', { n: 7, sub: 'Up to 7, based on how many are due.' }]],
+      ['parent', 'catchup', 'Make catch-up calls', { n: 7, auto: 1, sub: 'Up to 7, based on how many are due. Check-ins you record are counted automatically.' }]],
     W: [
       ['hyg', 'class_hyg', 'Review classroom hygiene', { i: 'Every classroom in order, instruments and requirements up to date, and teachers have what they need.' }],
       ['teach', 'audits', 'Audit 4 classes', { n: 4 }],
@@ -48,7 +48,7 @@
       ['num', 'm_pulse', 'Review the Business Pulse page', { link: 'home' }],
       ['num', 'm_ins', 'Add insights to the Execs Call and Weekly Offline Review pages', { links: [['Execs Call', 'execs'], ['Weekly Offline Review', 'review']] }],
       ['ppl', 'm_teach', 'Speak to one teacher', {}],
-      ['eng', 'm_learn', 'Speak to 5 learners', { n: 5 }]],
+      ['eng', 'm_learn', 'Speak to 5 learners', { n: 5, auto: 1, sub: 'Conversations you record are counted automatically.' }]],
     W: [
       ['ppl', 'm_tp', 'Review Teacher performance', { link: 'teachers', i: 'Demo conversion, renewal performance and the like.' }],
       ['prod', 'm_road', 'Review Product roadmap progress', { n: 2, sub: 'Twice a week.' }],
@@ -127,7 +127,7 @@
   .rzq .qp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 var(--body,'Onest')}.rzq .qp>i{flex:none;width:8px;height:8px;border-radius:50%;margin-top:5px}
   .rzl{all:unset;cursor:pointer;display:block;width:fit-content;margin-top:5px;font:600 12px var(--body,'Onest');color:#4101F7}
   .rzn{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}
-  .rzn button.rzu{all:unset;cursor:pointer;width:20px;height:20px;border-radius:6px;border:2px solid #CFC6EA;background:#fff;box-sizing:border-box;display:grid;place-items:center;transition:all .15s}.rzn button.rzu:hover{border-color:#4101F7}.rzn button.rzu:disabled{cursor:default}.rzn button.rzu[aria-checked="true"]{border:0;background:linear-gradient(135deg,#4101F7,#6601FD)}.rzn button.rzu[aria-checked="true"]::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+  .rzn button.rzu{all:unset;cursor:pointer;width:20px;height:20px;border-radius:6px;border:2px solid #CFC6EA;background:#fff;box-sizing:border-box;display:grid;place-items:center;transition:all .15s}.rzn button.rzu:hover{border-color:#4101F7}.rzn button.rzu:disabled{cursor:default}.rzn button.rzu.au[aria-checked="true"]{background:linear-gradient(135deg,#6601FD,#DD30B1)}.rzn button.rzu[aria-checked="true"]{border:0;background:linear-gradient(135deg,#4101F7,#6601FD)}.rzn button.rzu[aria-checked="true"]::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
   .rzn span{font:700 12px var(--body,'Onest');color:#4101F7;margin-left:2px}
   .rzd{font:700 10px var(--body,'Onest');letter-spacing:.14em;text-transform:uppercase;color:#8A83A6;margin:6px 4px 0}
   .rzpop{position:absolute;right:12px;top:8px;font:800 13px var(--body,'Onest');color:#4101F7;pointer-events:none;animation:rzup 1s ease-out forwards}
@@ -154,6 +154,14 @@
   @media (prefers-reduced-motion:reduce){.rzpop,.rzcf i{animation:none;display:none}}
   @media (max-width:760px){.rzb{padding:18px}.rzp{min-width:0;max-width:none;flex-basis:100%}.rzc{flex-basis:78vw}}`;
 
+  /* Recorded conversations (Check-ins and Focus Groups) tick the items marked auto. ST.auto: { owner: { 'YYYY-MM-DD': learners spoken to } } */
+  const autoN = (o, day, x) => Math.min(x[3].n || 0, (((ST && ST.auto || {})[o] || {})[day]) || 0);
+  function setRow(o, p, k, v) { const r = ST.rows.find(x => x[0] === o && x[1] === p && x[2] === k); if (r) { if (r[3] < v) { r[3] = v; r[4] = r[4] || 'auto'; } } else ST.rows.push([o, p, k, v, 'auto', '']); }
+  function prep(j) {
+    if (j && !j.auto && ST) j.auto = ST.auto;
+    ST = j; if (!ST || !ST.auto) return;
+    Object.keys(ST.auto).forEach(o => setOf(o).D.filter(x => x[3].auto).forEach(x => Object.keys(ST.auto[o]).forEach(d => { const e = autoN(o, d, x); if (!e) return; setRow(o, 'D:' + d, x[1] + '_n', e); if (e >= x[3].n) setRow(o, 'D:' + d, x[1], 1); })));
+  }
   const $ = id => document.getElementById(id);
   const own = () => ST && ST.owners.find(o => o.key === OWN);
   const per = (s, o) => s + ':' + (s === 'W' ? wkKey(o == null ? OWN : o) : s === 'D' ? curDay() : curDay().slice(0, 7));
@@ -214,8 +222,9 @@
   function card(s, x, ed) {
     const [a, k, t, o] = x, v = val(OWN, per(s), k), n = o.n ? val(OWN, per(s), k + '_n') : 0, d = v > 0;
     if (o.off) return `<div class="rzk off"><button class="rzx" disabled aria-label="Not available yet"></button><div class="tx"><span class="tl">${esc(t)}</span><span class="soon">PostHog · soon</span></div></div>`;
-    const ctr = o.n ? `<div class="rzn">${Array.from({ length: o.n }, (_, i) => `<button class="rzu" role="checkbox" aria-checked="${i < n}" data-rzu="${k}" data-i="${i}"${ed ? '' : ' disabled'} aria-label="${esc(t)}, ${i + 1} of ${o.n}"></button>`).join('')}<span>${n} of ${o.n}</span></div>` : '';
-    return `<div class="rzk${d ? ' dn' : ''}" data-k="${k}"><button class="rzx" role="checkbox" aria-checked="${d}" data-rzt="${k}"${ed ? '' : ' disabled'} aria-label="${esc(t)}"></button>
+    const au = o.auto ? autoN(OWN, curDay(), x) : 0;
+    const ctr = o.n ? `<div class="rzn">${Array.from({ length: o.n }, (_, i) => `<button class="rzu${i < au ? ' au' : ''}" role="checkbox" aria-checked="${i < n}" data-rzu="${k}" data-i="${i}"${ed && i >= au ? '' : ' disabled'}${i < au ? ' title="Counted from a recorded conversation"' : ''} aria-label="${esc(t)}, ${i + 1} of ${o.n}"></button>`).join('')}<span>${n} of ${o.n}${au ? ` · ${au} from recorded conversations` : ''}</span></div>` : '';
+    return `<div class="rzk${d ? ' dn' : ''}" data-k="${k}"><button class="rzx" role="checkbox" aria-checked="${d}" data-rzt="${k}"${ed && !(o.auto && o.n && au >= o.n) ? '' : ' disabled'} aria-label="${esc(t)}"></button>
       <div class="tx"><span class="tl">${esc(t)}</span>${info(o.i, t, o.list)}${o.sub ? `<small>${esc(o.sub)}</small>` : ''}${ctr}${o.link ? `<button class="rzl" data-rzgo="${o.link}">Open →</button>` : ''}${(o.links || []).map(l => `<button class="rzl" data-rzgo="${l[1]}">Open ${esc(l[0])} →</button>`).join('')}</div></div>`;
   }
   function board(s, ed) {
@@ -274,7 +283,7 @@
   async function call(action, args) {
     if (BUSY) return; BUSY = true;
     try { const j = await ArtiumAuth.call(action, args); if (j && j.error) throw new Error(j.error === 'not-allowed' ? 'Only this centre’s Centre Manager can change it.' : j.error);
-      ST = j; draw(); return true; }
+      prep(j); draw(); return true; }
     catch (e) { draw(e.message || String(e)); return false; } finally { BUSY = false; }
   }
   // tick locally first, then save
@@ -296,6 +305,7 @@
     if (!O || !O.edit) return;
     if (b.dataset.rzt) { const k = b.dataset.rzt; tick(k, val(OWN, per(TAB), k) > 0 ? 0 : 1, TAB); return; }
     if (b.dataset.rzu) { const k = b.dataset.rzu, i = +b.dataset.i, x = setOf(OWN)[TAB].find(y => y[1] === k), cur = val(OWN, per(TAB), k + '_n'), n = i < cur ? i : i + 1;
+      if (x[3].auto && i < autoN(OWN, curDay(), x)) return;
       tick(k + '_n', n, TAB); const t = val(OWN, per(TAB), k) > 0;
       if (n >= x[3].n && !t) setTimeout(() => tick(k, 1, TAB), 400); else if (n < x[3].n && t) setTimeout(() => tick(k, 0, TAB), 400); return; }
     if (b.dataset.rzs) { const x = ST.soc.find(y => y.id === b.dataset.rzs); call('riyazSociety', { op: 'step', id: b.dataset.rzs, dir: +b.dataset.d }).then(ok => { if (ok && x && +b.dataset.d > 0 && x.step === 5) confetti(); }); return; }
@@ -305,10 +315,18 @@
       ADD = false; call('riyazSociety', { op: 'add', owner: OWN, name: nm, note: no }); }
   });
   document.addEventListener('change', e => { if (e.target.id === 'rzday') { const v = e.target.value; DAY = !v || v >= ST.periods.D ? '' : v; draw(); return; } if (e.target.id === 'rzown') { OWN = e.target.value; try { localStorage.setItem('artium_rz_owner', OWN); } catch (x) {} ADD = false; draw(); } });
+  /* Pick up conversations recorded elsewhere: when the Home page is showing again, and every minute while it is open */
+  let lastRef = 0;
+  function refresh() {
+    if (!ST || BUSY || !window.innerWidth || Date.now() - lastRef < 20000) return; lastRef = Date.now();
+    const sig = x => JSON.stringify([x.rows, x.auto, x.periods.D]);
+    ArtiumAuth.call('riyaz', {}).then(j => { if (!j || j.error || BUSY || !ST) return; const old = sig(ST), a = document.activeElement; prep(j); if (sig(ST) !== old && !(a && a.closest && a.closest('.rzf'))) draw(); }).catch(() => {});
+  }
+  window.addEventListener('resize', refresh); document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); }); setInterval(refresh, 60000);
   window.Riyaz = {
     start() {
       const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
-      ArtiumAuth.call('riyaz', {}).then(j => { if (!j || j.error) return; ST = j; if (!ST.owners.length) return draw();
+      ArtiumAuth.call('riyaz', {}).then(j => { if (!j || j.error) return; prep(j); if (!ST.owners.length) return draw();
         let k = ''; try { k = localStorage.getItem('artium_rz_owner') || ''; } catch (e) {}
         OWN = ST.owners.some(o => o.key === k) ? k : (ST.owners.find(o => o.edit && o.kind === 'centre') || ST.owners.find(o => o.kind === 'me') || ST.owners[0]).key; draw(); }).catch(() => {});
     },
