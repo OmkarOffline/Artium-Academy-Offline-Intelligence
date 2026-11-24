@@ -620,7 +620,7 @@ function summary(P,mine){
   const lExt=K.oext,lExtR=lExt.filter(x=>x.st==='paid'),lExp=K.oexp,lExpR=lExp.filter(renNow);
   const rr=(a,b)=>`<div class="rb"><div class="rt"><span>${n(b)} renewed</span><b>${pc(b,a)}</b></div><div class="tr"><i style="width:${a?Math.round(b/a*100):0}%"></i></div></div>`;
   const rnl=ALL.filter(x=>mine(x)&&x.tab==='rn'&&inP(x.date,P));
-  const rPrev=rnl.filter(x=>!(x.prevEnd&&inP(x.prevEnd,P))).length,tot=ren.length+rPrev;
+  const tot=rnl.length,rCoh=rnl.filter(x=>x.prevEnd&&inP(x.prevEnd,P)).length,rPrev=tot-rCoh;   // Renewal collection efficiency: every renewal paid in the period (Date of Renewal), whenever it was due
   const m=(t,v,cls='',sm='',lk='',bar='')=>lk?`<button type="button" class="m clk ${cls}${LIST===lk?' cur':''}" data-list="${lk}" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div></button>`:`<div class="m ${cls}"><div class="t">${t}</div><div class="v">${v}${sm?`<small>${sm}</small>`:''}</div>${bar}</div>`;
   const ob=(lk,t,a,b)=>`<button type="button" class="m clk${LIST===lk?' cur':''}" data-list="${lk}" title="See these learners"><span class="eye" aria-hidden="true">👀</span><div class="t">${t}</div><div class="v">${n(a.length)}</div>${rr(a.length,b.length)}</button>`;
   return section('l_sum','Cohort summary',`<span>${esc(P.label)}</span>`,`<div class="sum3">
@@ -630,7 +630,7 @@ function summary(P,mine){
    <div class="sg"><h3>Carried over from ${LM}</h3><p>Learners whose package was due in ${LM}.</p>
     <div class="sc c2">${ob('oext','Extended into '+MN,lExt,lExtR)}${ob('oexp','Expired in '+LM,lExp,lExpR)}</div></div>
    <div class="sg"><h3>Renewed in ${MN}</h3><p>Everyone who renewed this month, whenever they were due.</p>
-    <div class="sc c2">${m('From the '+MN+' cohort',n(ren.length))}${m('From earlier months',n(rPrev))}${m('Total renewed',n(tot),'hero')}${m('Renewal collection efficiency',pc(tot,C.length),bdc(tot,C.length),'','',mbar(Math.min(tot,C.length),C.length))}</div></div>
+    <div class="sc c2">${m('From the '+MN+' cohort',n(rCoh))}${m('From other months',n(rPrev))}${m('Total renewed',n(tot),'hero')}${m('Renewal collection efficiency',pc(tot,C.length),bdc(tot,C.length),'','',mbar(Math.min(tot,C.length),C.length))}</div></div>
   </div>`);
 }
 /* Package completion: the month's cohort (original Package Expiry Date in the month) in three groups, each split by where the renewal stands */
@@ -884,14 +884,14 @@ function render(){
   const prevPipe=pipe.filter(x=>x.end&&x.end<P.a),cohPipe=cA.filter(x=>x.ca==='pipe');
   const byNcd=(L,f)=>{const a=zero();L.forEach(x=>{const i=wi(x.ncd);if(i>=0){a[i]+=f?f(x):1;a[W.length]+=f?f(x):1;}});return a;};
   const pPrev=byNcd(prevPipe),pAll=byNcd(cohPipe.concat(prevPipe)),pAmt=byNcd(cohPipe.concat(prevPipe),x=>x.exp||0);
-  const aEff=aDue.map((d,i)=>{const t=aR[i]+rPrev[i]+rAdv[i]+rUnk[i];return pc(t,d);}),aTot=aR.map((x,i)=>x+rPrev[i]+rAdv[i]+rUnk[i]);
+  const aTot=ach,aEff=aDue.map((d,i)=>pc(ach[i],d));   // every renewal paid in the period, whenever it was due (as on Renewal Collection Efficiency)
   const A=[{l:'Memberships expiring in '+MN,v:aDue,cls:'key'},{l:mode==='month'?'Extended – rolling over to '+NXT:'Extended – rolling over beyond this period',v:aX,op:'−'},
     {l:'Will not renew',v:aW,op:'−',cls:'wnr'},{l:'Expected to renew in '+MN,v:aExp,op:'=',cls:'res'},{l:'Renewed',v:aR,op:'−'},
     {l:'Yet to renew',v:aY,op:'=',cls:'res ytr big',list:'ytr',inner:()=>plist(ytrList,'ytr')},{l:'Pipeline – due in '+MN,v:aP,op:'−'},{l:'Yet to commit',v:aC,op:'=',cls:'res ytc'},
     {h:'Pipeline · by the week of the promised payment'},{l:mode==='month'?'Pipeline – due in previous months':'Pipeline – due before this period',v:pPrev},
     {l:'Pipeline – total',v:pAll,cls:'key'},{l:'Expected collections',v:pAmt.map(x=>x?inr(x):'0')},{l:'ATV – pipeline',v:pAmt.map((x,i)=>pAll[i]?inr(Math.round(x/pAll[i])):'–'),cls:'acc'},
     {h:'For information'},{l:'Extensions – memberships still expiring in '+MN,v:aXin,cls:'note',tip:'Already counted above: their extension ends within '+MN+'.'},
-    {h:'Renewal collection efficiency'},{l:'Renewals due in '+MN,v:aDue},{l:mode==='month'?'Renewed – '+MN+' cohort':'Renewed – this period\'s cohort',v:aR},{l:"Renewed – previous months' cohorts",v:rPrev},
+    {h:'Renewal collection efficiency'},{l:'Renewals due in '+MN,v:aDue},{l:mode==='month'?'Renewed – '+MN+' cohort':'Renewed – this period\'s cohort',v:rCur},{l:"Renewed – previous months' cohorts",v:rPrev},
     {l:'Renewed – in advance',v:rAdv,opt:1},{l:'Renewed – earlier entry not found',v:rUnk,opt:1},
     {l:'Renewed – total',v:aTot,cls:'key tline'},{l:'Renewal collection efficiency',v:aEff,cls:'acc strong'}];
   const ytrList=cA.filter(x=>x.ca==='pipe'||x.ca==='ytc');
