@@ -317,12 +317,13 @@
   document.addEventListener('change', e => { if (e.target.id === 'rzday') { const v = e.target.value; DAY = !v || v >= ST.periods.D ? '' : v; draw(); return; } if (e.target.id === 'rzown') { OWN = e.target.value; try { localStorage.setItem('artium_rz_owner', OWN); } catch (x) {} ADD = false; draw(); } });
   /* Pick up conversations recorded elsewhere: when the Home page is showing again, and every minute while it is open */
   let lastRef = 0;
-  function refresh() {
-    if (!ST || BUSY || !window.innerWidth || Date.now() - lastRef < 20000) return; lastRef = Date.now();
+  function refresh(force) {
+    if (!ST || BUSY || (!force && (!window.innerWidth || Date.now() - lastRef < 20000))) return; lastRef = Date.now();
     const sig = x => JSON.stringify([x.rows, x.auto, x.periods.D]);
     ArtiumAuth.call('riyaz', {}).then(j => { if (!j || j.error || BUSY || !ST) return; const old = sig(ST), a = document.activeElement; prep(j); if (sig(ST) !== old && !(a && a.closest && a.closest('.rzf'))) draw(); }).catch(() => {});
   }
-  window.addEventListener('resize', refresh); document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); }); setInterval(refresh, 60000);
+  window.addEventListener('storage', e => { if (e.key === 'artium_ins_saved') refresh(true); });   // a conversation was just recorded in Check-ins or Focus Groups
+  window.addEventListener('resize', () => refresh()); document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); }); setInterval(() => refresh(), 60000);
   window.Riyaz = {
     start() {
       const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);

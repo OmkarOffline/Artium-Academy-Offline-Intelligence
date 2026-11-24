@@ -506,6 +506,8 @@ function startEdit(id){
   draft={date:e.date,with:e.with,how:e.how,items:e.items.map(i=>({theme:i.theme,type:i.type,note:i.note})),follow:e.follow?{action:e.follow.action||'',owner:e.follow.owner||'',due:e.follow.due||''}:{action:'',owner:'',due:''},showFollow:!!e.follow};
   editId=id;paintIns();const f=document.getElementById('ins-form');if(f)f.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+const ownerOpts=()=>{const v=draft.follow.owner,o=(k,l)=>`<option value="${k}"${v===k?' selected':''}>${l}</option>`;
+  return o('cm','Centre Manager')+o('me','Me')+(STAFF.length?'<optgroup label="Someone else">'+STAFF.map(n=>`<option${n===v?' selected':''}>${esc(n)}</option>`).join('')+'</optgroup>':'')+(v&&v!=='cm'&&v!=='me'&&!STAFF.includes(v)?`<option selected>${esc(v)}</option>`:'');};
 function paintIns(){
   const INFO={name:cur.name,bits:[cur.id,cur.centre,cur.age,cur.course,cur.teacher?'Teacher '+cur.teacher:'']};
   const list=entriesOf(cur.id).slice().sort((a,b)=>(b.date+b.at).localeCompare(a.date+a.at));
@@ -522,10 +524,10 @@ function paintIns(){
         ${draft.items.length>1?`<button type="button" class="rm" data-rm="${i}" aria-label="Remove this insight"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>`:''}</div>
       <textarea data-k="note" rows="2" placeholder="${it.type==='Positive'?'Anything to add? (optional)':'What did they say?'}">${esc(it.note)}</textarea></div>`).join('')}</div>
     <button type="button" class="link" id="f-more"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add another insight</button>
-    <div class="fu-box${draft.showFollow?' open':''}"><button type="button" class="link" id="f-fu">${draft.showFollow?'Follow-up':'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add a follow-up (optional)'}</button>
-      ${draft.showFollow?`<div class="frow"><label class="grow">What needs doing<input id="f-act" value="${esc(draft.follow.action)}" placeholder="e.g. Plan a student showcase next month"></label>
-        <label>Owner<input id="f-own" list="staff-list" value="${esc(draft.follow.owner)}" placeholder="Name"></label><label>Due<input type="date" id="f-due" value="${draft.follow.due}"></label></div>
-        <datalist id="staff-list">${STAFF.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:''}</div>
+    <div class="fu-box${draft.showFollow?' open':''}"><button type="button" class="link" id="f-fu">${draft.showFollow?'Task':'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Set a task (optional)'}</button>
+      ${draft.showFollow?`<div class="frow"><label class="grow">What needs doing<input id="f-act" value="${esc(draft.follow.action)}" placeholder="e.g. Help them log in to the Artium app when they come for their next class"></label>
+        <label>For<select id="f-own">${ownerOpts()}</select></label><label>Due<input type="date" id="f-due" value="${draft.follow.due}"></label></div>
+        ${editId?'<div class="ins-empty" style="margin:0">A task that was already set is not changed from here.</div>':''}`:''}</div>
     <div class="ins-msg" id="ins-msg"></div>
     <div class="ins-actions"><button type="button" class="btn" id="f-cancel">Cancel</button><button type="button" class="btn primary" id="f-save">${editId?'Save changes':'Save conversation'}</button></div>`;
   f.querySelectorAll('.seg[data-f]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{draft[g.dataset.f]=b.dataset.v;paintIns();}));
@@ -536,7 +538,7 @@ function paintIns(){
     const rm=el.querySelector('.rm');if(rm)rm.onclick=()=>{draft.items.splice(+rm.dataset.rm,1);paintIns();};});
   document.getElementById('f-date').onchange=e=>draft.date=e.target.value;
   document.getElementById('f-more').onclick=()=>{draft.items.push({theme:'',type:'',note:''});paintIns();const t=f.querySelectorAll('textarea');t[t.length-1].focus();};
-  document.getElementById('f-fu').onclick=()=>{draft.showFollow=true;paintIns();};
+  document.getElementById('f-fu').onclick=()=>{draft.showFollow=true;if(!draft.follow.owner)draft.follow.owner=ME.canEdit?'cm':'me';paintIns();};
   ['f-act','f-own','f-due'].forEach((id,k)=>{const el=document.getElementById(id);if(el)el.oninput=el.onchange=e=>draft.follow[['action','owner','due'][k]]=e.target.value;});
   document.getElementById('f-cancel').onclick=()=>{if(editId){editId='';draft=viewOnly?null:blank();paintIns();}else{draft=null;closeIns();}};
   document.getElementById('f-save').onclick=saveIns;
@@ -552,12 +554,12 @@ async function saveIns(){
       const old=INS.find(x=>x.id===editId)||{ids:[cur.id]};
       const j=await ArtiumAuth.call('editInsight',{entry:{id:editId,ids:old.ids,name:old.name||cur.name,centre:old.centre||cur.centre,date:draft.date,with:draft.with,how:draft.how,items,follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
       if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
-      INS=j.insights||INS;editId='';draft=viewOnly?null:blank();paintIns();draw();return;
+      try{localStorage.setItem('artium_ins_saved',String(Date.now()))}catch(x){};INS=j.insights||INS;editId='';draft=viewOnly?null:blank();paintIns();draw();return;
     }
     const j=await ArtiumAuth.call('checkinInsight',{centre:cur.centre,id:cur.id,learner:cur.name,day:cur.day,
       entry:{ids:[cur.id],name:cur.name,centre:cur.centre,date:draft.date,with:draft.with,how:draft.how,items,follow:draft.showFollow&&draft.follow.action.trim()?draft.follow:null}});
     if(!j||j.error)throw new Error(j&&j.error||'No answer from the data service');
-    DONE=j.done||DONE;INS=j.ins||INS;KEEP.add(cur.key);draft=null;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draw();
+    try{localStorage.setItem('artium_ins_saved',String(Date.now()))}catch(x){};DONE=j.done||DONE;INS=j.ins||INS;KEEP.add(cur.key);draft=null;document.getElementById('ins').hidden=true;document.body.style.overflow='';cur=null;draw();
   }catch(e){msg.textContent='Could not save: '+(e.message==='not-allowed'?"only the person who recorded it can edit this conversation":e.message)+'.';b.disabled=false;b.textContent=editId?'Save changes':'Save conversation';}
 }
 window.openInsight=function(id,tries){   // from the notification bell: open the learner's conversations, with this one marked

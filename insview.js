@@ -40,7 +40,7 @@
   /* A recorded conversation as a card. info: { name, bits: [id, centre, age group, course, teacher] } for the image. actions: extra buttons. */
   function card(e, info, actions, cls) {
     REG[e.id] = { e, info: info || {} };
-    const fu = e.follow ? `<div class="iv-fu"><b>Follow-up</b> · ${esc(e.follow.action)}${e.follow.owner ? ' · ' + esc(e.follow.owner) : ''}${e.follow.due ? ' · by ' + esc(dShort(e.follow.due)) : ''}</div>` : '';
+    const fu = e.follow ? `<div class="iv-fu"><b>Task</b> · ${esc(e.follow.action)}${e.follow.owner ? ' · for ' + esc(e.follow.owner) : ''}${e.follow.due ? ' · by ' + esc(dShort(e.follow.due)) : ''}</div>` : '';
     return `<article class="iv${cls ? ' ' + cls : ''}"><div class="iv-h"><b><i></i>${esc(title(e))}</b><small>${sentHTML(e)}</small></div>${body(e.items)}${fu}` +
       `<div class="iv-a"><button type="button" class="iv-btn pri" data-ivcopy="${esc(e.id)}">Copy as image</button>${actions || ''}</div></article>`;
   }
