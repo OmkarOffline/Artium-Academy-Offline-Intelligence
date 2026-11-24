@@ -79,6 +79,13 @@ const CSS=`
 .aw-slot .aw-an .w-reach{font:600 12px 'Onest',system-ui,sans-serif;margin-top:9px}.aw-slot .aw-an .w-reach b{font-weight:800}.aw-slot .aw-an .w-reach.w-none{color:#B0204F}
 .aw-slot .aw-an .w-pv{font:700 17.5px 'Onest',system-ui,sans-serif;color:#01073C}.aw-slot .aw-an .w-pc small{display:block;font-size:12px;color:#9C97B0;margin-top:3px}
 .aw-slot .aw-an .w-t-r{color:#C2245A}.aw-slot .aw-an .w-t-a{color:#B07A00}.aw-slot .aw-an .w-t-g{color:#1A8A5A}.aw-slot .aw-an .w-t-b{color:#3552C9}.aw-slot .aw-an .w-t-{color:#8A84A3}
+.aw-slot .aw-an .w-nm .w-cs{display:block;font:400 12px 'Onest',system-ui,sans-serif;color:#8A84A3;margin-top:2px;letter-spacing:.01em}
+.aw-slot .aw-an .w-gw.w-fit{overflow:visible}
+.aw-slot .aw-an .w-g>.w-lh,.aw-slot .aw-an .w-g>.w-gh,.aw-slot .aw-an .w-g>.w-ch{position:sticky;z-index:3;background:#fff}
+.aw-slot .aw-an .w-g>.w-lh,.aw-slot .aw-an .w-g>.w-gh{top:0}
+.aw-slot .aw-an .w-g>.w-lh{align-self:stretch;display:flex;align-items:flex-end}
+.aw-slot .aw-an .w-g>.w-ch{top:var(--w-h1,64px)}
+.aw-slot .aw-an .w-g>.w-gh.w-p,.aw-slot .aw-an .w-g>.w-ch.w-p{background:#F8F7FB}
 .aw-slot .aw-an .w-tot{border-bottom:0!important}.aw-slot .aw-an .w-nm.w-tot{font-weight:800}.aw-slot .aw-an .w-cc.w-tot{padding-bottom:24px}
 .aw-slot .aw-an .w-lg{display:flex;gap:18px;padding:6px 26px 22px;font-size:12px;color:#8A84A3;align-items:center;flex-wrap:wrap}
 .aw-slot .aw-an .w-lg i{display:inline-block;width:18px;height:5px;border-radius:5px;vertical-align:1px;margin-right:7px}
@@ -175,7 +182,7 @@ const n=v=>Math.round(v).toLocaleString('en-IN');
 /* Current teachers (Offline Team tab). A sheet name matches a teacher when the full names match, or the first names match,
    ignoring capitals, any "h" and doubled letters (as Code.gs does); a first name shared by two teachers is not guessed. */
 let ROSTER=null,RKEY=[];const rk=t=>String(t||'').toLowerCase().replace(/[^a-z]/g,'').replace(/h/g,'').replace(/(.)\1+/g,'$1');
-function setRoster(list){ROSTER=(list||[]).map(x=>x.name).filter(Boolean);RKEY=ROSTER.map(nm=>({nm,full:rk(nm),first:rk(nm.split(/\s+/)[0])}));}
+let COURSE={};function setRoster(list){COURSE={};(list||[]).forEach(x=>{if(x&&x.name&&x.course)COURSE[x.name]=x.course;});ROSTER=(list||[]).map(x=>x.name).filter(Boolean);RKEY=ROSTER.map(nm=>({nm,full:rk(nm),first:rk(nm.split(/\s+/)[0])}));}
 const MEMO={};function teacherOf(v){if(!ROSTER||!ROSTER.length)return null;if(v in MEMO)return MEMO[v];
   const full=rk(v),first=rk(String(v).split(/\s+/)[0]);let h=RKEY.filter(x=>x.full===full);if(h.length!==1)h=RKEY.filter(x=>x.first===first);return MEMO[v]=h.length===1?h[0].nm:null;}
 let cfg=null,wheel,fab,veil,slot,an,opts=[],CUR=null,HK=null;
@@ -235,15 +242,19 @@ function render(k,anim){const spec=cfg.table(k);CUR=k;opts.forEach(b=>b.classLis
     spec.cur.cols.forEach((h,i)=>g+=`<div class="w-ch" style="grid-column:${2+i};grid-row:2">${esc(h)}</div>`);
     spec.prev.cols.forEach((h,i)=>g+=`<div class="w-ch w-p" style="grid-column:${3+C+i};grid-row:2"${spec.prev.titles&&spec.prev.titles[i]?` title="${esc(spec.prev.titles[i])}"`:''}>${esc(h)}</div>`);
     all.forEach((r,j)=>{const row=3+j,t=r.tot?' w-tot':'',dl=anim?` style="transition-delay:${200+j*50}ms;grid-row:${row}`:` style="grid-row:${row}`;
-      g+=`<div class="w-nm w-rw${t}"${dl};grid-column:1">${esc(r.name)}${r.past?'<span class="pt">Past teacher</span>':''}</div>`;
+      g+=`<div class="w-nm w-rw${t}"${dl};grid-column:1">${esc(r.name)}${k==='teacher'&&COURSE[r.name]?`<span class="w-cs">${esc(COURSE[r.name])}</span>`:''}</div>`;
       r.now.forEach((c,i)=>g+=`<div class="w-cc w-rw${t}"${dl};grid-column:${2+i}">${nowCell(c)}</div>`);
       r.prev.forEach((c,i)=>g+=`<div class="w-pc w-rw${t}"${dl};grid-column:${3+C+i}">${prevCell(c)}</div>`);});
     body=`<div class="w-gw"><div class="w-g" style="grid-template-columns:${tpl}">${g}</div></div>`+
       (spec.legend?`<div class="w-lg">${spec.legend}</div>`:'')+(spec.note?`<div class="nt">${esc(spec.note)}</div>`:'');}
   an.innerHTML=head+pod+`<div class="x"><button type="button" data-aw="switch"><svg viewBox="0 0 24 24">${ICON}</svg>Switch</button><button type="button" data-aw="hide"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>Collapse</button></div></div>`+body;
+  fitHead();
   if(anim){slot.classList.remove('open','done');void slot.offsetWidth;slot.classList.add('open');setTimeout(()=>slot.classList.contains('open')&&slot.classList.add('done'),600);
     const t=slot.getBoundingClientRect().top+window.scrollY-20;window.scrollTo({top:Math.max(0,t),behavior:'smooth'});}
 }
+function fitHead(){const gw=an.querySelector('.w-gw');if(!gw)return;const g=gw.firstElementChild,h=g&&g.querySelector('.w-gh');
+  const go=()=>{gw.classList.remove('w-fit');if(gw.scrollWidth<=gw.clientWidth+1)gw.classList.add('w-fit');if(h)g.style.setProperty('--w-h1',h.offsetHeight+'px');};
+  go();if(!fitHead.on){fitHead.on=1;window.addEventListener('resize',()=>fitHead());}}
 function show(k){closeW();render(k,true);}
 function hide(){CUR=null;slot.classList.remove('done');void slot.offsetWidth;slot.classList.remove('open');opts.forEach(b=>b.classList.remove('sel'));}
 function place(){const a=cfg.anchor&&cfg.anchor();if(a&&a.parentNode&&slot.nextSibling!==a)a.parentNode.insertBefore(slot,a);}
