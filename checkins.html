@@ -481,7 +481,7 @@ document.getElementById('mnext').onclick=()=>{MONTH++;draw();};
 document.getElementById('refresh').onclick=()=>{ArtiumAuth.freshUntil=Date.now()+15000;load();};
 
 /* ── Recording the call: the same Learner insights dialog as Focus Groups. Saving it marks the check-in done, and the conversation shows in Focus Groups too. ── */
-const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Other'];
+const THEMES=['Satisfaction with Teacher','Satisfaction with Staff','Communication with & from the Staff','Musical Progress','Performances & Events','Fees & Packages','Curriculum','Centre facilities','Artium App Experience','Other'];
 const TYPES=[['Positive','pos'],['Concern','neg'],['Request','req']];
 const itemHTML=i=>`<li><span class="ty ${TYC[i.type]||'neg'}">${esc(i.type)}</span><div><b>${esc(i.theme)}</b><span class="nt">${esc(i.note)}</span></div></li>`;
 document.body.insertAdjacentHTML('beforeend',`<div class="ins-bg" id="ins" hidden><div class="ins" role="dialog" aria-modal="true" aria-labelledby="ins-name">
