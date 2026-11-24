@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="wheel.js"></script>
 <script src="rowedit.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -526,6 +527,7 @@ document.getElementById('fbar').addEventListener('change',e=>{const k=e.target.d
 document.getElementById('fbar').addEventListener('click',e=>{if(e.target.id==='clr'){Object.keys(FV).forEach(k=>FV[k]='');render();}});
 
 function render(){
+  if(window.ArtiumWheel)ArtiumWheel.refresh();
   document.querySelectorAll('#lv button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===lv));
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.getElementById('eyebrow').textContent=sel?sel.name+' · '+sel.city:'All centres';
@@ -682,6 +684,18 @@ async function load(){
     document.getElementById('dot').className='dot';render();
   }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
 }
+/* Analysis wheel: how many centre visits turned into admissions, by course, demo teacher, age group and lead source.
+   Each window counts the visits made in it, and how many of those visitors have joined (at any time since). */
+ArtiumWheel.mount({hub:'Admissions',anchor:()=>document.getElementById('sumbox'),slices:['course','teacher','age','source'],
+  labels:{teacher:['By demo teacher','Demo teacher']},table:k=>{
+  if(!V)return null;
+  const sel=CENTRES.find(c=>c.name===selCentre),mine=x=>!sel||x.centre===sel.name,P=period();
+  const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
+  const W=ArtiumWheel.windows(P.a,P.b,{month:mode==='month',soFar:isCur}),L=V.filter(mine);
+  const key={course:x=>x.course,teacher:x=>x.teacher,age:x=>x.age,source:x=>x.src}[k];
+  const R=ArtiumWheel.ratio(k,W,L,x=>x.date,L.filter(x=>x.conv),x=>x.date,key);
+  const nm={course:'course',teacher:'demo teacher',age:'age group',source:'lead source'}[k];
+  return{title:'Visits converted by '+nm,sub:'Joined of visited · '+P.label+(isCur?' so far':'')+'.',cols:W,...R};}});
 load();
 </script>
 </body>

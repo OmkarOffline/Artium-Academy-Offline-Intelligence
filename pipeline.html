@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="wheel.js"></script>
 <script src="rowedit.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -815,6 +816,7 @@ function openList(k){LIST=k;try{localStorage.setItem('artium_rp_list',LIST);}cat
   if(view!=='list'){view='list';try{localStorage.setItem('artium_rp_view','list');}catch(e){}}
   render();const t=document.getElementById('lists');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
 function render(){
+  if(window.ArtiumWheel)ArtiumWheel.refresh();
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===selCentre));
   document.querySelectorAll('#mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mode));
@@ -1160,6 +1162,17 @@ async function load(){
     document.getElementById('dot').className='dot';render();
   }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
 }
+/* Analysis wheel: renewal collection efficiency by course, teacher, course level, age group and gender.
+   Due = memberships whose original package expiry date falls in the window; collected = Renewals entries paid in the window, under that entry's own course, teacher and so on. */
+const WCOL={course:8,teacher:29,level:9,age:6,gender:5};
+ArtiumWheel.mount({hub:'Renewals',anchor:()=>document.getElementById('out'),table:k=>{
+  if(!DUE)return null;
+  const sel=CENTRES.find(c=>c.name===selCentre),mine=x=>!sel||x.centre===sel.name,P=period();
+  const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
+  const W=ArtiumWheel.windows(P.a,P.b,{month:mode==='month',soFar:isCur});
+  const R=ArtiumWheel.ratio(k,W,DUE.filter(mine),x=>x.end,ALL.filter(x=>mine(x)&&x.tab==='rn'),x=>x.date,x=>x.r[WCOL[k]]);
+  const nm={course:'course',teacher:'teacher',level:'course level',age:'age group',gender:'gender'}[k];
+  return{title:'Renewals by '+nm,sub:'Collected of due · '+P.label+(isCur?' so far':'')+'.',cols:W,...R};}});
 load();
 
 </script>

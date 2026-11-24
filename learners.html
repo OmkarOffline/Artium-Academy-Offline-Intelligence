@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
+<script src="wheel.js"></script>
 <script src="cardnav.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -385,6 +386,7 @@ const ROWS=[
 ];
 
 function render(){
+  if(window.ArtiumWheel)ArtiumWheel.refresh();
   const sel=CENTRES.find(c=>c.name===selCentre);
   document.getElementById('eyebrow').textContent=sel?sel.city:'All centres';
   document.getElementById('subtitle').textContent=sel?'Month-by-month learner movement — '+sel.name+', '+sel.city:'Month-by-month learner movement — all centres combined';
@@ -548,6 +550,23 @@ CardNav.init({back:'All sections',cards:[
   {id:'sec-t',k:'Teachers',title:'Learners by Teacher',short:'Monthly Active Learners for every teacher, current and past.',go:'Open by teacher',
    icon:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2 9 2 12 0v-5"/>',preview:()=>LOADED()?topNow('mal-t'):null}
 ]});
+/* Analysis wheel: Monthly Active Learners by course, teacher, course level, age group and gender.
+   The same calculation as the first table, run on just the rows of each course (teacher, …); the page's filters still apply.
+   Columns: this month till date, last month (with the change), and 3, 6 and 12 months ago. */
+const WCOL={course:8,teacher:29,level:9,age:6,gender:5};
+ArtiumWheel.mount({hub:'Active learners',anchor:()=>document.getElementById('sec-mal'),table:k=>{
+  if(!CENTRES.every(c=>DATA[c.name]))return null;
+  const sel=CENTRES.find(c=>c.name===selCentre),names=sel?[sel.name]:CENTRES.map(c=>c.name),col=WCOL[k],g=ArtiumWheel.grouper(k);
+  const labels=new Set();names.forEach(nn=>{const d=DATA[nn];d.fs.concat(d.rn).filter(passes).forEach(r=>labels.add(g(r[col])));});
+  const K=[LAST,LAST-1,LAST-3,LAST-6,LAST-12],ml=ArtiumWheel.ml,blank=k==='teacher'?'Unassigned':'Not given';
+  const rows=[...labels].map(l=>{const v=build(names,r=>passes(r)&&g(r[col])===l);const x=K.map(m=>v[m]?v[m].H:0);
+    return{name:l,blank:l===blank,skip:l===blank,x,cells:x.map((c,i)=>i===1?{v:c,d:x[0]-c,u:''}:{v:c}),rank:x[0]||null,tie:x[1],line:x[0].toLocaleString('en-IN')+' active'};}).filter(r=>r.x.some(c=>c));
+  ArtiumWheel.sortRows(k,rows,r=>r.x[0]*1e4+r.x[1]);
+  const T=K.map((m,i)=>rows.reduce((s,r)=>s+r.x[i],0));
+  return{title:'Active learners by '+{course:'course',teacher:'teacher',level:'course level',age:'age group',gender:'gender'}[k],
+    sub:'Monthly Active Learners at the end of each month · this month till date.',
+    cols:[{h:ml(LAST),sm:'till date'},{h:ml(LAST-1)},{h:'3M ago',sm:ml(LAST-3)},{h:'6M ago',sm:ml(LAST-6)},{h:'12M ago',sm:ml(LAST-12)}],
+    rows,total:{cells:T.map((c,i)=>i===1?{v:c,d:T[0]-c,u:''}:{v:c})}};}});
 load();
 </script>
 </body>
