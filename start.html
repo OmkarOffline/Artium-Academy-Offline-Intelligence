@@ -538,8 +538,8 @@
 const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
 const CAPACITY={'Alwarpet':540,'Thoraipakkam':630,'Borewell Road':720};   // Monthly Active Learners capacity
 const PAGES={   // page names as Claude cites them → tab on this site
-  'Business Pulse':'home','Monthly Performance Analysis':'performance','Statistics':'stats','Monthly Active Learners':'learners',
-  'Learner Analysis':'analysis','Lead to Purchase':'dashboard','Calendar':'calendar','Offline Centres':'centres'};
+  'Business Pulse':'home','Daily Tracker':'daily','Statistics':'stats','Monthly Active Learners':'learners',
+  'Learner Analysis':'analysis','Renewal Collection Efficiency':'rce','Month on Month Dashboard':'mom','Calendar':'calendar','Offline Centres':'centres'};
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
 function parseDate(str){
@@ -817,22 +817,21 @@ const isPerMonth=k=>['count','sum'].includes(METRICS[k].kind);           // show
     switch(mk){
       case 'rate':add('Statistics','Renewal Rate by Age Group',['First-time','Repeated','Total']);if(dim!=='age')add('Statistics','Renewal Turnaround',['Renewal rate','Renewed','Memberships ended']);
         add('Business Pulse','Renewals',['Renewal collection efficiency']);break;
-      case 'eff':add('Business Pulse','Renewals',['Renewal collection efficiency']);add('Monthly Performance Analysis','Renewals Overview',['Renewal collection efficiency %']);break;
+      case 'eff':add('Business Pulse','Renewals',['Renewal collection efficiency']);add('Renewal Collection Efficiency','Summary',['Collection efficiency']);break;
       case 'tat':add('Statistics','Renewal Turnaround',['Admission → first renewal','Renewal → next renewal']);break;
-      case 'renewals':case 'due':add('Business Pulse','Renewals',['Renewals due per month','Successful renewals per month']);add('Monthly Performance Analysis','Renewals Overview',['No. of renewals due','Renewed']);break;
-      case 'admissions':add('Business Pulse','Conversions',['Conversions per month']);add('Monthly Performance Analysis','Admissions Overview',['Conversions']);break;
-      case 'collections':add('Monthly Performance Analysis','Collections Overview',['Collections – Fresh Sales','Collections – Renewals','Collections – Total']);add('Statistics','All-Time Records',['Highest monthly collection']);break;
+      case 'renewals':case 'due':add('Business Pulse','Renewals',['Renewals due per month','Successful renewals per month']);add('Daily Tracker','Renewals',['No. of renewals']);break;
+      case 'admissions':add('Business Pulse','Conversions',['Conversions per month']);add('Daily Tracker','Fresh sales',['Conversions']);break;
+      case 'collections':add('Daily Tracker','Total',['Collections – Fresh Sales','Collections – Renewals','Total collections']);add('Statistics','All-Time Records',['Highest monthly collection']);break;
       case 'atv':add('Business Pulse','Conversions',['ATV – Fresh Sales']);add('Business Pulse','Renewals',['ATV – Renewals']);break;
       case 'active':add('Monthly Active Learners','Active learners by month',['Monthly Active Learners','% Active utilisation']);break;
-      case 'appts':case 'a2v':add('Business Pulse','Appointments & Centre Visits',['Appointments per month','Appointments to visits']);add('Monthly Performance Analysis','Admissions Overview',['No. of appointments booked','Appointment to visit %']);break;
+      case 'appts':case 'a2v':add('Business Pulse','Appointments & Centre Visits',['Appointments per month','Appointments to visits']);add('Daily Tracker','Fresh sales',['Appointments booked','Show-up rate']);break;
       case 'visits':case 'v2c':case 'tconv':add('Business Pulse','Appointments & Centre Visits',['Centre visits per month']);add('Business Pulse','Conversions',['Visits to conversions','Time to conversion']);break;
-      default:add('Business Pulse','Marketing',['Blended CPL','CAC','Leads per month – Meta','Leads per month – Google']);add('Monthly Performance Analysis','Marketing Overview',['Marketing spends','Blended CPL','CAC','CPCV (cost per centre visit)']);
+      default:add('Business Pulse','Marketing',['Blended CPL','CAC','Leads per month – Meta','Leads per month – Google']);add('Daily Tracker','Fresh sales',['Marketing spend','Blended CPL']);
     }
-    if(dim==='course'&&!METRICS[mk].funnel)add(mk==='active'?'Monthly Active Learners':'Lead to Purchase',mk==='active'?'Monthly Active Learners by Course':'Admissions Breakdown',['Course-wise']);
+    if(dim==='course'&&mk==='active')add('Monthly Active Learners','Monthly Active Learners by Course',['Course-wise']);
     if(dim==='age'&&mk!=='rate')add(mk==='active'?'Monthly Active Learners':'Statistics',mk==='active'?'Monthly Active Learners by Age Group':'Course Subscription by Age Group',['Age groups']);
     if(dim==='teacher')add(mk==='active'?'Monthly Active Learners':'Statistics',mk==='active'?'Monthly Active Learners by Teacher':'Renewal Rate by Age Group',[mk==='active'?'Teacher':'Teacher filter']);
-    if(dim==='level')add('Lead to Purchase','Admissions Breakdown',['Course-level-wise']);
-    if(dim==='package')add(mk==='rate'?'Statistics':'Lead to Purchase',mk==='rate'?'Renewal Turnaround':'Admissions Breakdown',[mk==='rate'?'Package':'Subscription-period-wise']);
+    if(dim==='package'&&mk==='rate')add('Statistics','Renewal Turnaround',['Package']);
     return W.slice(0,3);
   }
 
@@ -1015,7 +1014,7 @@ const isPerMonth=k=>['count','sum'].includes(METRICS[k].kind);           // show
       figures:rows.slice(0,4).map(r=>({label:cap(METRICS[r.k].label)+(isAvgKind(r.k)?' run-rate':''),value:fmt(r.now,METRICS[r.k].fmt),note:r.d?r.d.txt+' vs usual':'',tone:r.d?(r.d.d>=0?'good':'bad'):'neutral'})),
       sections:[],actions:[worst?{title:`Recover ${METRICS[worst.k].label} in the remaining ${DAYS_TOTAL-DAYS_DONE} days.`,detail:`It is tracking ${worst.d.txt} against usual. Ask "${cap(METRICS[worst.k].label)} by centre this month" to see where the gap is.`}:null,
         best?{title:`Keep up what's driving ${METRICS[best.k].label}.`,detail:`It is ${best.d.txt} ahead of usual; find out which centre or course is behind it and keep it going.`}:null].filter(Boolean),
-      where:[{page:'Business Pulse',section:'All sections',items:['CM','RR']},{page:'Monthly Performance Analysis',section:'Collections Overview',items:['Actuals','Run-rate']}],
+      where:[{page:'Business Pulse',section:'All sections',items:['CM','RR']},{page:'Daily Tracker',section:'At a glance',items:['Month so far']}],
       followups:[worst?`${cap(METRICS[worst.k].label)} by centre this month`:'Admissions by course this month','Which teachers have the best renewal rate?'],scope:scopeTxt(f)+' · '+MONTH_FULL[CUR%12]+' vs the last 12 months'};
   }
   return{answer,prepare};
