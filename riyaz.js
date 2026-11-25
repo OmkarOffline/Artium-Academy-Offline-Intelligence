@@ -47,7 +47,7 @@
       ['sales', 'm_adm', 'Review the Admissions Pipeline', { link: 'admissions' }],
       ['sales', 'm_ren', 'Review the Renewal Pipeline', { link: 'pipeline' }],
       ['sales', 'm_pkg', 'Review Package completion', { link: 'pipeline', i: 'In the Renewal Pipeline, under the Package completion tab.' }],
-      ['cm', 'm_chk', 'Go through the day’s Check-ins', { link: 'checkins', i: 'The check-ins punched in by the Centre Managers for the day.' }],
+      ['cm', 'm_chk', 'Go through the day’s Check-ins', { links: [['Check-ins', 'checkins']], i: 'The check-ins punched in by the Centre Managers for the day.' }],
       ['num', 'm_pulse', 'Review the Business Pulse page', { link: 'home' }],
       ['num', 'm_ins', 'Add insights to the Execs Call and Weekly Offline Review pages', { links: [['Execs Call', 'execs'], ['Weekly Offline Review', 'review']] }],
       ['eng', 'm_aha', 'Watch the Aha moments shot today', { i: 'The Aha moment videos shot at the centres today.' }],
