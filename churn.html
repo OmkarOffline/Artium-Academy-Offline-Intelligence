@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Churn</title>
+<title>Churn Analysis</title>
 <link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
 <link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
 <link rel="apple-touch-icon" href="brand/emblem-180.png">
@@ -15,103 +15,162 @@
 <script src="wheel.js?v=20261125f"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--display:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;--body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
-  --bg:#F6F3FC;--border:#E6E0F5;--line:#EFEBF8;--ink:#120e2b;--ink2:#4a4466;--muted:#6a6488;--faint:#7a7196;--ghost:#b7b0cc;
-  --accent:#4101f7;--accent-soft:#F1EAFE;--bad:#B4443A;--ok:#1F7A4D;--shadow:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35)}
-body{background:var(--bg);font-family:var(--body);color:var(--ink2);-webkit-font-smoothing:antialiased}
-.page{max-width:1400px;margin:-64px auto 0;padding:0 48px 96px;position:relative}
-.hero{background:radial-gradient(120% 140% at 85% -20%,#4101f7 0%,rgba(65,1,247,0) 55%),linear-gradient(135deg,#2B0256 0%,#160240 55%,#01064c 100%);padding:34px 48px 92px;color:#fff}
-.hin{max-width:1304px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
-.eyebrow{font:700 11px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:#cec8ea;margin-bottom:10px}
-h1{font:800 42px/1.08 var(--display);letter-spacing:-.02em;background:linear-gradient(90deg,#FFFFFF 0%,#F1B6FA 45%,#9BB6FF 100%);-webkit-background-clip:text;background-clip:text;color:transparent;max-width:860px}
-.subtitle{font:400 16px/24px var(--body);color:#cec8ea;margin-top:10px;max-width:780px}
-.updated{display:flex;align-items:center;gap:8px;font-size:13px;color:#cec8ea}
-.dot{width:8px;height:8px;border-radius:50%;background:#4ade80}.dot.loading{background:#b9a0f5;animation:pulse 1s infinite}.dot.error{background:#ff8a80}
+:root{--v:#4101f7;--ink:#01073C;--ink2:#4A4466;--ink3:#6A6488;--ink4:#8A84A3;--line:#F1EDF9;--f:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;--red:#B4443A;--org:#D9772A;
+  --accent:#4101f7;--accent-soft:#F1EAFE;--body:var(--f);--display:var(--f);--border:#E6E0F5;--muted:#6A6488;--faint:#8A84A3}
+body{font-family:var(--f);background:#FBFAFF;color:var(--ink2);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.hero{max-width:1600px;margin:0 auto;padding:40px 48px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font:400 17px var(--f);color:var(--ink2);margin-top:12px}
+.upd{font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:8px;margin-top:6px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#3DDC97}.dot.loading{background:#F5906F;animation:pulse 1s infinite}.dot.error{background:#B0204F}
 @keyframes pulse{50%{opacity:.35}}
-.centre-toggle{display:inline-flex;gap:4px;background:#fff;border:1px solid var(--border);border-radius:18px;padding:5px;box-shadow:var(--shadow);margin-bottom:18px;max-width:100%;overflow-x:auto;scrollbar-width:none}
-.ct-btn{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:0;background:none;border-radius:13px;padding:9px 20px 10px;cursor:pointer;white-space:nowrap;text-align:left}
-.ct-btn small{font:700 9.5px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-.ct-btn span{font:700 15px/1.2 var(--display);color:var(--ink)}
-.ct-btn:hover{background:#F4F1FB}
-.ct-btn[aria-pressed="true"]{background:linear-gradient(135deg,#6601fd,#4101f7);box-shadow:0 8px 18px -10px rgba(65,1,247,.8)}
-.ct-btn[aria-pressed="true"] span{color:#fff}.ct-btn[aria-pressed="true"] small{color:#d9ccff}
-.pr{display:flex;gap:12px;margin:0 0 18px;flex-wrap:wrap;align-items:center}
-.seg{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:14px;padding:4px;flex-wrap:wrap}
-.seg button{border:0;background:none;border-radius:10px;padding:8px 14px;font:600 13px var(--body);color:var(--ink2);cursor:pointer}
-.seg button.on{background:#fff;color:var(--accent);box-shadow:0 6px 14px -10px rgba(1,7,60,.5)}
-.pr small{font:500 12.5px var(--body);color:var(--faint)}
-.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
-.tl{background:#fff;border-radius:24px;padding:18px 22px;box-shadow:var(--shadow)}
-.tl .k{font:700 10.5px var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
-.tl .n{margin-top:8px;font:800 20px var(--display);letter-spacing:-.4px;color:var(--ink)}
-.tl .v{margin-top:4px;font:500 13.5px var(--body);color:var(--ink2)}.tl .v b{font:800 22px var(--body);color:var(--accent);letter-spacing:-.5px;margin-right:6px}
-.tl.hot{background:linear-gradient(140deg,#4101F7,#6601FD 60%,#DD30B1 130%)}.tl.hot .k{color:#DCD2FF}.tl.hot .n{color:#fff}.tl.hot .v{color:#E4DCFF}.tl.hot .v b{color:#fff}
-.card{background:#fff;border-radius:28px;padding:8px 8px 12px;box-shadow:0 2px 4px rgba(1,7,60,.04),0 40px 80px -50px rgba(65,1,247,.4)}
-.g{display:grid;grid-template-columns:minmax(190px,1.2fr) 1.1fr 1fr .95fr .95fr 1.5fr;align-items:center}
-.hd{padding:14px 20px 6px}.hd>div{position:relative}
-.hb{border:0;background:none;font:700 10.5px var(--body);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:4px 0;text-align:left}
-.hb:hover,.hb.open,.hb.act{color:var(--accent)}
-.hb svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;opacity:.35}.hb:hover svg,.hb.open svg,.hb.act svg{opacity:1}
-.hb b{font-size:12px;letter-spacing:0}
-.r{display:grid;grid-template-columns:minmax(190px,1.2fr) 1.1fr 1fr .95fr .95fr 1.5fr;align-items:center;padding:15px 20px;border-top:1px solid var(--line)}
-.r:hover{background:#FBF8FF}
-.nm b{display:block;font:700 16px var(--body);color:var(--ink)}.nm small,.c small{display:block;font:500 12px var(--body);color:var(--faint);margin-top:3px}
-.big{font:800 28px/1 var(--display);letter-spacing:-1px;color:var(--ink)}
-.mid{font:800 21px/1 var(--display);letter-spacing:-.6px;color:var(--ink)}.mid span{font:500 13px var(--body);color:var(--faint);letter-spacing:0}
-button.num{border:0;background:none;padding:2px 6px;margin:-2px -6px;border-radius:8px;cursor:pointer;text-align:left;font:inherit;color:inherit}
-button.num:hover,button.num.on{background:var(--accent-soft);color:var(--accent)}
-.sp{display:flex;height:9px;border-radius:6px;overflow:hidden;gap:2px;margin-top:9px;max-width:170px}.sp i{display:block;height:100%}.sp .a{background:#C9B8FF}.sp .b{background:linear-gradient(90deg,#4101F7,#6601FD)}
-.stk{display:flex;height:16px;border-radius:9px;overflow:hidden;gap:2px}.stk i{display:block;min-width:4px;cursor:pointer}
-.hatch{background:repeating-linear-gradient(135deg,#BDB6CF 0 3px,#E4DFEF 3px 6px)!important}
-.r.tot{background:#FBF8FF;border-radius:0 0 22px 22px}.r.tot .nm b{font-weight:800}
-.lg2,.leg{display:flex;flex-wrap:wrap;gap:6px 18px;padding:12px 22px 0;font:500 12.5px var(--body);color:var(--ink2)}
-.lg2 span,.leg span{display:inline-flex;align-items:center;gap:7px}.lg2 i{width:22px;height:8px;border-radius:5px;display:inline-block}.leg i{width:10px;height:10px;border-radius:3px;display:inline-block}
-.hint{margin:14px 6px 0;font:500 12.5px var(--body);color:var(--faint)}
-.empty{padding:40px;text-align:center;color:var(--faint);font:500 14px var(--body)}
-.note{margin:12px 6px 0;font:500 12.5px var(--body);color:var(--faint)}
+.page{max-width:1600px;margin:0 auto;padding:0 48px 96px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.seg{display:inline-flex;gap:4px;background:#EFEAF9;border-radius:22px;padding:6px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.ct{position:relative;border:0;background:none;cursor:pointer;text-align:left;border-radius:17px;padding:10px 22px 12px;white-space:nowrap}
+.ct small{display:block;font:700 9.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}.ct span{font:700 15px var(--f);color:var(--ink)}
+.ct:hover{background:rgba(255,255,255,.55)}
+.ct[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}.ct[aria-pressed="true"] small{color:#A8431E}
+.ct[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.chips,.vw{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:18px;padding:5px;flex-wrap:wrap}
+.chips button,.vw button{border:0;background:none;cursor:pointer;padding:9px 16px;border-radius:13px;font:600 13.5px var(--f);color:var(--ink2)}
+.vw{border-radius:14px;padding:4px}.vw button{padding:8px 15px;border-radius:10px;font-size:13px}
+.chips button[aria-pressed="true"],.vw button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -14px rgba(1,7,60,.4)}
+.back{display:inline-flex;align-items:center;gap:8px;border:0;background:#fff;border-radius:14px;padding:10px 16px;font:600 13.5px var(--f);color:var(--v);cursor:pointer;box-shadow:0 1px 2px rgba(1,7,60,.06),0 10px 22px -16px rgba(1,7,60,.4);margin-bottom:18px}
+.back svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Landing: one card per question ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px;max-width:1400px}
+.pc{position:relative;height:440px;border-radius:30px;overflow:hidden;padding:24px;display:flex;flex-direction:column;background:#FBF7FF;border:0;text-align:left;cursor:pointer;
+  box-shadow:0 1px 2px rgba(1,7,60,.05),0 36px 70px -44px rgba(65,1,247,.45);transition:transform .2s,box-shadow .2s}
+.pc:hover{transform:translateY(-4px);box-shadow:0 1px 2px rgba(1,7,60,.05),0 44px 80px -44px rgba(65,1,247,.6)}
+.pc:focus-visible{outline:2px solid var(--v);outline-offset:3px}
+.mesh{position:absolute;inset:0;pointer-events:none}.mesh i{position:absolute;border-radius:50%;filter:blur(46px)}
+.m1{width:260px;height:260px;left:-90px;top:-90px;background:#F1B6FA;opacity:.75}.m2{width:240px;height:240px;right:-90px;top:-60px;background:#B9C8FF;opacity:.75}.m3{width:230px;height:230px;left:40px;top:120px;background:#FFD2BD;opacity:.65}
+.tl{position:absolute;display:grid;place-items:center;border-radius:20px;box-shadow:0 18px 30px -16px rgba(1,7,60,.35);transition:transform .3s}
+.tl svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.t1{width:74px;height:74px;right:30px;top:30px;transform:rotate(9deg);background:linear-gradient(140deg,#DD30B1,#F06BC8);color:#fff}.t1 svg{width:34px;height:34px}
+.t2{width:48px;height:48px;right:120px;top:64px;border-radius:15px;transform:rotate(-10deg);background:#fff;color:#4101F7}.t2 svg{width:22px;height:22px}
+.t3{width:58px;height:58px;right:54px;top:122px;border-radius:50%;background:#4101F7;color:#fff}.t3 svg{width:26px;height:26px}
+.t4{width:56px;height:56px;right:146px;top:142px;border-radius:17px;transform:rotate(8deg);background:linear-gradient(140deg,#C9502A,#F5906F);color:#fff}.t4 svg{width:26px;height:26px}
+.pc:hover .t1{transform:rotate(14deg) translateY(-3px)}.pc:hover .t4{transform:rotate(2deg) translateY(-2px)}
+.chip{position:relative;align-self:flex-start;display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.75);border-radius:999px;padding:6px 12px;font:700 10.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);box-shadow:0 4px 14px -8px rgba(1,7,60,.3)}
+.chip b{width:7px;height:7px;border-radius:50%;background:#DD30B1}
+.qq{position:relative;margin-top:auto;font:800 30px/1.08 var(--f);letter-spacing:-1.1px;color:var(--ink)}
+.qq span{background:linear-gradient(90deg,#4101F7,#B42BD0 55%,#F0766A);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ft{position:relative;display:flex;align-items:center;justify-content:space-between;margin-top:20px;min-height:46px}
+.ft small{font:700 11px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.ft i{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#4101F7,#B42BD0);color:#fff;box-shadow:0 12px 22px -10px rgba(120,30,200,.8)}
+.ft i svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pc.soon{background:#F7F5FC;box-shadow:none;border:1.5px dashed #DCD5EE;cursor:default}.pc.soon:hover{transform:none}
+.pc.soon .ghost{position:absolute;right:30px;top:34px;width:64px;height:64px;border-radius:20px;background:#EFEAF9;transform:rotate(9deg)}
+.pc.soon .ghost.g2{right:112px;top:76px;width:42px;height:42px;border-radius:14px;transform:rotate(-10deg)}
+.pc.soon .sk{border-radius:9px;background:#ECE7F6}
+.pc.soon .chip{background:#EFEAF9;box-shadow:none;color:var(--ink4)}.pc.soon .chip b{background:#C9C2E0}
+
+/* ── Question section ── */
+.sec{background:#fff;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);margin-bottom:22px}
+.qh{padding:26px 30px 8px;display:flex;align-items:flex-start;gap:14px}
+.qh h2{font:700 32px/1.15 var(--f);letter-spacing:-.8px;color:var(--v)}.qh h2::after{content:"";display:block;width:44px;height:4px;border-radius:4px;background:linear-gradient(90deg,#4101F7,#DD30B1);margin-top:12px}
+.ib{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--v);background:#fff;color:var(--v);font:italic 700 14px/1 Georgia,serif;display:grid;place-items:center;margin-top:9px;cursor:pointer;padding:0}
+.ib:hover,.ib[aria-expanded="true"]{background:var(--v);color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:18px 28px 8px}
+.k{background:#F7F5FC;border-radius:18px;padding:16px 20px;min-width:0}
+.k .t{font:600 13px var(--f);color:var(--ink3)}.k .nm{font:800 21px var(--f);color:var(--ink);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.k .v{font:800 28px/1.1 var(--f);color:var(--ink);margin-top:6px;letter-spacing:-.02em}.k .v span{font:500 13.5px var(--f);color:var(--ink3);letter-spacing:0}
+.k.rr{background:linear-gradient(140deg,#FDE8F1 0%,#FFF3F8 100%);box-shadow:0 0 0 1px #F8D3E3}.k.rr .t{color:#B1286A}
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:12px 28px 6px;align-items:start}
+.dg[hidden]{display:none}
+.dg .dc{background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 18px 36px -28px rgba(1,7,60,.4);overflow:hidden}
+.dg .dh{padding:13px 16px 11px;background:linear-gradient(135deg,#F4EEFF,#FCEFFA)}.dg .dn{display:flex;align-items:center;gap:8px;font:700 14.5px/1.3 var(--f);color:var(--ink)}.dg .dn::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--v);flex:none}
+.dg .dm{font:400 12.5px/1.45 var(--f);color:var(--ink2);margin-top:3px}.dg .db{padding:12px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.dg .dl{font:700 10px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-top:2px}
+.dg .dfm{font:600 13.5px/1.5 var(--f);color:var(--ink);padding:1px 0 1px 11px;border-left:3px solid #C9B8FF}.dg .dfm s{text-decoration:none;color:var(--v);font-weight:800;margin:0 3px}
+.dg .dli{display:flex;gap:9px;align-items:flex-start;font:400 13px/1.4 var(--f);color:var(--ink2)}.dg .dli b{color:var(--ink);font-weight:700}
+.dg .dic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:700 10.5px var(--f);background:#EFEAF9;color:var(--v)}
+.dg .dtp{display:flex;gap:9px;align-items:flex-start;font:400 12.5px/1.45 var(--f);color:var(--ink2)}.dg .dtp>i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:4px;background:#C9C2E0}
+.dg .dbs{display:flex;gap:6px;flex-wrap:wrap}.dg .dbs span{font:600 11.5px var(--f);border-radius:8px;padding:3px 8px}
+.tbar{padding:18px 28px 0}
+body.land .aw-fab,body.land .aw-slot{display:none!important}
+@media(max-width:1400px){.tw{overflow-x:auto}}
+.g{position:relative;padding:8px 0 22px;min-width:1260px;--cols:380px 128px 112px 200px 112px 150px 112px minmax(150px,1fr)}
+.deco{position:absolute;top:8px;bottom:14px;border-radius:22px;pointer-events:none}
+.deco.d1{background:#fff;box-shadow:0 18px 40px -24px rgba(65,1,247,.45),0 0 0 1px #EFE9FD;border-top:3px solid transparent;background-image:linear-gradient(#fff,#fff),linear-gradient(90deg,#4101f7,#dd30b1);background-origin:border-box;background-clip:padding-box,border-box}
+.deco.d2{background:#F8F5FE}
+.head,.row{display:grid;grid-template-columns:var(--cols);position:relative;z-index:1}
+.head{align-items:end;padding:18px 0 10px;z-index:5}
+.head>div{position:relative;padding:0 14px 0 22px}
+.head>div:first-child{padding-left:28px}
+.hb{border:0;background:none;cursor:pointer;text-align:left;font:700 10.5px/1.45 var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);padding:2px 0}
+.hb:hover,.hb.open,.hb.act{color:var(--v)}
+.hb::after{content:"";display:inline-block;width:5px;height:5px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.45;transform:rotate(45deg);margin:0 0 3px 7px}
+.hb.act::after,.hb.open::after,.hb:hover::after{opacity:1}
+.hb b{letter-spacing:0;margin-left:4px}
+.row{align-items:center;min-height:104px}
+.row>div{padding:0 14px 0 22px;min-width:0}
+.row+.row::before{content:"";position:absolute;left:0;right:0;top:0;border-top:1px solid var(--line);z-index:-1}
+.t1c{padding-left:28px!important;border-right:1px solid var(--line);align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.t1c b{font:700 17px var(--f);color:var(--ink)}
+.kv{display:grid;grid-template-columns:142px 118px 1fr;margin-top:9px}
+.kv span{font:600 13px var(--f);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px}.kv em{display:block;font:700 9.5px var(--f);font-style:normal;letter-spacing:.13em;text-transform:uppercase;color:var(--ink4);margin-bottom:3px}
+.kv .est{color:var(--ink3);font-weight:500}
+.n{font:800 28px/1 var(--f);letter-spacing:-.8px;color:var(--ink)}.n em{font:700 16px var(--f);font-style:normal;margin-left:1px;letter-spacing:0}
+.n.z{color:#C9C2E0}
+.s{font:500 12.5px var(--f);color:var(--ink4);margin-top:6px}
+button.nb{border:0;background:none;padding:3px 7px;margin:-3px -7px;border-radius:9px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+button.nb:hover,button.nb.on{background:var(--accent-soft)}
+.lz{margin-top:8px;display:flex;flex-direction:column;gap:3px;align-items:flex-start;font:600 13px/1.35 var(--f)}.lz b{font-weight:800}
+.lz button.nb{padding:1px 6px;margin:0 -6px}
+.lz .r{color:var(--red)}.lz .o{color:var(--org)}
+.tr{height:6px;border-radius:6px;background:#EEE8FB;margin-top:9px;width:110px;display:flex;overflow:hidden;gap:2px}.tr i{display:block;height:100%}
+.top{color:#2F4DB8}.hi{color:#1F7A4D}.mid{color:#A86F00}.lo{color:#B0204F}
+i.top{background:#2F4DB8}i.hi{background:#1F7A4D}i.mid{background:#C99012}i.lo{background:#B0204F}
+.empty{padding:40px;text-align:center;color:var(--ink4);font:500 14px var(--f)}
+.note{padding:0 30px 22px;font:500 12.5px var(--f);color:var(--ink4)}
 /* column menu */
-.cmenu{position:absolute;top:100%;left:-8px;z-index:30;width:250px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 22px 50px -20px rgba(18,14,43,.45);padding:10px;text-transform:none;letter-spacing:0;font-weight:500}
-.cmenu .cm-h{font:700 13px var(--body);color:var(--ink);padding:2px 6px 8px}
-.cmenu button.cm-s{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:8px 6px;border-radius:8px;font:600 13px var(--body);color:var(--ink2);cursor:pointer;text-align:left}
-.cmenu button.cm-s:hover,.cmenu button.cm-s.on{background:var(--accent-soft);color:var(--accent)}
+.cmenu{position:absolute;top:100%;left:12px;margin-top:6px;z-index:40;width:250px;background:#fff;border:1px solid #ece4ff;border-radius:14px;box-shadow:0 22px 50px -20px rgba(18,14,43,.45);padding:10px;text-transform:none;letter-spacing:0}
+.cmenu .cm-h{font:700 13px var(--f);color:var(--ink);padding:2px 6px 8px}
+.cmenu button.cm-s{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:8px 6px;border-radius:8px;font:600 13px var(--f);color:var(--ink2);cursor:pointer;text-align:left}
+.cmenu button.cm-s:hover,.cmenu button.cm-s.on{background:var(--accent-soft);color:var(--v)}
 .cmenu button.cm-s svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.cm-f{font:700 10.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);padding:10px 6px 6px}
-.cm-l{max-height:210px;overflow:auto}.cm-l label{display:flex;align-items:center;gap:8px;padding:5px 6px;font:500 13px var(--body);color:var(--ink2);cursor:pointer;border-radius:6px}.cm-l label:hover{background:#F8F5FE}
-.cm-l label span{flex:1}.cm-l i{font-style:normal;color:var(--ghost);font-size:12px}
-.cm-a{display:flex;gap:12px;padding:0 6px 6px}.cm-a button{border:0;background:none;color:var(--accent);font:600 12px var(--body);cursor:pointer}
-.cm-min{display:flex;align-items:center;gap:8px;padding:0 6px;font:500 13px var(--body);color:var(--ink2)}.cm-min input{width:80px;height:34px;border:1px solid var(--border);border-radius:9px;padding:0 10px;font:500 13px var(--body)}
+.cm-f{font:700 10.5px var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding:10px 6px 6px}
+.cm-l{max-height:220px;overflow:auto}.cm-l label{display:flex;align-items:center;gap:8px;padding:5px 6px;font:500 13px var(--f);color:var(--ink2);cursor:pointer;border-radius:6px}.cm-l label:hover{background:#F8F5FE}
+.cm-l label span{flex:1}
+.cm-a{display:flex;gap:12px;padding:0 6px 6px}.cm-a button{border:0;background:none;color:var(--v);font:600 12px var(--f);cursor:pointer}
+.cm-min{display:flex;align-items:center;gap:8px;padding:0 6px 4px;font:500 13px var(--f);color:var(--ink2)}.cm-min input{width:80px;height:34px;border:1px solid #dcd5ee;border-radius:9px;padding:0 10px;font:500 13px var(--f)}
 /* drill */
-.dp{background:#fff;border-radius:24px;box-shadow:var(--shadow);margin-top:18px;padding:18px 18px 12px;scroll-margin-top:12px}
-.dp h3{font:800 18px var(--display);color:var(--ink);display:flex;justify-content:space-between;gap:12px;align-items:center}
-.dp h3 button{border:0;background:var(--accent-soft);color:var(--accent);border-radius:10px;padding:7px 12px;font:600 12.5px var(--body);cursor:pointer}
-.dp .sb{font:500 13px var(--body);color:var(--faint);margin:4px 0 12px}
-.tw{overflow-x:auto}
-table.lt{width:100%;border-collapse:collapse;font:500 13px var(--body)}
-table.lt th{text-align:left;font:700 10.5px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--faint);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
-table.lt td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink2)}
-table.lt td.who b{display:block;font:700 14px var(--body);color:var(--ink)}table.lt td.who small{color:var(--faint);font-size:12px}
-table.lt td.ds{white-space:pre-line;min-width:220px;max-width:340px}
-.mut{color:var(--ghost)}
-.pill{display:inline-block;border-radius:999px;padding:3px 10px;font:700 11.5px var(--body)}.pill.rd{background:#FBE9E7;color:#B4443A}.pill.gn{background:#E5F5EC;color:#1F7A4D}.pill.vi{background:var(--accent-soft);color:var(--accent)}
-@media(max-width:900px){.page{padding:0 16px 96px}.hero{padding:26px 18px 84px}h1{font-size:30px}.tiles{grid-template-columns:1fr}
- .g.hd{display:none}.r{grid-template-columns:1fr 1fr;gap:12px}.r .nm{grid-column:1/-1}.r .why{grid-column:1/-1}}
+.dp{background:#fff;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);overflow:hidden;scroll-margin-top:14px}
+.dp .h2{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:22px 30px 4px;font:700 21px var(--f);color:var(--ink)}.dp .h2 span span{color:var(--ink4);font-weight:600}
+.dp .h2 button{border:0;background:var(--accent-soft);color:var(--v);border-radius:10px;padding:8px 14px;font:600 13px var(--f);cursor:pointer}
+.dp .sb{padding:0 30px 12px;font:500 13px var(--f);color:var(--ink4)}
+.dtw{overflow-x:auto}
+table.lt{width:100%;border-collapse:collapse;font:500 13px var(--f)}
+table.lt th{text-align:left;font:700 10.5px var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);padding:12px 14px 8px;background:#FBFAFE;white-space:nowrap}
+table.lt th:first-child,table.lt td:first-child{padding-left:30px}
+table.lt td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink2)}
+table.lt td.who b{display:block;color:var(--ink);font:700 14px var(--f)}table.lt td.who small{color:var(--ink4);font-size:12px}
+table.lt td.ds{white-space:pre-line;min-width:240px;max-width:360px}
+.mut{color:#B7B0CC}
+.pill{display:inline-block;border-radius:999px;padding:3px 10px;font:700 11.5px var(--f);white-space:nowrap}.p-w{background:#FCE2E5;color:#9A2F3A}.p-o{background:#FDEBDD;color:#A8540F}.p-l{background:#F1EAFE;color:var(--v)}.p-g{background:#E3F7EE;color:#137A4F}.p-b{background:#EAF0FF;color:#2F4DB8}
+.more{display:block;margin:10px auto 16px;border:0;background:var(--accent-soft);color:var(--v);border-radius:10px;padding:8px 14px;font:600 13px var(--f);cursor:pointer}
+@media(max-width:900px){.hero{padding:24px 16px 12px;flex-wrap:wrap}.upd{white-space:normal}h1{font-size:34px;letter-spacing:-1px}.page{padding:0 16px 96px}.tiles{grid-template-columns:1fr}.qh h2{font-size:24px}.qh{padding:22px 18px 6px}.tiles,.tbar,.dg{padding-left:18px;padding-right:18px}.cards{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="hero"><div class="hin">
-  <div><div class="eyebrow">Churn analysis</div><h1>Which teachers are we losing the most learners from?</h1>
-  <div class="subtitle">Learners whose package ended and was not renewed, counted from the month each teacher started. Learners a teacher inherited are shown apart from the ones they admitted themselves.</div></div>
-  <div class="updated"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div>
-</div></div>
+<div class="hero"><div><h1>Churn Analysis</h1><div class="sub" id="sub" hidden></div></div>
+  <div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div></div>
 <div class="page">
-  <nav class="centre-toggle" id="centre-toggle" aria-label="Centre"></nav>
-  <div class="pr"><div class="seg" id="per"></div><small id="perN"></small></div>
-  <div id="out"><div class="empty">Loading…</div></div>
+  <button type="button" class="back" id="back" hidden><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>All questions</button>
+  <div class="bar" id="qbar" hidden><nav class="seg" id="centre" aria-label="Centre"></nav><div class="chips" id="per" hidden></div></div>
+  <div id="land"></div>
+  <div id="out" hidden></div>
 </div>
 <script>
 const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const GRACE=30;   // days after a package ends before a learner with no renewal counts as lost
+const CAP=90;   // a teacher's capacity, as on the Monthly Active Learners pages
 function parseDate(str){
   if(!str)return null;const s=String(str).trim();
   const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
@@ -122,233 +181,268 @@ function parseDate(str){
   const d=new Date(s);return isNaN(d)?null:d;
 }
 const valid=d=>d&&d.getFullYear()>=2020?d:null;
-const parseNum=s=>{const v=parseFloat(String(s||'').replace(/[^0-9.\-]/g,''));return isNaN(v)?0:v;};
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtD=d=>d?String(d.getDate()).padStart(2,'0')+' '+MON[d.getMonth()]+' '+d.getFullYear():'';
-const fmtM=d=>d?MON[d.getMonth()]+' '+d.getFullYear():'';
-const n0=v=>Math.round(v).toLocaleString('en-IN');
+const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate()),MO=30.4375*864e5;
 async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
-const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate()),DAY=864e5,MO=30.4375*DAY;
+const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}};
 
-/* Reasons: every reason stays visible; the sheet's wording is sorted into groups, and a learner with nothing written is "Reason not logged". */
-const RG=[['Lost interest','#4101F7'],['Schedule clash','#9B6BFF'],['Relocation','#DD30B1'],['Exams and studies','#F5906F'],['Fees','#2F4DB8'],['Health','#3FA796'],['Teacher or class','#E0A33A'],['Other','#C9B8FF'],['Reason not logged','hatch']];
-const RULES=[['Relocation',/reloc|moved|moving|shift(ed|ing)? to|transfer|abroad|another city|out of (station|town|city)|left (the )?city|migrat/i],
-  ['Exams and studies',/exam|stud(y|ies)|academ|board|school|tuition|homework|jee|neet|college|career|marks/i],
-  ['Fees',/fee|cost|expens|afford|price|money|financ|budget|pay(ment)? issue/i],
-  ['Health',/health|\bill|medical|surgery|injur|sick|pregn|hospital|covid|fever/i],
-  ['Schedule clash',/schedul|timing|slot|\btime\b|clash|batch|busy|availab|commut|travel|distance|far\b/i],
-  ['Teacher or class',/teacher|faculty|quality|method|syllabus|dissatisf|complain|not satisfied|class(es)? (not|quality)|online|another (academy|class)|other (academy|class)|competitor/i],
-  ['Lost interest',/interest|bored|motivat|enjoy|keen|enthus|hobby|not serious|don.?t want|no longer|not willing|not continu|stopp?ed|quit|dropp?ed/i]];
-function rGroup(s){s=String(s||'').trim();if(!s||/^(na|n\/a|-|nil|none)$/i.test(s))return'Reason not logged';for(const[g,re]of RULES)if(re.test(s))return g;return'Other';}
+/* ── State ── */
+const PERIODS=[['cm','CM','This month so far'],['pm','PM','Last month'],['3','3M','Last 3 months'],['6','6M','Last 6 months'],['12','12M','Last 12 months'],['all','Since joining','Since each teacher joined']];
+const VIEWS=[['overall','Overall'],['inh','Inherited learners'],['own','Own admissions']];
+let DATA={},ROSTER=[],MEMS=[],loaded=false,VIEW=null;
+let selCentre=(()=>{const v=store('artium_ch_centre');return CENTRES.some(c=>c.name===v)?v:'All';})();
+let PER=(()=>{const v=store('artium_ch_per2');return PERIODS.some(p=>p[0]===v)?v:'all';})();
+let VW=(()=>{const v=store('artium_ch_view');return VIEWS.some(p=>p[0]===v)?v:'overall';})();
+let SORT={c:'lost',dir:'desc'},FILT={},MIN={},MENU=null,DRILL=null,INFO=false,SHOWALL=false;
+let Q=location.hash==='#teachers'?'teachers':'';
 
-const PERIODS=[['last','Last month'],['3','Last 3 months'],['6','Last 6 months'],['12','Last 12 months'],['all','Since the teacher joined']];
-let DATA={},ROSTER=[],ITEMS=[],VIEW=null,selCentre=(()=>{try{const v=localStorage.getItem('artium_ch_centre');return CENTRES.some(c=>c.name===v)?v:'All';}catch(e){return'All';}})();
-let PER=(()=>{try{const v=localStorage.getItem('artium_ch_per');return PERIODS.some(p=>p[0]===v)?v:'all';}catch(e){return'all';}})();
-let SORT={c:'lost',dir:'desc'},FILT={},MIN={},MENU=null,DRILL=null,loaded=false;
-
-/* ── Data: every membership, with the teacher's name resolved against the Offline Team tab ── */
+/* ── Data: every membership, its teacher resolved against the Offline Team tab ── */
 const rk=t=>String(t||'').toLowerCase().replace(/[^a-z]/g,'').replace(/h/g,'').replace(/(.)\1+/g,'$1');
-function resolver(){const R=ROSTER.map(x=>({x,full:rk(x.name),first:rk(x.name.split(/\s+/)[0]),centre:String(x.centre||'').toLowerCase()})),memo={};
+function resolver(){const R=ROSTER.map(x=>({x,full:rk(x.name),first:rk(String(x.name).split(/\s+/)[0]),centre:String(x.centre||'').toLowerCase()})),memo={};
   return(raw,centre)=>{raw=String(raw||'').trim();if(!raw)return null;const mk=raw+'|'+centre;if(mk in memo)return memo[mk];
     const full=rk(raw),first=rk(raw.split(/\s+/)[0]);let h=R.filter(x=>x.full===full);
     if(h.length!==1){const f=R.filter(x=>x.first===first),here=f.filter(x=>x.centre.indexOf(centre.toLowerCase())>=0);h=here.length===1?here:f.length===1?f:[];}
     return memo[mk]=h.length===1?h[0].x:null;};}
-const effEnd=t=>t.end&&t.newEnd&&t.newEnd>t.end?t.newEnd:t.end;
 function build(){
-  const T=[];
+  const who=resolver(),T=[];
   CENTRES.forEach(c=>{const d=DATA[c.name];if(!d)return;
     [['fs',d.fs],['rn',d.rn]].forEach(([tab,rows])=>rows.forEach(r=>{const date=parseDate(r[0]);if(!date)return;
-      T.push({r,centre:c.name,tab,date,id:String(r[3]||'').trim().toUpperCase(),end:valid(parseDate(r[23])),newEnd:valid(parseDate(r[36])),status:String(r[25]||'').trim(),
-        reason:String(r[28]||'').trim(),desc:String(r[32]||'').trim(),name:String(r[4]||'').trim(),phone:String(r[7]||'').replace(/\D/g,'').slice(-10),
-        course:String(r[8]||'').trim(),level:String(r[9]||'').trim(),teacherRaw:String(r[29]||'').trim()});}));});
-  ITEMS=T;
+      const id=String(r[3]||'').trim().toUpperCase()||('~'+String(r[4]||'').trim().toLowerCase()+'|'+String(r[7]||'').replace(/\D/g,'').slice(-10));
+      const end=valid(parseDate(r[23])),ne=valid(parseDate(r[36]));
+      T.push({r,centre:c.name,tab,date,id,end,act:end&&ne&&ne>end?ne:end,status:String(r[25]||'').trim(),name:String(r[4]||'').trim(),
+        phone:String(r[7]||'').replace(/\D/g,'').slice(-10),course:String(r[8]||'').trim(),desc:String(r[32]||'').trim(),teacher:who(r[29],c.name),traw:String(r[29]||'').trim()});}));});
+  // Each learner's memberships in order: first admission, and whether each one was renewed
+  const by=new Map();T.forEach(m=>{(by.get(m.id)||by.set(m.id,[]).get(m.id)).push(m);});
+  by.forEach(l=>{l.sort((a,b)=>a.date-b.date);const first=l[0].date;
+    l.forEach((m,i)=>{m.first=first;m.next=l[i+1]||null;m.latest=l[l.length-1];
+      m.ren=!!m.next||/^renewed$/i.test(m.status);
+      m.wnr=!m.ren&&/will not renew|won'?t renew|discontinu|refund/i.test(m.status);});});
+  MEMS=T;
 }
-function learners(){
-  const who=resolver(),by=new Map();
-  ITEMS.filter(t=>t.id&&(selCentre==='All'||t.centre===selCentre)).forEach(t=>{(by.get(t.id)||by.set(t.id,[]).get(t.id)).push(t);});
-  const L=[];
-  by.forEach(list=>{list.sort((a,b)=>a.date-b.date);list.forEach(m=>{m.teacher=who(m.teacherRaw,m.centre);});
-    const last=list[list.length-1],e=effEnd(last),st=last.status;let lost=false,ld=null;
-    if(/will not renew|won'?t renew|discontinu|refund/i.test(st)){lost=true;ld=e||last.date;}
-    else if(!/renewed|pause|resume|transfer/i.test(st)&&e&&e<new Date(TODAY-GRACE*DAY)){lost=true;ld=e;}
-    L.push({id:last.id,name:last.name,phone:last.phone,course:last.course,level:last.level,desc:last.desc,centre:last.centre,tab:last.tab,r:last.r,
-      first:list[0].date,mems:list,lost,ld,reason:last.reason,rg:lost?rGroup(last.reason):'',teacher:last.teacher,status:st,end:e});});
-  return L;
-}
-function window_(doj){
+
+/* ── The numbers, teacher by teacher ── */
+function win(doj){
   let a,b=TODAY;
-  if(PER==='last'){a=new Date(TODAY.getFullYear(),TODAY.getMonth()-1,1);b=new Date(TODAY.getFullYear(),TODAY.getMonth(),0);}
+  if(PER==='cm')a=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+  else if(PER==='pm'){a=new Date(TODAY.getFullYear(),TODAY.getMonth()-1,1);b=new Date(TODAY.getFullYear(),TODAY.getMonth(),0);}
   else if(PER==='all')a=doj;
-  else{a=new Date(TODAY.getFullYear(),TODAY.getMonth()-(+PER),TODAY.getDate());}
+  else a=new Date(TODAY.getFullYear(),TODAY.getMonth()-(+PER),TODAY.getDate());
   if(doj&&a<doj)a=doj;
   return[a,b];
 }
+const band=p=>p>=70?'top':p>=55?'hi':p>=40?'mid':'lo';
 function compute(){
-  const L=learners(),rows=[],unplaced=L.filter(x=>x.lost&&!x.teacher).length;
-  const byT=new Map();ROSTER.forEach(t=>byT.set(t.name,{t,ls:new Set(),mems:[]}));
-  L.forEach(l=>l.mems.forEach(m=>{if(m.teacher&&byT.has(m.teacher.name)){const o=byT.get(m.teacher.name);o.mems.push(m);o.ls.add(l);}}));
-  byT.forEach(({t,mems,ls})=>{
-    if(!mems.length)return;
+  const mine=m=>selCentre==='All'||m.centre===selCentre;
+  const per=new Map();
+  MEMS.forEach(m=>{if(!m.teacher||!mine(m))return;(per.get(m.teacher.name)||per.set(m.teacher.name,{t:m.teacher,ms:[]}).get(m.teacher.name)).ms.push(m);});
+  const rows=[];
+  per.forEach(({t,ms})=>{
     let doj=t.doj?parseDate(t.doj):null,est=false;
-    if(!doj){doj=new Date(Math.min(...mems.map(m=>m.date)));est=true;}
-    const[a,b]=window_(doj);if(a>b)return;
-    const months=Math.max(1,(b-a)/MO),lostL=[],pop=new Set(),cover=[];
-    ls.forEach(l=>{
-      const ms=l.mems.filter(m=>m.teacher&&m.teacher.name===t.name);
-      if(ms.some(m=>m.date<=b&&(effEnd(m)||TODAY)>=a))pop.add(l);
-      if(l.lost&&l.teacher&&l.teacher.name===t.name&&l.ld>=a&&l.ld<=b)lostL.push(l);
-    });
-    const inh=l=>est?false:l.first<doj;
-    let avg=0,k=0;for(let d=new Date(a);d<=b;d=new Date(d.getFullYear(),d.getMonth()+1,d.getDate()),k++){
-      let c=0;ls.forEach(l=>{if(l.mems.some(m=>m.teacher&&m.teacher.name===t.name&&m.date<=d&&(effEnd(m)||TODAY)>=d))c++;});avg+=c;if(k>120)break;}
-    avg=k?avg/k:0;
-    const P=[...pop],pI=P.filter(inh),pO=P.filter(l=>!inh(l)),lI=lostL.filter(inh),lO=lostL.filter(l=>!inh(l));
-    const rs={};RG.forEach(g=>rs[g[0]]=[]);lostL.forEach(l=>rs[l.rg].push(l));
-    const logged=RG.filter(g=>g[0]!=='Reason not logged').sort((x,y)=>rs[y[0]].length-rs[x[0]].length)[0][0];
-    rows.push({name:t.name,course:t.course,doj,est,months,a,b,lost:lostL.length,perMonth:lostL.length/months,pct:avg?lostL.length/months/avg*100:0,avg,
-      inh:{lost:lI.length,pop:pI.length,l:lI},own:{lost:lO.length,pop:pO.length,l:lO},all:lostL,rs,top:rs[logged].length?logged:(lostL.length?'Reason not logged':'—')});
+    if(!doj){doj=new Date(Math.min(...ms.map(m=>m.date)));est=true;}
+    const[a,b]=win(doj);if(a>b)return;
+    const inh=m=>m.first<doj,inG=m=>VW==='overall'||(VW==='inh')===inh(m);
+    const G=ms.filter(inG);
+    // Admissions acquired: own learners first admitted in the period. Inherited: inherited learners taught in the period.
+    const acq=new Map();
+    G.forEach(m=>{if(inh(m)){if(m.date<=b&&(m.act||TODAY)>=a&&!acq.has(m.id))acq.set(m.id,m.latest);}
+      else if(m.first>=a&&m.first<=b&&m.date.getTime()===m.first.getTime()&&!acq.has(m.id))acq.set(m.id,m.latest);});
+    // Became due: packages whose end date falls in the period (up to today), taught by this teacher, on or after the DOJ
+    const hi=b<TODAY?b:TODAY,due=G.filter(m=>m.end&&m.end>=a&&m.end<=hi&&m.end>=doj);
+    const lost=due.filter(m=>!m.ren),wnr=lost.filter(m=>m.wnr),nyy=lost.filter(m=>!m.wnr);
+    // Current active: learners with a package from this teacher running today
+    const actM=new Map();G.forEach(m=>{if(m.date<=TODAY&&m.act&&m.act>=TODAY&&!actM.has(m.id))actM.set(m.id,m);});
+    const months=Math.max(1,(b-a)/MO),tenure=Math.max(0,Math.round((TODAY-doj)/MO));
+    const counts={};ms.forEach(m=>{if(m.course)counts[m.course]=(counts[m.course]||0)+1;});
+    const course=t.course||Object.keys(counts).sort((x,y)=>counts[y]-counts[x])[0]||'';
+    const act=actM.size;
+    if(!acq.size&&!due.length&&!act)return;
+    rows.push({name:t.name,course,doj,est,tenure,months,acq:[...acq.values()],due,lost,wnr,nyy,actL:[...actM.values()],
+      nAcq:acq.size,nDue:due.length,nLost:lost.length,pm:lost.length/months,churn:due.length?lost.length/due.length*100:null,act,util:act/CAP*100});
   });
-  return{rows,unplaced,L};
+  return rows;
 }
 
-/* ── Column menus: sort, and filter (values for text columns, a minimum for numbers) ── */
-const COLS=[['teacher','Teacher','t',r=>r.name],['lost','Lost in total','n',r=>r.lost],['perMonth','Lost per month','n',r=>r.perMonth],
-  ['inh','Inherited learners','n',r=>r.inh.pop?r.inh.lost/r.inh.pop*100:0,'% lost'],['own','Own admissions','n',r=>r.own.pop?r.own.lost/r.own.pop*100:0,'% lost'],['why','Why they left','t',r=>r.top]];
-const ARR='<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+/* ── Column menus: sort, and filter (names for Teacher, a minimum for numbers) ── */
+const COLS=[['teacher','Teacher','t',r=>r.name],['acq',null,'n',r=>r.nAcq],['due','Became due','n',r=>r.nDue],['lost','Lost in total','n',r=>r.nLost],
+  ['pm','Lost per month','n',r=>Math.round(r.pm*10)/10],['churn','Churn rate','n',r=>r.churn==null?null:Math.round(r.churn),'%'],['act','Current active','n',r=>r.act],['util','Utilisation','n',r=>Math.round(r.util),'%']];
+const acqLabel=()=>({overall:'Learners handled',inh:'Inherited learners',own:'Admissions acquired'}[VW]);
+const colLabel=c=>c[1]||acqLabel();
 function menuHtml(c,rows){
-  const [k,label,ty]=c,S=SORT.c===k?SORT.dir:'';
-  const lab=ty==='n'?['Sort smallest to largest','Sort largest to smallest']:['Sort A → Z','Sort Z → A'];
-  let h=`<div class="cmenu" data-k="${k}"><div class="cm-h">${label}</div>
+  const[k,,ty]=c,S=SORT.c===k?SORT.dir:'',lab=ty==='n'?['Sort smallest to largest','Sort largest to smallest']:['Sort A → Z','Sort Z → A'];
+  let h=`<div class="cmenu" data-k="${k}"><div class="cm-h">${esc(colLabel(c))}</div>
    <button type="button" class="cm-s${S==='asc'?' on':''}" data-dir="asc"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>${lab[0]}</button>
    <button type="button" class="cm-s${S==='desc'?' on':''}" data-dir="desc"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg>${lab[1]}</button>`;
-  if(ty==='n')h+=`<div class="cm-f">Filter</div><div class="cm-min">${c[4]?'At least':'At least'}<input type="number" min="0" step="any" data-min="${k}" value="${MIN[k]==null?'':MIN[k]}" placeholder="0">${c[4]?'% lost':''}</div>`;
-  else{const cnt=new Map();rows.forEach(r=>{const v=c[3](r);cnt.set(v,(cnt.get(v)||0)+1);});const vals=[...cnt.keys()].sort((a,b)=>String(a).localeCompare(String(b))),sel=FILT[k];
+  if(ty==='n')h+=`<div class="cm-f">Filter</div><div class="cm-min">At least<input type="number" min="0" step="any" data-min="${k}" value="${MIN[k]==null?'':MIN[k]}" placeholder="0">${c[4]||''}</div>`;
+  else{const vals=rows.map(c[3]).sort((a,b)=>a.localeCompare(b)),sel=FILT[k];
     h+=`<div class="cm-f">Filter by values</div><div class="cm-a"><button type="button" data-ca="all">Select all</button><button type="button" data-ca="none">Clear</button></div><div class="cm-l">`
-      +vals.map(v=>`<label><input type="checkbox" value="${esc(v)}"${!sel||sel.includes(v)?' checked':''}><span>${esc(v)}</span><i>${cnt.get(v)}</i></label>`).join('')+'</div>';}
+      +vals.map(v=>`<label><input type="checkbox" value="${esc(v)}"${!sel||sel.includes(v)?' checked':''}><span>${esc(v)}</span></label>`).join('')+'</div>';}
   return h+'</div>';
 }
 function applyView(rows){
-  let R=rows.filter(r=>COLS.every(c=>{const k=c[0];if(c[2]==='n'){return MIN[k]==null||MIN[k]===''||c[3](r)>=+MIN[k];}return!FILT[k]||FILT[k].includes(c[3](r));}));
+  let R=rows.filter(r=>COLS.every(c=>{const k=c[0];if(c[2]==='n')return MIN[k]==null||(c[3](r)!=null&&c[3](r)>=MIN[k]);return!FILT[k]||FILT[k].includes(c[3](r));}));
   const c=COLS.find(c=>c[0]===SORT.c);
-  if(c){const d=SORT.dir==='desc'?-1:1;R=R.slice().sort((p,q)=>{const x=c[3](p),y=c[3](q);return(typeof x==='number'?x-y:String(x).localeCompare(String(y)))*d||q.lost-p.lost;});}
+  if(c){const d=SORT.dir==='desc'?-1:1;R=R.slice().sort((p,q)=>{const x=c[3](p),y=c[3](q);if(x==null||y==null)return x==null&&y==null?0:x==null?1:-1;
+    return(typeof x==='number'?x-y:String(x).localeCompare(String(y)))*d||q.nLost-p.nLost;});}
   return R;
 }
 
-/* ── Drill: the learners behind a number ── */
-function drillHtml(key){
-  const[tn,kind]=key.split('|'),row=VIEW.rows.find(r=>r.name===tn),T=tn==='*';
-  let list,ttl;const rows=T?VIEW.shown:[row];
-  const pick=r=>kind==='all'?r.all:kind==='inh'?r.inh.l:kind==='own'?r.own.l:r.rs[kind]||[];
-  list=[];rows.forEach(r=>pick(r).forEach(l=>list.push({l,r})));
-  const nm=T?'All teachers':tn,what=kind==='all'?'lost':kind==='inh'?'inherited learners lost':kind==='own'?'own admissions lost':kind+' ·';
-  ttl=nm+' · '+(kind==='all'?'learners lost':kind==='inh'?'inherited learners lost':kind==='own'?'own admissions lost':'lost because of "'+kind+'"');
-  list.sort((a,b)=>b.l.ld-a.l.ld);
-  const body=list.map(({l,r})=>{const x=Object.assign({},l,{centre:l.centre,tab:l.tab,r:l.r});
-    return`<tr><td class="who"><b>${esc(l.name)||'—'}</b><small>${esc(l.id)}${selCentre==='All'?' · '+esc(l.centre):''}</small></td><td class="ds">${esc(l.desc)||'<span class="mut">—</span>'}</td>
-    <td>${l.phone?esc(l.phone.slice(0,5)+' '+l.phone.slice(5)):'<span class="mut">—</span>'}</td>${window.RowEdit?RowEdit.cell(x):'<td>'+esc(l.r[40])+'</td>'}
-    <td>${esc(l.course)||'<span class="mut">—</span>'}</td><td>${esc(r.name)}</td><td><span class="pill ${(r.est?false:l.first<r.doj)?'vi':'gn'}">${(r.est?false:l.first<r.doj)?'Inherited':'Own admission'}</span></td>
-    <td>${fmtD(l.ld)}</td><td>${l.reason?esc(l.reason)+'<br><small class="mut">'+esc(l.rg)+'</small>':'<span class="mut">Reason not logged</span>'}</td></tr>`;}).join('');
-  return`<div class="dp" id="dp"><h3><span>${esc(ttl)} <span style="color:var(--faint);font-weight:600">(${list.length})</span></span><button type="button" data-close>Close</button></h3>
-   <div class="sb">Most recent first. Reasons are the wording in the sheet, with the group it was counted under.</div>
-   ${list.length?`<div class="tw"><table class="lt"><thead><tr><th>Learner</th><th>Latest discussion</th><th>Phone</th><th>Row</th><th>Course</th><th>Teacher</th><th>Joined</th><th>Lost on</th><th>Reason given</th></tr></thead><tbody>${body}</tbody></table></div>`:'<div class="empty">No learners here.</div>'}</div>`;
+/* ── The learners behind a number ── */
+function drillHtml(){
+  const[tn,kind]=DRILL.split('|'),r=VIEW.rows.find(x=>x.name===tn);if(!r)return'';
+  const L={acq:r.acq,due:r.due,lost:r.lost,wnr:r.wnr,nyy:r.nyy,act:r.actL}[kind]||[];
+  const T={acq:acqLabel(),due:'Became due',lost:'Learners lost',wnr:'Will not renew',nyy:'Not renewed yet',act:'Current active'}[kind];
+  const isM=['due','lost','wnr','nyy'].includes(kind);
+  const st=m=>m.ren?'<span class="pill p-g">Renewed</span>':m.wnr?'<span class="pill p-w">Will not renew</span>':'<span class="pill p-o">Not renewed yet</span>';
+  const doj=r.doj,inh=m=>!r.est&&m.first<doj;
+  const list=L.slice().sort((a,b)=>isM?(b.end-a.end):String(a.name).localeCompare(String(b.name)));
+  const shown=SHOWALL||list.length<=40?list:list.slice(0,30);
+  const rows=shown.map(m=>`<tr><td class="who"><b>${esc(m.name)||'—'}</b><small>${esc(m.id.startsWith('~')?'':m.id)}${selCentre==='All'?(m.id.startsWith('~')?'':' · ')+esc(m.centre):''}</small></td>
+    <td class="ds">${esc(m.desc)||'<span class="mut">—</span>'}</td>${isM?`<td>${st(m)}</td>`:''}
+    <td style="white-space:nowrap">${m.phone?esc(m.phone.slice(0,5)+' '+m.phone.slice(5)):'<span class="mut">—</span>'}</td>${window.RowEdit?RowEdit.cell(m):'<td>'+esc(m.r[40])+'</td>'}
+    <td>${esc(m.course)||'<span class="mut">—</span>'}</td><td><span class="pill ${inh(m)?'p-l':'p-b'}">${inh(m)?'Inherited':'Own admission'}</span></td>
+    <td style="white-space:nowrap">${isM?fmtD(m.end):kind==='act'?fmtD(m.act):fmtD(m.first)}</td></tr>`).join('');
+  return`<div class="dp" id="dp"><div class="h2"><span>${esc(r.name)} · ${esc(T)} <span>(${list.length})</span></span><button type="button" data-close>Close</button></div>
+   <div class="sb">${isM?'Packages that ended, latest first.':kind==='act'?'Learning with this teacher today.':'Learners in this group, A to Z.'}</div>
+   ${list.length?`<div class="dtw"><table class="lt"><thead><tr><th>Learner</th><th>Latest discussion</th>${isM?'<th>Status</th>':''}<th>Phone</th><th>Row</th><th>Course</th><th>Joined</th><th>${isM?'Package ended':kind==='act'?'Package ends':'First admission'}</th></tr></thead><tbody>${rows}</tbody></table></div>
+   ${shown.length<list.length?`<button type="button" class="more" data-all>Show all ${list.length} learners</button>`:''}`:'<div class="empty">No learners here.</div>'}</div>`;
 }
 
+/* ── Explanation (the i button) ── */
+const DEFS=`<div class="dc"><div class="dh"><div class="dn">Lost in total</div><div class="dm">Packages that ended in the period and were not renewed.</div></div><div class="db"><div class="dl">Includes</div>
+  <div class="dli"><span class="dic">✓</span><span><b>Will not renew:</b> told us they will not renew.</span></div>
+  <div class="dli"><span class="dic">✓</span><span><b>Not renewed yet:</b> no decision conveyed to us, but they have not renewed, whatever their status says. As good as lost.</span></div>
+  <div class="dtp"><i></i><span>Learners who moved to online are counted for now.</span></div><div class="dtp"><i></i><span>A learner who renews later drops out of this number.</span></div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Admissions acquired</div><div class="dm">Learners the teacher admitted in the period.</div></div><div class="db"><div class="dtp"><i></i><span>In Overall it is every learner they handled in the period, inherited ones included.</span></div><div class="dtp"><i></i><span>In Inherited it is the inherited learners they taught in the period.</span></div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Became due</div><div class="dm">Packages whose end date falls in the period, up to today.</div></div><div class="db"><div class="dtp"><i></i><span>Counted under the teacher on that package.</span></div><div class="dtp"><i></i><span>An extension does not move the end date.</span></div><div class="dtp"><i></i><span>A learner falls due once for every package, so this can be more than the number of learners.</span></div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Lost per month</div><div class="dm">How fast a teacher is losing learners.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Lost <s>÷</s> months</div><div class="dtp"><i></i><span>Months in the chosen period, or since the teacher's DOJ if that is shorter.</span></div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Churn rate</div><div class="dm">The share of due learners we lost.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Lost <s>÷</s> became due</div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Current active</div><div class="dm">Learners with a running package from the teacher today.</div></div><div class="db"><div class="dtp"><i></i><span>Does not change with the period.</span></div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Utilisation</div><div class="dm">How full the teacher is.</div></div><div class="db"><div class="dl">Worked out as</div><div class="dfm">Current active <s>÷</s> ${CAP}</div><div class="dtp"><i></i><span>${CAP} is a teacher's capacity, as on the Monthly Active Learners pages.</span></div>
+  <div class="dl">Colours</div><div class="dbs"><span style="background:#FFEDF2;color:#B0204F">Below 40%</span><span style="background:#FFF3D6;color:#8A5A00">40–55%</span><span style="background:#E3F7EE;color:#137A4F">55–70%</span><span style="background:#EEF1FF;color:#2F4DB8">70% or more</span></div></div></div>
+ <div class="dc"><div class="dh"><div class="dn">Inherited learners and own admissions</div><div class="dm">Use the switch above the table.</div></div><div class="db">
+  <div class="dli"><span class="dic">✓</span><span><b>Inherited:</b> first admitted before the teacher's DOJ.</span></div><div class="dli"><span class="dic">✓</span><span><b>Own admissions:</b> first admitted on or after the DOJ.</span></div>
+  <div class="dtp"><i></i><span>Every column and scorecard follows the switch.</span></div><div class="dtp"><i></i><span>Only the time from the teacher's DOJ is counted. Learners who left before the teacher joined are not shown.</span></div>
+  <div class="dtp"><i></i><span>DOJ is the DOJ column of the Offline Team tab. Without one, the teacher's first learner is used and marked estimated.</span></div></div></div>`;
+
 /* ── Render ── */
-const seg=(a,b,t)=>`<i${t?' class="'+t+'"':''} style="flex:${a}"></i>`;
-function stk(rs,total,key){return`<div class="stk">${RG.map(([g,c])=>rs[g].length?`<i data-d="${esc(key)}|${esc(g)}" class="${c==='hatch'?'hatch':''}" style="flex:${rs[g].length};${c==='hatch'?'':'background:'+c}" title="${g}: ${rs[g].length}"></i>`:'').join('')}</div>`;}
+const LAND_ICONS={t1:'<circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.4 2.7-6.2 6-6.2s6 2.8 6 6.2"/><path d="M16.5 11h5"/>',t2:'<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>',
+  t3:'<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 16l4-4-4-4M19 12H9"/>',t4:'<path d="M3 7l6 6 4-4 8 8"/><path d="M21 17v-5M21 17h-5"/>'};
+function landing(){
+  const soon=n=>`<div class="pc soon" aria-hidden="true"><div class="ghost"></div><div class="ghost g2"></div><div class="chip"><b></b>Coming soon</div>
+    <div style="margin-top:auto"><div class="sk" style="height:26px;width:92%"></div><div class="sk" style="height:26px;width:78%;margin-top:10px"></div><div class="sk" style="height:26px;width:54%;margin-top:10px"></div></div>
+    <div class="ft"><small style="color:#B7B0CC">Question 0${n}</small></div></div>`;
+  return`<div class="cards"><button type="button" class="pc" data-q="teachers"><div class="mesh"><i class="m1"></i><i class="m2"></i><i class="m3"></i></div>
+    ${['t1','t2','t3','t4'].map(k=>`<div class="tl ${k}"><svg viewBox="0 0 24 24">${LAND_ICONS[k]}</svg></div>`).join('')}
+    <div class="chip"><b></b>Teachers</div><div class="qq">Which teachers are we <span>losing</span> the most learners from?</div>
+    <div class="ft"><small>Question 01</small><i><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></div></button>${soon(2)}${soon(3)}</div>`;
+}
+function question(){
+  if(!loaded)return'<div class="sec"><div class="empty">Loading…</div></div>';
+  const all=compute(),shown=applyView(all);VIEW={rows:all,shown};
+  const pick=(f,ok)=>{const c=shown.filter(ok||(()=>true));return c.length?c.reduce((x,y)=>f(y)>f(x)?y:x):null;};
+  const a=pick(r=>r.nLost,r=>r.nLost>0),b=pick(r=>r.pm,r=>r.nLost>0),c=pick(r=>r.churn,r=>r.nDue>=5&&r.nLost>0);
+  const mo=m=>Math.round(m)===1?'1 month':Math.round(m)+' months';
+  const tile=(cls,t,r,v,s)=>`<div class="k ${cls}"><div class="t">${t}</div><div class="nm">${r?esc(r.name):'—'}</div><div class="v">${r?v+` <span>${s}</span>`:'<span>No learners lost in this period.</span>'}</div></div>`;
+  const tiles=`<div class="tiles">${tile('rr','Most learners lost in total',a,a&&a.nLost,a&&'over '+mo(a.months))}${tile('','Losing learners fastest',b,b&&b.pm.toFixed(1),'a month')}
+    ${tile('','Highest churn rate',c,c&&Math.round(c.churn)+'%',c&&c.nLost+' of '+c.nDue+' due not renewed')}</div>`;
+  const hd=`<div class="head">${COLS.map(cl=>{const k=cl[0],f=cl[2]==='n'?MIN[k]!=null:!!FILT[k],s=SORT.c===k;
+    return`<div><button type="button" class="hb${MENU===k?' open':''}${f||s?' act':''}" data-m="${k}">${esc(colLabel(cl))}${s?`<b>${SORT.dir==='desc'?'↓':'↑'}</b>`:''}</button>${MENU===k?menuHtml(cl,all):''}</div>`;}).join('')}</div>`;
+  const nb=(r,k,inner,cls='')=>`<button type="button" class="nb${DRILL===r.name+'|'+k?' on':''} ${cls}" data-d="${esc(r.name)}|${k}">${inner}</button>`;
+  const body=shown.map(r=>{const u=Math.round(r.util),bd=band(u),ch=r.churn==null?null:Math.round(r.churn);
+    return`<div class="row"><div class="t1c"><b>${esc(r.name)}</b><div class="kv"><span title="${esc(r.course)}"><em>Course</em>${esc(r.course)||'—'}</span><span title="${r.est?'No DOJ on the Offline Team tab: the teacher\'s first learner is used.':''}"><em>DOJ${r.est?' (estimated)':''}</em>${fmtD(r.doj)}</span><span><em>Tenure</em>${r.tenure===1?'1 month':r.tenure+' months'}</span></div></div>
+    <div>${nb(r,'acq',`<div class="n">${r.nAcq}</div>`)}</div><div>${nb(r,'due',`<div class="n">${r.nDue}</div>`)}</div>
+    <div>${nb(r,'lost',`<div class="n${r.nLost?'':' z'}">${r.nLost}</div>`)}${r.nLost?`<div class="lz">${nb(r,'wnr',`<b>${r.wnr.length}</b> Will not renew`,'r')}${nb(r,'nyy',`<b>${r.nyy.length}</b> Not renewed yet`,'o')}</div>`:''}</div>
+    <div><div class="n${r.nLost?'':' z'}">${r.pm.toFixed(1)}</div></div>
+    <div>${ch==null?'<div class="n z">—</div><div class="s">None due</div>':`<div class="n">${ch}<em>%</em></div><div class="s">${r.nLost} of ${r.nDue}</div><div class="tr"><i style="width:${r.wnr.length/r.nDue*100}%;background:var(--red)"></i><i style="width:${r.nyy.length/r.nDue*100}%;background:var(--org)"></i></div>`}</div>
+    <div>${nb(r,'act',`<div class="n">${r.act}</div>`)}</div>
+    <div><div class="n ${bd}">${u}<em>%</em></div><div class="s">${r.act} of ${CAP}</div><div class="tr"><i class="${bd}" style="width:${Math.min(100,u)}%"></i></div></div></div>`;}).join('')||'<div class="empty">No teachers match.</div>';
+  return`<div class="sec"><div class="qh"><h2>Which teachers are we losing the most learners from?</h2><button type="button" class="ib" id="ib" aria-expanded="${INFO}" aria-label="How this is worked out">i</button></div>
+    ${tiles}<div class="dg"${INFO?'':' hidden'}>${DEFS}</div>
+    <div class="tbar"><div class="vw" id="vw">${VIEWS.map(v=>`<button type="button" data-vw="${v[0]}" aria-pressed="${v[0]===VW}">${v[1]}</button>`).join('')}</div></div>
+    <div class="tw"><div class="g" id="grid"><div class="deco d1"></div><div class="deco d2"></div>${hd}${body}</div></div>
+    ${all.length?'':'<div class="note">No teachers yet. Teachers come from the Offline Team tab, matched to the Teacher Name on each package.</div>'}</div>
+    <div id="dpw">${DRILL?drillHtml():''}</div>`;
+}
+function placeDeco(){
+  const g=document.getElementById('grid');if(!g)return;const h=g.querySelector('.head');if(!h)return;const cells=h.children,gr=g.getBoundingClientRect();
+  const x=i=>cells[i].getBoundingClientRect();
+  const d1=g.querySelector('.d1'),d2=g.querySelector('.d2');
+  d1.style.left=(x(3).left-gr.left-6)+'px';d1.style.width=(x(4).right-x(3).left+6)+'px';
+  d2.style.left=(x(5).left-gr.left+6)+'px';d2.style.right='14px';
+}
 function render(){
-  const out=document.getElementById('out');
-  document.querySelectorAll('.ct-btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===selCentre)));
-  document.getElementById('per').innerHTML=PERIODS.map(p=>`<button type="button" data-p="${p[0]}" class="${p[0]===PER?'on':''}">${p[1]}</button>`).join('');
-  document.getElementById('perN').textContent=PER==='all'?'Each teacher counted from their own start date':PER==='last'?'The previous calendar month':'The last '+PER+' months, or since the teacher joined if that was later';
-  if(!loaded)return;
-  VIEW=compute();const all=VIEW.rows,shown=applyView(all);VIEW.shown=shown;
-  const act=all.filter(r=>r.lost>0);
-  const tile=(cls,k,r,v,s)=>`<div class="tl ${cls}"><div class="k">${k}</div><div class="n">${r?esc(r.name):'—'}</div><div class="v">${r?`<b>${v}</b>${s}`:'No learners lost in this period.'}</div></div>`;
-  const best=(f,min)=>act.filter(r=>r.months>=min).sort((a,b)=>f(b)-f(a))[0]||act.sort((a,b)=>f(b)-f(a))[0];
-  const t1=best(r=>r.lost,0),t2=best(r=>r.perMonth,3),t3=best(r=>r.pct,3);
-  const tiles=`<div class="tiles">${tile('hot','Most learners lost in total',t1,t1&&t1.lost,t1&&'over '+(t1.months<1.5?'1 month':n0(t1.months)+' months'))}
-    ${tile('','Losing learners fastest',t2,t2&&t2.perMonth.toFixed(1),t2&&'a month · '+t2.pct.toFixed(1)+'% of their learners')}
-    ${tile('','Highest monthly churn rate',t3,t3&&t3.pct.toFixed(1)+'%',t3&&'of learners lost a month')}</div>`;
-  const hd=`<div class="g hd">${COLS.map(c=>{const k=c[0],open=MENU===k,f=(c[2]==='n'?MIN[k]!=null&&MIN[k]!=='':!!FILT[k]),s=SORT.c===k;
-    return`<div><button type="button" class="hb${open?' open':''}${f||s?' act':''}" data-m="${k}">${c[1]}${s?`<b>${SORT.dir==='desc'?'↓':'↑'}</b>`:''}${ARR}</button>${open?menuHtml(c,all):''}</div>`;}).join('')}</div>`;
-  let rowsH=shown.map(r=>{const mx=Math.max(1,...shown.map(x=>x.lost)),sub=r.course+' · '+(r.est?'start date estimated · ':'since '+fmtM(r.doj)+' · ')+(r.months<1.5?'1 month':n0(r.months)+' months');
-    const part=(o,key)=>o.pop?`<button type="button" class="num" data-d="${esc(r.name)}|${key}"><div class="mid">${o.lost}<span> of ${o.pop}</span></div></button><small>${Math.round(o.lost/o.pop*100)}% lost</small>`:'<div class="mid"><span>None</span></div>';
-    return`<div class="r"><div class="nm"><b>${esc(r.name)}</b><small>${esc(sub)}</small></div>
-    <div class="c"><button type="button" class="num" data-d="${esc(r.name)}|all"><div class="big">${r.lost}</div></button>${r.lost?`<div class="sp" style="width:${r.lost/mx*100}%"><i class="a" style="flex:${r.inh.lost}"></i><i class="b" style="flex:${r.own.lost}"></i></div>`:''}</div>
-    <div class="c"><div class="big">${r.perMonth.toFixed(1)}</div><small>${r.pct.toFixed(1)}% of learners a month</small></div>
-    <div class="c">${part(r.inh,'inh')}</div><div class="c">${part(r.own,'own')}</div>
-    <div class="c why">${r.lost?stk(r.rs,r.lost,r.name)+`<small>${r.top==='Reason not logged'?(r.rs['Reason not logged'].length===r.lost?'No reason logged':'Mostly no reason logged'):esc(r.top)+' is the biggest reason'}</small>`:'<small>Nobody lost</small>'}</div></div>`;}).join('');
-  if(!shown.length)rowsH='<div class="empty">No teachers match.</div>';
-  const S=k=>shown.reduce((a,r)=>a+k(r),0),tl=S(r=>r.lost),ti=S(r=>r.inh.pop),til=S(r=>r.inh.lost),to=S(r=>r.own.pop),tol=S(r=>r.own.lost);
-  const trs={};RG.forEach(g=>trs[g[0]]=[].concat(...shown.map(r=>r.rs[g[0]])));
-  const tot=shown.length?`<div class="r tot"><div class="nm"><b>All teachers</b></div><div class="c"><button type="button" class="num" data-d="*|all"><div class="big">${tl}</div></button></div><div class="c"></div>
-    <div class="c"><div class="mid">${til}<span> of ${ti}</span></div>${ti?`<small>${Math.round(til/ti*100)}% lost</small>`:''}</div><div class="c"><div class="mid">${tol}<span> of ${to}</span></div>${to?`<small>${Math.round(tol/to*100)}% lost</small>`:''}</div>
-    <div class="c why">${tl?stk(trs,tl,'*'):''}</div></div>`:'';
-  const leg=RG.map(([g,c])=>`<span><i class="${c==='hatch'?'hatch':''}" style="${c==='hatch'?'':'background:'+c}"></i>${g}</span>`).join('');
-  out.innerHTML=tiles+`<div class="card">${hd}${rowsH}${tot}
-    <div class="lg2"><span><i style="background:#C9B8FF"></i>Inherited: already learning when the teacher joined</span><span><i style="background:linear-gradient(90deg,#4101F7,#6601FD)"></i>Own admissions: joined after the teacher started</span></div><div class="leg">${leg}</div></div>
-    <div class="hint">Click a number or a colour to see the learners behind it. Click a column heading to sort or filter. Use the Analyse button for course, age group, gender or course level.</div>
-    <div class="note">A learner counts as lost when their latest package is marked Will not renew, or ended more than ${GRACE} days ago with no renewal. ${VIEW.unplaced?VIEW.unplaced+' lost learner'+(VIEW.unplaced>1?'s are':' is')+' under a teacher not on the Offline Team tab, so not shown here. ':''}</div>
-    <div id="dpw">${DRILL?drillHtml(DRILL):''}</div>`;
+  document.querySelectorAll('.ct').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===selCentre)));
+  const per=document.getElementById('per'),land=document.getElementById('land'),out=document.getElementById('out');
+  document.body.classList.toggle('land',!Q);document.getElementById('back').hidden=!Q;per.hidden=!Q;land.hidden=!!Q;out.hidden=!Q;
+  per.innerHTML=PERIODS.map(p=>`<button type="button" data-p="${p[0]}" aria-pressed="${p[0]===PER}" title="${p[2]}">${p[1]}</button>`).join('');
+  const sb=document.getElementById('sub');sb.hidden=!Q;sb.textContent=Q?PERIODS.find(p=>p[0]===PER)[2]+'.':'';document.getElementById('qbar').hidden=!Q;
+  if(!Q){if(!land.firstChild)land.innerHTML=landing();return;}
+  out.innerHTML=question();placeDeco();
 }
 
 /* ── Events ── */
-document.getElementById('centre-toggle').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
-  .map(o=>`<button class="ct-btn" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
-document.querySelectorAll('.ct-btn').forEach(b=>b.onclick=()=>{selCentre=b.dataset.c;DRILL=null;try{localStorage.setItem('artium_ch_centre',selCentre);}catch(e){}render();});
-document.getElementById('per').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;PER=b.dataset.p;DRILL=null;try{localStorage.setItem('artium_ch_per',PER);}catch(e){}render();};
+document.getElementById('centre').innerHTML=[{name:'All',label:'All centres',city:CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button type="button" class="ct" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+const go=q=>{Q=q;DRILL=null;MENU=null;if(q){if(location.hash!=='#'+q)history.pushState(null,'','#'+q);}else if(location.hash)history.pushState(null,'',location.pathname+location.search);render();window.scrollTo(0,0);};
+window.addEventListener('popstate',()=>{Q=location.hash==='#teachers'?'teachers':'';DRILL=null;MENU=null;render();});
+window.addEventListener('resize',placeDeco);
 document.addEventListener('click',e=>{
   const t=e.target;
+  const c=t.closest('.ct');if(c){selCentre=c.dataset.c;DRILL=null;store('artium_ch_centre',selCentre);render();return;}
+  if(t.closest('#back')){go('');return;}
+  const q=t.closest('[data-q]');if(q){go(q.dataset.q);return;}
+  const p=t.closest('[data-p]');if(p){PER=p.dataset.p;DRILL=null;store('artium_ch_per2',PER);render();return;}
+  const v=t.closest('[data-vw]');if(v){VW=v.dataset.vw;DRILL=null;store('artium_ch_view',VW);render();return;}
+  if(t.closest('#ib')){INFO=!INFO;render();return;}
   if(t.closest('.cmenu')){
-    const s=t.closest('[data-dir]');if(s){const k=t.closest('.cmenu').dataset.k;SORT=SORT.c===k&&SORT.dir===s.dataset.dir?{c:null,dir:'desc'}:{c:k,dir:s.dataset.dir};render();return;}
+    const s=t.closest('[data-dir]');if(s){const k=t.closest('.cmenu').dataset.k;SORT=SORT.c===k&&SORT.dir===s.dataset.dir?{c:'lost',dir:'desc'}:{c:k,dir:s.dataset.dir};render();return;}
     const ca=t.closest('[data-ca]');if(ca){const k=t.closest('.cmenu').dataset.k;if(ca.dataset.ca==='all')delete FILT[k];else FILT[k]=[];render();}
     return;}
-  const m=t.closest('[data-m]');
-  if(m){MENU=MENU===m.dataset.m?null:m.dataset.m;render();return;}
+  const m=t.closest('[data-m]');if(m){MENU=MENU===m.dataset.m?null:m.dataset.m;render();return;}
   if(MENU){MENU=null;render();}
-  const cl=t.closest('[data-close]');if(cl){DRILL=null;render();return;}
+  if(t.closest('[data-close]')){DRILL=null;render();return;}
+  if(t.closest('[data-all]')){SHOWALL=true;render();return;}
   const d=t.closest('[data-d]');
-  if(d){DRILL=DRILL===d.dataset.d?null:d.dataset.d;render();if(DRILL){const p=document.getElementById('dp');if(p)p.scrollIntoView({behavior:'smooth',block:'start'});}}
+  if(d){DRILL=DRILL===d.dataset.d?null:d.dataset.d;SHOWALL=false;render();if(DRILL){const el=document.getElementById('dp');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}}
 });
 document.addEventListener('change',e=>{
-  const t=e.target,mn=t.closest&&t.closest('[data-min]');
-  if(mn){const k=mn.dataset.min;MIN[k]=mn.value===''?null:+mn.value;render();return;}
-  if(t.matches&&t.matches('.cm-l input')){const k=t.closest('.cmenu').dataset.k,c=COLS.find(c=>c[0]===k);
-    const all=[...new Set(VIEW.rows.map(r=>c[3](r)))],cur=FILT[k]||all.slice(),v=t.value;
-    FILT[k]=t.checked?cur.concat(cur.includes(v)?[]:[v]):cur.filter(x=>x!==v);if(FILT[k].length===all.length)delete FILT[k];render();}
+  const t=e.target;
+  if(t.matches('[data-min]')){const k=t.dataset.min;MIN[k]=t.value===''?null:+t.value;render();return;}
+  if(t.matches('.cm-l input')){const k=t.closest('.cmenu').dataset.k,c=COLS.find(c=>c[0]===k);
+    const all=VIEW.rows.map(c[3]),cur=FILT[k]||all.slice(),val=t.value;
+    FILT[k]=t.checked?cur.concat(cur.includes(val)?[]:[val]):cur.filter(x=>x!==val);if(FILT[k].length===all.length)delete FILT[k];render();}
 });
 
 async function load(){
   render();
   try{
-    const [res,ro]=await Promise.all([Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')]))),ArtiumAuth.roster().catch(()=>[])]);
+    const[res,ro]=await Promise.all([Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')]))),ArtiumAuth.roster().catch(()=>[])]);
     CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
     ROSTER=(ro||[]).filter(x=>x&&x.name);build();loaded=true;
     if(window.RowEdit)RowEdit.start(x=>{if(x)build();render();});
     const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
     document.getElementById('dot').className='dot';render();
-  }catch(e){document.getElementById('updated').textContent='Error — '+e.message;document.getElementById('dot').className='dot error';}
+  }catch(e){document.getElementById('updated').textContent='Error: '+e.message;document.getElementById('dot').className='dot error';}
 }
-/* Analyse wheel: of the memberships that ended in the window, how many were lost, by course, course level, age group and gender */
+
+/* Analyse wheel: of the packages that ended, how many were lost, by course, course level, age group and gender */
 const WCOL={course:8,level:9,age:6,gender:5};
-function drillChurn(items){
-  const byR=new Map();(VIEW?VIEW.L:[]).forEach(l=>l.mems.forEach(m=>byR.set(m.r,l)));const L=[];items.forEach(x=>{const l=byR.get(x.r);if(l)L.push(l);});
-  const seen=new Set(),U=L.filter(l=>!seen.has(l.id)&&seen.add(l.id)).sort((a,b)=>(b.lost-a.lost)||(b.ld-a.ld));
+function drillWheel(items){
+  const seen=new Set(),U=items.filter(m=>!seen.has(m.id)&&seen.add(m.id)).sort((a,b)=>(a.ren-b.ren)||(b.end-a.end));
   if(!U.length)return'<div class="empty">No learners here.</div>';
-  return`<div class="tw"><table class="lt"><thead><tr><th>Learner</th><th>Latest discussion</th><th>Status</th><th>Phone</th><th>Row</th><th>Course</th><th>Teacher</th><th>Package ended</th><th>Reason given</th></tr></thead><tbody>${U.map(l=>`<tr><td class="who"><b>${esc(l.name)||'—'}</b><small>${esc(l.id)}</small></td><td class="ds">${esc(l.desc)||'<span class="mut">—</span>'}</td>
-    <td><span class="pill ${l.lost?'rd':'gn'}">${l.lost?'Lost':'Still with us'}</span></td><td>${l.phone?esc(l.phone.slice(0,5)+' '+l.phone.slice(5)):'<span class="mut">—</span>'}</td>${RowEdit.cell(l)}
-    <td>${esc(l.course)}</td><td>${esc(l.teacher?l.teacher.name:l.mems[l.mems.length-1].teacherRaw)}</td><td>${fmtD(l.end)}</td><td>${esc(l.reason)||'<span class="mut">—</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+  const st=m=>m.ren?'<span class="pill p-g">Renewed</span>':m.wnr?'<span class="pill p-w">Will not renew</span>':'<span class="pill p-o">Not renewed yet</span>';
+  return`<div class="dtw"><table class="lt"><thead><tr><th>Learner</th><th>Latest discussion</th><th>Status</th><th>Phone</th><th>Row</th><th>Course</th><th>Teacher</th><th>Package ended</th></tr></thead><tbody>${U.map(m=>`<tr><td class="who"><b>${esc(m.name)||'—'}</b><small>${esc(m.id.startsWith('~')?'':m.id)}</small></td><td class="ds">${esc(m.desc)||'<span class="mut">—</span>'}</td>
+    <td>${st(m)}</td><td style="white-space:nowrap">${m.phone?esc(m.phone.slice(0,5)+' '+m.phone.slice(5)):'<span class="mut">—</span>'}</td>${RowEdit.cell(m)}<td>${esc(m.course)}</td><td>${esc(m.teacher?m.teacher.name:m.traw)}</td><td style="white-space:nowrap">${fmtD(m.end)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 if(window.ArtiumWheel)ArtiumWheel.mount({hub:'Churn',slices:['course','level','age','gender'],anchor:()=>document.getElementById('out'),
-  drill:items=>drillChurn(items),dw:['memberships ended','lost'],dlab:'Lost of ended',dnoun:'learners',
+  drill:items=>drillWheel(items),dw:['packages ended','lost'],dlab:'Lost of ended',dnoun:'learners',
   table:k=>{
-    if(!loaded||!VIEW)return null;
-    const mine=x=>selCentre==='All'||x.centre===selCentre,cm=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
-    const W=ArtiumWheel.windows(cm,TODAY,{month:true,soFar:true,label:'This month'});
-    const R=ArtiumWheel.ratio(k,W,ITEMS.filter(x=>mine(x)&&effEnd(x)),x=>effEnd(x),VIEW.L.filter(l=>l.lost),l=>l.ld,x=>x.r[WCOL[k]]);
-    const nm={course:'course',level:'course level',age:'age group',gender:'gender'}[k];
-    return{title:'Churn by '+nm,sub:'Learners lost of the memberships that ended.',...R};}});
+    if(!loaded)return null;
+    const mine=m=>selCentre==='All'||m.centre===selCentre,ended=MEMS.filter(m=>mine(m)&&m.end&&m.end<=TODAY);
+    const W=ArtiumWheel.windows(new Date(TODAY.getFullYear(),TODAY.getMonth(),1),TODAY,{month:true,soFar:true,label:'This month'});
+    const R=ArtiumWheel.ratio(k,W,ended,m=>m.end,ended.filter(m=>!m.ren),m=>m.end,m=>m.r[WCOL[k]]);
+    return{title:'Churn by '+{course:'course',level:'course level',age:'age group',gender:'gender'}[k],sub:'Packages lost of those that ended.',...R};}});
 load();
 </script>
 </body>
