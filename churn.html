@@ -334,7 +334,7 @@ function landing(){
     <div class="ft"><small style="color:#B7B0CC">Question 0${n}</small></div></div>`;
   return`<div class="cards"><button type="button" class="pc" data-q="teachers"><div class="mesh"><i class="m1"></i><i class="m2"></i><i class="m3"></i></div>
     ${['t1','t2','t3','t4'].map(k=>`<div class="tl ${k}"><svg viewBox="0 0 24 24">${LAND_ICONS[k]}</svg></div>`).join('')}
-    <div class="chip"><b></b>Teachers</div><div class="qq">Which teachers are we <span>losing</span> the most learners from?</div>
+    <div class="chip"><b></b>Teachers</div><div class="qq">Which teachers are <span>losing</span> the most learners?</div>
     <div class="ft"><small>Question 01</small><i><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></i></div></button>${soon(2)}${soon(3)}</div>`;
 }
 function question(){
@@ -357,7 +357,7 @@ function question(){
     <div>${ch==null?'<div class="n z">—</div><div class="s">None due</div>':`<div class="n">${ch}<em>%</em></div><div class="s">${r.nLost} of ${r.nDue}</div><div class="tr"><i style="width:${r.wnr.length/r.nDue*100}%;background:var(--red)"></i><i style="width:${r.nyy.length/r.nDue*100}%;background:var(--org)"></i></div>`}</div>
     <div>${nb(r,'act',`<div class="n">${r.act}</div>`)}</div>
     <div><div class="n ${bd}">${u}<em>%</em></div><div class="s">${r.act} of ${CAP}</div><div class="tr"><i class="${bd}" style="width:${Math.min(100,u)}%"></i></div></div></div>`;}).join('')||'<div class="empty">No teachers match.</div>';
-  return`<div class="sec"><div class="qh"><h2>Which teachers are we losing the most learners from?</h2><button type="button" class="ib" id="ib" aria-expanded="${INFO}" aria-label="How this is worked out">i</button></div>
+  return`<div class="sec"><div class="qh"><h2>Which teachers are losing the most learners?</h2><button type="button" class="ib" id="ib" aria-expanded="${INFO}" aria-label="How this is worked out">i</button></div>
     ${tiles}<div class="dg"${INFO?'':' hidden'}>${DEFS}</div>
     <div class="tbar"><div class="vw" id="vw">${VIEWS.map(v=>`<button type="button" data-vw="${v[0]}" aria-pressed="${v[0]===VW}">${v[1]}</button>`).join('')}</div></div>
     <div class="tw"><div class="g" id="grid"><div class="deco d1"></div><div class="deco d2"></div>${hd}${body}</div></div>
