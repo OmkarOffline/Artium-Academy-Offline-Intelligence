@@ -90,7 +90,7 @@ table.lt th{text-align:left;padding:13px 24px 11px;font:700 10.5px var(--f);lett
 table.lt td{padding:15px 24px;border-bottom:1px solid #F1EDF9;font:400 14px var(--f);color:var(--ink2);vertical-align:top}
 table.lt tr:last-child td{border-bottom:0}
 table.lt td b{font-weight:700;color:var(--ink)}table.lt td small{display:block;font-size:12px;color:var(--ink4);margin-top:3px}
-table.lt th,table.lt td{white-space:nowrap}table.lt td.ds{white-space:normal;max-width:440px;line-height:1.5;color:var(--ink)}table.lt td.ex{color:var(--tbfg);font-weight:600}
+table.lt th,table.lt td{white-space:nowrap}table.lt td.ds{white-space:pre-line;max-width:440px;line-height:1.5;color:var(--ink)}table.lt td.ex{color:var(--tbfg);font-weight:600}
 .tg{display:inline-block;margin-left:8px;padding:2px 7px;border-radius:6px;font:800 10px var(--f);letter-spacing:.06em;vertical-align:1px}
 .tg.ft{background:var(--tpbg);color:var(--tpfg)}.tg.rr{background:var(--tbbg);color:var(--tbfg)}
 .sh .ct{display:inline-grid;place-items:center;min-width:24px;height:22px;padding:0 7px;border-radius:999px;font:800 12px var(--f)}
@@ -1041,9 +1041,9 @@ function listView(P,mine,sel){
   /* The columns every list shows, after the learner and any column of its own */
   const ocL=(x,oc)=>oc!=='ren'&&sheetSt(x)?sheetSt(x):oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
   /* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
-  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t'],['Row',x=>RowEdit.cell(x),null,'n'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
+  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t'],['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],['Row',x=>RowEdit.cell(x),null,'n'],
     ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
-    ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],
+    ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),
     ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
     ['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex'),x=>x.ext?Math.round(x.ext):'','n'],
     ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Package completed',x=>tdc(x.doneOn?fmtD(x.doneOn):esc(x.done)),x=>x.doneOn||x.done||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
