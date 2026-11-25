@@ -57,7 +57,7 @@ body.aw-pk-on .aw-fab{opacity:0;pointer-events:none}
 .aw-slot .aw-an{font-family:'Onest',system-ui,sans-serif;background:#fff;border-radius:24px;box-shadow:0 0 0 2px #E2D6FF,0 40px 80px -40px rgba(65,1,247,.45);opacity:0;transform:translateY(-18px) scale(.985);transition:opacity .4s .12s,transform .5s .1s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .aw-slot.open .aw-an{opacity:1;transform:none}
 .aw-slot .aw-an .hd{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:20px 26px;border-bottom:1px solid #F1EDF9;border-radius:24px 24px 0 0;background:radial-gradient(60% 160% at 0% 0%,#F4EEFF,rgba(244,238,255,0) 70%)}
-.aw-slot .aw-an .tg{font:700 10.5px 'Onest',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6A6488;display:block;margin-bottom:3px}
+.aw-slot .aw-an .hd .tg{font:700 10.5px 'Onest',system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#6A6488;display:block;margin-bottom:3px}
 .aw-slot .aw-an .hd b.tt{font:700 21px 'Onest',system-ui,sans-serif;color:#01073C;display:block}
 .aw-slot .aw-an .sub{display:block;font-size:13px;color:#6A6488;margin-top:3px}
 .aw-slot .aw-an .hd>div:first-child{margin-right:auto}.aw-slot .aw-an .pod{display:flex;gap:10px;flex-wrap:wrap}
