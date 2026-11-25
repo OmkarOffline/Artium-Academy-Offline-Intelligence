@@ -1041,14 +1041,13 @@ function listView(P,mine,sel){
   /* The columns every list shows, after the learner and any column of its own */
   const ocL=(x,oc)=>oc!=='ren'&&sheetSt(x)?sheetSt(x):oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
   /* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
-  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Row',x=>RowEdit.cell(x),null,'n'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
+  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t'],['Row',x=>RowEdit.cell(x),null,'n'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],
     ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
     ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],
     ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
     ['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex'),x=>x.ext?Math.round(x.ext):'','n'],
     ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Package completed',x=>tdc(x.doneOn?fmtD(x.doneOn):esc(x.done)),x=>x.doneOn||x.done||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
-    ['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c'),x=>x.exp>0?x.exp:'','n'],
-    ['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t']];
+    ['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c'),x=>x.exp>0?x.exp:'','n']];
   const okR=(x,ocf,k)=>{const r=fl(k).ren;return r==='all'||(r==='ren')===(ocf(x)==='ren');};
   const dueOc=x=>outcome(x,P);
 
