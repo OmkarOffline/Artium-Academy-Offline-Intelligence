@@ -99,6 +99,13 @@ body.aw-pk-on .aw-fab{opacity:0;pointer-events:none}
 .aw-slot .aw-an .w-g>.w-lh{align-self:stretch;display:flex;align-items:flex-end}
 .aw-slot .aw-an .w-g>.w-ch{top:var(--w-h1,64px)}
 .aw-slot .aw-an .w-g>.w-gh.w-p,.aw-slot .aw-an .w-g>.w-ch.w-p{background:#F8F7FB}
+.aw-slot .aw-an .w-dr{cursor:pointer;transition:background .2s,box-shadow .2s}.aw-slot .aw-an .w-dr:hover{background:#F4EEFF}.aw-slot .aw-an .w-dr:focus-visible{outline:2px solid #4101F7;outline-offset:-2px}
+.aw-slot .aw-an .w-dr.w-sel{background:#EDE4FF;box-shadow:inset 0 0 0 2px #4101F7}
+.aw-slot .aw-an .w-hint{margin:12px 22px 0;font:500 12.5px 'Onest',system-ui,sans-serif;color:#8A84A3}
+.aw-slot .aw-an .w-dp{display:none;margin:16px 22px 24px;padding:18px;background:#fff;border-radius:22px;box-shadow:0 0 0 1px #EDE7FA,0 24px 50px -36px rgba(65,1,247,.45)}.aw-slot .aw-an .w-dp.on{display:block}
+.aw-slot .aw-an .w-dh{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}.aw-slot .aw-an .w-dh>div{flex:1}.aw-slot .aw-an .w-dh b{display:block;font:700 16px 'Onest',system-ui,sans-serif;color:#01073C}
+.aw-slot .aw-an .w-dh span{display:block;margin-top:3px;font:500 13px 'Onest',system-ui,sans-serif;color:#6A6488}
+.aw-slot .aw-an .w-dh button{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;background:#F4F1F9;color:#6A6488;display:grid;place-items:center;font:700 13px system-ui}
 .aw-slot .aw-an .w-tot{border-bottom:0!important}.aw-slot .aw-an .w-nm.w-tot{font-weight:800}.aw-slot .aw-an .w-cc.w-tot{padding-bottom:24px}
 .aw-slot .aw-an .w-lg{display:flex;gap:18px;padding:6px 26px 22px;font-size:12px;color:#8A84A3;align-items:center;flex-wrap:wrap}
 .aw-slot .aw-an .w-lg i{display:inline-block;width:18px;height:5px;border-radius:5px;vertical-align:1px;margin-right:7px}
@@ -198,7 +205,7 @@ let ROSTER=null,RKEY=[];const rk=t=>String(t||'').toLowerCase().replace(/[^a-z]/
 let COURSE={};function setRoster(list){COURSE={};(list||[]).forEach(x=>{if(x&&x.name&&x.course)COURSE[x.name]=x.course;});ROSTER=(list||[]).map(x=>x.name).filter(Boolean);RKEY=ROSTER.map(nm=>({nm,full:rk(nm),first:rk(nm.split(/\s+/)[0])}));}
 const MEMO={};function teacherOf(v){if(!ROSTER||!ROSTER.length)return null;if(v in MEMO)return MEMO[v];
   const full=rk(v),first=rk(String(v).split(/\s+/)[0]);let h=RKEY.filter(x=>x.full===full);if(h.length!==1)h=RKEY.filter(x=>x.first===first);return MEMO[v]=h.length===1?h[0].nm:null;}
-let cfg=null,wheel,fab,veil,slot,an,opts=[],CUR=null,HK=null;
+let cfg=null,wheel,fab,veil,slot,an,opts=[],CUR=null,HK=null,DRK=null,DR={};
 function css(){if(document.getElementById('aw-css'))return;const s=document.createElement('style');s.id='aw-css';s.textContent=CSS;document.head.appendChild(s);}
 function draw(){const C=280,R=255,r=96,S=cfg.slices,m=S.length,P=(a,rad)=>[C+rad*Math.cos(a),C+rad*Math.sin(a)];
   let h=`<svg class="w" viewBox="0 0 560 560"><defs><linearGradient id="aw-wv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4101F7"/><stop offset="1" stop-color="#6601FD"/></linearGradient></defs>`;
@@ -254,22 +261,28 @@ function render(k,anim){const spec=cfg.table(k);CUR=k;opts.forEach(b=>b.classLis
     g+=`<div class="w-gh w-p" style="grid-column:${3+C}/${3+C+P};grid-row:1"><div class="w-k">${esc(spec.prev.k)}</div><div class="w-m">${esc(spec.prev.m)}</div></div>`;
     spec.cur.cols.forEach((h,i)=>g+=`<div class="w-ch" style="grid-column:${2+i};grid-row:2">${esc(h)}</div>`);
     spec.prev.cols.forEach((h,i)=>g+=`<div class="w-ch w-p" style="grid-column:${3+C+i};grid-row:2"${spec.prev.titles&&spec.prev.titles[i]?` title="${esc(spec.prev.titles[i])}"`:''}>${esc(h)}</div>`);
+    DR={};const dk=(j,col,c,label,r)=>{const L=c&&(c.dl||c.pl);if(!cfg.drill||!L||!L.length)return'';const key=j+'|'+col;
+      DR[key]={items:L,title:(r.tot?'Total':r.name)+' · '+label,sub:c.dl?n(c.dl.length)+' '+((cfg.dw||[])[0]||'due')+' · '+n(c.a||0)+' '+((cfg.dw||[])[1]||'renewed so far'):n(L.length)+' in the pipeline',info:{kind:c.dl?'due':'pipe'}};return` data-dr="${key}" tabindex="0" role="button"`;};
     all.forEach((r,j)=>{const row=3+j,t=r.tot?' w-tot':'',dl=anim?` style="transition-delay:${200+j*50}ms;grid-row:${row}`:` style="grid-row:${row}`;
       g+=`<div class="w-nm w-rw${t}"${dl};grid-column:1">${esc(r.name)}${k==='teacher'&&COURSE[r.name]?`<span class="w-cs">${esc(COURSE[r.name])}</span>`:''}</div>`;
-      r.now.forEach((c,i)=>g+=`<div class="w-cc w-rw${t}"${dl};grid-column:${2+i}">${nowCell(c)}</div>`);
-      r.prev.forEach((c,i)=>g+=`<div class="w-pc w-rw${t}"${dl};grid-column:${3+C+i}">${prevCell(c)}</div>`);});
+      r.now.forEach((c,i)=>{const a=dk(j,'n'+i,c,('pipe' in c?'In pipeline · ':(cfg.dlab||'Collected of due')+' · ')+(spec.cur.m||spec.cur.k),r);g+=`<div class="w-cc w-rw${t}${a?' w-dr':''}"${dl};grid-column:${2+i}"${a}>${nowCell(c)}</div>`;});
+      r.prev.forEach((c,i)=>{const a=dk(j,'p'+i,c,(cfg.dlab||'Collected of due')+' · '+(spec.prev.titles&&spec.prev.titles[i]||spec.prev.cols[i]),r);g+=`<div class="w-pc w-rw${t}${a?' w-dr':''}"${dl};grid-column:${3+C+i}"${a}>${prevCell(c)}</div>`;});});
     body=`<div class="w-gw"><div class="w-g" style="grid-template-columns:${tpl}">${g}</div></div>`+
-      (spec.legend?`<div class="w-lg">${spec.legend}</div>`:'')+(spec.note?`<div class="nt">${esc(spec.note)}</div>`:'');}
+      (spec.legend?`<div class="w-lg">${spec.legend}</div>`:'')+(cfg.drill&&Object.keys(DR).length?'<div class="w-hint">Click a percentage'+(spec.cur.cols.length>1?' or a pipeline number':'')+' to see those '+(cfg.dnoun||'learners')+'.</div>':'')+'<div class="w-dp"></div>'+(spec.note?`<div class="nt">${esc(spec.note)}</div>`:'');}
   an.innerHTML=head+pod+`<div class="x"><button type="button" data-aw="switch"><svg viewBox="0 0 24 24">${ICON}</svg>Switch</button><button type="button" data-aw="hide"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>Collapse</button></div></div>`+body;
-  fitHead();
+  fitHead();drillRender();
   if(anim){slot.classList.remove('open','done');void slot.offsetWidth;slot.classList.add('open');setTimeout(()=>slot.classList.contains('open')&&slot.classList.add('done'),600);
     const t=slot.getBoundingClientRect().top+window.scrollY-20;window.scrollTo({top:Math.max(0,t),behavior:'smooth'});}
 }
+function drillRender(){const box=an.querySelector('.w-dp');an.querySelectorAll('.w-dr.w-sel').forEach(e=>e.classList.remove('w-sel'));if(!box)return;
+  const d=DRK&&DR[DRK];if(!d){box.classList.remove('on');box.innerHTML='';return;}
+  const el=an.querySelector('[data-dr="'+DRK+'"]');if(el)el.classList.add('w-sel');
+  box.innerHTML=`<div class="w-dh"><div><b>${esc(d.title)}</b><span>${esc(d.sub)}</span></div><button type="button" data-aw="dx" aria-label="Close the list">✕</button></div>`+cfg.drill(d.items,d.info);box.classList.add('on');}
 function fitHead(){const gw=an.querySelector('.w-gw');if(!gw)return;const g=gw.firstElementChild,h=g&&g.querySelector('.w-gh');
   const go=()=>{gw.classList.remove('w-fit');if(gw.scrollWidth<=gw.clientWidth+1)gw.classList.add('w-fit');if(h)g.style.setProperty('--w-h1',h.offsetHeight+'px');};
   go();if(!fitHead.on){fitHead.on=1;window.addEventListener('resize',()=>fitHead());}}
-function show(k){closeW();render(k,true);}
-function hide(){CUR=null;slot.classList.remove('done');void slot.offsetWidth;slot.classList.remove('open');opts.forEach(b=>b.classList.remove('sel'));}
+function show(k){closeW();DRK=null;render(k,true);}
+function hide(){CUR=null;DRK=null;slot.classList.remove('done');void slot.offsetWidth;slot.classList.remove('open');opts.forEach(b=>b.classList.remove('sel'));}
 function place(){const a=cfg.anchor&&cfg.anchor();if(a&&a.parentNode&&slot.nextSibling!==a)a.parentNode.insertBefore(slot,a);}
 
 function mount(c){cfg=Object.assign({slices:['course','teacher','level','age','gender']},c);css();
@@ -283,7 +296,10 @@ function mount(c){cfg=Object.assign({slices:['course','teacher','level','age','g
   wheel.addEventListener('click',e=>{const b=e.target.closest('.wedge');if(b)show(b.dataset.k);else if(e.target.closest('.hub'))closeW();});
   wheel.addEventListener('mouseover',e=>{const w=e.target.closest('.wedge');peek(w?w.dataset.k:null);});
   wheel.addEventListener('mouseleave',()=>peek(null));
-  an.addEventListener('click',e=>{const b=e.target.closest('[data-aw]');if(!b)return;if(b.dataset.aw==='switch')openW();else hide();});
+  an.addEventListener('click',e=>{const c=e.target.closest('[data-dr]');
+    if(c&&!e.target.closest('.w-dp')){DRK=DRK===c.dataset.dr?null:c.dataset.dr;drillRender();const b=an.querySelector('.w-dp');if(DRK&&b)b.scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+    const b=e.target.closest('[data-aw]');if(!b)return;if(b.dataset.aw==='switch')openW();else if(b.dataset.aw==='dx'){DRK=null;drillRender();}else hide();});
+  an.addEventListener('keydown',e=>{const c=e.target.closest&&e.target.closest('[data-dr]');if(c&&(e.key==='Enter'||e.key===' ')&&!e.target.closest('.w-dp')){e.preventDefault();c.click();}});
   document.addEventListener('keydown',e=>{if(!wheel.classList.contains('on'))return;if(e.key==='Escape'){closeW();return;}const i=+e.key-1;if(cfg.slices[i])show(cfg.slices[i]);});
 }
 function refresh(){if(!cfg)return;place();if(CUR)render(CUR,false);}
@@ -313,15 +329,15 @@ function sortRows(k,rows,by){const o=ORDER[k];return rows.sort((x,y)=>{if(x.blan
 /* Collected of due, per label and window: den = the "due" items, num = the "collected" items.
    o.pipe (optional): items still expected this period, counted per label; they add an "In pipeline" column. */
 function ratio(k,W,den,dDate,num,nDate,key,o={}){const g=grouper(k),M=new Map(),blank=BLANK[k]||'Not given';
-  const get=l=>M.get(l)||M.set(l,{c:W.map(()=>({a:0,b:0})),p:0}).get(l);
-  den.forEach(x=>{const d=dDate(x);W.forEach((w,i)=>{if(inW(d,w))get(g(key(x))).c[i].b++;});});
+  const get=l=>M.get(l)||M.set(l,{c:W.map(()=>({a:0,b:0,dl:[]})),p:0,pl:[]}).get(l);
+  den.forEach(x=>{const d=dDate(x);W.forEach((w,i)=>{if(inW(d,w)){const c=get(g(key(x))).c[i];c.b++;c.dl.push(x);}});});
   num.forEach(x=>{const d=nDate(x);W.forEach((w,i)=>{if(inW(d,w))get(g(key(x))).c[i].a++;});});
-  if(o.pipe)o.pipe.forEach(x=>get(g(key(x))).p++);
-  const T={c:W.map(()=>({a:0,b:0})),p:0};M.forEach(v=>{v.c.forEach((c,i)=>{T.c[i].a+=c.a;T.c[i].b+=c.b;});T.p+=v.p;});
+  if(o.pipe)o.pipe.forEach(x=>{const v=get(g(key(x)));v.p++;v.pl.push(x);});
+  const T={c:W.map(()=>({a:0,b:0,dl:[]})),p:0,pl:[]};M.forEach(v=>{v.c.forEach((c,i)=>{T.c[i].a+=c.a;T.c[i].b+=c.b;T.c[i].dl.push(...c.dl);});T.p+=v.p;T.pl.push(...v.pl);});
   const pipeOn=!!o.pipe;
   const mk=v=>{const c=v.c,p0=pct(c[0].a,c[0].b),p1=pct(c[1].a,c[1].b);
     const now=[Object.assign({},c[0],{d:p0!=null&&p1!=null?p0-p1:null,vs:W.vs,p:pipeOn?v.p:0})];
-    if(pipeOn)now.push({pipe:v.p,reach:{a:c[0].a+v.p,b:c[0].b}});
+    if(pipeOn)now.push({pipe:v.p,pl:v.pl,reach:{a:c[0].a+v.p,b:c[0].b}});
     return{now,prev:c.slice(1)};};
   let rows=[...M].filter(([l,v])=>v.p||v.c.slice(0,5).some(c=>c.a||c.b)).map(([l,v])=>Object.assign({name:l,blank:l===blank,skip:l===blank,
     rank:v.c[0].b?pct(v.c[0].a,v.c[0].b):null,tie:v.c[0].a,line:v.c[0].b?pct(v.c[0].a,v.c[0].b)+'% · '+n(v.c[0].a)+' of '+n(v.c[0].b):'',x:v.c},mk(v)));

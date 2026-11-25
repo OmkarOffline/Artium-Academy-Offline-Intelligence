@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
-<script src="wheel.js"></script>
+<script src="wheel.js?v=20261125e"></script>
 <script src="rowedit.js"></script>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -686,7 +686,23 @@ async function load(){
 }
 /* Analysis wheel: how many centre visits turned into admissions, by course, demo teacher, age group and lead source.
    Each window counts the visits made in it, and how many of those visitors have joined (at any time since). */
-ArtiumWheel.mount({hub:'Admissions',anchor:()=>document.getElementById('sumbox'),slices:['course','teacher','age','source'],
+/* The visitors behind a number in the Analysis table: those not converted yet first, so they can be called */
+function drillVisits(items){
+  const sel=CENTRES.find(c=>c.name===selCentre),st=x=>x.conv?1:x.state==='lost'?2:0;
+  const list=items.slice().sort((a,b)=>st(a)-st(b)||b.date-a.date||String(a.name).localeCompare(String(b.name)));
+  if(!list.length)return'<div class="empty" style="padding:18px">No visitors here.</div>';
+  const head=['Visited','Visitor','Row',...(sel?[]:['Centre']),'Phone','Course','Lead source','Visit status','Probability','Expected date',{t:'Expected amount',n:1},'Converted','Notes'];
+  let h='<div class="tbl-wrap"><table><thead><tr>'+head.map(x=>typeof x==='string'?`<th>${x}</th>`:`<th class="n">${x.t}</th>`).join('')+'</tr></thead><tbody>';
+  list.forEach(x=>{
+    h+=`<tr class="${x.state==='paid'||x.state==='lost'?'done':''}"><td class="date"><b>${WD[x.date.getDay()]}, ${x.date.getDate()} ${MON[x.date.getMonth()]}</b><small>${esc(x.vt)}</small></td>
+      <td class="who"><b>${esc(x.name)||'—'}</b><small>${esc(x.age)}</small></td>${RowEdit.cell(x)}${sel?'':`<td><span class="ctr">${esc(x.centre)}</span></td>`}
+      <td class="tel">${tel(x.phone)}</td><td>${esc(x.course)||'—'}${x.teacher?`<span class="sub">${esc(x.teacher)}</span>`:''}</td><td>${esc(x.src)||'—'}</td><td>${esc(x.status)||'—'}</td>
+      <td>${x.prob?esc(x.prob):'<span style="color:var(--faint)">—</span>'}</td><td>${x.ed?fmtD(x.ed):'<span style="color:var(--faint)">—</span>'}</td><td class="n amt">${x.ea>0?inr(x.ea):'<span style="color:var(--faint);font-weight:400">—</span>'}</td>
+      <td>${x.conv?`<span class="st paid"><i></i>Converted</span><span class="sub">${x.cd?fmtD(x.cd):''}${x.act?' · '+inr(x.act):''}</span>`:x.state==='lost'?`<span class="st lost"><i></i>Not joining</span>`:'<span class="st due"><i></i>Not yet</span>'}</td>
+      <td class="note">${x.note?`<div class="nt" title="${esc(x.note)}">${esc(x.note)}</div>`:'<span style="color:var(--faint)">—</span>'}</td></tr>`;});
+  return h+'</tbody></table></div>';
+}
+ArtiumWheel.mount({hub:'Admissions',anchor:()=>document.getElementById('sumbox'),slices:['course','teacher','age','source'],drill:items=>drillVisits(items),dw:['visitors','joined so far'],dlab:'Joined of visitors',dnoun:'visitors',
   labels:{teacher:['By demo teacher','Demo teacher']},table:k=>{
   if(!V)return null;
   const sel=CENTRES.find(c=>c.name===selCentre),mine=x=>!sel||x.centre===sel.name,P=period();

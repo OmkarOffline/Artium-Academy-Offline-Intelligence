@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="auth.js"></script>
-<script src="wheel.js?v=20261125c"></script>
+<script src="wheel.js?v=20261125e"></script>
 <script src="rowedit.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -1036,23 +1036,34 @@ function ltable(list,cols,sel,key,full){
   return`<div class="tw"><table class="lt"><thead><tr>${head}</tr></thead><tbody>`+rows.map(x=>'<tr>'+cols.map(c=>c[1](x)).join('')+'</tr>').join('')+'</tbody></table></div>'+menu
     +(list.length>12?`<button type="button" class="more" data-more="${key}">${all?'Show fewer':'Show all '+list.length+' learners'}</button>`:'');
 }
+const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
+const stat=(x,oc)=>`<td>${oc!=='ren'&&sheetSt(x)?pill(esc(sheetSt(x)),oc==='wnr'?'rd':oc==='pipe'?'vi':'bl')+`<small class="sub2">(${OC[oc][0]})</small>`:pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
+/* The columns every list shows, after the learner and any column of its own */
+const ocL=(x,oc)=>oc!=='ren'&&sheetSt(x)?sheetSt(x):oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
+/* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
+const STDc=(sel,ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t'],['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],['Row',x=>RowEdit.cell(x),null,'n'],
+  ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
+  ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),
+  ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
+  ['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex'),x=>x.ext?Math.round(x.ext):'','n'],
+  ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Package completed',x=>tdc(x.doneOn?fmtD(x.doneOn):esc(x.done)),x=>x.doneOn||x.done||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
+  ['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c'),x=>x.exp>0?x.exp:'','n']];
+/* The learners behind a number in the Analysis table (Collected of due, or In pipeline): the list view's columns, learners still to renew first */
+function drillList(items,info){
+  const sel=selCentre!=='All',byR=new Map((DUE||[]).map(d=>[d.r,d]));
+  const L=items.map(x=>byR.get(x.r)||x),rank=x=>nowOc(x)==='ren'?1:0;
+  L.sort((a,b)=>rank(a)-rank(b)||(a.end||0)-(b.end||0)||String(a.name).localeCompare(String(b.name)));
+  const want=['Learner','Latest discussion','Status','Phone','Row','Course','Teacher','Package','Package expiry','Expected payment date','Expected collections'];
+  const cols=STDc(sel,nowOc,[]).filter(c=>want.includes(c[0]));
+  if(!L.length)return'<div class="empty">No learners here.</div>';
+  return`<div class="tw"><table class="lt"><thead><tr>${cols.map(c=>`<th>${c[0]}</th>`).join('')}</tr></thead><tbody>${L.map(x=>'<tr>'+cols.map(c=>c[1](x)).join('')+'</tr>').join('')}</tbody></table></div>`;
+}
 function listView(P,mine,sel){
   const okP=(x,k)=>{const p=fl(k).pkg;return okF(x)&&(p==='all'||Math.round(x.m)===+p);};
   // Each learner's memberships in order; the latest one says where they stand now
   const byId=new Map();DUE.filter(mine).forEach(x=>{if(x.id)(byId.get(x.id)||byId.set(x.id,[]).get(x.id)).push(x);});
   const latest=[];byId.forEach(l=>{l.sort((a,b)=>a.date-b.date);latest.push(Object.assign(l[l.length-1],{hist:l}));});
-  const tdc=(v,c='')=>`<td class="${c}">${v||'<span class="mut">—</span>'}</td>`;
-  const stat=(x,oc)=>`<td>${oc!=='ren'&&sheetSt(x)?pill(esc(sheetSt(x)),oc==='wnr'?'rd':oc==='pipe'?'vi':'bl')+`<small class="sub2">(${OC[oc][0]})</small>`:pill(oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0],OC[oc][1])}</td>`;
-  /* The columns every list shows, after the learner and any column of its own */
-  const ocL=(x,oc)=>oc!=='ren'&&sheetSt(x)?sheetSt(x):oc==='ext'&&/pause/i.test(x.status)?'Paused':OC[oc][0];
-  /* The columns every list shows: [heading, cell, value (for sorting and filtering), type t text · d date · n number] */
-  const STD=(ocf,own)=>[['Learner',x=>who(x,sel),x=>x.name,'t'],['Latest discussion',x=>`<td class="ds">${esc(x.desc)||'<span class="mut">—</span>'}</td>`,x=>x.desc,'t'],['Status',x=>stat(x,ocf(x)),x=>ocL(x,ocf(x)),'t'],['Phone',x=>tdc(x.phone?x.phone.slice(0,5)+' '+x.phone.slice(5):'','ph'),x=>x.phone,'t'],['Row',x=>RowEdit.cell(x),null,'n'],
-    ['Course',x=>tdc(esc(x.course)),x=>x.course,'t'],['Course level',x=>tdc(esc(x.level)),x=>x.level,'t'],['Age group',x=>tdc(esc(x.age)),x=>x.age,'t'],['Teacher',x=>tdc(esc(x.teacher)),x=>x.teacher,'t'],
-    ['Package',x=>tdc(x.pack,'pk'),x=>x.m?Math.round(x.m):'','n'],...(own||[]),
-    ['Package expiry',x=>tdc(fmtD(x.end)),x=>x.end,'d'],['Compensations due',x=>tdc(x.comp?n(x.comp):'','c'),x=>x.comp||'','n'],
-    ['Extension',x=>tdc(x.ext?Math.round(x.ext)+' day'+(Math.round(x.ext)===1?'':'s'):'','ex'),x=>x.ext?Math.round(x.ext):'','n'],
-    ['New package expiry',x=>tdc(x.newEnd?fmtD(x.newEnd):''),x=>x.newEnd||'','d'],['Package completed',x=>tdc(x.doneOn?fmtD(x.doneOn):esc(x.done)),x=>x.doneOn||x.done||'','d'],['Expected payment date',x=>tdc(x.ncd?fmtD(x.ncd):''),x=>x.ncd||'','d'],
-    ['Expected collections',x=>tdc(x.exp>0?inr(x.exp):'','c'),x=>x.exp>0?x.exp:'','n']];
+  const STD=(ocf,own)=>STDc(sel,ocf,own);
   const okR=(x,ocf,k)=>{const r=fl(k).ren;return r==='all'||(r==='ren')===(ocf(x)==='ren');};
   const dueOc=x=>outcome(x,P);
 
@@ -1193,7 +1204,7 @@ ArtiumWheel.picker({btn:()=>document.querySelector('.wowsec .aw-pkb'),hub:'Pick 
   items:[{k:'wA',lines:['Overall','breakdown'],short:'A · Overall'},{k:'wB',lines:['First-time','renewals'],short:'B · First-time'},
     {k:'wC',lines:['Repeated','renewals'],short:'C · Repeated'},{k:'wD',lines:['Pipeline','breakdown'],short:'D · Pipeline'}],
   pick:k=>{WOWK=k;FOLD.wow=false;FOLD[k]=false;render();const t=document.querySelector('.wowsec');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}});
-ArtiumWheel.mount({hub:'Renewals',anchor:()=>document.getElementById('out'),table:k=>{
+ArtiumWheel.mount({hub:'Renewals',anchor:()=>document.getElementById('out'),drill:(items,info)=>drillList(items,info),table:k=>{
   if(!DUE)return null;
   const sel=CENTRES.find(c=>c.name===selCentre),mine=x=>!sel||x.centre===sel.name,P=period();
   const isCur=mode==='month'&&viewY===NOW.getFullYear()&&viewM===NOW.getMonth();
