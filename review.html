@@ -100,7 +100,7 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,
 .tx h3{font:800 38px/1.12 var(--f);letter-spacing:-1px;color:#01073C;margin-top:20px}
 .tx ul{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:12px}
 .tx li{position:relative;padding-left:24px;font:400 22px/1.45 var(--f);color:var(--ink2)}.tx li b{color:#01073C;font-weight:700}
-.tx li::before{content:"";position:absolute;left:0;top:13px;width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#4101F7,#DD30B1)}
+.tx li.bul::before{content:"";position:absolute;left:0;top:13px;width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#4101F7,#DD30B1)}
 .tx .big{margin-top:auto;display:flex;align-items:baseline;gap:12px;padding-top:24px;border-top:1.5px solid #F1EDF9}
 .tx .big b{font:800 64px/1 var(--f);letter-spacing:-2px;background:linear-gradient(90deg,#4101F7,#DD30B1);-webkit-background-clip:text;background-clip:text;color:transparent}.tx .big span{font:600 19px/1.3 var(--f);color:var(--ink3)}
 /* photos and videos */
@@ -124,7 +124,7 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,
 .u h3{font:800 28px/1.16 var(--f);letter-spacing:-.6px;color:#01073C;margin-top:12px}.u h3:first-child{margin-top:0}
 .u ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:6px}
 .u li{position:relative;padding-left:22px;font:400 19px/1.4 var(--f);color:var(--ink2)}.u li b{color:#01073C;font-weight:700}
-.u li::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
+.u li.bul::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
 .flow{flex:1;display:flex;gap:22px;align-items:flex-start;align-self:flex-start;min-width:0}
 .flow .fcol{flex:1;display:flex;flex-direction:column;gap:22px;min-width:0}
 .flow .u{overflow:visible}.flow .u h3{font-size:calc(28px*var(--z,1))}.flow .u li{font-size:calc(19px*var(--z,1))}
@@ -166,15 +166,18 @@ body.fs.intro #stage .slide{opacity:0;animation:inS .75s cubic-bezier(.2,.8,.2,1
 .rtb{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:#fff;padding:6px}
 .rtb button{height:30px;min-width:32px;padding:0 10px;border:0;border-radius:8px;background:none;font:600 13px var(--f);color:var(--ink2);cursor:pointer}
 .rtb button:hover{background:#F1ECFC}.rtb button.on{background:#E8E0FF;color:var(--violet2)}
-.rtb .bb{font-weight:800}.rtb .bi{font-style:italic;font-family:Georgia,serif}.rtb .bu{text-decoration:underline}
+.rtb .bb,.rtb .bh{font-weight:800}.rtb .sep{width:1px;height:20px;background:var(--line);margin:0 4px}.rtb .bl{display:grid;place-items:center}.rtb .bl svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}.rtb .bl svg circle{fill:currentColor;stroke:none}
+.rte ul{margin:0;padding-left:22px}.rte li{margin:0}.rte h1{letter-spacing:0}.rtb .bi{font-style:italic;font-family:Georgia,serif}.rtb .bu{text-decoration:underline}
 .rte{min-height:132px;max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:0 0 12px 12px;background:#F6F3FC;padding:10px 12px;font:400 14px/1.5 var(--f);color:var(--ink);outline:none;white-space:pre-wrap;word-break:break-word}
 .card-e .rte{min-height:92px}
 .rte:focus{border-color:var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12);background:#fff}
 .rte h1{font:600 16px/1.5 var(--f);margin:0;color:var(--ink)}.rte div,.rte p{margin:0}
 .rte:empty:before{content:attr(data-ph);color:var(--ink4)}
-/* formatted lines on the slides: a gap, a heading kept from older text, italics and underline */
+/* formatted lines on the slides: plain text, bullet points ("- "), a heading ("# "), a gap, italics and underline */
 .s-b li.sp{height:.9em;padding:0}.s-b li.sp::before{display:none}
-.s-b li.h1{padding-left:0;font-weight:700;color:#01073C}.s-b li.h1::before{display:none}
+.s-b li.pln,.s-b li.h1{padding-left:0}.s-b li.pln::before,.s-b li.h1::before{display:none}
+.s-b li.h1{font-weight:600;color:#01073C;letter-spacing:-.2px}.s-b li.h1:not(:first-child){margin-top:6px}
+.tx li.h1{font-size:25px}.u li.h1,.flow .u li.h1{font-size:calc(22px*var(--z,1))}.ic2 li.h1{font-size:calc(24px*var(--z,1))}.band li.h1{font-size:calc(33px*var(--z,1));font-weight:700}
 .s-b li i{font-style:italic}.s-b li u{text-decoration:underline;text-underline-offset:3px}
 /* Challenge, Insight, Initiative: the challenge (or objective) as a band across the top, then what we learnt and what we did */
 .ci{flex:1;display:flex;flex-direction:column;gap:24px;min-height:0;min-width:0}
@@ -196,7 +199,7 @@ body.fs.intro #stage .slide{opacity:0;animation:inS .75s cubic-bezier(.2,.8,.2,1
 .ic2 .lb i svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .ic2 ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
 .ic2 li{position:relative;padding-left:22px;font:400 calc(21px*var(--z,1))/1.42 var(--f);color:var(--ink2)}.ic2 li b{color:#01073C;font-weight:700}
-.ic2 li::before{content:"";position:absolute;left:0;top:calc(12px*var(--z,1));width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
+.ic2 li.bul::before{content:"";position:absolute;left:0;top:calc(12px*var(--z,1));width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
 .pair .arw{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;z-index:2;box-shadow:0 10px 24px -12px rgba(65,1,247,.6)}
 .pair .arw svg{width:20px;height:20px;fill:none;stroke:#4101F7;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
 .ci .empty{color:var(--ink4);font-style:italic}
@@ -420,7 +423,8 @@ const inl=t=>esc(t).replace(/&lt;(\/?)(b|i|u)&gt;/g,'<$1$2>');
 const rich=ls=>(ls||[]).map(l=>{l=String(l);
   if(!l.trim())return'<li class="sp"></li>';
   if(l.startsWith('# '))return`<li class="h1">${inl(l.slice(2))}</li>`;
-  return`<li>${FMT.test(l)?inl(l):line(l)}</li>`;}).join('');
+  const b=l.startsWith('- '),t=b?l.slice(2):l;
+  return`<li class="${b?'bul':'pln'}">${FMT.test(t)?inl(t):line(t)}</li>`;}).join('');
 function cardHtml(c,k){
   const of=+c.of||0,done=+c.done||0,pct=of?Math.round(done/of*100):0;
   return`<div class="u a${(k||0)%4}">${c.tag?`<span class="tg">${esc(c.tag)}</span>`:''}<h3>${esc(c.title||'Untitled update')}</h3><ul>${rich(c.lines)}</ul>
@@ -506,41 +510,57 @@ function paint(){if(document.body.classList.contains('fs'))presentPaint();else i
 /* ── The formatted text box ──
    Kept as lines: "# " starts a heading; <b>, <i>, <u> mark bold, italics and underline; an empty line is a gap. */
 try{document.execCommand('defaultParagraphSeparator',false,'div');}catch(e){}
-function toEd(ls){const a=(ls||[]).map(l=>{l=String(l);if(!l.trim())return'<div><br></div>';
-  if(l.startsWith('# '))return`<h1>${inl(l.slice(2))||'<br>'}</h1>`;return`<div>${FMT.test(l)?inl(l):esc(l)}</div>`;});return a.join('');}
+function toEd(ls){let h='',ul=false;
+  (ls||[]).forEach(l=>{l=String(l);const b=l.startsWith('- '),hd=l.startsWith('# ');
+    if(b&&!ul){h+='<ul>';ul=true;}if(!b&&ul){h+='</ul>';ul=false;}
+    const t=b||hd?l.slice(2):l,x=FMT.test(t)?inl(t):esc(t);
+    h+=!l.trim()?'<div><br></div>':b?`<li>${x||'<br>'}</li>`:hd?`<h1>${x||'<br>'}</h1>`:`<div>${x}</div>`;});
+  return h+(ul?'</ul>':'');}
 function fromEd(root){
-  const out=[];let cur=null;
-  const flush=()=>{if(cur){out.push(cur);cur=null;}};
+  const out=[];
   const inline=n=>{
-    if(n.nodeType===3)return n.nodeValue.replace(/\u00a0/g,' ');
+    if(n.nodeType===3)return n.nodeValue.replace(/ /g,' ');
     if(n.nodeType!==1)return'';const t=n.tagName;if(t==='BR')return'';
     let x=[...n.childNodes].map(inline).join('');if(!x)return'';
     const st=n.style||{},b=t==='B'||t==='STRONG'||+st.fontWeight>=600||st.fontWeight==='bold',it=t==='I'||t==='EM'||st.fontStyle==='italic',u=t==='U'||/underline/.test(st.textDecoration||st.textDecorationLine||'');
     if(u)x='<u>'+x+'</u>';if(it)x='<i>'+x+'</i>';if(b)x='<b>'+x+'</b>';return x;};
-  const block=n=>{const h=/^H[1-6]$/.test(n.tagName);
-    // a block can hold line breaks: each piece is a line
-    let parts=[''];[...n.childNodes].forEach(c=>{if(c.nodeType===1&&c.tagName==='BR')parts.push('');else if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI|UL|OL)$/.test(c.tagName)){parts.push(...blockLines(c),'');}else parts[parts.length-1]+=inline(c);});
-    if(parts.length>1&&parts[parts.length-1]==='')parts.pop();
-    return parts.map(p=>h&&p.trim()?'# '+p:p);};
-  const blockLines=n=>block(n);
-  [...root.childNodes].forEach(c=>{
-    if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI|UL|OL)$/.test(c.tagName)){flush();out.push(...block(c));}
-    else if(c.nodeType===1&&c.tagName==='BR'){if(cur==null)cur='';flush();}
-    else{cur=(cur||'')+inline(c);}});
-  flush();
+  // each block is a line (a line break inside one starts a new line); a list item gets "- ", a heading "# "
+  const walk=(n,pre)=>{let cur='';
+    const push=()=>{out.push(cur.trim()?pre+cur:'');cur='';};
+    [...n.childNodes].forEach(c=>{
+      if(c.nodeType===1&&c.tagName==='BR'){push();return;}
+      if(c.nodeType===1&&/^(UL|OL)$/.test(c.tagName)){if(cur.trim())push();[...c.childNodes].forEach(x=>{if(x.nodeType===1)walk(x,'- ');else if(x.nodeValue&&x.nodeValue.trim())out.push('- '+x.nodeValue.trim());});return;}
+      if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI)$/.test(c.tagName)){if(cur.trim())push();walk(c,/^H[1-6]$/.test(c.tagName)?'# ':c.tagName==='LI'?'- ':pre);return;}
+      cur+=inline(c);});
+    if(cur.trim())push();};
+  walk(root,'');
   // tidy: no formatting around nothing, joined runs, no gaps at the ends, never two gaps in a row
-  let v=out.map(l=>l.replace(/<(b|i|u)><\/\1>/g,'').replace(/<\/(b|i|u)><\1>/g,'').replace(/\s+$/,'').replace(/^\s+/,''));
-  v=v.map(l=>l==='#'?'':l);
+  let v=out.map(l=>l.replace(/<(b|i|u)><\/\1>/g,'').replace(/<\/(b|i|u)><\1>/g,'').replace(/\s+$/,''));
   while(v.length&&!v[0].trim())v.shift();while(v.length&&!v[v.length-1].trim())v.pop();
   return v.filter((l,i)=>l.trim()||(v[i-1]||'').trim()).slice(0,30);
+}
+/* Typing "- " at the start of a line turns it into a bullet point */
+function autoList(ed){
+  const sel=getSelection();if(!sel.rangeCount)return;const n=sel.anchorNode;
+  if(!n||n.nodeType!==3||!ed.contains(n)||sel.anchorOffset!==2||!/^-[  ]/.test(n.nodeValue))return;
+  let blk=n.parentNode;while(blk&&blk!==ed&&!/^(DIV|P|H[1-6]|LI)$/.test(blk.tagName))blk=blk.parentNode;
+  if(!blk||blk.tagName==='LI'||/^H[1-6]$/.test(blk.tagName))return;
+  // only at the very start of its line
+  if(blk!==ed){const w=document.createTreeWalker(blk,NodeFilter.SHOW_TEXT);if(w.nextNode()!==n)return;}
+  else{const p=n.previousSibling;if(p&&!(p.nodeType===1&&/^(BR|DIV|P|H[1-6]|UL|OL)$/.test(p.tagName)))return;}
+  const rest=n.nodeValue.slice(2),r=document.createRange();
+  // an empty line keeps a line break, so the list starts on this line and not the one above
+  if(rest){n.nodeValue=rest;r.setStart(n,0);}else{const br=document.createElement('br');n.parentNode.replaceChild(br,n);r.setStartBefore(br);}
+  r.collapse(true);sel.removeAllRanges();sel.addRange(r);
+  document.execCommand('insertUnorderedList');
 }
 /* where the caret is, as characters into the box, so it can be put back after the form is drawn again */
 function caretOf(el){const sel=getSelection();if(!sel.rangeCount)return null;const r=sel.getRangeAt(0);if(!el.contains(r.endContainer))return null;
   const pre=document.createRange();pre.selectNodeContents(el);pre.setEnd(r.endContainer,r.endOffset);return textLen(pre.cloneContents());}
-function textLen(fr){let n=0;const w=x=>{if(x.nodeType===3)n+=x.nodeValue.length;else{if(x.nodeType===1&&/^(DIV|P|H[1-6])$/.test(x.tagName)&&n>0)n+=1;x.childNodes.forEach(w);}};fr.childNodes.forEach(w);return n;}
+function textLen(fr){let n=0;const w=x=>{if(x.nodeType===3)n+=x.nodeValue.length;else{if(x.nodeType===1&&/^(DIV|P|H[1-6]|LI)$/.test(x.tagName)&&n>0)n+=1;x.childNodes.forEach(w);}};fr.childNodes.forEach(w);return n;}
 function setCaret(el,k){let n=0,done=false;const r=document.createRange();
   const w=x=>{if(done)return;if(x.nodeType===3){if(n+x.nodeValue.length>=k){r.setStart(x,k-n);done=true;return;}n+=x.nodeValue.length;}
-    else{if(x.nodeType===1&&/^(DIV|P|H[1-6])$/.test(x.tagName)&&n>0&&x!==el){n+=1;if(n>k){r.setStart(x,0);done=true;return;}}x.childNodes.forEach(w);}};
+    else{if(x.nodeType===1&&/^(DIV|P|H[1-6]|LI)$/.test(x.tagName)&&n>0&&x!==el){n+=1;if(n>k){r.setStart(x,0);done=true;return;}}x.childNodes.forEach(w);}};
   w(el);if(!done){r.selectNodeContents(el);r.collapse(false);}else r.collapse(true);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}
 function rtState(){
   document.querySelectorAll('.rtw').forEach(w=>{const ed=w.querySelector('.rte'),sel=getSelection(),inside=sel.rangeCount&&ed.contains(sel.anchorNode);
@@ -556,7 +576,11 @@ document.getElementById('ed').addEventListener('click',e=>{
   const ed=b.closest('.rtw').querySelector('.rte');const sel=getSelection();
   if(!(sel.rangeCount&&ed.contains(sel.anchorNode))){ed.focus();setCaret(ed,1e9);}
   const k=b.dataset.rt;
-  if(k==='h1')document.execCommand('formatBlock',false,'h1');else if(k==='p')document.execCommand('formatBlock',false,'div');else document.execCommand(k);
+  if(k==='h1'){const inH=(()=>{let n=getSelection().anchorNode;while(n&&n!==ed){if(n.nodeType===1&&n.tagName==='H1')return true;n=n.parentNode;}return false;})();
+    if(!inH){try{if(document.queryCommandState('insertUnorderedList'))document.execCommand('insertUnorderedList');}catch(x){}}
+    document.execCommand('formatBlock',false,inH?'div':'h1');}
+  else if(k==='insertUnorderedList'){let n=getSelection().anchorNode;while(n&&n!==ed){if(n.nodeType===1&&n.tagName==='H1'){document.execCommand('formatBlock',false,'div');break;}n=n.parentNode;}document.execCommand(k);}
+  else document.execCommand(k);
   rtState();ed.dispatchEvent(new Event('input',{bubbles:true}));
 },true);
 /* pasting brings in the words only, not the formatting of wherever they came from */
@@ -581,7 +605,7 @@ function renderEditor(){
       <label class="chk"><input type="checkbox" data-f="show"${s.hide?'':' checked'}>In the slideshow</label>
       <button class="ic" data-a="up" title="Move earlier"${SEL?'':' disabled'}>↑</button><button class="ic" data-a="down" title="Move later"${SEL<n-1?'':' disabled'}>↓</button><button class="ic del" data-a="del" title="Delete this slide">✕</button></div>`;
     if(s.tpl==='cii'){
-      const ob=s.lead==='objective',box=(k,lab,hint,ph)=>`<div class="fl">${lab} <small>${hint}</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="${k}" data-ph="${ph}">${toEd(s[k])}</div></div></div>`;
+      const ob=s.lead==='objective',box=(k,lab,hint,ph)=>`<div class="fl">${lab} <small>${hint}</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bh" data-rt="h1" title="Heading 1">H1</button><button type="button" class="bl" data-rt="insertUnorderedList" title="Bullet points (or type - and a space)"><svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="5" cy="17" r="1.4"/><path d="M10 7h10M10 12h10M10 17h10"/></svg></button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="${k}" data-ph="${ph}">${toEd(s[k])}</div></div></div>`;
       f+=`<div class="fg"><div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="e.g. Renewals in the first month"></label>
         <div class="fl">The first box is <div><span class="lead"><button type="button" data-lead="challenge" aria-pressed="${!ob}">Challenge</button><button type="button" data-lead="objective" aria-pressed="${ob}">Objective</button></span></div></div>
         ${box('c1',ob?'The objective':'The challenge',ob?'What we set out to do.':'The problem, put so that people stop and think.',ob?'e.g. Get every new learner to their first renewal.':'e.g. 1 in 4 new learners leave before their first renewal.')}</div>
@@ -589,14 +613,14 @@ function renderEditor(){
     }else if(s.tpl==='upd'){
       f+=`<div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="${SUB==='key'?'Key updates':'Updates'}"></label>
         ${(s.cards||[]).map((c,k)=>`<div class="card-e" data-c="${k}"><div class="row"><input class="in" data-cf="title" placeholder="Update title, e.g. Baseline audits" value="${esc(c.title)}"><select class="in" style="width:200px" data-cf="tag" aria-label="Tag">${TAGOPTS(c.tag)}</select><button class="ic del" data-a="delc" title="Remove this update">✕</button></div>
-          <div class="fl">Points <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Goal:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-cf="lines" data-ph="Goal: every teacher audited once.">${toEd(c.lines)}</div></div></div>
+          <div class="fl">Points <small>Type "- " and a space, or use the list button, for bullet points; H1 makes a heading. A word and a colon at the start, like "Goal:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bh" data-rt="h1" title="Heading 1">H1</button><button type="button" class="bl" data-rt="insertUnorderedList" title="Bullet points (or type - and a space)"><svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="5" cy="17" r="1.4"/><path d="M10 7h10M10 12h10M10 17h10"/></svg></button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-cf="lines" data-ph="Goal: every teacher audited once.">${toEd(c.lines)}</div></div></div>
           <div class="row"><span class="fl">Progress</span><input class="in num" data-cf="done" inputmode="decimal" placeholder="Done" value="${c.done==null?'':c.done}"> of <input class="in num" data-cf="of" inputmode="decimal" placeholder="Out of" value="${c.of==null?'':c.of}"><input class="in" data-cf="unit" placeholder="Label, e.g. Teachers audited" value="${esc(c.unit)}"></div></div>`).join('')}
         ${(s.cards||[]).length<4?'<button type="button" class="addc" data-a="addc">+ Add an update card</button>':''}</div>`;
     }else{
       const left=`<div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="e.g. Diwali Showcase"></label>
         ${T[2]?`<label class="fl">Tag<select data-f="tag">${TAGOPTS(s.tag)}</select></label>
         <label class="fl">Text box heading <small>Optional.</small><input class="in" data-f="head" value="${esc(s.head)}" placeholder="e.g. Diwali Showcase at the centre"></label>
-        <div class="fl">Text box <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Turnout:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="lines" data-ph="Turnout: 46 learners performed.">${toEd(s.lines)}</div></div></div>
+        <div class="fl">Text box <small>Type "- " and a space, or use the list button, for bullet points; H1 makes a heading. A word and a colon at the start, like "Turnout:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bh" data-rt="h1" title="Heading 1">H1</button><button type="button" class="bl" data-rt="insertUnorderedList" title="Bullet points (or type - and a space)"><svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="5" cy="17" r="1.4"/><path d="M10 7h10M10 12h10M10 17h10"/></svg></button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="lines" data-ph="Turnout: 46 learners performed.">${toEd(s.lines)}</div></div></div>
         <div class="row"><label class="fl" style="width:130px">Big number <small>Optional.</small><input class="in" data-f="bn" maxlength="12" value="${esc(s.bn||'')}" placeholder="e.g. 46"></label><label class="fl" style="flex:1">Its label<small>Shown beside the number.</small><input class="in" data-f="bl" maxlength="40" value="${esc(s.bl||'')}" placeholder="e.g. learners performed"></label></div>`:''}</div>`;
       const ms=s.media||[],slots=[];
       for(let k=0;k<T[5];k++){const m=ms[k];
@@ -611,24 +635,25 @@ function renderEditor(){
     }
     main=`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,s,SEL,n)}</div></div><div class="spill" id="spill" hidden></div></div><div class="form" id="form">${f}</div>`;
   }
-  const save=DIRTY||(deckOf(SUB).carried&&DRAFT.length)?`<div class="save"><span id="save-n">${UPLOADING?'Wait for the upload to finish before saving.':DIRTY?'Changes not saved yet.':'Save to keep these slides for this week.'}</span><span class="msg" id="msg"></span>
-    <button class="btn" id="discard" type="button">Discard</button><button class="btn pri" id="go" type="button"${UPLOADING||busy?' disabled':''}>${busy?'Saving…':'Save'}</button></div>`:'';
+  const save=saveBar();
   // keep the field being typed in focused
-  const a=document.activeElement,keep=a&&ed.contains(a)?{f:a.dataset.f,cf:a.dataset.cf,c:a.closest('[data-c]')?.dataset.c,s:a.selectionStart,e:a.selectionEnd}:null;
+  const a=document.activeElement,keep=a&&ed.contains(a)?{f:a.dataset.f,cf:a.dataset.cf,c:a.closest('[data-c]')?.dataset.c,s:a.selectionStart,e:a.selectionEnd,rte:a.classList.contains('rte')?caretOf(a):null}:null;
   ed.innerHTML=rail+`<div>${main}${save}</div>`;
   spillNote();
-  if(keep&&(keep.f||keep.cf)){const q=keep.cf?`[data-c="${keep.c}"] [data-cf="${keep.cf}"]`:`[data-f="${keep.f}"]`,el=ed.querySelector(q);if(el){el.focus();try{el.setSelectionRange(keep.s,keep.e);}catch(e){}}}
+  if(keep&&(keep.f||keep.cf)){const q=keep.cf?`[data-c="${keep.c}"] [data-cf="${keep.cf}"]`:`[data-f="${keep.f}"]`,el=ed.querySelector(q);if(el){el.focus();if(el.classList.contains('rte')){if(keep.rte!=null)setCaret(el,keep.rte);}else try{el.setSelectionRange(keep.s,keep.e);}catch(e){}}}
   fit();
 }
 const cur=()=>DRAFT&&DRAFT[SEL];
 function touch(){DIRTY=true;}
 function spillNote(){const n=document.getElementById('spill'),s=cur();if(!n)return;const k=s&&!s.hide&&s.tpl==='upd'?spill(s).length:1;n.hidden=k<2;n.textContent=k>1?`This slide is too full, so in the slideshow it continues onto ${k-1===1?'a second slide':k+' slides'}.`:'';}
+function saveBar(){return DIRTY||(deckOf(SUB).carried&&DRAFT.length)?`<div class="save"><span id="save-n">${UPLOADING?'Wait for the upload to finish before saving.':DIRTY?'Changes not saved yet.':'Save to keep these slides for this week.'}</span><span class="msg" id="msg"></span>
+    <button class="btn" id="discard" type="button">Discard</button><button class="btn pri" id="go" type="button"${UPLOADING||busy?' disabled':''}>${busy?'Saving…':'Save'}</button></div>`:'';}
 function refreshCanvas(){const page=pageOf(SUB),s=cur();const el=document.getElementById('eslide');if(el&&s)el.innerHTML=slideHtml(page,s,SEL,DRAFT.length);spillNote();
   const th=document.querySelector(`.th[data-sel="${SEL}"] .slide`);if(th&&s)th.innerHTML=slideHtml(page,s,SEL,DRAFT.length,true);
-  const sv=document.querySelector('.save');if(!sv)renderEditor();else document.getElementById('save-n').textContent=UPLOADING?'Wait for the upload to finish before saving.':'Changes not saved yet.';}
+  const sv=document.querySelector('.save');if(!sv){const host=document.getElementById('ed').lastElementChild;if(host)host.insertAdjacentHTML('beforeend',saveBar());}else document.getElementById('save-n').textContent=UPLOADING?'Wait for the upload to finish before saving.':'Changes not saved yet.';}
 document.getElementById('ed').addEventListener('input',e=>{
   const s=cur();if(!s)return;const t=e.target,v=t.value;
-  if(t.classList&&t.classList.contains('rte')){const ls=fromEd(t);
+  if(t.classList&&t.classList.contains('rte')){if(e.inputType==='insertText'&&e.data===' ')autoList(t);const ls=fromEd(t);
     if(t.dataset.cf){s.cards[+t.closest('[data-c]').dataset.c].lines=ls;}else s[t.dataset.f]=ls;
     touch();refreshCanvas();return;}
   if(t.dataset.f){const f=t.dataset.f;

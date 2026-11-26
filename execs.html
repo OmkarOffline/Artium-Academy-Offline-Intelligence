@@ -495,6 +495,7 @@ const inl=t=>esc(t).replace(/&lt;(\/?)(b|i|u)&gt;/g,'<$1$2>');
 const rich=ls=>(ls||[]).map(l=>{l=String(l);
   if(!l.trim())return'<li class="sp"></li>';
   if(l.startsWith('# '))return`<li class="h1">${inl(l.slice(2))}</li>`;
+  if(l.startsWith('- '))l=l.slice(2);   // a bullet point marked on the Weekly Offline Review
   return`<li>${FMT.test(l)?inl(l):line(l)}</li>`;}).join('');
 function cardHtml(c){
   const of=+c.of||0,done=+c.done||0,pct=of?Math.round(done/of*100):0;
