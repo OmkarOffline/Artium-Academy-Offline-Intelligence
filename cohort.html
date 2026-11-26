@@ -92,6 +92,8 @@ th.rl,th.tl,th.hd.c1{position:sticky;left:0;z-index:4;background:#fff;width:190p
 td.ad,th.hd.c2,tr.al td.c2{position:sticky;left:205px;z-index:4;box-shadow:0 0 0 13px #fff}
 th.hd.c2,tr.al td.c2{background:#fff}
 th.tl{z-index:6}
+td.ad.tc{position:static;box-shadow:none;width:104px;min-width:104px}td.ad.tc b{display:block;font:800 17px var(--f);color:var(--ink)}
+table.col td.c,table.col td.tt{width:104px;min-width:104px}table.col td.c b,table.col td.tt b{font-size:17px}table.col td.c span,table.col td.tt span{font-size:10.5px}
 td.c{position:relative;border-radius:12px;text-align:center;height:76px;width:88px;min-width:88px;background:#fff;color:var(--ink)}
 td.c b{display:block;font:800 19px/1.1 var(--f)}td.c span{display:block;font:500 11px var(--f);color:var(--ink2);margin-top:2px;white-space:nowrap}
 td.c em.cr{position:absolute;top:-8px;right:-6px;width:20px;height:20px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 1.5px #E3B64A,0 2px 5px -2px rgba(160,110,10,.3)}
@@ -138,6 +140,9 @@ const valid=d=>d&&d.getFullYear()>=2020?d:null;
 const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 const mi=d=>d.getFullYear()*12+d.getMonth(),LAST=mi(TODAY);
+const amt=x=>{const n=parseFloat(String(x==null?'':x).replace(/[^0-9.\-]/g,''));return isNaN(n)?0:n;};
+const money=x=>x>=1e5?'₹'+(x/1e5).toFixed(2).replace(/\.?0+$/,'')+'L':x>=1e3?'₹'+(x/1e3).toFixed(1).replace(/\.0$/,'')+'K':'₹'+Math.round(x);
+const inr=x=>'₹'+Math.round(x).toLocaleString('en-IN');
 const yy=k=>String(Math.floor(k/12)).slice(2),mLab=k=>MON[k%12]+' '+yy(k);
 async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
 const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}};
@@ -146,6 +151,7 @@ const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localSto
 let DATA={},loaded=false,OPEN=null,INFO=false;
 let selCentre=(()=>{const v=store('artium_co_centre');return v==='All'||CENTRES.some(c=>c.name===v)?v:'Alwarpet';})();
 let MODE=store('artium_co_mode')==='q'?'q':'m';
+let VIEW=store('artium_co_view')==='col'?'col':'ret';
 let YT=store('artium_co_yt')==='fy'?'fy':'cy';
 const curStart=yt=>yt==='fy'?(TODAY.getMonth()>=3?TODAY.getFullYear():TODAY.getFullYear()-1):TODAY.getFullYear();
 let YEAR=(()=>{const v=+store('artium_co_year');return v>=2020&&v<=curStart(YT)?v:curStart(YT);})();
@@ -157,12 +163,12 @@ const yLong=(y,yt)=>yt==='fy'?'F.Y. '+y+'–'+String(y+1).slice(2)+' (Apr '+y+' 
    the same counting as the Monthly Active Learners page, taken one learner at a time. */
 const keyOf=r=>String(r[3]||'').trim().toUpperCase()||('~'+String(r[4]||'').trim().toLowerCase()+'|'+String(r[7]||'').replace(/\D/g,'').slice(-10));
 function learners(){
-  const by=new Map(),get=k=>by.get(k)||by.set(k,{adm:[],ren:[],end:[],first:null}).get(k);
+  const by=new Map(),get=k=>by.get(k)||by.set(k,{adm:[],ren:[],end:[],pay:[],first:null}).get(k);
   const endOf=r=>{const t=valid(parseDate(r[23]));return t&&t<=TODAY?mi(t):null;};
   (selCentre==='All'?CENTRES.map(c=>c.name):[selCentre]).forEach(n=>{const d=DATA[n];if(!d)return;
-    d.fs.forEach(r=>{const L=get(keyOf(r)),t=valid(parseDate(r[0])),e=endOf(r);if(e!=null)L.end.push(e);if(!t)return;L.adm.push(mi(t));
+    d.fs.forEach(r=>{const L=get(keyOf(r)),t=valid(parseDate(r[0])),e=endOf(r);if(e!=null)L.end.push(e);if(!t)return;L.adm.push(mi(t));L.pay.push([mi(t),amt(r[17])||amt(r[16])]);   // Fresh Sales: Total Receipts (registration fee included)
       if(!L.first||t<L.first.t)L.first={t,r};});
-    d.rn.forEach(r=>{const L=get(keyOf(r)),t=valid(parseDate(r[0])),e=endOf(r);if(t)L.ren.push(mi(t));if(e!=null)L.end.push(e);});});
+    d.rn.forEach(r=>{const L=get(keyOf(r)),t=valid(parseDate(r[0])),e=endOf(r);if(t){L.ren.push(mi(t));L.pay.push([mi(t),amt(r[16])||amt(r[17])]);}if(e!=null)L.end.push(e);});});   // Renewals: Net Coaching Fees
   return by;
 }
 const active=(L,k)=>{let n=0;L.adm.forEach(x=>{if(x<=k)n++;});L.ren.forEach(x=>{if(x<=k)n++;});L.end.forEach(x=>{if(x<=k)n--;});return n>0;};
@@ -178,9 +184,9 @@ function compute(){
   const rows=groups.filter(G=>G.ls.length).map(G=>{
     const cells=[];
     for(let m=0;;m++){const a=G.a+m*span;if(a>LAST)break;const k=Math.min(a+span-1,LAST);
-      cells.push({n:G.ls.reduce((t,L)=>t+(active(L,k)?1:0),0),now:LAST>=a&&LAST<=a+span-1});}
+      cells.push({n:VIEW==='col'?G.ls.reduce((t,L)=>t+L.pay.reduce((u,x)=>u+(x[0]>=a&&x[0]<=k?x[1]:0),0),0):G.ls.reduce((t,L)=>t+(active(L,k)?1:0),0),now:LAST>=a&&LAST<=a+span-1});}
     const lab=Q?MON[G.a%12]+' – '+MON[G.b%12]+' '+yy(G.b):mLab(G.a);
-    return{lab,a:G.ls.length,cells};});
+    return{lab,a:G.ls.length,cells,tot:cells.reduce((t,c)=>t+c.n,0)};});
   const N=Math.max(0,...rows.map(r=>r.cells.length));
   // Best and the All cohorts row: finished months only (the current month is still moving)
   const best=[],pool=[];
@@ -189,8 +195,8 @@ function compute(){
     const top=Math.max(...S.map(r=>r.cells[m].n/r.a)),w=S.filter(r=>Math.abs(r.cells[m].n/r.a-top)<1e-9);
     best.push({p:top,row:w.length===1?w[0]:null});
     const num=S.reduce((t,r)=>t+r.cells[m].n,0),den=S.reduce((t,r)=>t+r.a,0);pool.push({num,den,p:num/den,from:S[0].lab,to:S[S.length-1].lab,k:S.length});}
-  rows.forEach(r=>{r.watch=null;r.cells.forEach((c,m)=>{if(c.now&&pool[m]){const gap=(c.n/r.a-pool[m].p)*100;if(gap<=-WATCH)r.watch=gap;}});});
-  return{rows,N,best,pool,Q,unit:Q?'Q':'M'};
+  rows.forEach(r=>{r.watch=null;if(VIEW==='col')return;r.cells.forEach((c,m)=>{if(c.now&&pool[m]){const gap=(c.n/r.a-pool[m].p)*100;if(gap<=-WATCH)r.watch=gap;}});});
+  return{rows,N,best,pool,Q,unit:Q?'Q':'M',col:VIEW==='col'};
 }
 
 /* ── Icons ── */
@@ -202,7 +208,7 @@ const I={grid:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" r
   age:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.3"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M14.5 19c.3-2 1.3-3.4 2.5-3.4s2.6 1.2 3 3.4"/></svg>',
   course:'<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>'};
 const CROWN=c=>`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5L3 8z" fill="${c}"/></svg>`;
-const VIEWS=[['ret','Retention','Share of each cohort still active',I.ret,true],['col','Collections','Money collected from each cohort',I.coin,false],
+const VIEWS=[['ret','Retention','Share of each cohort still active',I.ret,true],['col','Collections','Money collected from each cohort',I.coin,true],
   ['age','Age groups','Cohorts split by age group',I.age,false],['crs','Courses','Cohorts split by course',I.course,false]];
 
 /* ── Render ── */
@@ -213,22 +219,34 @@ function years(){
 }
 function toolbar(){
   const view=`<div class="mn" style="width:310px"><div class="mh">Show</div><div class="mb" style="gap:4px;padding:10px">${VIEWS.map(v=>
-    `<button type="button" class="opt" aria-pressed="${v[0]==='ret'}"${v[4]?'':' disabled'}><span class="ic">${v[3]}</span><span>${v[1]}<small>${v[2]}</small></span>${v[4]?'':'<span class="sn">Soon</span>'}</button>`).join('')}</div></div>`;
+    `<button type="button" class="opt" data-view="${v[0]}" aria-pressed="${v[0]===VIEW}"${v[4]?'':' disabled'}><span class="ic">${v[3]}</span><span>${v[1]}<small>${v[2]}</small></span>${v[4]?'':'<span class="sn">Soon</span>'}</button>`).join('')}</div></div>`;
   const per=`<div class="mn" style="width:340px"><div class="mh">Period</div><div class="mb">
     <div><div class="lb">View</div><div class="sg2"><button type="button" data-mode="m" aria-pressed="${MODE==='m'}">Monthly</button><button type="button" data-mode="q" aria-pressed="${MODE==='q'}">Quarterly</button></div></div>
     <div><div class="lb">Year</div><div class="sg2">${years().map(y=>`<button type="button" data-year="${y}" aria-pressed="${y===YEAR}">${YT==='fy'?y+'–'+String(y+1).slice(2):y}</button>`).join('')}</div></div>
     <div><div class="lb">Year type</div><div class="sg2"><button type="button" data-yt="cy" aria-pressed="${YT==='cy'}">C.Y.</button><button type="button" data-yt="fy" aria-pressed="${YT==='fy'}">F.Y.</button></div></div>
     <div class="ft">C.Y. is the calendar year, Jan to Dec. F.Y. is the financial year, Apr to Mar, so F.Y. ${YEAR}–${String(YEAR+1).slice(2)} runs Apr ${YEAR} to Mar ${YEAR+1}.</div></div></div>`;
   const leg=`<div class="mn" style="width:430px"><div class="mh">How to read the boxes</div><div class="mb" style="gap:13px">
-    <div class="lr"><span class="sw"><u></u></span><span><b>Current ${MODE==='q'?'quarter':'month'}.</b> Orange outline. It is still moving, so a note below it shows how far it is from the best cohort.</span></div>
-    <div class="lr"><span class="sw"><i class="cb">${CROWN('#C9961A')}</i></span><span><b>Best at that age.</b> The cohort that kept the highest share at that ${MODE==='q'?'quarter':'month'} since joining.</span></div>
-    <div class="lr"><span class="sw"><b class="wb">Watch</b></span><span><b>Needs attention.</b> The current ${MODE==='q'?'quarter':'month'} is ${WATCH} or more points below the All cohorts row.</span></div>
-    <div class="lr"><span class="sw"><i class="a1"></i></span><span><b>Pale outline.</b> A low share of the cohort is still active.</span></div>
-    <div class="lr"><span class="sw"><i class="a2"></i></span><span><b>Dark outline.</b> A high share of the cohort is still active.</span></div></div></div>`;
+    <div class="lr"><span class="sw"><u></u></span><span><b>Current ${MODE==='q'?'quarter':'month'}.</b> Orange outline. It is still moving, so ${VIEW==='col'?'it is not compared with other cohorts':'a note below it shows how far it is from the best cohort'}.</span></div>
+    <div class="lr"><span class="sw"><i class="cb">${CROWN('#C9961A')}</i></span><span><b>Best at that age.</b> ${VIEW==='col'?'The cohort that collected the most per learner admitted':'The cohort that kept the highest share'} at that ${MODE==='q'?'quarter':'month'} since joining.</span></div>
+    ${VIEW==='col'?'':`<div class="lr"><span class="sw"><b class="wb">Watch</b></span><span><b>Needs attention.</b> The current ${MODE==='q'?'quarter':'month'} is ${WATCH} or more points below the All cohorts row.</span></div>`}
+    <div class="lr"><span class="sw"><i class="a1"></i></span><span><b>Pale outline.</b> ${VIEW==='col'?'Little collected per learner, compared with the best cohort at that age.':'A low share of the cohort is still active.'}</span></div>
+    <div class="lr"><span class="sw"><i class="a2"></i></span><span><b>Dark outline.</b> ${VIEW==='col'?'Close to the best cohort at that age.':'A high share of the cohort is still active.'}</span></div></div></div>`;
   const pill=(k,inner,menu)=>`<div class="pw"><button type="button" class="pill" data-open="${k}" aria-expanded="${OPEN===k}">${inner}</button>${OPEN===k?menu:''}</div>`;
-  return`<div class="tb"><div class="pills">${pill('view',I.grid+'<span>Retention</span>'+I.chv,view)}${pill('per',I.cal+`<span>${MODE==='q'?'Quarterly':'Monthly'} · ${yLab(YEAR,YT)}</span>`+I.chv,per)}${pill('leg','<i class="ii">i</i><span>Legend</span>',leg)}</div></div>`;
+  return`<div class="tb"><div class="pills">${pill('view',(VIEW==='col'?I.coin:I.grid)+`<span>${VIEW==='col'?'Collections':'Retention'}</span>`+I.chv,view)}${pill('per',I.cal+`<span>${MODE==='q'?'Quarterly':'Monthly'} · ${yLab(YEAR,YT)}</span>`+I.chv,per)}${pill('leg','<i class="ii">i</i><span>Legend</span>',leg)}</div></div>`;
+}
+function defsCol(V){
+  const u=V.Q?'quarter':'month',U=V.unit,f=V.rows[0];
+  const eg=f?`The ${esc(f.lab)} cohort is the ${f.a} learners whose first admission was in ${V.Q?'that quarter':f.lab.replace(/ (\d\d)$/,' 20$1')}. Everything those learners pay, in any later ${u}, is counted under this cohort.`:'';
+  return`<div class="dg">
+  <div class="dc"><div class="dh"><div class="dn">Cohort</div><div class="dm">Everyone who took their first admission in the same ${u}.</div></div><div class="db"><span>${eg}</span><span>A Cross-Sale, an extra course for an existing learner, does not start a new cohort, but what the learner pays for it is counted in their own cohort.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">${U}1, ${U}2, ${U}3</div><div class="dm">${V.Q?'Quarters':'Months'} since joining.</div></div><div class="db"><span><b>${U}1</b> is the ${u} the learner was admitted, <b>${U}2</b> is the next ${u}, and so on. Reading down a column compares cohorts at the same age.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Collections</div><div class="dm">Money received in that ${u}.</div></div><div class="db"><span>Each payment is counted in the ${u} of its date: the admission payment in ${U}1, and each renewal in the ${u} the learner renewed.</span><span>Admissions count the Total Receipts of the Fresh Sales entry, registration fee included. Renewals count the Net Coaching Fees. Refunds are not deducted.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Total collections and LTV</div><div class="dm">Everything the cohort has paid so far.</div></div><div class="db"><span><b>Total collections</b> is every payment from the cohort, from admission to today.</span><div class="dfm">LTV per learner = Total collections ÷ Admissions</div></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Per learner, crown and outline</div><div class="dm">Comparing cohorts of different sizes.</div></div><div class="db"><span>The small figure in each box is the money per learner admitted. Cohorts are compared on this figure, so a bigger cohort does not win just by being bigger.</span><span>The crown marks the cohort that collected the most per learner at that ${u}, among finished ${u}s. A darker outline is closer to that best.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Current ${u}</div><div class="dm">Still being collected.</div></div><div class="db"><span>The orange box shows what has come in till date. It is not compared with finished ${u}s, because the ${u} is not over.</span></div></div></div>`;
 }
 function defs(V){
+  if(V.col)return defsCol(V);
   const u=V.Q?'quarter':'month',U=V.unit,f=V.rows[0];
   const eg=f?`The ${esc(f.lab)} cohort is the ${f.a} learners whose first admission was in ${V.Q?'that quarter':f.lab.replace(/ (\d\d)$/,' 20$1')}. It stays those same ${f.a} learners in every later ${u}, and no one is added.`:'';
   return`<div class="dg">
@@ -241,6 +259,10 @@ function defs(V){
 }
 function allPop(V){
   const u=V.Q?'quarter':'month',U=V.unit;
+  if(V.col)return`<div class="mn"><div class="mh">How to read All cohorts</div><div class="mb"><span>This row pools every cohort above. For each ${u} since joining, it adds up what the cohorts collected and divides it by the learners they admitted, across all cohorts that have completed that ${u}.</span>
+    <span><b>Use it as a yardstick.</b> The big figure is the total collected, and the small one is the money per learner admitted.</span>
+    <span>The first two columns are the total across all cohorts: the collections so far, and the LTV per learner.</span>
+    <span>The orange current-${u} boxes are left out, because they are still being collected. That is why the last columns rest on fewer cohorts.</span></div></div>`;
   let m=-1;for(let i=V.N-1;i>=0;i--){if(V.pool[i]&&V.pool[i].k>=2&&i<=3){m=i;break;}}
   if(m<0)m=V.pool.findIndex(p=>p);
   const p=m>=0?V.pool[m]:null;
@@ -250,27 +272,30 @@ function allPop(V){
     <span>The orange current-${u} boxes are left out of the pool, because they are still moving. That is why the last columns rest on fewer cohorts.</span></div></div>`;
 }
 function question(){
-  const qt=`How many learners from each ${MODE==='q'?"quarter's":"month's"} cohort are still with us?`;
+  const qt=VIEW==='col'?`How much have we collected from each ${MODE==='q'?"quarter's":"month's"} cohort?`:`How many learners from each ${MODE==='q'?"quarter's":"month's"} cohort are still with us?`;
   const head=`<div class="qh"><h2>${qt}</h2><button type="button" class="ib" id="ib" aria-expanded="${INFO}" aria-label="How this is worked out">i</button></div>`;
   if(!loaded)return`<div class="sec">${head}<div class="empty">Loading…</div></div>`;
   const V=compute();
   if(!V.rows.length)return`<div class="sec">${head}${INFO?defs(V):''}${toolbar()}<div class="empty">No admissions in ${esc(yLong(YEAR,YT))} for this centre.</div></div>`;
   const pct=(n,a)=>Math.round(n/a*100);
+  const COL=V.col,fm=n=>COL?money(n):Math.round(n*100)+'%';
   const body=V.rows.map(r=>{
     const tds=[];for(let m=0;m<V.N;m++){const c=r.cells[m];if(!c){tds.push('<td class="na"></td>');continue;}
-      const p=c.n/r.a,P=Math.round(p*100),B=V.best[m],tip=`${r.lab} cohort, ${V.unit}${m+1}: ${c.n} of ${r.a} learners active.`;
+      const p=c.n/r.a,P=Math.round(p*100),B=V.best[m],tip=COL?`${r.lab} cohort, ${V.unit}${m+1}: ${inr(c.n)} collected from ${r.a} learners.`:`${r.lab} cohort, ${V.unit}${m+1}: ${c.n} of ${r.a} learners active.`;
+      const rel=COL&&B&&B.p>0?Math.max(0,Math.min(1,p/B.p)):p;
       if(!c.now){const cr=B&&B.row===r?`<em class="cr">${CROWN('#C9961A')}</em>`:'';
-        tds.push(`<td class="c" title="${esc(tip)}" style="box-shadow:0 0 0 2.5px rgba(65,1,247,${(0.12+0.88*p).toFixed(2)}) inset">${cr}<b>${P}%</b><span>${c.n} learners</span></td>`);}
+        tds.push(`<td class="c" title="${esc(tip)}" style="box-shadow:0 0 0 2.5px rgba(65,1,247,${(0.12+0.88*rel).toFixed(2)}) inset">${cr}<b>${COL?money(c.n):P+'%'}</b><span>${COL?inr(p)+' / learner':c.n+' learners'}</span></td>`);}
+      else if(COL){tds.push(`<td class="c now" title="${esc(tip)} Till date."><i>till date</i><b>${money(c.n)}</b><span>${inr(p)} / learner</span></td>`);}
       else{const ch=!B?'<u class="dl na">no best yet</u>':p>=B.p-1e-9?`<u class="dl up">${CROWN('#B07A12')} best so far</u>`:`<u class="dl dn">&#9660; ${Math.round(B.p*100)-P} pts vs best</u>`;
         tds.push(`<td class="c now" title="${esc(tip)} Till date."><i>till date</i><b>${P}%</b><span>${c.n} learners</span>${ch}</td>`);}}
     const w=r.watch!=null?`<em class="wt">Watch · ${Math.round(-r.watch)} pts below yardstick</em>`:'';
-    return`<tr><th class="rl" scope="row"><b>${esc(r.lab)}</b>${w}</th><td class="ad">${r.a}</td>${tds.join('')}</tr>`;}).join('');
-  const avg=V.pool.map(p=>p?`<td class="tt"><b>${Math.round(p.p*100)}%</b><span>${p.num} of ${p.den}</span></td>`:'<td class="tt"><b>–</b><span>no finished cohort yet</span></td>').join('');
+    return`<tr><th class="rl" scope="row"><b>${esc(r.lab)}</b>${w}</th><td class="ad">${r.a}</td>${COL?`<td class="ad tc"><b>${money(r.tot)}</b></td><td class="ad tc"><b>${inr(r.tot/r.a)}</b></td>`:''}${tds.join('')}</tr>`;}).join('');
+  const avg=V.pool.map(p=>p?(COL?`<td class="tt"><b>${money(p.num)}</b><span>${inr(p.p)} / learner</span></td>`:`<td class="tt"><b>${Math.round(p.p*100)}%</b><span>${p.num} of ${p.den}</span></td>`):'<td class="tt"><b>–</b><span>no finished cohort yet</span></td>').join('');
   const allLab='All '+(YT==='fy'?yLab(YEAR,YT):YEAR)+' cohorts';
   const hd=Array.from({length:V.N},(_,m)=>`<th class="ch" scope="col">${V.unit}${m+1}</th>`).join('');
   return`<div class="sec">${head}${INFO?defs(V):''}${toolbar()}
-    <div class="tw"><table><thead><tr><th class="hd c1">${V.Q?'Quarter cohort':'Cohort'}</th><th class="hd c2" style="text-align:center">Admissions</th>${hd}</tr></thead>
-    <tbody>${body}<tr class="al"><th class="tl" scope="row"><span class="big">${esc(allLab)}<button type="button" class="ib2" data-open="all" aria-expanded="${OPEN==='all'}" aria-label="How to read this row">i</button></span>${OPEN==='all'?allPop(V):''}</th><td class="c2"></td>${avg}</tr></tbody></table></div></div>`;
+    <div class="tw"><table class="${COL?'col':''}"><thead><tr><th class="hd c1">${V.Q?'Quarter cohort':'Cohort'}</th><th class="hd c2" style="text-align:center">Admissions</th>${COL?'<th class="hd" style="text-align:center">Total collections</th><th class="hd" style="text-align:center">LTV per learner</th>':''}${hd}</tr></thead>
+    <tbody>${body}<tr class="al"><th class="tl" scope="row"><span class="big">${esc(allLab)}<button type="button" class="ib2" data-open="all" aria-expanded="${OPEN==='all'}" aria-label="How to read this row">i</button></span>${OPEN==='all'?allPop(V):''}</th><td class="c2"></td>${COL?(()=>{const T=V.rows.reduce((t,r)=>t+r.tot,0),A=V.rows.reduce((t,r)=>t+r.a,0);return`<td class="tt"><b>${money(T)}</b><span>${A} admissions</span></td><td class="tt"><b>${inr(T/A)}</b><span>per learner</span></td>`;})():''}${avg}</tr></tbody></table></div></div>`;
 }
 function render(){
   document.querySelectorAll('.ct').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===selCentre)));
@@ -286,6 +311,7 @@ document.addEventListener('click',e=>{
   const t=e.target;
   const c=t.closest('.ct');if(c){selCentre=c.dataset.c;store('artium_co_centre',selCentre);render();return;}
   if(t.closest('#ib')){INFO=!INFO;render();return;}
+  const vw=t.closest('[data-view]');if(vw&&!vw.disabled){VIEW=vw.dataset.view;store('artium_co_view',VIEW);OPEN=null;render();return;}
   const md=t.closest('[data-mode]');if(md){MODE=md.dataset.mode;store('artium_co_mode',MODE);render();return;}
   const yr=t.closest('[data-year]');if(yr){YEAR=+yr.dataset.year;store('artium_co_year',YEAR);render();return;}
   const yt=t.closest('[data-yt]');if(yt){if(yt.dataset.yt!==YT){YT=yt.dataset.yt;store('artium_co_yt',YT);
