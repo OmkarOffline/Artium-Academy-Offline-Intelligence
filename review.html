@@ -159,7 +159,7 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,
 @keyframes ttlOut{to{transform:scale(1.12);opacity:0;filter:blur(10px)}}
 @keyframes iOut{to{opacity:0;visibility:hidden}}
 body.fs.intro #stage .slide{opacity:0;animation:inS .75s cubic-bezier(.2,.8,.2,1) 2.65s forwards}
-@keyframes inS{from{opacity:0;transform:var(--tf) scale(.965) translateY(18px)}to{opacity:1;transform:var(--tf)}}
+@keyframes inS{from{opacity:0;translate:0 24px}to{opacity:1;translate:0 0}}
 @media (prefers-reduced-motion:reduce){.istage{display:none}body.fs.intro #stage .slide{opacity:1;animation:none}}
 /* Edit view */
 .ed{display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;align-items:start}
@@ -656,7 +656,21 @@ const STK=[['<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx
   ['<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 5.9L12 16.4 6.7 19.3l1.2-5.9L3.4 9.3l6-.7z"/>','#fff',92,'28px',18,'#4101F7'],
   ['<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/>','#fff',84,'26px',-14,'#DD30B1'],
   ['<path d="M19 3l2 2-6 6"/><path d="M13 9a4 4 0 0 0-5.6.4L4 13a3.5 3.5 0 0 0 5 5l3.6-3.4A4 4 0 0 0 13 9z"/><circle cx="9.5" cy="14.5" r="1.3"/>','linear-gradient(135deg,#2F4DB8,#7C9BFF)',110,'32px',8,'#fff']];
-let introT=null;
+let introT=null,AC=null;
+// The swoosh as the opener gives way to the first slide: a short breath of noise swept through a filter, made in the browser (no sound file)
+function swoosh(delay){
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime+delay,len=0.9,buf=AC.createBuffer(1,Math.round(AC.sampleRate*len),AC.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    const src=AC.createBufferSource();src.buffer=buf;
+    const bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=0.9;bp.frequency.setValueAtTime(300,t);bp.frequency.exponentialRampToValueAtTime(4200,t+0.42);bp.frequency.exponentialRampToValueAtTime(900,t+len);
+    const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.55,t+0.32);g.gain.exponentialRampToValueAtTime(0.0001,t+len);
+    const pan=AC.createStereoPanner?AC.createStereoPanner():null;
+    src.connect(bp);bp.connect(g);if(pan){pan.pan.setValueAtTime(-0.6,t);pan.pan.linearRampToValueAtTime(0.6,t+len);g.connect(pan);pan.connect(AC.destination);}else g.connect(AC.destination);
+    src.start(t);src.stop(t+len);SW=src;
+  }catch(e){}
+}
+let SW=null;
 function playIntro(p){
   const name=p.id==='key'?'Offline Overview':p.name,city=p.id==='key'?'All centres':CITY[p.name]||'Artium Academy';
   const ring=STK.map(([ic,bg,sz,rad,rot,col],i)=>{const a=(-150+i*60+(i%2?10:-8))*Math.PI/180,x=640*Math.cos(a),y=330*Math.sin(a);
@@ -665,10 +679,10 @@ function playIntro(p){
   document.getElementById('intro').innerHTML=`<div class="istage" id="istage"><div class="slide" id="islide"><i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i><i class="cl c4"></i>
     <div class="s-top"><div><div class="s-eb"><i></i>Weekly Offline Review · <b>${esc(wkShort(WEEK))}</b></div></div><div class="logo"><img src="brand/lockup-violet.png" alt="Artium Academy" width="125" height="44"></div></div>
     <div class="orbit">${ring}</div><div class="ttl"><h2 style="${name.length>12?'font-size:'+Math.max(96,Math.round(170*12/name.length))+'px;letter-spacing:-5px':''}">${words.length?words.join(' ')+' ':''}${last}<em>.</em></h2><div class="city">${esc(city)}</div></div></div></div>`;
-  document.body.classList.add('intro');fit();
+  document.body.classList.add('intro');fit();swoosh(2.3);
   clearTimeout(introT);introT=setTimeout(endIntro,3500);
 }
-function endIntro(){clearTimeout(introT);document.body.classList.remove('intro');document.getElementById('intro').innerHTML='';}
+function endIntro(){clearTimeout(introT);if(SW){try{SW.stop();}catch(e){}SW=null;}document.body.classList.remove('intro');document.getElementById('intro').innerHTML='';}
 function leaveFs(){if(!document.body.classList.contains('fs'))return;endIntro();document.body.classList.remove('fs');document.getElementById('fsb').hidden=true;
   const x=SEQ[POS];if(x){SUB=x.p.id;SL=x.i;}render();}
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)leaveFs();});
@@ -700,12 +714,14 @@ function fit(){
       // when the screen is short, the slide gets smaller and its frame narrows with it, centred
       if(st.id==='stage'){const top=st.getBoundingClientRect().top+scrollY,room=innerHeight-top-24;if(900*s>room&&room>320){s=room/900;st.style.width=(1600*s)+'px';}}
       st.style.height=(900*s)+'px';}
-    sl.style.transform=`translate(${ox}px,${oy}px) scale(${s})`;sl.style.setProperty('--tf',`translate(${ox}px,${oy}px) scale(${s})`);};
+    sl.style.transform=`translate(${ox}px,${oy}px) scale(${s})`;};
   one(document.getElementById('stage'),document.getElementById('slide'));
   one(document.getElementById('estage'),document.getElementById('eslide'));
   one(document.getElementById('istage'),document.getElementById('islide'));
 }
 addEventListener('resize',fit);
+// full screen takes a moment to settle: size the slide again once it has
+document.addEventListener('fullscreenchange',()=>{fit();requestAnimationFrame(fit);setTimeout(fit,300);});
 
 function stamp(){const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
 async function load(){
