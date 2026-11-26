@@ -70,28 +70,32 @@ h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;backgrou
 .opt .sn{margin-left:auto;font:700 10px var(--f);letter-spacing:.08em;text-transform:uppercase;color:#8C84AD;background:#EFEAF9;border-radius:6px;padding:3px 7px}
 .lr{display:flex;align-items:center;gap:12px;font:500 13px/1.4 var(--f);color:var(--ink2)}.lr b{color:var(--ink)}.lr .sw{flex:0 0 46px;display:grid;place-items:center}
 .lr .sw u{display:block;width:34px;height:20px;border-radius:7px;background:#fff;box-shadow:0 0 0 2.5px var(--org) inset}
-.lr .sw .cb{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold1),var(--gold2));display:grid;place-items:center}
+.lr .sw .cb{width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 0 0 1.5px #E3B64A;display:grid;place-items:center}
 .lr .sw .wb{background:var(--wbg);color:var(--wfg);border-radius:7px;padding:3px 8px;font:700 11px var(--f)}
 .lr .sw .a1,.lr .sw .a2{display:block;width:34px;height:20px;border-radius:7px}
 .lr .sw .a1{box-shadow:0 0 0 2.5px rgba(65,1,247,.2) inset}.lr .sw .a2{box-shadow:0 0 0 2.5px #4101F7 inset}
 
 /* ── The grid ── */
-.tw{overflow-x:auto;padding:0 0 6px;scrollbar-width:thin;scrollbar-color:#D9CFFA transparent}
-table{border-collapse:separate;border-spacing:5px 24px;margin:0 24px}
+.tw{overflow:auto;max-height:calc(100vh - 150px);min-height:420px;padding:0 0 6px;scrollbar-width:thin;scrollbar-color:#D9CFFA transparent}
+table{border-collapse:separate;border-spacing:14px 34px;margin:0 24px}
 th.ch{font:800 13px var(--f);letter-spacing:.04em;color:var(--ink4);padding:8px 4px 0;text-align:center}
 th.hd{font:700 11px var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding:8px 4px 0;text-align:left;white-space:nowrap}
-thead th{vertical-align:bottom}
+thead th{vertical-align:bottom;position:sticky;top:0;z-index:5;background:#fff;box-shadow:0 12px 0 #fff}
+thead th.hd.c1,thead th.hd.c2{z-index:9}
+thead th.hd.c1{left:0}
+thead th.hd.c2{left:205px}
 th.rl{text-align:left;padding:6px 14px 6px 6px;white-space:nowrap;vertical-align:middle}th.rl b{font:700 15px var(--f);color:var(--ink);display:block}
 th.rl em.wt{display:inline-block;font:700 10.5px var(--f);font-style:normal;background:var(--wbg);color:var(--wfg);border-radius:7px;padding:3px 8px;margin-top:5px;white-space:nowrap}
 td.ad{text-align:center;font:800 18px var(--f);color:var(--ink);background:#F7F5FC;border-radius:12px;width:84px;min-width:84px}
 /* The cohort and admissions columns stay put while the months scroll sideways */
 th.rl,th.tl,th.hd.c1{position:sticky;left:0;z-index:4;background:#fff;width:190px;min-width:190px;max-width:190px;box-shadow:0 0 0 14px #fff,-30px 0 0 14px #fff}
-td.ad,th.hd.c2,tr.al td.c2{position:sticky;left:195px;z-index:4;box-shadow:0 0 0 13px #fff}
+td.ad,th.hd.c2,tr.al td.c2{position:sticky;left:205px;z-index:4;box-shadow:0 0 0 13px #fff}
 th.hd.c2,tr.al td.c2{background:#fff}
 th.tl{z-index:6}
-td.c{position:relative;border-radius:12px;text-align:center;height:76px;width:84px;min-width:84px;background:#fff;color:var(--ink)}
+td.c{position:relative;border-radius:12px;text-align:center;height:76px;width:88px;min-width:88px;background:#fff;color:var(--ink)}
 td.c b{display:block;font:800 19px/1.1 var(--f)}td.c span{display:block;font:500 11px var(--f);color:var(--ink2);margin-top:2px;white-space:nowrap}
-td.c em.cr{position:absolute;top:-7px;right:-5px;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold1),var(--gold2));display:grid;place-items:center;box-shadow:0 3px 8px -2px rgba(160,110,10,.55),0 0 0 2px #fff}
+td.c em.cr{position:absolute;top:-8px;right:-6px;width:20px;height:20px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 1.5px #E3B64A,0 2px 5px -2px rgba(160,110,10,.3)}
+td.c em.cr svg{width:11px;height:11px}
 td.c.now{box-shadow:0 0 0 2.5px var(--org) inset}
 td.c.now i{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font:700 8.5px var(--f);font-style:normal;letter-spacing:.1em;text-transform:uppercase;background:var(--org);color:#fff;border-radius:6px;padding:2px 7px;white-space:nowrap}
 td.c u.dl{position:absolute;left:50%;top:calc(100% + 5px);transform:translateX(-50%);text-decoration:none;font:700 10.5px var(--f);white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
@@ -217,7 +221,7 @@ function toolbar(){
     <div class="ft">C.Y. is the calendar year, Jan to Dec. F.Y. is the financial year, Apr to Mar, so F.Y. ${YEAR}–${String(YEAR+1).slice(2)} runs Apr ${YEAR} to Mar ${YEAR+1}.</div></div></div>`;
   const leg=`<div class="mn" style="width:430px"><div class="mh">How to read the boxes</div><div class="mb" style="gap:13px">
     <div class="lr"><span class="sw"><u></u></span><span><b>Current ${MODE==='q'?'quarter':'month'}.</b> Orange outline. It is still moving, so a note below it shows how far it is from the best cohort.</span></div>
-    <div class="lr"><span class="sw"><i class="cb">${CROWN('#fff')}</i></span><span><b>Best at that age.</b> The cohort that kept the highest share at that ${MODE==='q'?'quarter':'month'} since joining.</span></div>
+    <div class="lr"><span class="sw"><i class="cb">${CROWN('#C9961A')}</i></span><span><b>Best at that age.</b> The cohort that kept the highest share at that ${MODE==='q'?'quarter':'month'} since joining.</span></div>
     <div class="lr"><span class="sw"><b class="wb">Watch</b></span><span><b>Needs attention.</b> The current ${MODE==='q'?'quarter':'month'} is ${WATCH} or more points below the All cohorts row.</span></div>
     <div class="lr"><span class="sw"><i class="a1"></i></span><span><b>Pale outline.</b> A low share of the cohort is still active.</span></div>
     <div class="lr"><span class="sw"><i class="a2"></i></span><span><b>Dark outline.</b> A high share of the cohort is still active.</span></div></div></div>`;
@@ -246,7 +250,7 @@ function allPop(V){
     <span>The orange current-${u} boxes are left out of the pool, because they are still moving. That is why the last columns rest on fewer cohorts.</span></div></div>`;
 }
 function question(){
-  const qt=`How many of each ${MODE==='q'?"quarter's":"month's"} new learners are still with us?`;
+  const qt=`How many learners from each ${MODE==='q'?"quarter's":"month's"} cohort are still with us?`;
   const head=`<div class="qh"><h2>${qt}</h2><button type="button" class="ib" id="ib" aria-expanded="${INFO}" aria-label="How this is worked out">i</button></div>`;
   if(!loaded)return`<div class="sec">${head}<div class="empty">Loading…</div></div>`;
   const V=compute();
@@ -255,7 +259,7 @@ function question(){
   const body=V.rows.map(r=>{
     const tds=[];for(let m=0;m<V.N;m++){const c=r.cells[m];if(!c){tds.push('<td class="na"></td>');continue;}
       const p=c.n/r.a,P=Math.round(p*100),B=V.best[m],tip=`${r.lab} cohort, ${V.unit}${m+1}: ${c.n} of ${r.a} learners active.`;
-      if(!c.now){const cr=B&&B.row===r?`<em class="cr">${CROWN('#fff')}</em>`:'';
+      if(!c.now){const cr=B&&B.row===r?`<em class="cr">${CROWN('#C9961A')}</em>`:'';
         tds.push(`<td class="c" title="${esc(tip)}" style="box-shadow:0 0 0 2.5px rgba(65,1,247,${(0.12+0.88*p).toFixed(2)}) inset">${cr}<b>${P}%</b><span>${c.n} learners</span></td>`);}
       else{const ch=!B?'<u class="dl na">no best yet</u>':p>=B.p-1e-9?`<u class="dl up">${CROWN('#B07A12')} best so far</u>`:`<u class="dl dn">&#9660; ${Math.round(B.p*100)-P} pts vs best</u>`;
         tds.push(`<td class="c now" title="${esc(tip)} Till date."><i>till date</i><b>${P}%</b><span>${c.n} learners</span>${ch}</td>`);}}
