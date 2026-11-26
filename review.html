@@ -121,7 +121,9 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,
 .u .ico{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;flex:none}
 .u .ico svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .u .tg{font-size:14px;padding:6px 14px}
-.u h3{font:800 28px/1.16 var(--f);letter-spacing:-.6px;color:#01073C;margin-top:12px}.u h3:first-child{margin-top:0}
+.u h3{font:800 28px/1.16 var(--f);letter-spacing:-.6px;color:#01073C;margin-top:0}
+/* the card's function sits right after its title */
+.u h3 .tg{display:inline-flex;vertical-align:middle;margin:-4px 0 0 14px;letter-spacing:0;font-size:14px;padding:6px 14px;position:relative;top:-1px}
 .u ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:6px}
 .u li{position:relative;padding-left:22px;font:400 19px/1.4 var(--f);color:var(--ink2)}.u li b{color:#01073C;font-weight:700}
 .u li.bul::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
@@ -427,7 +429,7 @@ const rich=ls=>(ls||[]).map(l=>{l=String(l);
   return`<li class="${b?'bul':'pln'}">${FMT.test(t)?inl(t):line(t)}</li>`;}).join('');
 function cardHtml(c,k){
   const of=+c.of||0,done=+c.done||0,pct=of?Math.round(done/of*100):0;
-  return`<div class="u a${(k||0)%4}">${c.tag?`<span class="tg">${esc(c.tag)}</span>`:''}<h3>${esc(c.title||'Untitled update')}</h3><ul>${rich(c.lines)}</ul>
+  return`<div class="u a${(k||0)%4}"><h3>${esc(c.title||'Untitled update')}${c.tag?`<span class="tg">${esc(c.tag)}</span>`:''}</h3><ul>${rich(c.lines)}</ul>
     ${of?`<div class="meter"><div class="n">${done.toLocaleString('en-IN')}<small> / ${of.toLocaleString('en-IN')}</small></div><div class="bw"><div><span>${esc(c.unit||'')}</span><b>${pct}%</b></div><div class="tr"><i style="width:${Math.min(100,pct)}%"></i></div></div></div>`:''}</div>`;
 }
 /* One slide, 1600 × 900 */
