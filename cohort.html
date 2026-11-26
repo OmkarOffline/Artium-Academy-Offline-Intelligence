@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cohort Analysis</title>
+<link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
+<link rel="apple-touch-icon" href="brand/emblem-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--v:#4101f7;--ink:#01073C;--ink2:#4A4466;--ink3:#6A6488;--ink4:#8A84A3;--line:#F1EDF9;--f:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --org:#E8833A;--gold1:#F2C14E;--gold2:#D99A1C;--wbg:#FDECEC;--wfg:#B4443A}
+body{font-family:var(--f);background:#FBFAFF;color:var(--ink2);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+[hidden]{display:none!important}
+.hero{max-width:1600px;margin:0 auto;padding:40px 48px 18px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;background:linear-gradient(90deg,#4101F7 0%,#6601FD 35%,#DD30B1 75%,#F1B6FA 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.upd{font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:8px;margin-top:6px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#3DDC97}.dot.loading{background:#F5906F;animation:pulse 1s infinite}.dot.error{background:#B0204F}
+@keyframes pulse{50%{opacity:.35}}
+.page{max-width:1600px;margin:0 auto;padding:0 48px 96px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.seg{display:inline-flex;gap:4px;background:#EFEAF9;border-radius:22px;padding:6px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.ct{position:relative;border:0;background:none;cursor:pointer;text-align:left;border-radius:17px;padding:10px 22px 12px;white-space:nowrap}
+.ct small{display:block;font:700 9.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px}.ct span{font:700 15px var(--f);color:var(--ink)}
+.ct:hover{background:rgba(255,255,255,.55)}
+.ct[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}.ct[aria-pressed="true"] small{color:#A8431E}
+.ct[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+
+/* ── The question ── */
+.sec{background:#fff;border-radius:28px;box-shadow:0 1px 2px rgba(1,7,60,.05),0 40px 80px -50px rgba(1,7,60,.3);padding-bottom:30px}
+.qh{padding:26px 30px 8px;display:flex;align-items:flex-start;gap:14px}
+.qh h2{font:700 32px/1.15 var(--f);letter-spacing:-.8px;color:var(--v)}.qh h2::after{content:"";display:block;width:44px;height:4px;border-radius:4px;background:linear-gradient(90deg,#4101F7,#DD30B1);margin-top:12px}
+.ib{flex:none;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--v);background:#fff;color:var(--v);font:italic 700 14px/1 Georgia,serif;display:grid;place-items:center;margin-top:9px;cursor:pointer;padding:0}
+.ib:hover,.ib[aria-expanded="true"]{background:var(--v);color:#fff}
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:12px 30px 6px;align-items:start}
+.dg .dc{background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 18px 36px -28px rgba(1,7,60,.4);overflow:hidden}
+.dg .dh{padding:13px 16px 11px;background:linear-gradient(135deg,#F4EEFF,#FCEFFA)}.dg .dn{display:flex;align-items:center;gap:8px;font:700 14.5px/1.3 var(--f);color:var(--ink)}.dg .dn::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--v);flex:none}
+.dg .dm{font:400 12.5px/1.45 var(--f);color:var(--ink2);margin-top:3px}.dg .db{padding:12px 16px 14px;display:flex;flex-direction:column;gap:8px;font:400 13px/1.5 var(--f);color:var(--ink2)}.dg .db b{color:var(--ink)}
+.dg .dfm{font:600 13.5px/1.5 var(--f);color:var(--ink);padding:1px 0 1px 11px;border-left:3px solid #C9B8FF}
+
+/* ── Pills and their menus ── */
+.tb{display:flex;align-items:center;margin:22px 30px 6px}
+.pills{display:flex;gap:10px;flex-wrap:wrap}.pw{position:relative}
+.pill{display:inline-flex;align-items:center;gap:8px;border:0;cursor:pointer;background:#fff;border-radius:999px;padding:9px 14px 9px 13px;font:600 13px var(--f);color:var(--ink);box-shadow:0 0 0 1.5px #D9CFFA,0 6px 14px -10px rgba(65,1,247,.5);white-space:nowrap}
+.pill:hover{box-shadow:0 0 0 1.5px #B9A6F7,0 6px 14px -10px rgba(65,1,247,.5)}
+.pill svg{width:15px;height:15px;fill:none;stroke:var(--v);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pill .chv{width:13px;height:13px;stroke:var(--ink3);stroke-width:2.6}
+.pill[aria-expanded="true"]{background:#F4EEFF;box-shadow:0 0 0 1.5px var(--v)}
+.pill .ii{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--v);color:var(--v);font:italic 700 11px/1 Georgia,serif}
+.mn{position:absolute;left:0;top:100%;margin-top:10px;z-index:30;background:#fff;border-radius:18px;box-shadow:0 0 0 1px #E6E0F3,0 28px 50px -22px rgba(1,7,60,.45);overflow:hidden;cursor:default}
+.mn .mh{padding:12px 16px 10px;background:linear-gradient(135deg,#F4EEFF,#FCEFFA);font:700 14px var(--f);color:var(--ink)}
+.mn .mb{padding:14px 16px 16px;display:flex;flex-direction:column;gap:14px}
+.mn .lb{font:700 11px var(--f);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:7px}
+.sg2{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:12px;padding:3px;flex-wrap:wrap}
+.sg2 button{border:0;background:none;cursor:pointer;padding:7px 14px;border-radius:9px;font:600 13px var(--f);color:var(--ink2);white-space:nowrap}
+.sg2 button:hover{background:rgba(255,255,255,.6)}
+.sg2 button[aria-pressed="true"]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(1,7,60,.08)}
+.mn .ft{font:400 12.5px/1.5 var(--f);color:var(--ink3);background:#F7F5FC;border-radius:10px;padding:8px 11px}
+.opt{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;text-align:left;padding:9px 11px;border-radius:12px;font:600 13.5px var(--f);color:var(--ink);cursor:pointer}
+.opt[aria-pressed="true"]{background:#F4EEFF}.opt small{display:block;font:400 12px var(--f);color:var(--ink3);margin-top:1px}
+.opt .ic{flex:none;width:30px;height:30px;border-radius:9px;background:#EFEAF9;display:grid;place-items:center}
+.opt .ic svg{width:15px;height:15px;fill:none;stroke:var(--v);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.opt:disabled{color:#A9A4BC;cursor:default}.opt:disabled .ic svg{stroke:#B9B2D3}
+.opt .sn{margin-left:auto;font:700 10px var(--f);letter-spacing:.08em;text-transform:uppercase;color:#8C84AD;background:#EFEAF9;border-radius:6px;padding:3px 7px}
+.lr{display:flex;align-items:center;gap:12px;font:500 13px/1.4 var(--f);color:var(--ink2)}.lr b{color:var(--ink)}.lr .sw{flex:0 0 46px;display:grid;place-items:center}
+.lr .sw u{display:block;width:34px;height:20px;border-radius:7px;background:#fff;box-shadow:0 0 0 2.5px var(--org) inset}
+.lr .sw .cb{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold1),var(--gold2));display:grid;place-items:center}
+.lr .sw .wb{background:var(--wbg);color:var(--wfg);border-radius:7px;padding:3px 8px;font:700 11px var(--f)}
+.lr .sw .a1,.lr .sw .a2{display:block;width:34px;height:20px;border-radius:7px}
+.lr .sw .a1{box-shadow:0 0 0 2.5px rgba(65,1,247,.2) inset}.lr .sw .a2{box-shadow:0 0 0 2.5px #4101F7 inset}
+
+/* ── The grid ── */
+.tw{overflow-x:auto;padding:0 0 6px}
+table{border-collapse:separate;border-spacing:5px 24px;margin:0 24px}
+th.ch{font:800 13px var(--f);letter-spacing:.04em;color:var(--ink4);padding:8px 4px 0;text-align:center}
+th.hd{font:700 11px var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);padding:8px 4px 0;text-align:left;white-space:nowrap}
+thead th{vertical-align:bottom}
+th.rl{text-align:left;padding:6px 14px 6px 6px;min-width:150px;white-space:nowrap;vertical-align:middle}th.rl b{font:700 15px var(--f);color:var(--ink);display:block}
+th.rl em.wt{display:inline-block;font:700 10.5px var(--f);font-style:normal;background:var(--wbg);color:var(--wfg);border-radius:7px;padding:3px 8px;margin-top:5px;white-space:nowrap}
+td.ad{text-align:center;font:800 18px var(--f);color:var(--ink);background:#F7F5FC;border-radius:12px;width:84px;min-width:84px}
+td.c{position:relative;border-radius:12px;text-align:center;height:76px;width:84px;min-width:84px;background:#fff;color:var(--ink)}
+td.c b{display:block;font:800 19px/1.1 var(--f)}td.c span{display:block;font:500 11px var(--f);color:var(--ink2);margin-top:2px;white-space:nowrap}
+td.c em.cr{position:absolute;top:-7px;right:-5px;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold1),var(--gold2));display:grid;place-items:center;box-shadow:0 3px 8px -2px rgba(160,110,10,.55),0 0 0 2px #fff}
+td.c.now{box-shadow:0 0 0 2.5px var(--org) inset}
+td.c.now i{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font:700 8.5px var(--f);font-style:normal;letter-spacing:.1em;text-transform:uppercase;background:var(--org);color:#fff;border-radius:6px;padding:2px 7px;white-space:nowrap}
+td.c u.dl{position:absolute;left:50%;top:calc(100% + 5px);transform:translateX(-50%);text-decoration:none;font:700 10.5px var(--f);white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+td.c u.dn{color:var(--wfg)}td.c u.up{color:#8A5B0A}td.c u.na{color:var(--ink3)}
+td.na{background:transparent}
+tr.sp td{height:0;padding:0}
+td.tt{height:76px;width:84px;text-align:center;background:#fff;border-radius:12px;box-shadow:0 0 0 1.5px #D9CFFA}td.tt b{display:block;font:800 19px/1.1 var(--f);color:var(--v)}td.tt span{display:block;font:500 11px var(--f);color:var(--ink3);margin-top:2px}
+th.tl{text-align:left;padding:6px 10px 6px 6px;position:relative;white-space:nowrap}
+th.tl .big{display:inline-flex;align-items:center;gap:8px;font:800 21px var(--f);color:var(--v)}
+.ib2{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--v);background:#fff;color:var(--v);font:italic 700 12px/1 Georgia,serif;cursor:pointer;padding:0}
+.ib2:hover,.ib2[aria-expanded="true"]{background:var(--v);color:#fff}
+th.tl .mn{top:auto;bottom:100%;margin:0 0 10px;width:500px;white-space:normal;text-align:left}
+th.tl .mn .mb{gap:9px;font:400 13px/1.5 var(--f);color:var(--ink2)}th.tl .mn .mb b{color:var(--ink);font-weight:700}
+.eg{background:#F7F5FC;border-radius:12px;padding:10px 13px;font:600 13px/1.5 var(--f);color:var(--ink)}
+.empty{padding:40px;text-align:center;color:var(--ink4);font:500 14px var(--f)}
+@media(max-width:900px){.hero{padding:24px 16px 12px;flex-wrap:wrap}.upd{white-space:normal}h1{font-size:34px;letter-spacing:-1px}.page{padding:0 16px 96px}.qh h2{font-size:24px}.qh{padding:22px 18px 6px}.dg{padding-left:18px;padding-right:18px}.tb{margin-left:18px;margin-right:18px}table{margin:0 12px}th.tl .mn{width:300px}.mn{max-width:calc(100vw - 40px)}}
+</style>
+</head>
+<body>
+<div class="hero"><div><h1>Cohort Analysis</h1></div>
+  <div class="upd"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div></div>
+<div class="page">
+  <div class="bar"><nav class="seg" id="centre" aria-label="Centre"></nav></div>
+  <div id="out"></div>
+</div>
+<script>
+const CENTRES=[{city:'Chennai',name:'Alwarpet'},{city:'Chennai',name:'Thoraipakkam'},{city:'Bangalore',name:'Borewell Road'}];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WATCH=8;   // points below the All cohorts row, at the same age, that mark a cohort Watch
+function parseDate(str){
+  if(!str)return null;const s=String(str).trim();
+  const a=s.match(/^(\d{1,2})-([A-Za-z]+)-(\d{2,4})$/);
+  if(a){const m=MON.findIndex(x=>x.toLowerCase()===a[2].slice(0,3).toLowerCase());const y=a[3].length===2?2000+ +a[3]:+a[3];if(m>=0)return new Date(y,m,+a[1]);}
+  const b=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(b){const y=b[3].length===2?2000+ +b[3]:+b[3];return new Date(y,+b[2]-1,+b[1]);}
+  const i=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(i)return new Date(+i[1],+i[2]-1,+i[3]);
+  const d=new Date(s);return isNaN(d)?null:d;
+}
+const valid=d=>d&&d.getFullYear()>=2020?d:null;
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const now=new Date(),TODAY=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+const mi=d=>d.getFullYear()*12+d.getMonth(),LAST=mi(TODAY);
+const yy=k=>String(Math.floor(k/12)).slice(2),mLab=k=>MON[k%12]+' '+yy(k);
+async function fetchTab(centre,tab){const rows=await ArtiumAuth.fetchRows(centre,tab);return rows.slice(2).filter(r=>r[0]&&r[0].toLowerCase()!=='date');}
+const store=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}};
+
+/* ── State ── */
+let DATA={},loaded=false,OPEN=null,INFO=false;
+let selCentre=(()=>{const v=store('artium_co_centre');return v==='All'||CENTRES.some(c=>c.name===v)?v:'Alwarpet';})();
+let MODE=store('artium_co_mode')==='q'?'q':'m';
+let YT=store('artium_co_yt')==='fy'?'fy':'cy';
+const curStart=yt=>yt==='fy'?(TODAY.getMonth()>=3?TODAY.getFullYear():TODAY.getFullYear()-1):TODAY.getFullYear();
+let YEAR=(()=>{const v=+store('artium_co_year');return v>=2020&&v<=curStart(YT)?v:curStart(YT);})();
+const yLab=(y,yt)=>yt==='fy'?'F.Y. '+y+'–'+String(y+1).slice(2):'C.Y. '+y;
+const yLong=(y,yt)=>yt==='fy'?'F.Y. '+y+'–'+String(y+1).slice(2)+' (Apr '+y+' to Mar '+(y+1)+')':'Calendar year '+y+' (Jan to Dec)';
+
+/* ── Learners: every admission, renewal and package end, per learner ──
+   A learner is active in a month when (admissions + renewals) up to that month outnumber the packages that have ended by then,
+   the same counting as the Monthly Active Learners page, taken one learner at a time. */
+const keyOf=r=>String(r[3]||'').trim().toUpperCase()||('~'+String(r[4]||'').trim().toLowerCase()+'|'+String(r[7]||'').replace(/\D/g,'').slice(-10));
+function learners(){
+  const by=new Map(),get=k=>by.get(k)||by.set(k,{adm:[],ren:[],end:[],first:null}).get(k);
+  const endOf=r=>{const t=valid(parseDate(r[23]));return t&&t<=TODAY?mi(t):null;};
+  (selCentre==='All'?CENTRES.map(c=>c.name):[selCentre]).forEach(n=>{const d=DATA[n];if(!d)return;
+    d.fs.forEach(r=>{const L=get(keyOf(r)),t=valid(parseDate(r[0])),e=endOf(r);if(e!=null)L.end.push(e);if(!t)return;L.adm.push(mi(t));
+      if(!L.first||t<L.first.t)L.first={t,r};});
+    d.rn.forEach(r=>{const L=get(keyOf(r)),t=valid(parseDate(r[0])),e=endOf(r);if(t)L.ren.push(mi(t));if(e!=null)L.end.push(e);});});
+  return by;
+}
+const active=(L,k)=>{let n=0;L.adm.forEach(x=>{if(x<=k)n++;});L.ren.forEach(x=>{if(x<=k)n++;});L.end.forEach(x=>{if(x<=k)n--;});return n>0;};
+// Cohort month of a learner: their first Fresh Sales entry. A first entry that is a Cross-Sale (an extra course for an existing learner) is left out.
+const cohortOf=L=>!L.first||/cross/i.test(String(L.first.r[10]||''))?null:mi(L.first.t);
+
+/* ── The grid for the chosen period ── */
+function compute(){
+  const by=learners(),start=YEAR*12+(YT==='fy'?3:0),Q=MODE==='q',span=Q?3:1,maxC=Q?4:12;
+  const groups=[];
+  for(let g=0;g<(Q?4:12);g++){const a=start+g*span;if(a>LAST)break;groups.push({g,a,b:a+span-1,ls:[]});}
+  by.forEach(L=>{const c=cohortOf(L);if(c==null||c<start||c>start+11)return;const G=groups.find(x=>c>=x.a&&c<=x.b);if(G)G.ls.push(L);});
+  const rows=groups.filter(G=>G.ls.length).map(G=>{
+    const cells=[];
+    for(let m=0;m<maxC;m++){const a=G.a+m*span;if(a>LAST)break;const k=Math.min(a+span-1,LAST);
+      cells.push({n:G.ls.reduce((t,L)=>t+(active(L,k)?1:0),0),now:LAST>=a&&LAST<=a+span-1});}
+    const lab=Q?MON[G.a%12]+' – '+MON[G.b%12]+' '+yy(G.b):mLab(G.a);
+    return{lab,a:G.ls.length,cells};});
+  const N=Math.max(0,...rows.map(r=>r.cells.length));
+  // Best and the All cohorts row: finished months only (the current month is still moving)
+  const best=[],pool=[];
+  for(let m=0;m<N;m++){const S=rows.filter(r=>r.cells[m]&&!r.cells[m].now);
+    if(!S.length){best.push(null);pool.push(null);continue;}
+    const top=Math.max(...S.map(r=>r.cells[m].n/r.a)),w=S.filter(r=>Math.abs(r.cells[m].n/r.a-top)<1e-9);
+    best.push({p:top,row:w.length===1?w[0]:null});
+    const num=S.reduce((t,r)=>t+r.cells[m].n,0),den=S.reduce((t,r)=>t+r.a,0);pool.push({num,den,p:num/den,from:S[0].lab,to:S[S.length-1].lab,k:S.length});}
+  rows.forEach(r=>{r.watch=null;r.cells.forEach((c,m)=>{if(c.now&&pool[m]){const gap=(c.n/r.a-pool[m].p)*100;if(gap<=-WATCH)r.watch=gap;}});});
+  return{rows,N,best,pool,Q,unit:Q?'Q':'M'};
+}
+
+/* ── Icons ── */
+const I={grid:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
+  cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  chv:'<svg class="chv" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+  ret:'<svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16"/><path d="M7 9l4 3 3-2 5 4"/></svg>',
+  coin:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9 9h6M9 12h6M11 9c2.5 0 2.5 6 0 6l3 3"/></svg>',
+  age:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.3"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M14.5 19c.3-2 1.3-3.4 2.5-3.4s2.6 1.2 3 3.4"/></svg>',
+  course:'<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>'};
+const CROWN=c=>`<svg viewBox="0 0 24 24" width="13" height="13"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 10H5L3 8z" fill="${c}"/></svg>`;
+const VIEWS=[['ret','Retention','Share of each cohort still active',I.ret,true],['col','Collections','Money collected from each cohort',I.coin,false],
+  ['age','Age groups','Cohorts split by age group',I.age,false],['crs','Courses','Cohorts split by course',I.course,false]];
+
+/* ── Render ── */
+function years(){
+  let lo=curStart(YT);
+  CENTRES.forEach(c=>{const d=DATA[c.name];if(!d)return;d.fs.forEach(r=>{const t=valid(parseDate(r[0]));if(!t)return;const y=YT==='fy'?(t.getMonth()>=3?t.getFullYear():t.getFullYear()-1):t.getFullYear();if(y<lo)lo=y;});});
+  const out=[];for(let y=lo;y<=curStart(YT);y++)out.push(y);return out;
+}
+function toolbar(){
+  const view=`<div class="mn" style="width:310px"><div class="mh">Show</div><div class="mb" style="gap:4px;padding:10px">${VIEWS.map(v=>
+    `<button type="button" class="opt" aria-pressed="${v[0]==='ret'}"${v[4]?'':' disabled'}><span class="ic">${v[3]}</span><span>${v[1]}<small>${v[2]}</small></span>${v[4]?'':'<span class="sn">Soon</span>'}</button>`).join('')}</div></div>`;
+  const per=`<div class="mn" style="width:340px"><div class="mh">Period</div><div class="mb">
+    <div><div class="lb">View</div><div class="sg2"><button type="button" data-mode="m" aria-pressed="${MODE==='m'}">Monthly</button><button type="button" data-mode="q" aria-pressed="${MODE==='q'}">Quarterly</button></div></div>
+    <div><div class="lb">Year</div><div class="sg2">${years().map(y=>`<button type="button" data-year="${y}" aria-pressed="${y===YEAR}">${YT==='fy'?y+'–'+String(y+1).slice(2):y}</button>`).join('')}</div></div>
+    <div><div class="lb">Year type</div><div class="sg2"><button type="button" data-yt="cy" aria-pressed="${YT==='cy'}">C.Y.</button><button type="button" data-yt="fy" aria-pressed="${YT==='fy'}">F.Y.</button></div></div>
+    <div class="ft">C.Y. is the calendar year, Jan to Dec. F.Y. is the financial year, Apr to Mar, so F.Y. ${YEAR}–${String(YEAR+1).slice(2)} runs Apr ${YEAR} to Mar ${YEAR+1}.</div></div></div>`;
+  const leg=`<div class="mn" style="width:430px"><div class="mh">How to read the boxes</div><div class="mb" style="gap:13px">
+    <div class="lr"><span class="sw"><u></u></span><span><b>Current ${MODE==='q'?'quarter':'month'}.</b> Orange outline. It is still moving, so a note below it shows how far it is from the best cohort.</span></div>
+    <div class="lr"><span class="sw"><i class="cb">${CROWN('#fff')}</i></span><span><b>Best at that age.</b> The cohort that kept the highest share at that ${MODE==='q'?'quarter':'month'} since joining.</span></div>
+    <div class="lr"><span class="sw"><b class="wb">Watch</b></span><span><b>Needs attention.</b> The current ${MODE==='q'?'quarter':'month'} is ${WATCH} or more points below the All cohorts row.</span></div>
+    <div class="lr"><span class="sw"><i class="a1"></i></span><span><b>Pale outline.</b> A low share of the cohort is still active.</span></div>
+    <div class="lr"><span class="sw"><i class="a2"></i></span><span><b>Dark outline.</b> A high share of the cohort is still active.</span></div></div></div>`;
+  const pill=(k,inner,menu)=>`<div class="pw"><button type="button" class="pill" data-open="${k}" aria-expanded="${OPEN===k}">${inner}</button>${OPEN===k?menu:''}</div>`;
+  return`<div class="tb"><div class="pills">${pill('view',I.grid+'<span>Retention</span>'+I.chv,view)}${pill('per',I.cal+`<span>${MODE==='q'?'Quarterly':'Monthly'} · ${yLab(YEAR,YT)}</span>`+I.chv,per)}${pill('leg','<i class="ii">i</i><span>Legend</span>',leg)}</div></div>`;
+}
+function defs(V){
+  const u=V.Q?'quarter':'month',U=V.unit,f=V.rows[0];
+  const eg=f?`The ${esc(f.lab)} cohort is the ${f.a} learners whose first admission was in ${V.Q?'that quarter':f.lab.replace(/ (\d\d)$/,' 20$1')}. It stays those same ${f.a} learners in every later ${u}, and no one is added.`:'';
+  return`<div class="dg">
+  <div class="dc"><div class="dh"><div class="dn">Cohort</div><div class="dm">Everyone who took their first admission in the same ${u}.</div></div><div class="db"><span>${eg}</span><span>The first admission is the learner's first Fresh Sales entry. Pre-launch admissions are included. A Cross-Sale, an extra course for an existing learner, does not start a new cohort.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">${U}1, ${U}2, ${U}3</div><div class="dm">${V.Q?'Quarters':'Months'} since joining.</div></div><div class="db"><span><b>${U}1</b> is the ${u} the learner was admitted, <b>${U}2</b> is the next ${u}, and so on. Reading down a column compares cohorts at the same age.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Active learner</div><div class="dm">Counted the same way as Monthly Active Learners.</div></div><div class="db"><div class="dfm">Package remains unexpired at ${u} end, or renewed in the ${u}</div><span>A learner whose package expired and who did not renew is not active. If they return later, they count as active again.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Percent and number</div><div class="dm">What each box shows.</div></div><div class="db"><span>The big figure is the share of the cohort still active. The small one is how many learners that is.</span><span>A darker violet outline means higher retention. An orange outline is the current ${u}, so it is still moving.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Crown and best so far</div><div class="dm">Comparing cohorts at the same age.</div></div><div class="db"><span>The crown marks the cohort that kept the highest share at that ${u} since joining, among finished ${u}s. When two cohorts tie, neither gets the crown.</span><span>Below a current-${u} box, a note shows how far it is from that best, or that it is the best so far.</span></div></div>
+  <div class="dc"><div class="dh"><div class="dn">Watch</div><div class="dm">A cohort that needs attention.</div></div><div class="db"><span>A cohort is marked Watch when its current ${u} is ${WATCH} or more points below the All cohorts row at the same age.</span></div></div></div>`;
+}
+function allPop(V){
+  const u=V.Q?'quarter':'month',U=V.unit;
+  let m=-1;for(let i=V.N-1;i>=0;i--){if(V.pool[i]&&V.pool[i].k>=2&&i<=3){m=i;break;}}
+  if(m<0)m=V.pool.findIndex(p=>p);
+  const p=m>=0?V.pool[m]:null;
+  const eg=p?`<div class="eg">Example, ${U}${m+1}: <b>${p.num} of ${p.den} = ${Math.round(p.p*100)}%</b>. ${p.k===1?'One cohort ('+esc(p.from)+') has':p.k+' cohorts ('+esc(p.from)+' to '+esc(p.to)+') have'} completed their ${U}${m+1}, together admitting ${p.den} learners, and ${p.num} of them were active in their ${U}${m+1}.</div>`:'';
+  return`<div class="mn"><div class="mh">How to read All cohorts</div><div class="mb"><span>This row pools every cohort above into one benchmark. For each ${u} since joining, it divides the learners still active by the learners admitted, across all cohorts that have completed that ${u}.</span>
+    ${eg}<span><b>Use it as a yardstick.</b> If a cohort is above this figure in a column, it kept more of its learners than a typical cohort did at that age. If it is below, it kept fewer.</span>
+    <span>The orange current-${u} boxes are left out of the pool, because they are still moving. That is why the last columns rest on fewer cohorts.</span></div></div>`;
+}
+function question(){
+  const qt=`How many of each ${MODE==='q'?"quarter's":"month's"} new learners are still with us?`;
+  const head=`<div class="qh"><h2>${qt}</h2><button type="button" class="ib" id="ib" aria-expanded="${INFO}" aria-label="How this is worked out">i</button></div>`;
+  if(!loaded)return`<div class="sec">${head}<div class="empty">Loading…</div></div>`;
+  const V=compute();
+  if(!V.rows.length)return`<div class="sec">${head}${INFO?defs(V):''}${toolbar()}<div class="empty">No admissions in ${esc(yLong(YEAR,YT))} for this centre.</div></div>`;
+  const pct=(n,a)=>Math.round(n/a*100);
+  const body=V.rows.map(r=>{
+    const tds=[];for(let m=0;m<V.N;m++){const c=r.cells[m];if(!c){tds.push('<td class="na"></td>');continue;}
+      const p=c.n/r.a,P=Math.round(p*100),B=V.best[m],tip=`${r.lab} cohort, ${V.unit}${m+1}: ${c.n} of ${r.a} learners active.`;
+      if(!c.now){const cr=B&&B.row===r?`<em class="cr">${CROWN('#fff')}</em>`:'';
+        tds.push(`<td class="c" title="${esc(tip)}" style="box-shadow:0 0 0 2.5px rgba(65,1,247,${(0.12+0.88*p).toFixed(2)}) inset">${cr}<b>${P}%</b><span>${c.n} learners</span></td>`);}
+      else{const ch=!B?'<u class="dl na">no best yet</u>':p>=B.p-1e-9?`<u class="dl up">${CROWN('#B07A12')} best so far</u>`:`<u class="dl dn">&#9660; ${Math.round(B.p*100)-P} pts vs best</u>`;
+        tds.push(`<td class="c now" title="${esc(tip)} Till date."><i>till date</i><b>${P}%</b><span>${c.n} learners</span>${ch}</td>`);}}
+    const w=r.watch!=null?`<em class="wt">Watch · ${Math.round(-r.watch)} pts below yardstick</em>`:'';
+    return`<tr><th class="rl" scope="row"><b>${esc(r.lab)}</b>${w}</th><td class="ad">${r.a}</td>${tds.join('')}</tr>`;}).join('');
+  const avg=V.pool.map(p=>p?`<td class="tt"><b>${Math.round(p.p*100)}%</b><span>${p.num} of ${p.den}</span></td>`:'<td class="tt"><b>–</b><span>no finished cohort yet</span></td>').join('');
+  const allLab='All '+(YT==='fy'?yLab(YEAR,YT):YEAR)+' cohorts';
+  const hd=Array.from({length:V.N},(_,m)=>`<th class="ch" scope="col">${V.unit}${m+1}</th>`).join('');
+  return`<div class="sec">${head}${INFO?defs(V):''}${toolbar()}
+    <div class="tw"><table><thead><tr><th class="hd">${V.Q?'Quarter cohort':'Cohort'}</th><th class="hd" style="text-align:center">Admissions</th>${hd}</tr></thead>
+    <tbody>${body}<tr><th class="tl" scope="row"><span class="big">${esc(allLab)}<button type="button" class="ib2" data-open="all" aria-expanded="${OPEN==='all'}" aria-label="How to read this row">i</button></span>${OPEN==='all'?allPop(V):''}</th><td></td>${avg}</tr></tbody></table></div></div>`;
+}
+function render(){
+  document.querySelectorAll('.ct').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===selCentre)));
+  document.getElementById('out').innerHTML=question();
+}
+
+/* ── Events ── */
+document.getElementById('centre').innerHTML=[{name:'All',label:'All centres',city:'All '+CENTRES.length+' centres'}].concat(CENTRES.map(c=>({name:c.name,label:c.name,city:c.city})))
+  .map(o=>`<button type="button" class="ct" data-c="${o.name}" aria-pressed="false"><small>${o.city}</small><span>${o.label}</span></button>`).join('');
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const c=t.closest('.ct');if(c){selCentre=c.dataset.c;store('artium_co_centre',selCentre);render();return;}
+  if(t.closest('#ib')){INFO=!INFO;render();return;}
+  const md=t.closest('[data-mode]');if(md){MODE=md.dataset.mode;store('artium_co_mode',MODE);render();return;}
+  const yr=t.closest('[data-year]');if(yr){YEAR=+yr.dataset.year;store('artium_co_year',YEAR);render();return;}
+  const yt=t.closest('[data-yt]');if(yt){if(yt.dataset.yt!==YT){YT=yt.dataset.yt;store('artium_co_yt',YT);
+    // keep roughly the same year: F.Y. 2026–27 for C.Y. 2026, and back
+    YEAR=Math.min(YEAR,curStart(YT));store('artium_co_year',YEAR);}render();return;}
+  const o=t.closest('[data-open]');if(o){OPEN=OPEN===o.dataset.open?null:o.dataset.open;render();return;}
+  if(t.closest('.mn'))return;
+  if(OPEN){OPEN=null;render();}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&OPEN){OPEN=null;render();}});
+async function load(){
+  render();
+  try{
+    const res=await Promise.all(CENTRES.map(c=>Promise.all([fetchTab(c.name,'Fresh Sales'),fetchTab(c.name,'Renewals')])));
+    CENTRES.forEach((c,i)=>{const mine=rows=>rows.filter(x=>!(x[2]||'').trim()||(x[2]||'').trim()===c.name);DATA[c.name]={fs:mine(res[i][0]),rn:mine(res[i][1])};});
+    loaded=true;
+    const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('dot').className='dot';render();
+  }catch(e){document.getElementById('updated').textContent='Error: '+e.message;document.getElementById('dot').className='dot error';}
+}
+load();
+</script>
+</body>
+</html>
