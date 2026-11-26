@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Offline Review</title>
+<link rel="icon" type="image/png" sizes="32x32" href="brand/emblem-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="brand/emblem-64.png">
+<link rel="apple-touch-icon" href="brand/emblem-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="auth.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
+:root{
+  --pink:#dd30b1;--violet:#6601fd;--violet2:#4101f7;--purple:#7b2cf0;
+  --ink:#120e2b;--ink2:#4a4466;--ink3:#6a6488;--ink4:#7a7196;--line:#dcd5ee;--edge:#ece4ff;
+  --tvbg:#f1eafe;--tvfg:#6b3fc7;--bad:#B4443A;
+  --f:'Onest',system-ui,sans-serif;
+  --sh:0 1px 2px rgba(18,14,43,.04),0 18px 40px -26px rgba(65,1,247,.35);
+}
+body{font-family:var(--f);background:#F6F3FC;color:var(--ink2);-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font-family:inherit}
+/* ── The page: the Home look, soft colour clouds behind dark headings ── */
+html,body{background:#FBF8FF}
+.studio{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.studio i{position:absolute;border-radius:50%;filter:blur(64px)}
+.studio .k1{width:640px;height:640px;left:-160px;top:-280px;background:#F1B6FA;opacity:.7}
+.studio .k2{width:600px;height:600px;right:-140px;top:-220px;background:#9BB6FF;opacity:.65}
+.studio .k3{width:500px;height:500px;right:26%;top:110px;background:#FFC9B0;opacity:.45}
+.hero,.page{position:relative;z-index:1}
+.hero{padding:40px 48px 0}
+.hin{max-width:1504px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.kk{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.75);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:999px;padding:9px 16px 9px 14px;font:700 12.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);box-shadow:0 10px 30px -18px rgba(65,1,247,.5)}
+.kk .dot{width:8px;height:8px}
+h1{font:800 64px/1 var(--f);letter-spacing:-2.4px;color:#01073C;margin-top:22px}
+h1 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,#F5906F 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:4px}
+.sub{font:500 18px/26px var(--f);color:var(--ink2);margin-top:12px}
+.hr{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#3DDC97;box-shadow:0 0 0 4px rgba(61,220,151,.18)}.dot.loading{background:#F5906F;box-shadow:none;animation:pulse 1s infinite}.dot.error{background:#B0204F;box-shadow:none}
+@keyframes pulse{50%{opacity:.35}}
+.vt{display:inline-flex;gap:3px;background:rgba(255,255,255,.6);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:5px;box-shadow:0 0 0 1px rgba(255,255,255,.8),0 18px 40px -24px rgba(1,7,60,.35)}
+.vt button{border:0;background:none;padding:9px 16px;border-radius:13px;font:600 13.5px var(--f);color:var(--ink2);cursor:pointer}
+.vt button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 10px 22px -14px rgba(1,7,60,.4)}
+.page{max-width:1600px;margin:0 auto;padding:30px 48px 64px}
+.bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:14px;flex-wrap:wrap}
+.seg{display:inline-flex;gap:4px;background:rgba(239,234,249,.85);border-radius:22px;padding:6px;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.sp{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;border:0;background:none;padding:10px 22px 12px;border-radius:17px;cursor:pointer;white-space:nowrap;text-align:left}
+.sp small{font:700 9.5px var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.sp span{font:700 15px var(--f);color:#01073C}
+.sp:hover{background:rgba(255,255,255,.55)}
+.sp[aria-pressed="true"]{background:#fff;box-shadow:0 1px 2px rgba(1,7,60,.06),0 14px 30px -18px rgba(201,80,42,.55)}
+.sp[aria-pressed="true"] small{color:#A8431E}
+.sp[aria-pressed="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:3px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#C9502A,#F5906F)}
+.sp .rm{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#fff;color:var(--ink3);font:700 10px/18px var(--f);text-align:center;box-shadow:0 1px 3px rgba(18,14,43,.2)}
+.addsp{border:1.5px dashed #CDBDF7;background:none;border-radius:15px;padding:0 16px;font:700 13.5px var(--f);color:var(--violet2);cursor:pointer;margin-left:4px;white-space:nowrap}
+.br{display:flex;gap:12px;align-items:center}
+.per{display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:6px;box-shadow:0 0 0 1.5px #E6DEFB,0 12px 26px -18px rgba(65,1,247,.5)}
+.mb{width:36px;height:36px;border:0;border-radius:50%;background:#F4EEFF;display:grid;place-items:center;color:var(--violet2);font:700 18px var(--f);cursor:pointer}
+.mb:disabled{opacity:.35;cursor:default}
+.pl{min-width:190px;text-align:center;font:700 14.5px var(--f);color:#01073C}.pl small{display:block;font:500 11px var(--f);color:var(--ink4)}
+.pres{display:flex;align-items:center;gap:9px;height:50px;padding:0 22px;border:0;border-radius:999px;background:linear-gradient(135deg,#4101F7,#DD30B1);color:#fff;font:700 14.5px var(--f);box-shadow:0 14px 28px -12px rgba(102,1,253,.7);cursor:pointer}
+.pres svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round}
+.pres:disabled{opacity:.5;cursor:default}
+.note{background:rgba(255,255,255,.9);border-radius:16px;padding:12px 16px;margin-bottom:14px;font-size:14px;color:var(--ink2);box-shadow:inset 4px 0 0 #4101F7,0 12px 26px -20px rgba(65,1,247,.5)}
+.note b{color:#01073C}
+.sbar{display:flex;align-items:center;justify-content:space-between;margin:4px 4px 14px;gap:12px}
+.sbar .who{font:500 13.5px var(--f);color:var(--ink3)}.sbar .who b{color:#01073C;font-weight:700}
+.snav{display:flex;align-items:center;gap:10px;font:700 13.5px var(--f);color:#01073C}
+.snav .mb{width:34px;height:34px;background:#fff;box-shadow:0 0 0 1.5px #E6DEFB}
+/* slide thumbnails under the slideshow */
+.strip{display:flex;gap:14px;margin:20px auto 0;width:fit-content;max-width:100%;overflow-x:auto;padding:4px 4px 8px;scrollbar-width:thin}
+.strip button{flex:none;width:176px;height:99px;border:0;padding:0;border-radius:14px;overflow:hidden;position:relative;cursor:pointer;background:#fff;box-shadow:0 0 0 1.5px #E6DEFB}
+.strip button.on{box-shadow:0 0 0 3px #4101F7}
+.strip .slide{transform:scale(.11)}
+/* The slide: 1600 × 900, scaled to fit */
+.stage{position:relative;width:100%;margin:0 auto;border-radius:28px;overflow:hidden;box-shadow:0 2px 4px rgba(1,7,60,.04),0 50px 90px -50px rgba(65,1,247,.55);background:#FBF8FF}
+.slide{width:1600px;height:900px;position:absolute;left:0;top:0;transform-origin:0 0;background:#FBF8FF;display:flex;flex-direction:column;overflow:hidden}
+.slide>.cl{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.slide>.c1{width:720px;height:720px;left:-260px;top:-380px;background:#F1B6FA;opacity:.7}
+.slide>.c2{width:680px;height:680px;right:-240px;top:-360px;background:#9BB6FF;opacity:.65}
+.slide>.c3{width:520px;height:520px;right:22%;top:-300px;background:#FFC9B0;opacity:.5}
+.slide>.c4{width:620px;height:620px;left:30%;bottom:-520px;background:#C9B5FF;opacity:.35}
+.s-top{position:relative;display:flex;justify-content:space-between;align-items:flex-start;padding:40px 70px 0;gap:30px}
+.s-eb{display:inline-flex;align-items:center;gap:12px;background:rgba(255,255,255,.78);border-radius:999px;padding:10px 20px 10px 16px;font:700 14px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--ink2);box-shadow:0 12px 30px -18px rgba(65,1,247,.5)}
+.s-eb i{width:9px;height:9px;border-radius:50%;background:#3DDC97;box-shadow:0 0 0 5px rgba(61,220,151,.18)}.s-eb b{color:#4101F7}
+.s-h{font:800 62px/1 var(--f);letter-spacing:-2.4px;color:#01073C}
+.s-h em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,#F5906F 100%);-webkit-background-clip:text;background-clip:text;color:transparent;padding-right:4px}
+.s-wk{font:500 21px var(--f);color:var(--ink3);margin-top:12px}
+.logo{display:flex;align-items:center;gap:12px;flex:none}
+.logo img{display:block;height:44px;width:auto}
+.s-b{position:relative;flex:1;display:flex;gap:34px;padding:28px 70px 0;min-height:0}
+.s-f{position:relative;display:flex;justify-content:space-between;align-items:center;padding:20px 70px 28px;font:600 15px var(--f);color:var(--ink4)}
+.s-f .dots{display:flex;gap:7px}.s-f .dots i{width:28px;height:6px;border-radius:6px;background:rgba(65,1,247,.12)}.s-f .dots i.on{width:44px;background:linear-gradient(90deg,#4101F7,#DD30B1)}
+/* text box */
+.tx{flex:0 0 560px;border-radius:32px;background:rgba(255,255,255,.9);padding:38px 42px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 2px 4px rgba(1,7,60,.04),0 34px 60px -36px rgba(65,1,247,.45)}
+.tg{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#EEE8FE;color:#4101F7;font:700 15px var(--f)}
+.tx h3{font:800 38px/1.12 var(--f);letter-spacing:-1px;color:#01073C;margin-top:20px}
+.tx ul{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:12px}
+.tx li{position:relative;padding-left:24px;font:400 22px/1.45 var(--f);color:var(--ink2)}.tx li b{color:#01073C;font-weight:700}
+.tx li::before{content:"";position:absolute;left:0;top:13px;width:10px;height:10px;border-radius:3px;background:linear-gradient(135deg,#4101F7,#DD30B1)}
+.tx .big{margin-top:auto;display:flex;align-items:baseline;gap:12px;padding-top:24px;border-top:1.5px solid #F1EDF9}
+.tx .big b{font:800 64px/1 var(--f);letter-spacing:-2px;background:linear-gradient(90deg,#4101F7,#DD30B1);-webkit-background-clip:text;background-clip:text;color:transparent}.tx .big span{font:600 19px/1.3 var(--f);color:var(--ink3)}
+/* photos and videos */
+.mg{flex:1;display:grid;gap:24px;min-width:0;min-height:0}
+.md{position:relative;border-radius:30px;overflow:hidden;background:#F1ECFC;min-height:0;border:6px solid #fff;box-shadow:0 34px 60px -36px rgba(1,7,60,.45)}
+.md img,.md video,.md iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.md img{object-fit:cover}.md.contain img{object-fit:contain}
+.md video{object-fit:contain;background:#000}
+.md .ph{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;font:600 18px var(--f);color:var(--ink4);text-align:center}
+.md.empty{border:3px dashed #CDBDF7;background:rgba(255,255,255,.7);box-shadow:none}.md.empty .ph{color:var(--violet2)}
+.md.vthumb{background:linear-gradient(135deg,#4101F7,#DD30B1)}.md.vthumb .ph{color:#fff}
+.md .play{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;margin:0 auto}
+.md .play svg{width:34px;height:34px;fill:var(--violet2);margin-left:6px}
+/* update cards: each takes the height of its text, in two columns; a slide that is too full continues on the next one */
+.cards{flex:1;display:grid;gap:24px;min-height:0}
+.u{position:relative;border-radius:30px;background:rgba(255,255,255,.9);padding:26px 32px 28px;display:flex;flex-direction:column;overflow:hidden;min-height:0;box-shadow:0 2px 4px rgba(1,7,60,.04),0 34px 60px -36px rgba(65,1,247,.45)}
+.u .top{display:flex;align-items:center;gap:14px}
+.u .ico{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;flex:none}
+.u .ico svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.u .tg{font-size:14px;padding:6px 14px}
+.u h3{font:800 28px/1.16 var(--f);letter-spacing:-.6px;color:#01073C;margin-top:14px}
+.u ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.u li{position:relative;padding-left:22px;font:400 19px/1.4 var(--f);color:var(--ink2)}.u li b{color:#01073C;font-weight:700}
+.u li::before{content:"";position:absolute;left:0;top:11px;width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
+.flow{flex:1;display:flex;gap:22px;align-items:flex-start;align-self:flex-start;min-width:0}
+.flow .fcol{flex:1;display:flex;flex-direction:column;gap:22px;min-width:0}
+.flow .u{overflow:visible}.flow .u h3{font-size:calc(28px*var(--z,1))}.flow .u li{font-size:calc(19px*var(--z,1))}
+.flow .meter{margin-top:16px}
+.s-h .cont{font:600 24px var(--f);letter-spacing:0;color:var(--ink4);margin-left:12px;-webkit-text-fill-color:var(--ink4)}
+.spill{margin-top:10px;font:500 13px var(--f);color:var(--ink3)}
+.meter{margin-top:auto;padding-top:14px;display:flex;align-items:flex-end;gap:20px}
+.meter .n{font:800 38px/1 var(--f);letter-spacing:-1px;color:#01073C}.meter .n small{font:600 19px var(--f);color:var(--ink4);letter-spacing:0}
+.meter .bw{flex:1}.meter .bw div{display:flex;justify-content:space-between;font:600 15px var(--f);color:var(--ink3);margin-bottom:9px}.meter .bw div b{font-weight:800;color:var(--accd)}
+.meter .tr{height:12px;border-radius:12px;background:rgba(65,1,247,.08);overflow:hidden}.meter .tr i{display:block;height:100%;border-radius:12px;background:var(--accg)}
+/* one colour per card, from the Home stickers */
+.a0{--acc:#4101F7;--accd:#4101F7;--accg:linear-gradient(90deg,#4101F7,#6601FD)}.a0 .ico{background:linear-gradient(135deg,#4101F7,#6601FD)}.a0 .tg{background:#EEE8FE;color:#4101F7}
+.a1{--acc:#DD30B1;--accd:#A3187F;--accg:linear-gradient(90deg,#DD30B1,#F17AD0)}.a1 .ico{background:linear-gradient(135deg,#DD30B1,#F17AD0)}.a1 .tg{background:#FCEAF7;color:#A3187F}
+.a2{--acc:#C9502A;--accd:#A8431E;--accg:linear-gradient(90deg,#C9502A,#F5906F)}.a2 .ico{background:linear-gradient(135deg,#C9502A,#F5906F)}.a2 .tg{background:#FFF1EA;color:#A8431E}
+.a3{--acc:#2F4DB8;--accd:#2F4DB8;--accg:linear-gradient(90deg,#2F4DB8,#7C9BFF)}.a3 .ico{background:linear-gradient(135deg,#2F4DB8,#7C9BFF)}.a3 .tg{background:#EAF0FF;color:#2F4DB8}
+.s-empty{flex:1;display:grid;place-items:center;font:500 26px var(--f);color:var(--ink4);border:3px dashed #E6DEFB;border-radius:30px;margin-bottom:6px;background:rgba(255,255,255,.5)}
+/* The opener for Present: the sub-page's name, the stickers swirl away, then the first slide arrives (about 3 seconds) */
+.istage{position:fixed;inset:0;z-index:40;background:#FBF8FF;animation:iOut .5s ease 2.9s forwards}
+.istage .slide{background:#FBF8FF}
+.istage .ttl{position:absolute;left:0;right:0;top:330px;text-align:center;animation:ttlOut .8s cubic-bezier(.6,0,.4,1) 2.05s forwards}
+.istage .ttl h2{font:800 170px/.92 var(--f);letter-spacing:-8px;color:#01073C;animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+.istage .ttl h2 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,#F5906F 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.istage .ttl .city{font:700 22px var(--f);letter-spacing:.42em;text-transform:uppercase;color:var(--ink3);margin-top:26px;animation:rise .8s cubic-bezier(.2,.8,.2,1) .15s both}
+.istage .orbit{position:absolute;left:800px;top:450px;width:0;height:0;animation:spin 1.5s cubic-bezier(.55,0,.35,1) 1.35s forwards}
+.istage .ok{position:absolute;animation:pop .7s cubic-bezier(.2,1.4,.4,1) var(--d) both}
+.istage .stk{display:grid;place-items:center;box-shadow:0 34px 56px -28px rgba(1,7,60,.45);transform:rotate(var(--r));animation:bob 1.6s ease-in-out infinite alternate}
+.istage .stk svg{width:52%;height:52%;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes rise{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes bob{to{transform:translateY(-10px) rotate(calc(var(--r) + 4deg))}}
+@keyframes spin{0%{transform:rotate(0) scale(1);opacity:1}70%{opacity:1}100%{transform:rotate(220deg) scale(.08);opacity:0}}
+@keyframes ttlOut{to{transform:scale(1.12);opacity:0;filter:blur(10px)}}
+@keyframes iOut{to{opacity:0;visibility:hidden}}
+body.fs.intro #stage .slide{opacity:0;animation:inS .75s cubic-bezier(.2,.8,.2,1) 2.65s forwards}
+@keyframes inS{from{opacity:0;translate:0 24px}to{opacity:1;translate:0 0}}
+@media (prefers-reduced-motion:reduce){.istage{display:none}body.fs.intro #stage .slide{opacity:1;animation:none}}
+/* The text editor: a small toolbar (bold, italics, underline) over a box that shows the formatting */
+.rtw{display:flex;flex-direction:column;gap:0}
+.rtb{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0;background:#fff;padding:6px}
+.rtb button{height:30px;min-width:32px;padding:0 10px;border:0;border-radius:8px;background:none;font:600 13px var(--f);color:var(--ink2);cursor:pointer}
+.rtb button:hover{background:#F1ECFC}.rtb button.on{background:#E8E0FF;color:var(--violet2)}
+.rtb .bb{font-weight:800}.rtb .bi{font-style:italic;font-family:Georgia,serif}.rtb .bu{text-decoration:underline}
+.rte{min-height:132px;max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:0 0 12px 12px;background:#F6F3FC;padding:10px 12px;font:400 14px/1.5 var(--f);color:var(--ink);outline:none;white-space:pre-wrap;word-break:break-word}
+.card-e .rte{min-height:92px}
+.rte:focus{border-color:var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12);background:#fff}
+.rte h1{font:600 16px/1.5 var(--f);margin:0;color:var(--ink)}.rte div,.rte p{margin:0}
+.rte:empty:before{content:attr(data-ph);color:var(--ink4)}
+/* formatted lines on the slides: a gap, a heading kept from older text, italics and underline */
+.s-b li.sp{height:.9em;padding:0}.s-b li.sp::before{display:none}
+.s-b li.h1{padding-left:0;font-weight:700;color:#01073C}.s-b li.h1::before{display:none}
+.s-b li i{font-style:italic}.s-b li u{text-decoration:underline;text-underline-offset:3px}
+/* Challenge, Insight, Initiative: the challenge (or objective) as a band across the top, then what we learnt and what we did */
+.ci{flex:1;display:flex;flex-direction:column;gap:24px;min-height:0;min-width:0}
+.band{position:relative;flex:none;border-radius:30px;padding:26px 150px 28px 44px;background:linear-gradient(115deg,#FFE9DD 0%,#FFF5EF 55%,rgba(255,255,255,.92) 100%);box-shadow:inset 6px 0 0 #E0673A,0 34px 60px -36px rgba(201,80,42,.5);overflow:hidden}
+.band .lb{display:flex;align-items:center;gap:12px;font:800 14px var(--f);letter-spacing:.18em;text-transform:uppercase;color:#A8431E}
+.band .lb i{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#C9502A,#F5906F);display:grid;place-items:center;flex:none}
+.band .lb i svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.band .qm{position:absolute;right:34px;top:50%;transform:translateY(-50%);font:800 230px/1 var(--f);color:rgba(201,80,42,.13);pointer-events:none}
+.band ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.band li{position:relative;font:600 calc(29px*var(--z,1))/1.32 var(--f);letter-spacing:-.4px;color:#01073C}
+.band li b{font-weight:800}
+.band.obj{background:linear-gradient(115deg,#EEE7FF 0%,#F7F3FF 55%,rgba(255,255,255,.92) 100%);box-shadow:inset 6px 0 0 #4101F7,0 34px 60px -36px rgba(65,1,247,.45)}
+.band.obj .lb{color:#4101F7}.band.obj .lb i{background:linear-gradient(135deg,#4101F7,#6601FD)}
+.band.obj .qm{font-size:0;width:190px;height:190px;right:28px}.band.obj .qm svg{width:100%;height:100%;fill:none;stroke:rgba(65,1,247,.12);stroke-width:1.6}
+.pair{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:30px;min-height:0;position:relative}
+.ic2{position:relative;border-radius:30px;background:rgba(255,255,255,.92);padding:26px 32px;display:flex;flex-direction:column;min-height:0;overflow:hidden;box-shadow:0 2px 4px rgba(1,7,60,.04),0 34px 60px -36px rgba(65,1,247,.45)}
+.ic2 .lb{display:flex;align-items:center;gap:12px;font:800 14px var(--f);letter-spacing:.18em;text-transform:uppercase;color:var(--accd)}
+.ic2 .lb i{width:38px;height:38px;border-radius:12px;background:var(--accg);display:grid;place-items:center;flex:none}
+.ic2 .lb i svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.ic2 ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.ic2 li{position:relative;padding-left:22px;font:400 calc(21px*var(--z,1))/1.42 var(--f);color:var(--ink2)}.ic2 li b{color:#01073C;font-weight:700}
+.ic2 li::before{content:"";position:absolute;left:0;top:calc(12px*var(--z,1));width:9px;height:9px;border-radius:3px;background:var(--acc);opacity:.85}
+.pair .arw{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;display:grid;place-items:center;z-index:2;box-shadow:0 10px 24px -12px rgba(65,1,247,.6)}
+.pair .arw svg{width:20px;height:20px;fill:none;stroke:#4101F7;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ci .empty{color:var(--ink4);font-style:italic}
+.lead{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:12px;padding:3px}
+.lead button{border:0;background:none;cursor:pointer;padding:8px 16px;border-radius:9px;font:600 13px var(--f);color:var(--ink2)}
+.lead button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.08)}
+/* Edit view */
+.ed{display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;align-items:start}
+.rail{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:14px;display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+.rt{font:700 10.5px var(--f);letter-spacing:.16em;text-transform:uppercase;color:var(--ink4);padding:4px 4px 0}
+.th{border-radius:14px;border:1.5px solid var(--edge);padding:6px;background:#fff;cursor:pointer;text-align:left}
+.th:hover{border-color:#CDBDF7}.th.on{border-color:var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12)}
+.th .mini{width:200px;height:112.5px;position:relative;overflow:hidden;border-radius:8px;border:1px solid var(--edge)}
+.th .mini .slide{transform:scale(.125)}
+.th small{display:flex;justify-content:space-between;gap:6px;font:600 12px var(--f);color:var(--ink2);padding:7px 3px 2px}.th small em{font-style:normal;color:var(--ink4);font-weight:600}
+.th.off .mini{opacity:.45}
+.addsl{border:1.5px dashed #CDBDF7;background:none;border-radius:14px;padding:14px;font:700 13.5px var(--f);color:var(--violet2);cursor:pointer}
+.form{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh);margin-top:18px;padding:20px 24px}
+.fh{display:flex;align-items:center;gap:10px;padding-bottom:16px;border-bottom:1px solid var(--edge);margin-bottom:18px;flex-wrap:wrap}
+.fh b{font:800 17px var(--f);color:var(--ink)}.fh span{font-size:13px;color:var(--ink4)}
+.fh .sp2{margin-left:auto}
+.ic{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer;font:700 14px var(--f)}
+.ic:disabled{opacity:.35;cursor:default}.ic.del{color:var(--bad)}
+.chk{display:inline-flex;align-items:center;gap:8px;font:600 13px var(--f);color:var(--ink2);cursor:pointer;margin-right:6px}
+.chk input{width:16px;height:16px;accent-color:#4101f7}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.fc{display:flex;flex-direction:column;gap:14px;min-width:0}
+.fl{display:flex;flex-direction:column;gap:7px;font:600 12.5px var(--f);color:var(--ink2)}
+.fl small{font-weight:500;color:var(--ink4)}
+.in,.fl select,.fl textarea{height:42px;border:1px solid var(--line);border-radius:12px;background:#F6F3FC;padding:0 12px;font:500 14px var(--f);color:var(--ink);width:100%}
+.fl textarea{height:132px;padding:10px 12px;line-height:1.5;resize:vertical}
+.in:focus,.fl select:focus,.fl textarea:focus{outline:none;border-color:var(--violet2);box-shadow:0 0 0 3px rgba(65,1,247,.12);background:#fff}
+.row{display:flex;gap:10px;align-items:center}.row .in.num{width:90px}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.slot{border-radius:14px;border:1.5px dashed #CDBDF7;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--violet2);font:700 13px var(--f);background:#FBF9FF;padding:10px;text-align:center}
+.slot button.up{border:0;background:none;color:var(--violet2);font:700 13.5px var(--f);cursor:pointer}
+.slot small{font:500 11.5px var(--f);color:var(--ink4)}
+.slot.full{border:1px solid var(--line);background:#fff;align-items:stretch;justify-content:flex-start;padding:8px}
+.slot .pv{height:96px;border-radius:10px;overflow:hidden;position:relative;background:#F1ECFC}
+.slot .pv img{width:100%;height:100%;object-fit:cover;display:block}
+.slot .pv .vi{position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#2B0256,#4101f7);color:#fff;font:700 13px var(--f)}
+.slot .nm{font:600 12px var(--f);color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;margin-top:6px}
+.slot .ctl{display:flex;gap:6px;align-items:center;margin-top:6px}
+.slot .ctl select{flex:1;height:30px;border:1px solid var(--line);border-radius:8px;background:#F6F3FC;font:500 12px var(--f);color:var(--ink);padding:0 6px;min-width:0}
+.slot .ctl .ic{width:30px;height:30px;font-size:12px}
+.prog{width:100%;height:6px;border-radius:6px;background:#EEE8FB;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--pink))}
+.card-e{border:1px solid var(--edge);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;background:#FCFBFF}
+.card-e .row .in{flex:1}
+.card-e textarea{height:92px}
+.addc{border:1.5px dashed #CDBDF7;background:none;border-radius:12px;padding:12px;font:700 13.5px var(--f);color:var(--violet2);cursor:pointer}
+.save{position:sticky;bottom:16px;z-index:5;display:flex;align-items:center;gap:10px;margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 40px -20px rgba(18,14,43,.45);padding:12px 16px}
+.save span{margin-right:auto;font:500 13.5px var(--f);color:var(--ink2)}.save .msg{color:var(--bad)}
+.btn{height:40px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:#fff;font:700 13.5px var(--f);color:var(--ink);cursor:pointer}
+.btn.pri{background:linear-gradient(135deg,var(--violet),var(--violet2));color:#fff;border:0}.btn:disabled{opacity:.5;cursor:default}
+.ro{padding:40px;text-align:center;font-size:15px;color:var(--ink3);background:#fff;border:1px solid var(--line);border-radius:22px}
+/* template picker and small dialogs */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(18,14,43,.5);display:grid;place-items:center;padding:20px}
+.dlg{width:min(1080px,100%);max-height:calc(100vh - 40px);overflow:auto;background:#fff;border-radius:26px;padding:28px 30px 26px;box-shadow:0 40px 80px -30px rgba(0,0,0,.5)}
+.dlg h3{font:800 24px var(--f);color:var(--ink)}.dlg p{font-size:14px;color:var(--ink3);margin-top:6px}
+.tpls{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px}
+.tp{border:1.5px solid var(--edge);border-radius:18px;padding:10px 10px 12px;background:#fff;cursor:pointer;text-align:left}
+.tp:hover{border-color:#CDBDF7}.tp[aria-pressed="true"]{border-color:var(--violet2);box-shadow:0 0 0 4px rgba(65,1,247,.12)}
+.tp .pv{height:128px;border-radius:12px;background:#FAF8FE;padding:10px;display:flex;gap:7px}
+.tp .pv .t{flex:0 0 42%;border-radius:8px;background:#E9E0FD;padding:10px 9px;display:flex;flex-direction:column;gap:6px}.tp .pv .t i{height:6px;border-radius:4px;background:#C9B5FA}.tp .pv .t i:first-child{width:60%;background:#9B7BF5;height:8px}
+.tp .pv .g{flex:1;display:grid;gap:7px}.tp .pv .g div{border-radius:8px;display:grid;place-items:center}
+.tp .pv .g svg{width:22px;height:22px;fill:#fff;opacity:.9}
+.tp b{display:block;font:700 14px var(--f);color:var(--ink);margin-top:10px}.tp small{display:block;font-size:12px;color:var(--ink4);margin-top:3px}
+.dlg .ft{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+.dlg.sm{width:440px}.dlg.sm .in{margin-top:16px}
+/* Presenting */
+body.fs{overflow:hidden;background:#FBF8FF}
+body.fs .hero,body.fs .bar,body.fs .strip,body.fs .note,body.fs .sbar,body.fs .ed,body.fs #ro{display:none!important}
+body.fs .page{margin:0;padding:0;max-width:none}
+body.fs .stage{position:fixed;inset:0;width:auto;height:auto!important;border-radius:0;box-shadow:none;background:#FBF8FF}
+body.fs .studio,body.fs .strip{display:none!important}
+.fsb{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:6px;background:rgba(18,14,43,.82);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:6px;color:#fff;font:600 13px var(--f);transition:opacity .3s;max-width:calc(100vw - 40px);overflow-x:auto}
+.fsb.idle{opacity:0;pointer-events:none}
+.fsb button{border:0;background:none;color:#cec8ea;padding:8px 14px;border-radius:11px;font:600 13px var(--f);cursor:pointer;white-space:nowrap}
+.fsb button em{font-style:normal;opacity:.7;margin-left:6px;font-size:12px}
+.fsb button.on{background:#fff;color:var(--violet2)}
+.fsb .nv{background:rgba(255,255,255,.1);color:#fff}
+.fsb .sep{width:1px;height:24px;background:rgba(255,255,255,.18);margin:0 6px;flex:none}
+@media (max-width:1100px){.ed{grid-template-columns:1fr}.rail{position:static;flex-direction:row;overflow-x:auto;max-height:none}.th{flex:none}.fg{grid-template-columns:1fr}.tpls{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:760px){.hero{padding:24px 16px 0}.hin{flex-direction:column;align-items:flex-start}.hr{align-items:flex-start}h1{font-size:40px;letter-spacing:-1.4px}.page{padding:22px 16px 48px}.br{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="studio" aria-hidden="true"><i class="k1"></i><i class="k2"></i><i class="k3"></i></div>
+<div class="hero"><div class="hin"><div><div class="kk"><span class="dot loading" id="dot"></span><span id="updated">Loading…</span></div><h1>Weekly Offline <em>Review.</em></h1><div class="sub" id="psub"></div></div>
+  <div class="hr">
+  <div class="vt" id="vt" role="group" aria-label="View" hidden><button type="button" data-v="show" aria-pressed="true">Slideshow</button><button type="button" data-v="edit" aria-pressed="false">Edit</button></div></div></div></div>
+<div class="page">
+  <div class="bar"><nav class="seg" id="subs" aria-label="Sub-pages"></nav>
+    <div class="br"><div class="per"><button class="mb" id="prev" aria-label="Previous week">‹</button><div class="pl" id="wlabel">—<small>Friday to Thursday</small></div><button class="mb" id="next" aria-label="Next week">›</button></div>
+      <button class="pres" id="present" type="button"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Present all</button></div></div>
+  <div class="note" id="note" hidden></div>
+  <div class="sbar" id="sbar"><span class="who" id="who"></span><span class="snav" id="snav"><button class="mb" id="sprev" aria-label="Previous slide">‹</button><span id="slabel">—</span><button class="mb" id="snext" aria-label="Next slide">›</button></span></div>
+  <div id="showwrap"><div class="stage" id="stage"><div class="slide" id="slide"></div></div><div class="strip" id="strip"></div></div>
+  <div class="ed" id="ed" hidden></div>
+</div>
+<div class="fsb" id="fsb" hidden></div>
+<div id="intro"></div>
+<div id="dlg"></div>
+
+<script>
+const MONTH_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TAGS=['Academics','Learner Experience','Finance','Hiring','Marketing','Operations','People Management','Product / Tech','Social Media','Design & Content','Teacher Experience'];
+const CITY={Alwarpet:'Chennai',Thoraipakkam:'Chennai','Borewell Road':'Bangalore'};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+/* Templates: [name, short description, text box?, kind, fewest, most] */
+const TPL={upd:['Updates','Up to 4 update cards, as on Key Updates.',0,'',0,0],t1p:['Text and 1 photo','One text box beside a photo.',1,'image',1,1],t2p:['Text and 2 photos','One text box beside two photos.',1,'image',2,2],
+  t1v:['Text and 1 video','One text box beside a video.',1,'video',1,1],t2v:['Text and 2 videos','One text box beside two videos.',1,'video',2,2],
+  ponly:['Photos only','2 to 4 photos, with a title.',0,'image',2,4],vonly:['Videos only','2 to 4 videos, with a title.',0,'video',2,4],
+  cii:['Challenge, Insight, Initiative','One topic: the challenge or objective, what we learnt and what we did.',0,'',0,0]};
+const TPL_ORDER=['upd','cii','t1p','t2p','t1v','t2v','ponly','vonly'];
+
+/* Weeks run Friday to Thursday, named by their Friday */
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const friday=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()-5+7)%7));return x;};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x;};
+const THIS_WEEK=friday(new Date());
+let WEEK=THIS_WEEK;
+const wkShort=w=>{const e=addD(w,6);return w.getMonth()===e.getMonth()?`${w.getDate()} – ${e.getDate()} ${MON[e.getMonth()]} ${e.getFullYear()}`:`${w.getDate()} ${MON[w.getMonth()]} – ${e.getDate()} ${MON[e.getMonth()]} ${e.getFullYear()}`;};
+const wkLong=w=>{const e=addD(w,6);return`Friday ${w.getDate()}${w.getMonth()!==e.getMonth()?' '+MONTH_FULL[w.getMonth()]:''} to Thursday ${e.getDate()} ${MONTH_FULL[e.getMonth()]} ${e.getFullYear()}`;};
+const wkSlide=w=>{const e=addD(w,6);return`Week of ${w.getDate()}${w.getMonth()!==e.getMonth()?' '+MONTH_FULL[w.getMonth()]:''} to ${e.getDate()} ${MONTH_FULL[e.getMonth()]} ${e.getFullYear()}`;};
+const fmtW=k=>{const [y,m,d]=k.split('-').map(Number);return`${d} ${MON[m-1]} ${y}`;};
+
+/* ── State ── */
+let DATA=null,SUB=(()=>{try{return localStorage.getItem('artium_review_sub')||'key';}catch(e){return'key';}})(),VIEW='show',SL=0;
+let SUBSET=false,DRAFT=null,DIRTY=false,SEL=0,busy=false,UPLOADING=0,PICK=null;
+const pageOf=id=>(DATA&&DATA.pages.find(p=>p.id===id))||null;
+const deckOf=id=>(DATA&&DATA.decks[id])||{slides:[]};
+const canAny=()=>!!DATA&&(DATA.canManage||DATA.pages.some(p=>p.canEdit));
+const shown=sl=>sl.filter(s=>!s.hide).flatMap(spill);
+/* An update slide that is too full: first the text gets a little smaller (down to 88%), then the cards that still don't fit
+   move to a next slide marked "(continued)". A card longer than a whole slide is split between its lines. */
+const SPILL=new Map();let MEAS=null;
+function fitsAt(s){
+  if(!MEAS){const d=document.createElement('div');d.style.cssText='position:fixed;left:-20000px;top:0;width:1600px;height:900px;visibility:hidden;pointer-events:none';
+    d.innerHTML='<div class="slide"></div>';document.body.appendChild(d);MEAS=d.firstChild;}
+  MEAS.innerHTML=slideHtml({name:''},s,0,2);
+  const b=MEAS.querySelector('.s-b'),f=MEAS.querySelector('.flow');
+  if(s.tpl==='cii'){const ci=MEAS.querySelector('.ci');return !ci||([...MEAS.querySelectorAll('.ic2')].every(x=>x.scrollHeight<=x.clientHeight+2)&&ci.scrollHeight<=b.clientHeight+2);}
+  return !f||f.offsetHeight<=b.clientHeight-4;
+}
+function spill(s){
+  if(s.tpl==='cii'){const key=JSON.stringify(s);if(SPILL.has(key))return SPILL.get(key);let out=null;
+    for(const z of [1,.94,.88]){const t=Object.assign({},s,{z});if(fitsAt(t)){out=[t];break;}}
+    out=out||[Object.assign({},s,{z:.88})];SPILL.set(key,out);return out;}
+  if(s.tpl!=='upd')return[s];
+  const key=JSON.stringify(s);if(SPILL.has(key))return SPILL.get(key);
+  const cs=(s.cards||[]).filter(c=>c.title||(c.lines||[]).length),Z=[1,.94,.88];
+  let out=null;
+  for(const z of Z){const t=Object.assign({},s,{z});if(fitsAt(t)){out=[t];break;}}
+  if(!out){
+    const parts=[];let cur=[];
+    const ok=cards=>fitsAt(Object.assign({},s,{cards,z:1}));
+    const queue=cs.slice();
+    while(queue.length){
+      const c=queue.shift();
+      if(ok(cur.concat(c))){cur.push(c);continue;}
+      if(cur.length){parts.push(cur);cur=[];queue.unshift(c);continue;}
+      // one card alone is too long: keep as many of its lines as fit, the rest continues
+      const L=c.lines||[];let k=L.length-1;
+      while(k>1&&!ok([Object.assign({},c,{lines:L.slice(0,k),of:null})]))k--;
+      parts.push([Object.assign({},c,{lines:L.slice(0,Math.max(1,k)),of:null})]);
+      if(L.length>Math.max(1,k))queue.unshift(Object.assign({},c,{title:(c.title||'')+' (continued)',lines:L.slice(Math.max(1,k))}));
+    }
+    if(cur.length)parts.push(cur);
+    out=parts.map((p,i)=>Object.assign({},s,{cards:p,z:1,cont:i>0}));
+  }
+  SPILL.set(key,out);return out;
+}
+
+/* ── Photos and videos ── */
+const LOCAL={},IMG={};
+async function loadImg(id){
+  if(IMG[id])return;IMG[id]='…';
+  try{const j=await ArtiumAuth.call('reviewMedia',{id});if(j.error)throw new Error(j.error);IMG[id]='data:'+j.mime+';base64,'+j.data;}
+  catch(e){IMG[id]='x';}
+  paint();
+}
+const PLAY='<div class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>';
+function media(m,k,kind,thumb){
+  if(!m)return`<div class="md empty"><div class="ph">${kind==='video'?'Video':'Photo'} ${k+1}</div></div>`;
+  const fit=m.fit==='contain'?' contain':'';
+  if(m.kind==='video'){
+    if(thumb)return`<div class="md vthumb"><div class="ph">${PLAY}</div></div>`;
+    if(LOCAL[m.id])return`<div class="md"><video src="${LOCAL[m.id]}" controls playsinline></video></div>`;
+    return`<div class="md"><iframe src="https://drive.google.com/file/d/${encodeURIComponent(m.id)}/preview" allow="autoplay; fullscreen" allowfullscreen title="Video ${k+1}"></iframe></div>`;
+  }
+  const src=LOCAL[m.id]||(IMG[m.id]&&IMG[m.id].length>2?IMG[m.id]:'');
+  if(src)return`<div class="md${fit}"><img src="${src}" alt=""></div>`;
+  if(IMG[m.id]==='x')return`<div class="md"><div class="ph">This photo couldn't be loaded.</div></div>`;
+  loadImg(m.id);return`<div class="md"><div class="ph">Loading the photo…</div></div>`;
+}
+// How the photos or videos share the space: one fills it; two sit side by side, or one above the other when both are wide;
+// three: one large beside two; four: two by two
+function grid(ms,n,withText){
+  if(n===1)return'';
+  if(n===2){const wide=ms.filter(Boolean).length===2&&ms.every(m=>(+m.w||16)/(+m.h||9)>=1.25);return wide&&withText?'grid-template-rows:1fr 1fr':'grid-template-columns:1fr 1fr';}
+  if(n===3)return'grid-template-columns:1.45fr 1fr;grid-template-rows:1fr 1fr';
+  return'grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr';
+}
+// a small icon per update card, by its tag
+const TICO={Academics:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>','Learner Experience':'<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/>',
+  Finance:'<circle cx="12" cy="12" r="8"/><path d="M9 9h6M9 12h6M11 9c2.5 0 2.5 6 0 6l3 3"/>',Hiring:'<circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.6-3.6 3.2-5.5 6.5-5.5"/><path d="M18 14v6M15 17h6"/>',
+  Marketing:'<path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a3 3 0 0 1 0 6M19 6a7 7 0 0 1 0 12"/>',Operations:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  'People Management':'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="10" r="2.3"/><path d="M3.5 19c.6-3.3 2.8-5 5.5-5s4.9 1.7 5.5 5M14.5 19c.3-2 1.3-3.4 2.5-3.4s2.6 1.2 3 3.4"/>',
+  'Product / Tech':'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>','Social Media':'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  'Design & Content':'<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>','Teacher Experience':'<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 6v7M10 6v7M14 6v7M18 6v7"/>',
+  '':'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 5.9L12 16.4 6.7 19.3l1.2-5.9L3.4 9.3l6-.7z"/>'};
+// the slide title, with its last word in the brand gradient and a full stop
+const titleHtml=t=>{t=String(t||'').trim();const dot=/[.!?]$/.test(t)?'':'.';const m=t.match(/^(.*?)(\S+)$/);return m?esc(m[1])+'<em>'+esc(m[2])+dot+'</em>':esc(t);};
+const line=t=>{const m=String(t).match(/^([^:.]{1,28}):\s*(.*)$/);return m?`<b>${esc(m[1])}:</b> ${esc(m[2])}`:esc(t);};
+/* Formatted text: a line starting with "# " is a heading; <b>, <i> and <u> are kept, everything else is shown as typed; an empty line is a gap of one line */
+const FMT=/<\/?(b|i|u)>/;
+const inl=t=>esc(t).replace(/&lt;(\/?)(b|i|u)&gt;/g,'<$1$2>');
+const rich=ls=>(ls||[]).map(l=>{l=String(l);
+  if(!l.trim())return'<li class="sp"></li>';
+  if(l.startsWith('# '))return`<li class="h1">${inl(l.slice(2))}</li>`;
+  return`<li>${FMT.test(l)?inl(l):line(l)}</li>`;}).join('');
+function cardHtml(c,k){
+  const of=+c.of||0,done=+c.done||0,pct=of?Math.round(done/of*100):0;
+  return`<div class="u a${(k||0)%4}"><div class="top"><span class="ico"><svg viewBox="0 0 24 24">${TICO[c.tag]||TICO['']}</svg></span>${c.tag?`<span class="tg">${esc(c.tag)}</span>`:''}</div><h3>${esc(c.title||'Untitled update')}</h3><ul>${rich(c.lines)}</ul>
+    ${of?`<div class="meter"><div class="n">${done.toLocaleString('en-IN')}<small> / ${of.toLocaleString('en-IN')}</small></div><div class="bw"><div><span>${esc(c.unit||'')}</span><b>${pct}%</b></div><div class="tr"><i style="width:${Math.min(100,pct)}%"></i></div></div></div>`:''}</div>`;
+}
+/* One slide, 1600 × 900 */
+function slideHtml(page,s,i,n,thumb){
+  const T=TPL[s.tpl]||TPL.upd;
+  const title=s.title||(s.tpl==='upd'?(page.id==='key'?'Key updates':'Updates'):'Untitled slide');
+  let body;
+  if(s.tpl==='cii'){
+    const ob=s.lead==='objective',bx=(ls,ph)=>(ls||[]).length?rich(ls):`<li class="empty">${ph}</li>`;
+    const QM=ob?'<span class="qm"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2"/></svg></span>':'<span class="qm">?</span>';
+    const LI=ob?'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/>':'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.9"/><path d="M12 17h.01"/>';
+    body=`<div class="ci" style="--z:${s.z||1}"><div class="band${ob?' obj':''}">${QM}<div class="lb"><i><svg viewBox="0 0 24 24">${LI}</svg></i>The ${ob?'objective':'challenge'}</div><ul>${bx(s.c1,thumb?'':'What were we up against?')}</ul></div>
+      <div class="pair"><div class="ic2 a0"><div class="lb"><i><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1.1 1.3 1.1 2.2h5c0-.9.5-1.7 1.1-2.2A6 6 0 0 0 12 3z"/></svg></i>Insight</div><ul>${bx(s.c2,thumb?'':'What did we learn about it?')}</ul></div>
+      <span class="arw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      <div class="ic2 a3"><div class="lb"><i><svg viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg></i>Initiative</div><ul>${bx(s.c3,thumb?'':'What did we do about it?')}</ul></div></div></div>`;}
+  else if(s.tpl==='upd'){const cs=(s.cards||[]).filter(c=>c.title||(c.lines||[]).length);
+    const h=cs.length===1?1:Math.ceil(cs.length/2),cols=cs.length===1?[cs]:[cs.slice(0,h),cs.slice(h)];
+    body=cs.length?`<div class="flow" style="--z:${s.z||1}">${cols.map((c,ci)=>`<div class="fcol">${c.map((x,k)=>cardHtml(x,ci?h+k:k)).join('')}</div>`).join('')}</div>`
+      :`<div class="s-empty">Add update cards to this slide.</div>`;}
+  else{
+    const ms=[],cnt=Math.max(T[4],Math.min(T[5],(s.media||[]).length+(thumb?0:0)));
+    for(let k=0;k<Math.max(cnt,(s.media||[]).length);k++)ms.push((s.media||[])[k]||null);
+    const shownMs=VIEW==='edit'||thumb?ms:ms.filter(Boolean);
+    const big=shownMs.length===3?'grid-row:1/3;':'';
+    const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
+    const tx=T[2]?`<div class="tx">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${rich(s.lines)}</ul>${s.bn?`<div class="big"><b>${esc(s.bn)}</b><span>${esc(s.bl||'')}</span></div>`:''}</div>`:'';
+    body=tx+mg||`<div class="s-empty">Nothing on this slide yet.</div>`;
+  }
+  const dots=n>1&&n<=14?`<span class="dots">${Array.from({length:n},(_,k)=>`<i${k===i?' class="on"':''}></i>`).join('')}</span>`:n>1?`<span>${i+1} of ${n}</span>`:'';
+  return`<i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i><i class="cl c4"></i><div class="s-top"><div><div class="s-h">${titleHtml(title)}${s.cont?'<span class="cont">(continued)</span>':''}</div><div class="s-wk">${wkSlide(WEEK)}</div></div>
+    <div class="logo"><img src="brand/lockup-violet.png" alt="Artium Academy" width="125" height="44"></div></div>
+    <div class="s-b">${body}</div><div class="s-f"><span>Artium Academy · Offline.</span>${dots}</div>`;
+}
+
+/* ── Rendering ── */
+function renderSubs(){
+  const el=document.getElementById('subs');if(!DATA){el.innerHTML='';return;}
+  const edit=VIEW==='edit';
+  el.innerHTML=DATA.pages.map(p=>`<button type="button" class="sp" data-sub="${esc(p.id)}" aria-pressed="${p.id===SUB}"><small>${p.id==='key'?'All centres':p.centre?(CITY[p.id]||'Centre'):'Added'}</small><span>${esc(p.name)}</span>${edit&&DATA.canManage&&!p.fixed?`<i class="rm" data-rm="${esc(p.id)}" title="Remove this sub-page">✕</i>`:''}</button>`).join('')
+    +(edit&&DATA.canManage?'<button type="button" class="addsp" id="addsp">+ Sub-page</button>':'');
+}
+function render(){
+  document.getElementById('psub').textContent=wkLong(WEEK);
+  document.getElementById('wlabel').innerHTML=wkShort(WEEK)+'<small>Friday to Thursday</small>';
+  document.getElementById('next').disabled=WEEK>=addD(THIS_WEEK,7);
+  const vt=document.getElementById('vt');vt.hidden=!canAny();
+  vt.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===VIEW));
+  if(DATA&&!SUBSET){SUBSET=true;let st=null;try{st=localStorage.getItem('artium_review_sub');}catch(e){}
+    const own=DATA.pages.filter(p=>p.canEdit&&p.centre);if(!st&&own.length===1&&!DATA.canManage)SUB=own[0].id;}
+  if(DATA&&!pageOf(SUB))SUB=DATA.pages[0].id;
+  renderSubs();
+  const edit=VIEW==='edit',page=pageOf(SUB),deck=deckOf(SUB),note=document.getElementById('note');
+  document.getElementById('present').disabled=!DATA;
+  // brought forward from an earlier week
+  note.hidden=!(DATA&&deck.carried&&(edit?page&&page.canEdit&&!DIRTY:true));
+  if(DATA&&deck.carried)note.innerHTML=edit?`These are the slides from the week of <b>${fmtW(deck.carried)}</b>, brought forward. Change what's new and press Save to keep them for this week.`
+    :`Nothing has been saved for ${esc(page.name)} this week yet, so these are the slides from the week of <b>${fmtW(deck.carried)}</b>.`;
+  document.getElementById('showwrap').hidden=edit;document.getElementById('sbar').hidden=edit;document.getElementById('ed').hidden=!edit;
+  if(edit)renderEditor();else renderShow();
+}
+function renderShow(){
+  const page=pageOf(SUB),sl=page?shown(deckOf(SUB).slides):[];
+  SL=Math.max(0,Math.min(SL,sl.length-1));
+  const d=deckOf(SUB);
+  document.getElementById('who').innerHTML=!DATA?'':page.name+(d.by&&!d.carried?` · last saved by <b>${esc(d.by)}</b>${d.at?' on '+new Date(d.at).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):''}`:'');
+  document.getElementById('snav').hidden=sl.length<2;
+  document.getElementById('slabel').textContent=`Slide ${SL+1} of ${sl.length}`;
+  document.getElementById('sprev').disabled=SL<=0;document.getElementById('snext').disabled=SL>=sl.length-1;
+  const el=document.getElementById('slide');
+  if(!DATA)el.innerHTML='<div class="s-empty" style="margin:60px">Loading…</div>';
+  else if(!sl.length)el.innerHTML=slideHtml(page,{tpl:'none',title:page.name},0,0).replace(/<div class="s-b">[\s\S]*?<\/div><div class="s-f">/,`<div class="s-b"><div class="s-empty">No slides for ${esc(page.name)} this week${page.canEdit?' yet. Switch to Edit to add them':''}.</div></div><div class="s-f">`);
+  else el.innerHTML=slideHtml(page,sl[SL],SL,sl.length);
+  const strip=document.getElementById('strip');
+  strip.innerHTML=DATA&&sl.length>1?sl.map((x,k)=>`<button type="button" data-sl="${k}" class="${k===SL?'on':''}" aria-label="Slide ${k+1}"><div class="slide">${slideHtml(page,x,k,sl.length,true)}</div></button>`).join(''):'';
+  strip.hidden=!strip.innerHTML;
+  fit();
+}
+function paint(){if(document.body.classList.contains('fs'))presentPaint();else if(VIEW==='edit')renderEditor();else renderShow();}
+
+/* ── The formatted text box ──
+   Kept as lines: "# " starts a heading; <b>, <i>, <u> mark bold, italics and underline; an empty line is a gap. */
+try{document.execCommand('defaultParagraphSeparator',false,'div');}catch(e){}
+function toEd(ls){const a=(ls||[]).map(l=>{l=String(l);if(!l.trim())return'<div><br></div>';
+  if(l.startsWith('# '))return`<h1>${inl(l.slice(2))||'<br>'}</h1>`;return`<div>${FMT.test(l)?inl(l):esc(l)}</div>`;});return a.join('');}
+function fromEd(root){
+  const out=[];let cur=null;
+  const flush=()=>{if(cur){out.push(cur);cur=null;}};
+  const inline=n=>{
+    if(n.nodeType===3)return n.nodeValue.replace(/\u00a0/g,' ');
+    if(n.nodeType!==1)return'';const t=n.tagName;if(t==='BR')return'';
+    let x=[...n.childNodes].map(inline).join('');if(!x)return'';
+    const st=n.style||{},b=t==='B'||t==='STRONG'||+st.fontWeight>=600||st.fontWeight==='bold',it=t==='I'||t==='EM'||st.fontStyle==='italic',u=t==='U'||/underline/.test(st.textDecoration||st.textDecorationLine||'');
+    if(u)x='<u>'+x+'</u>';if(it)x='<i>'+x+'</i>';if(b)x='<b>'+x+'</b>';return x;};
+  const block=n=>{const h=/^H[1-6]$/.test(n.tagName);
+    // a block can hold line breaks: each piece is a line
+    let parts=[''];[...n.childNodes].forEach(c=>{if(c.nodeType===1&&c.tagName==='BR')parts.push('');else if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI|UL|OL)$/.test(c.tagName)){parts.push(...blockLines(c),'');}else parts[parts.length-1]+=inline(c);});
+    if(parts.length>1&&parts[parts.length-1]==='')parts.pop();
+    return parts.map(p=>h&&p.trim()?'# '+p:p);};
+  const blockLines=n=>block(n);
+  [...root.childNodes].forEach(c=>{
+    if(c.nodeType===1&&/^(DIV|P|H[1-6]|LI|UL|OL)$/.test(c.tagName)){flush();out.push(...block(c));}
+    else if(c.nodeType===1&&c.tagName==='BR'){if(cur==null)cur='';flush();}
+    else{cur=(cur||'')+inline(c);}});
+  flush();
+  // tidy: no formatting around nothing, joined runs, no gaps at the ends, never two gaps in a row
+  let v=out.map(l=>l.replace(/<(b|i|u)><\/\1>/g,'').replace(/<\/(b|i|u)><\1>/g,'').replace(/\s+$/,'').replace(/^\s+/,''));
+  v=v.map(l=>l==='#'?'':l);
+  while(v.length&&!v[0].trim())v.shift();while(v.length&&!v[v.length-1].trim())v.pop();
+  return v.filter((l,i)=>l.trim()||(v[i-1]||'').trim()).slice(0,30);
+}
+/* where the caret is, as characters into the box, so it can be put back after the form is drawn again */
+function caretOf(el){const sel=getSelection();if(!sel.rangeCount)return null;const r=sel.getRangeAt(0);if(!el.contains(r.endContainer))return null;
+  const pre=document.createRange();pre.selectNodeContents(el);pre.setEnd(r.endContainer,r.endOffset);return textLen(pre.cloneContents());}
+function textLen(fr){let n=0;const w=x=>{if(x.nodeType===3)n+=x.nodeValue.length;else{if(x.nodeType===1&&/^(DIV|P|H[1-6])$/.test(x.tagName)&&n>0)n+=1;x.childNodes.forEach(w);}};fr.childNodes.forEach(w);return n;}
+function setCaret(el,k){let n=0,done=false;const r=document.createRange();
+  const w=x=>{if(done)return;if(x.nodeType===3){if(n+x.nodeValue.length>=k){r.setStart(x,k-n);done=true;return;}n+=x.nodeValue.length;}
+    else{if(x.nodeType===1&&/^(DIV|P|H[1-6])$/.test(x.tagName)&&n>0&&x!==el){n+=1;if(n>k){r.setStart(x,0);done=true;return;}}x.childNodes.forEach(w);}};
+  w(el);if(!done){r.selectNodeContents(el);r.collapse(false);}else r.collapse(true);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);}
+function rtState(){
+  document.querySelectorAll('.rtw').forEach(w=>{const ed=w.querySelector('.rte'),sel=getSelection(),inside=sel.rangeCount&&ed.contains(sel.anchorNode);
+    let h=false;if(inside){let n=sel.anchorNode;while(n&&n!==ed){if(n.nodeType===1&&n.tagName==='H1')h=true;n=n.parentNode;}}
+    w.querySelectorAll('[data-rt]').forEach(b=>{const k=b.dataset.rt;let on=false;
+      if(inside){if(k==='h1')on=h;else if(k==='p')on=!h;else{try{on=document.queryCommandState(k);}catch(e){}}}
+      b.classList.toggle('on',on);});});
+}
+document.addEventListener('selectionchange',rtState);
+document.getElementById('ed').addEventListener('mousedown',e=>{if(e.target.closest('[data-rt]'))e.preventDefault();});
+document.getElementById('ed').addEventListener('click',e=>{
+  const b=e.target.closest('[data-rt]');if(!b)return;e.stopPropagation();
+  const ed=b.closest('.rtw').querySelector('.rte');const sel=getSelection();
+  if(!(sel.rangeCount&&ed.contains(sel.anchorNode))){ed.focus();setCaret(ed,1e9);}
+  const k=b.dataset.rt;
+  if(k==='h1')document.execCommand('formatBlock',false,'h1');else if(k==='p')document.execCommand('formatBlock',false,'div');else document.execCommand(k);
+  rtState();ed.dispatchEvent(new Event('input',{bubbles:true}));
+},true);
+/* pasting brings in the words only, not the formatting of wherever they came from */
+document.getElementById('ed').addEventListener('paste',e=>{if(!e.target.closest('.rte'))return;e.preventDefault();const t=(e.clipboardData||window.clipboardData).getData('text/plain');document.execCommand('insertText',false,t);});
+/* ── Edit view ── */
+const TAGOPTS=v=>`<option value="">No tag</option>`+TAGS.map(t=>`<option${t===v?' selected':''}>${esc(t)}</option>`).join('');
+function startDraft(){DRAFT=JSON.parse(JSON.stringify(deckOf(SUB).slides||[]));DIRTY=false;SEL=Math.min(SEL,Math.max(0,DRAFT.length-1));}
+function renderEditor(){
+  const ed=document.getElementById('ed'),page=pageOf(SUB);
+  if(!DATA){ed.innerHTML='';return;}
+  if(!page.canEdit){ed.innerHTML=`<div class="ro" id="ro" style="grid-column:1/-1">You can view ${esc(page.name)} but not edit it. Switch to Slideshow to see it.</div>`;return;}
+  if(!DRAFT)startDraft();
+  const n=DRAFT.length,s=DRAFT[SEL];
+  const rail=`<div class="rail"><div class="rt">${esc(page.name)} · ${n} slide${n===1?'':'s'}</div>`
+    +DRAFT.map((x,i)=>`<button type="button" class="th${i===SEL?' on':''}${x.hide?' off':''}" data-sel="${i}"><div class="mini"><div class="slide">${slideHtml(page,x,i,n,true)}</div></div><small>${i+1}. ${esc(TPL[x.tpl][0])}<em>${x.hide?'Hidden':i===SEL?'Editing':''}</em></small></button>`).join('')
+    +`<button type="button" class="addsl" id="addsl">+ Add a slide</button></div>`;
+  let main;
+  if(!s)main=`<div class="ro">No slides yet. Press <b>+ Add a slide</b> to start ${esc(page.name)}'s deck for this week.</div>`;
+  else{
+    const T=TPL[s.tpl];
+    let f=`<div class="fh"><b>Slide ${SEL+1}</b><span>${esc(T[0])}</span><span class="sp2"></span>
+      <label class="chk"><input type="checkbox" data-f="show"${s.hide?'':' checked'}>In the slideshow</label>
+      <button class="ic" data-a="up" title="Move earlier"${SEL?'':' disabled'}>↑</button><button class="ic" data-a="down" title="Move later"${SEL<n-1?'':' disabled'}>↓</button><button class="ic del" data-a="del" title="Delete this slide">✕</button></div>`;
+    if(s.tpl==='cii'){
+      const ob=s.lead==='objective',box=(k,lab,hint,ph)=>`<div class="fl">${lab} <small>${hint}</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="${k}" data-ph="${ph}">${toEd(s[k])}</div></div></div>`;
+      f+=`<div class="fg"><div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="e.g. Renewals in the first month"></label>
+        <div class="fl">The first box is <div><span class="lead"><button type="button" data-lead="challenge" aria-pressed="${!ob}">Challenge</button><button type="button" data-lead="objective" aria-pressed="${ob}">Objective</button></span></div></div>
+        ${box('c1',ob?'The objective':'The challenge',ob?'What we set out to do.':'The problem, put so that people stop and think.',ob?'e.g. Get every new learner to their first renewal.':'e.g. 1 in 4 new learners leave before their first renewal.')}</div>
+        <div class="fc">${box('c2','Insight','What we learnt about it.','e.g. Most of them never met their teacher one to one.')}${box('c3','Initiative','What we did, or are doing, about it.','e.g. A 10-minute check-in with the teacher in week 2.')}</div></div>`;
+    }else if(s.tpl==='upd'){
+      f+=`<div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="${SUB==='key'?'Key updates':'Updates'}"></label>
+        ${(s.cards||[]).map((c,k)=>`<div class="card-e" data-c="${k}"><div class="row"><input class="in" data-cf="title" placeholder="Update title, e.g. Baseline audits" value="${esc(c.title)}"><select class="in" style="width:200px" data-cf="tag" aria-label="Tag">${TAGOPTS(c.tag)}</select><button class="ic del" data-a="delc" title="Remove this update">✕</button></div>
+          <div class="fl">Points <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Goal:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-cf="lines" data-ph="Goal: every teacher audited once.">${toEd(c.lines)}</div></div></div>
+          <div class="row"><span class="fl">Progress</span><input class="in num" data-cf="done" inputmode="decimal" placeholder="Done" value="${c.done==null?'':c.done}"> of <input class="in num" data-cf="of" inputmode="decimal" placeholder="Out of" value="${c.of==null?'':c.of}"><input class="in" data-cf="unit" placeholder="Label, e.g. Teachers audited" value="${esc(c.unit)}"></div></div>`).join('')}
+        ${(s.cards||[]).length<4?'<button type="button" class="addc" data-a="addc">+ Add an update card</button>':''}</div>`;
+    }else{
+      const left=`<div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="e.g. Diwali Showcase"></label>
+        ${T[2]?`<label class="fl">Tag<select data-f="tag">${TAGOPTS(s.tag)}</select></label>
+        <label class="fl">Text box heading <small>Optional.</small><input class="in" data-f="head" value="${esc(s.head)}" placeholder="e.g. Diwali Showcase at the centre"></label>
+        <div class="fl">Text box <small>Press Enter for a new point; an empty line adds a gap. A word and a colon at the start, like "Turnout:", still turns bold.</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="lines" data-ph="Turnout: 46 learners performed.">${toEd(s.lines)}</div></div></div>
+        <div class="row"><label class="fl" style="width:130px">Big number <small>Optional.</small><input class="in" data-f="bn" maxlength="12" value="${esc(s.bn||'')}" placeholder="e.g. 46"></label><label class="fl" style="flex:1">Its label<small>Shown beside the number.</small><input class="in" data-f="bl" maxlength="40" value="${esc(s.bl||'')}" placeholder="e.g. learners performed"></label></div>`:''}</div>`;
+      const ms=s.media||[],slots=[];
+      for(let k=0;k<T[5];k++){const m=ms[k];
+        if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
+          <div class="nm">${k+1}. ${esc(m.name||(m.kind==='video'?'Video':'Photo'))}</div>
+          <div class="ctl">${m.kind==='image'?`<select data-mf="fit" aria-label="Fit"><option value="cover"${m.fit!=='contain'?' selected':''}>Fill the space</option><option value="contain"${m.fit==='contain'?' selected':''}>Show the whole photo</option></select>`:'<span style="flex:1"></span>'}
+          <button class="ic" data-a="mleft" title="Move earlier"${k?'':' disabled'}>←</button><button class="ic" data-a="mright" title="Move later"${k<ms.length-1?'':' disabled'}>→</button><button class="ic del" data-a="unmedia" title="Remove">✕</button></div></div>`);
+        else if(k===ms.length)slots.push(`<div class="slot" data-k="${k}">${s._up?`<div class="prog"><i style="width:${s._up.pct}%"></i></div><small>${esc(s._up.text)}</small>`
+          :`<button type="button" class="up" data-a="pick">+ Upload ${T[3]==='video'?'a video':'a photo'}</button><small>${k<T[4]?'Needed':'Optional'} · ${T[3]==='video'?'up to 300 MB':'resized for the screen'}</small>`}</div>`);
+        else slots.push(`<div class="slot" style="opacity:.5"><small>${T[3]==='video'?'Video':'Photo'} ${k+1}${k<T[4]?' · needed':' · optional'}</small></div>`);}
+      f+=`<div class="fg">${left}<div class="fl">${T[3]==='video'?'Videos':'Photos'} <small>${T[4]===T[5]?T[4]+' for this template.':T[4]+' to '+T[5]+' for this template.'}</small><div class="slots">${slots.join('')}</div></div></div>`;
+    }
+    main=`<div><div class="stage" id="estage"><div class="slide" id="eslide">${slideHtml(page,s,SEL,n)}</div></div><div class="spill" id="spill" hidden></div></div><div class="form" id="form">${f}</div>`;
+  }
+  const save=DIRTY||(deckOf(SUB).carried&&DRAFT.length)?`<div class="save"><span id="save-n">${UPLOADING?'Wait for the upload to finish before saving.':DIRTY?'Changes not saved yet.':'Save to keep these slides for this week.'}</span><span class="msg" id="msg"></span>
+    <button class="btn" id="discard" type="button">Discard</button><button class="btn pri" id="go" type="button"${UPLOADING||busy?' disabled':''}>${busy?'Saving…':'Save'}</button></div>`:'';
+  // keep the field being typed in focused
+  const a=document.activeElement,keep=a&&ed.contains(a)?{f:a.dataset.f,cf:a.dataset.cf,c:a.closest('[data-c]')?.dataset.c,s:a.selectionStart,e:a.selectionEnd}:null;
+  ed.innerHTML=rail+`<div>${main}${save}</div>`;
+  spillNote();
+  if(keep&&(keep.f||keep.cf)){const q=keep.cf?`[data-c="${keep.c}"] [data-cf="${keep.cf}"]`:`[data-f="${keep.f}"]`,el=ed.querySelector(q);if(el){el.focus();try{el.setSelectionRange(keep.s,keep.e);}catch(e){}}}
+  fit();
+}
+const cur=()=>DRAFT&&DRAFT[SEL];
+function touch(){DIRTY=true;}
+function spillNote(){const n=document.getElementById('spill'),s=cur();if(!n)return;const k=s&&!s.hide&&s.tpl==='upd'?spill(s).length:1;n.hidden=k<2;n.textContent=k>1?`This slide is too full, so in the slideshow it continues onto ${k-1===1?'a second slide':k+' slides'}.`:'';}
+function refreshCanvas(){const page=pageOf(SUB),s=cur();const el=document.getElementById('eslide');if(el&&s)el.innerHTML=slideHtml(page,s,SEL,DRAFT.length);spillNote();
+  const th=document.querySelector(`.th[data-sel="${SEL}"] .slide`);if(th&&s)th.innerHTML=slideHtml(page,s,SEL,DRAFT.length,true);
+  const sv=document.querySelector('.save');if(!sv)renderEditor();else document.getElementById('save-n').textContent=UPLOADING?'Wait for the upload to finish before saving.':'Changes not saved yet.';}
+document.getElementById('ed').addEventListener('input',e=>{
+  const s=cur();if(!s)return;const t=e.target,v=t.value;
+  if(t.classList&&t.classList.contains('rte')){const ls=fromEd(t);
+    if(t.dataset.cf){s.cards[+t.closest('[data-c]').dataset.c].lines=ls;}else s[t.dataset.f]=ls;
+    touch();refreshCanvas();return;}
+  if(t.dataset.f){const f=t.dataset.f;
+    if(f==='lines')s.lines=v.split('\n').map(x=>x.trim()).filter(String);else if(f==='show'){s.hide=!t.checked;touch();renderEditor();return;}else s[f]=v;}
+  else if(t.dataset.cf){const c=s.cards[+t.closest('[data-c]').dataset.c],f=t.dataset.cf;
+    if(f==='lines')c.lines=v.split('\n').map(x=>x.trim()).filter(String);
+    else if(f==='done'||f==='of'){const x=v.replace(/[^0-9.]/g,'');if(x!==v)t.value=x;c[f]=x===''?null:+x;}else c[f]=v;}
+  else if(t.dataset.mf){const m=s.media[+t.closest('[data-k]').dataset.k];m.fit=v;}
+  else return;
+  touch();refreshCanvas();
+});
+document.getElementById('ed').addEventListener('click',async e=>{
+  const th=e.target.closest('[data-sel]');if(th){SEL=+th.dataset.sel;renderEditor();return;}
+  if(e.target.id==='addsl'){addSlide();return;}
+  if(e.target.id==='discard'){if(DIRTY&&!confirm('Discard your changes?'))return;startDraft();render();return;}
+  if(e.target.id==='go'){save();return;}
+  const ld=e.target.closest('[data-lead]');if(ld){const s=cur();if(s){s.lead=ld.dataset.lead;touch();renderEditor();}return;}
+  const b=e.target.closest('[data-a]');if(!b)return;const s=cur(),a=b.dataset.a;
+  if(a==='up'&&SEL>0){DRAFT.splice(SEL,1);DRAFT.splice(SEL-1,0,s);SEL--;}
+  else if(a==='down'&&SEL<DRAFT.length-1){DRAFT.splice(SEL,1);DRAFT.splice(SEL+1,0,s);SEL++;}
+  else if(a==='del'){if(!confirm('Delete slide '+(SEL+1)+'?'))return;DRAFT.splice(SEL,1);SEL=Math.max(0,SEL-1);}
+  else if(a==='addc'){s.cards=(s.cards||[]).concat({title:'',tag:'',lines:[],done:null,of:null,unit:''}).slice(0,4);}
+  else if(a==='delc'){s.cards.splice(+b.closest('[data-c]').dataset.c,1);}
+  else if(a==='unmedia'||a==='mleft'||a==='mright'){const k=+b.closest('[data-k]').dataset.k,m=s.media[k];s.media.splice(k,1);if(a==='mleft')s.media.splice(k-1,0,m);if(a==='mright')s.media.splice(k+1,0,m);}
+  else if(a==='pick'){pickFile(s);return;}
+  else return;
+  touch();renderEditor();
+});
+
+/* Adding a slide: choose a template first (Key Updates only has update cards) */
+function addSlide(tpl){
+  if(!tpl){PICK=SUB==='key'?'upd':'t1p';renderPicker();return;}
+  const s={id:uid('S'),tpl,title:'',head:'',tag:'',lines:[],hide:false};
+  if(tpl==='upd')s.cards=[{title:'',tag:'',lines:[],done:null,of:null,unit:''}];else if(tpl==='cii'){s.lead='challenge';s.c1=[];s.c2=[];s.c3=[];}else s.media=[];
+  DRAFT.splice(DRAFT.length?SEL+1:0,0,s);SEL=DRAFT.length===1?0:SEL+1;touch();renderEditor();
+  setTimeout(()=>{const t=document.querySelector('#form [data-f="title"]');if(t)t.focus();},30);
+}
+function renderPicker(){
+  const S=(v,c)=>`<div style="background:${c}">${v?'<svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg>':''}</div>`;
+  const P='linear-gradient(135deg,#9B7BF5,#4101f7)',Q='linear-gradient(135deg,#F1B6FA,#dd30b1)',L='#E9E0FD';
+  const PV={cii:['','grid-template-columns:1fr 1fr;grid-template-rows:.75fr 1fr','<div style="grid-column:1/3;background:linear-gradient(115deg,#FFD9C6,#FFF1EA);box-shadow:inset 4px 0 0 #E0673A"></div>'+S(0,L)+S(0,L)],upd:['','grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr',S(0,L)+S(0,L)+S(0,L)+S(0,L)],t1p:[1,'',S(0,P)],t2p:[1,'grid-template-rows:1fr 1fr',S(0,P)+S(0,Q)],
+    t1v:[1,'',S(1,P)],t2v:[1,'grid-template-rows:1fr 1fr',S(1,P)+S(1,Q)],ponly:['','grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr',S(0,P)+S(0,Q)+S(0,Q)+S(0,P)],vonly:['','grid-template-columns:1fr 1fr',S(1,P)+S(1,Q)]};
+  document.getElementById('dlg').innerHTML=`<div class="ov" id="ov"><div class="dlg" role="dialog" aria-label="Add a slide"><h3>Add a slide</h3><p>Choose a template first. You'll then add the text and upload the photos or videos it needs.</p>
+    <div class="tpls">${TPL_ORDER.filter(k=>SUB!=='key'||k==='upd'||k==='cii').map(k=>`<button type="button" class="tp" data-tpl="${k}" aria-pressed="${PICK===k}"><div class="pv">${PV[k][0]?'<div class="t"><i></i><i></i><i></i><i></i></div>':''}<div class="g" style="${PV[k][1]}">${PV[k][2]}</div></div><b>${TPL[k][0]}</b><small>${TPL[k][1]}</small></button>`).join('')}</div>
+    <div class="ft"><button class="btn" type="button" data-x>Cancel</button><button class="btn pri" type="button" data-ok>Add this slide</button></div></div></div>`;
+}
+document.getElementById('dlg').addEventListener('click',e=>{
+  const t=e.target.closest('[data-tpl]');if(t){PICK=t.dataset.tpl;renderPicker();return;}
+  if(e.target.closest('[data-ok]')&&PICK&&document.querySelector('.tpls')){const k=PICK;closeDlg();addSlide(k);return;}
+  if(e.target.closest('[data-x]')||e.target.id==='ov')closeDlg();
+});
+document.getElementById('dlg').addEventListener('dblclick',e=>{const t=e.target.closest('[data-tpl]');if(t){closeDlg();addSlide(t.dataset.tpl);}});
+function closeDlg(){document.getElementById('dlg').innerHTML='';PICK=null;}
+
+/* Upload: photos are resized to at most 2400 px first; everything goes to Drive in 8 MB pieces */
+function pickFile(s){
+  const T=TPL[s.tpl];if((s.media||[]).length>=T[5])return;
+  const inp=document.createElement('input');inp.type='file';inp.accept=T[3]==='video'?'video/*':'image/*';
+  inp.onchange=()=>{const f=inp.files[0];if(f)upload(s,f);};inp.click();
+}
+const dims=(f,kind)=>new Promise(res=>{const u=URL.createObjectURL(f);
+  if(kind==='video'){const v=document.createElement('video');v.preload='metadata';v.onloadedmetadata=()=>res({w:v.videoWidth||16,h:v.videoHeight||9,url:u});v.onerror=()=>res({w:16,h:9,url:u});v.src=u;}
+  else{const im=new Image();im.onload=()=>res({w:im.naturalWidth,h:im.naturalHeight,url:u,img:im});im.onerror=()=>res({w:16,h:9,url:u});im.src=u;}});
+async function shrink(f,d){
+  if(!d.img||/gif|svg/.test(f.type)||Math.max(d.w,d.h)<=2400&&f.size<1.5e6)return{blob:f,w:d.w,h:d.h};
+  const k=Math.min(1,2400/Math.max(d.w,d.h)),w=Math.round(d.w*k),h=Math.round(d.h*k),cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(d.img,0,0,w,h);
+  const blob=await new Promise(r=>cv.toBlob(r,'image/jpeg',.88));return{blob:blob||f,w,h};
+}
+const b64=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).replace(/^data:[^,]*,/,''));r.onerror=rej;r.readAsDataURL(blob);});
+async function upload(s,f){
+  const T=TPL[s.tpl],kind=/^video\//.test(f.type)?'video':/^image\//.test(f.type)?'image':null;
+  if(kind!==T[3]){alert(T[3]==='video'?'This slide needs a video.':'This slide needs a photo.');return;}
+  if(f.size>300*1024*1024){alert('That file is larger than 300 MB. Trim the video or export it smaller, then try again.');return;}
+  UPLOADING++;s._up={pct:0,text:'Getting ready…'};renderEditor();
+  try{
+    const d=await dims(f,kind),{blob,w,h}=kind==='image'?await shrink(f,d):{blob:f,w:d.w,h:d.h};
+    const type=blob.type||f.type,size=blob.size,name=f.name.replace(/\.[^.]+$/,'')+(blob===f?(f.name.match(/\.[^.]+$/)||[''])[0]:'.jpg');
+    const st=await ArtiumAuth.call('reviewUploadStart',{file:{name,type,size}});if(st.error)throw new Error(st.error);
+    let off=0,res=null;
+    while(off<size){
+      const end=Math.min(size,off+st.chunk),data=await b64(blob.slice(off,end));
+      res=await ArtiumAuth.call('reviewUploadChunk',{id:st.upload,offset:off,data});if(res.error)throw new Error(res.error);
+      off=res.done?size:res.next;
+      s._up={pct:Math.round(off/size*100),text:'Uploading '+Math.round(off/size*100)+'% of '+(size/1048576).toFixed(1)+' MB…'};if(cur()===s)renderEditor();
+    }
+    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover'}).slice(0,T[5]);DIRTY=true;
+  }catch(err){alert('The upload stopped: '+err.message+'.');}
+  delete s._up;UPLOADING--;renderEditor();
+}
+
+/* Save one sub-page's slides for this week */
+async function save(){
+  if(busy||UPLOADING)return;busy=true;renderEditor();
+  const slides=DRAFT.map(({_up,...x})=>x);
+  try{const j=await ArtiumAuth.call('saveReview',{week:iso(WEEK),sub:SUB,slides});if(j.error)throw new Error(j.error==='not-allowed'?'you can\'t edit this sub-page':j.error);
+    DATA=j;stamp();busy=false;startDraft();render();}
+  catch(err){busy=false;renderEditor();const m=document.getElementById('msg');if(m)m.textContent='Couldn\'t save: '+err.message+'.';}
+}
+
+/* Sub-pages: switch, add (editors with rights to All), remove the added ones */
+const leaveOk=()=>!DIRTY||confirm('You have changes that aren\'t saved. Leave without saving them?');
+document.getElementById('subs').addEventListener('click',async e=>{
+  if(e.target.id==='addsp'){askName();return;}
+  const rm=e.target.closest('[data-rm]');
+  if(rm){e.stopPropagation();const p=pageOf(rm.dataset.rm);if(!confirm('Remove the sub-page "'+p.name+'"? Its slides stay saved in the sheet.'))return;
+    savePages(DATA.pages.filter(x=>!x.fixed&&x.id!==p.id));return;}
+  const b=e.target.closest('[data-sub]');if(!b||b.dataset.sub===SUB)return;
+  if(!leaveOk())return;SUB=b.dataset.sub;try{localStorage.setItem('artium_review_sub',SUB);}catch(e){}SL=0;SEL=0;DRAFT=null;DIRTY=false;render();
+});
+function askName(){
+  document.getElementById('dlg').innerHTML=`<div class="ov" id="ov"><div class="dlg sm" role="dialog" aria-label="Add a sub-page"><h3>Add a sub-page</h3><p>It appears after the centres, every week, with its own slides.</p>
+    <input class="in" id="spname" maxlength="40" placeholder="e.g. Head Office"><div class="ft"><button class="btn" type="button" data-x>Cancel</button><button class="btn pri" type="button" id="spok">Add</button></div></div></div>`;
+  const i=document.getElementById('spname');i.focus();
+  const go=()=>{const n=i.value.trim();if(!n)return;closeDlg();savePages(DATA.pages.filter(x=>!x.fixed).concat({id:uid('P'),name:n}));};
+  document.getElementById('spok').onclick=go;i.onkeydown=e=>{if(e.key==='Enter')go();};
+}
+async function savePages(list){
+  try{const j=await ArtiumAuth.call('saveReviewPages',{week:iso(WEEK),pages:list.map(p=>({id:p.id,name:p.name}))});if(j.error)throw new Error(j.error);DATA=j;stamp();render();}
+  catch(err){alert('Couldn\'t change the sub-pages: '+err.message+'.');}
+}
+
+/* Views, weeks and slides */
+document.getElementById('vt').onclick=e=>{const b=e.target.closest('button');if(!b||b.dataset.v===VIEW)return;if(VIEW==='edit'&&!leaveOk())return;VIEW=b.dataset.v;DRAFT=null;DIRTY=false;render();};
+const moveWeek=d=>{if(!leaveOk())return;WEEK=addD(WEEK,7*d);SL=0;SEL=0;load();};
+document.getElementById('prev').onclick=()=>moveWeek(-1);document.getElementById('next').onclick=()=>moveWeek(1);
+const step=d=>{SL+=d;renderShow();};
+document.getElementById('strip').onclick=e=>{const b=e.target.closest('[data-sl]');if(b){SL=+b.dataset.sl;renderShow();}};
+document.getElementById('sprev').onclick=()=>step(-1);document.getElementById('snext').onclick=()=>step(1);
+
+/* ── Presenting: every sub-page in order, as one deck ── */
+let SEQ=[],POS=0,idleT=null;
+function buildSeq(){SEQ=[];DATA.pages.forEach(p=>{const sl=shown(deckOf(p.id).slides);sl.forEach((s,i)=>SEQ.push({p,s,i,n:sl.length}));});}
+function presentPaint(){
+  const el=document.getElementById('slide'),x=SEQ[POS];
+  el.innerHTML=x?slideHtml(x.p,x.s,x.i,x.n):'<div class="s-empty" style="margin:60px">No slides this week.</div>';
+  const pages=DATA.pages.filter(p=>shown(deckOf(p.id).slides).length);
+  document.getElementById('fsb').innerHTML=pages.map(p=>{const n=shown(deckOf(p.id).slides).length,on=x&&x.p.id===p.id;
+    return`<button type="button" data-go="${esc(p.id)}" class="${on?'on':''}">${esc(p.name)}<em>${on?(x.i+1)+' of '+n:n}</em></button>`;}).join('')
+    +`<span class="sep"></span><button type="button" class="nv" data-step="-1">‹ Previous</button><button type="button" class="nv" data-step="1">Next ›</button><button type="button" class="nv" data-exit>Exit (Esc)</button>`;
+  fit();
+}
+document.getElementById('present').onclick=async()=>{
+  if(!DATA)return;if(VIEW==='edit'){if(!leaveOk())return;VIEW='show';DRAFT=null;DIRTY=false;render();}
+  buildSeq();if(!SEQ.length){alert('There are no slides for this week yet.');return;}
+  // start at the slide on screen
+  const k=SEQ.findIndex(x=>x.p.id===SUB&&x.i===SL);POS=k>=0?k:0;
+  try{await document.documentElement.requestFullscreen();}catch(e){}
+  document.body.classList.add('fs');document.getElementById('fsb').hidden=false;wake();presentPaint();playIntro(SEQ[POS].p);
+};
+// The opener: the sub-page's name (Offline Overview for All centres) with its city, the stickers circle in and vanish, then the slide arrives
+const STK=[['<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>','linear-gradient(135deg,#DD30B1,#F17AD0)',170,'34px',12,'#fff'],
+  ['<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/>','linear-gradient(135deg,#4101F7,#6601FD)',130,'50%',-10,'#fff'],
+  ['<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 6v7M10 6v7M14 6v7M18 6v7"/>','linear-gradient(135deg,#C9502A,#F5906F)',150,'34px',-6,'#fff'],
+  ['<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 5.9L12 16.4 6.7 19.3l1.2-5.9L3.4 9.3l6-.7z"/>','#fff',92,'28px',18,'#4101F7'],
+  ['<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/>','#fff',84,'26px',-14,'#DD30B1'],
+  ['<path d="M19 3l2 2-6 6"/><path d="M13 9a4 4 0 0 0-5.6.4L4 13a3.5 3.5 0 0 0 5 5l3.6-3.4A4 4 0 0 0 13 9z"/><circle cx="9.5" cy="14.5" r="1.3"/>','linear-gradient(135deg,#2F4DB8,#7C9BFF)',110,'32px',8,'#fff']];
+let introT=null,AC=null;
+// The swoosh as the opener gives way to the first slide: a short breath of noise swept through a filter, made in the browser (no sound file)
+function swoosh(delay){
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+    const t=AC.currentTime+delay,len=0.9,buf=AC.createBuffer(1,Math.round(AC.sampleRate*len),AC.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+    const src=AC.createBufferSource();src.buffer=buf;
+    const bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=0.9;bp.frequency.setValueAtTime(300,t);bp.frequency.exponentialRampToValueAtTime(4200,t+0.42);bp.frequency.exponentialRampToValueAtTime(900,t+len);
+    const g=AC.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.55,t+0.32);g.gain.exponentialRampToValueAtTime(0.0001,t+len);
+    const pan=AC.createStereoPanner?AC.createStereoPanner():null;
+    src.connect(bp);bp.connect(g);if(pan){pan.pan.setValueAtTime(-0.6,t);pan.pan.linearRampToValueAtTime(0.6,t+len);g.connect(pan);pan.connect(AC.destination);}else g.connect(AC.destination);
+    src.start(t);src.stop(t+len);SW=src;
+  }catch(e){}
+}
+let SW=null;
+function playIntro(p){
+  const name=p.id==='key'?'Offline Overview':p.name,city=p.id==='key'?'All centres':CITY[p.name]||'Artium Academy';
+  const ring=STK.map(([ic,bg,sz,rad,rot,col],i)=>{const a=(-150+i*60+(i%2?10:-8))*Math.PI/180,x=640*Math.cos(a),y=330*Math.sin(a);
+    return`<div class="ok" style="left:${Math.round(x-sz/2)}px;top:${Math.round(y-sz/2)}px;--d:${(i*.08).toFixed(2)}s"><div class="stk" style="width:${sz}px;height:${sz}px;border-radius:${rad};background:${bg};--r:${rot}deg"><svg viewBox="0 0 24 24" style="stroke:${col}">${ic}</svg></div></div>`;}).join('');
+  const words=esc(name).split(' '),last=words.pop();
+  document.getElementById('intro').innerHTML=`<div class="istage" id="istage"><div class="slide" id="islide"><i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i><i class="cl c4"></i>
+    <div class="s-top"><div><div class="s-eb"><i></i>Weekly Offline Review · <b>${esc(wkShort(WEEK))}</b></div></div><div class="logo"><img src="brand/lockup-violet.png" alt="Artium Academy" width="125" height="44"></div></div>
+    <div class="orbit">${ring}</div><div class="ttl"><h2 style="${name.length>12?'font-size:'+Math.max(96,Math.round(170*12/name.length))+'px;letter-spacing:-5px':''}">${words.length?words.join(' ')+' ':''}${last}<em>.</em></h2><div class="city">${esc(city)}</div></div></div></div>`;
+  document.body.classList.add('intro');fit();swoosh(2.3);
+  clearTimeout(introT);introT=setTimeout(endIntro,3500);
+}
+function endIntro(){clearTimeout(introT);if(SW){try{SW.stop();}catch(e){}SW=null;}document.body.classList.remove('intro');document.getElementById('intro').innerHTML='';}
+function leaveFs(){if(!document.body.classList.contains('fs'))return;endIntro();document.body.classList.remove('fs');document.getElementById('fsb').hidden=true;
+  const x=SEQ[POS];if(x){SUB=x.p.id;SL=x.i;}render();}
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)leaveFs();});
+document.getElementById('intro').addEventListener('click',endIntro);
+const pstep=d=>{POS=Math.max(0,Math.min(SEQ.length-1,POS+d));presentPaint();};
+document.getElementById('fsb').addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');if(g){const k=SEQ.findIndex(x=>x.p.id===g.dataset.go);if(k>=0){POS=k;presentPaint();}return;}
+  const s=e.target.closest('[data-step]');if(s){pstep(+s.dataset.step);return;}
+  if(e.target.closest('[data-exit]')){if(document.fullscreenElement)document.exitFullscreen();else leaveFs();}
+});
+function wake(){const b=document.getElementById('fsb');b.classList.remove('idle');clearTimeout(idleT);idleT=setTimeout(()=>b.classList.add('idle'),2500);}
+document.addEventListener('mousemove',()=>{if(document.body.classList.contains('fs'))wake();});
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName||''))return;
+  if(document.getElementById('ov')){if(e.key==='Escape')closeDlg();return;}
+  const fs=document.body.classList.contains('fs');
+  const fwd=e.key==='ArrowRight'||e.key==='PageDown'||(fs&&e.key===' '),back=e.key==='ArrowLeft'||e.key==='PageUp';
+  if(fs&&document.body.classList.contains('intro')&&e.key!=='Escape'){e.preventDefault();endIntro();return;}
+  if(fs){if(fwd){e.preventDefault();pstep(1);}if(back){e.preventDefault();pstep(-1);}if(e.key==='Escape'&&!document.fullscreenElement)leaveFs();return;}
+  if(VIEW==='show'&&(fwd||back)){e.preventDefault();step(fwd?1:-1);}
+});
+
+/* Scale the 1600 × 900 slide to the space it has */
+function fit(){
+  const fs=document.body.classList.contains('fs');
+  const one=(st,sl)=>{if(!st||!sl)return;let s,ox=0,oy=0;
+    if(fs&&(st.id==='stage'||st.id==='istage')){st.style.width='';s=Math.min(innerWidth/1600,innerHeight/900);ox=(innerWidth-1600*s)/2;oy=(innerHeight-900*s)/2;}
+    else{if(st.id==='stage')st.style.width='';const w=st.clientWidth;s=w/1600;
+      // when the screen is short, the slide gets smaller and its frame narrows with it, centred
+      if(st.id==='stage'){const top=st.getBoundingClientRect().top+scrollY,room=innerHeight-top-24;if(900*s>room&&room>320){s=room/900;st.style.width=(1600*s)+'px';}}
+      st.style.height=(900*s)+'px';}
+    sl.style.transform=`translate(${ox}px,${oy}px) scale(${s})`;};
+  one(document.getElementById('stage'),document.getElementById('slide'));
+  one(document.getElementById('estage'),document.getElementById('eslide'));
+  one(document.getElementById('istage'),document.getElementById('islide'));
+}
+addEventListener('resize',fit);
+// full screen takes a moment to settle: size the slide again once it has
+document.addEventListener('fullscreenchange',()=>{fit();requestAnimationFrame(fit);setTimeout(fit,300);});
+
+function stamp(){const t=new Date();document.getElementById('updated').textContent='Updated '+t.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' · '+t.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});document.getElementById('dot').className='dot';}
+async function load(){
+  const k=iso(WEEK);DATA=null;DRAFT=null;DIRTY=false;render();
+  document.getElementById('dot').className='dot loading';document.getElementById('updated').textContent='Loading…';
+  try{const j=await ArtiumAuth.call('review',{week:k});if(k!==iso(WEEK))return;if(j.error)throw new Error(j.error==='not-allowed'?'you don\'t have access to this page':j.error);DATA=j;stamp();}
+  catch(err){document.getElementById('updated').textContent='Error: '+err.message;document.getElementById('dot').className='dot error';}
+  render();
+}
+window.load=load;
+// the site's refresh button and automatic refresh wait while editing, with unsaved changes, or while a file uploads
+window.artiumBusy=()=>VIEW==='edit'||DIRTY||UPLOADING>0||document.body.classList.contains('fs');
+addEventListener('beforeunload',e=>{if(DIRTY||UPLOADING){e.preventDefault();e.returnValue='';}});
+document.fonts&&document.fonts.ready.then(()=>{SPILL.clear();fit();if(DATA&&VIEW!=='edit')paint();});
+load();
+</script>
+</body>
+</html>
