@@ -252,6 +252,7 @@ const fmt=d=>d.getDate()+' '+MON[d.getMonth()]+' '+d.getFullYear();
 const fmtS=d=>d.getDate()+' '+MON[d.getMonth()];
 const TODAY=midnight(new Date());
 let ITEMS=[],NODATE=[],FAM=new Map(),BYJ=new Map(),BYP=new Map(),DONE={},INS=[],STAFF=[],ME={name:'',email:'',centre:'',canEdit:false};
+const myCentres=()=>ME.centres&&ME.centres.length?ME.centres:(ME.centre?[ME.centre]:[]);   // the centres a centre's own team looks after
 let CEN='All',TAB='due',MONTH=TODAY.getFullYear()*12+TODAY.getMonth();
 const KEEP=new Set();   // KEEP: rows marked done in this visit stay on the list, in green, until you change tab   // notes typed but not saved yet
 
@@ -287,7 +288,7 @@ function build(rowsByCentre){
   buildFamilies(rowsByCentre);
   ITEMS=[];NODATE=[];
   CENTRES.forEach(c=>{
-    if(ME.scoped&&c!==ME.centre)return;   // a centre's own team sees its own centre only
+    if(ME.scoped&&!myCentres().includes(c))return;   // a centre's own team sees its own centres only
     (rowsByCentre[c]||[]).forEach(r=>{
       const own=(r[2]||'').trim();if(own&&own!==c)return;
       const name=(r[4]||'').trim(),adm=parseDate(r[0]);if(!name||!adm||adm<START)return;
@@ -355,7 +356,7 @@ function drawTabs(){
   const fcOpts=[['','All months']].concat(fcs.map(m=>[m,MFULL[m%12]+' '+Math.floor(m/12)]));
   const moreOpts=[['','Main lists'],['missed','Missed ('+cnt.missed+')'],['nodate','No first class date ('+cnt.nodate+')']];
   el.innerHTML='<span class="ptrack">'+main.map(t=>`<button type="button" class="pill" data-t="${t[0]}" aria-pressed="${TAB===t[0]}">${t[1]} (${t[2]})</button>`).join('')+'</span><span class="sp"></span>'+
-    (ME.scoped?'':dd('cen','Centre',CEN,[['All','All centres']].concat(CENTRES.map(c=>[c,c])),false))+
+    (ME.scoped?(myCentres().length>1?dd('cen','Centre',CEN,[['All','All my centres']].concat(myCentres().map(c=>[c,c])),false):''):dd('cen','Centre',CEN,[['All','All centres']].concat(CENTRES.map(c=>[c,c])),false))+
     dd('rec','Recorded',REC,[['','Any date'],['today','Today'],['yday','Yesterday'],['7d','Last 7 days'],['range','Pick dates']],!!REC)+
     (REC==='range'?`<span class="rr"><input type="date" id="ra" value="${RA}" max="${isoD(TODAY)}" aria-label="Recorded from"><span>to</span><input type="date" id="rb" value="${RB}" max="${isoD(TODAY)}" aria-label="Recorded to"></span>`:'')+
     dd('fcm','First class',FCM,fcOpts,FCM!=='')+
@@ -577,7 +578,7 @@ async function load(){
     if(meta.error)throw new Error(meta.error==='not-allowed'?"You don't have access to this page":meta.error);
     DONE=meta.done||{};ME=meta;INS=meta.ins||[];STAFF=meta.staff||[];
     const by={};CENTRES.forEach((c,i)=>by[c]=rows[i]);build(by);
-    if(!draw.once){draw.once=1;let s='';try{s=localStorage.getItem('artium_ck_centre')||'';}catch(x){}CEN=ME.scoped?ME.centre:(CENTRES.concat('All').includes(s)?s:'All');}
+    if(!draw.once){draw.once=1;let s='';try{s=localStorage.getItem('artium_ck_centre')||'';}catch(x){}CEN=ME.scoped?(myCentres().length>1?(myCentres().concat('All').includes(s)?s:'All'):ME.centre):(CENTRES.concat('All').includes(s)?s:'All');}
     draw();dot.className='dot';st.textContent='Up to date.';
     try{const p=sessionStorage.getItem('artium_open_insight');if(p){sessionStorage.removeItem('artium_open_insight');window.openInsight(p);}}catch(x){}
   }catch(e){dot.className='dot error';st.textContent='Could not load: '+e.message+'.';}
