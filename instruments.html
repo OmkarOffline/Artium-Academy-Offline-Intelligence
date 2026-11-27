@@ -63,13 +63,23 @@ th:first-child{background:#FAF8FF;z-index:3}
 .card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:18px 18px 22px;box-shadow:0 6px 24px #4101f70d}
 .cat{font:600 12px var(--f);color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;margin-top:16px}
 .nm{font:700 26px/1.15 var(--f);color:var(--ink);letter-spacing:-.01em;margin:2px 0 10px}
-.pr b{font:700 30px var(--f);color:var(--v)}.pr s{margin-left:10px;color:var(--ink4);font-size:15px}
+.pr b{font:700 30px var(--f);color:var(--v)}.pr s{margin-left:12px;color:var(--ink2);font:500 18px var(--f);text-decoration:line-through;text-decoration-thickness:1.5px;text-decoration-color:rgba(74,68,102,.65)}
 .dl{font-size:12px;color:var(--ink3);margin-top:3px}
-.save{display:inline-block;margin-top:10px;font:700 12px var(--f);color:#0F7B4B;background:#E3F6EC;padding:6px 12px;border-radius:99px}
+.save b{font-weight:800}
+.save{display:inline-block;margin-top:10px;font:600 13px var(--f);color:#0F7B4B;background:#E3F6EC;padding:6px 12px;border-radius:99px}
 .foot{margin-top:22px;color:var(--ink3);font-size:13px;display:flex;gap:24px;flex-wrap:wrap}
 /* gallery */
 .gal{position:relative;border-radius:16px;box-shadow:inset 0 0 0 1px #E9E2F7;background:linear-gradient(135deg,#F4F0FF,#FFE9F8);aspect-ratio:4/3;overflow:hidden;touch-action:pan-y;user-select:none}
-.gal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in;-webkit-user-drag:none}
+.gal.zoom{cursor:zoom-in}
+.sl{position:absolute;inset:0;opacity:0;transition:opacity 1.3s ease-in-out}
+.sl.on{opacity:1}
+.sl img{position:absolute;inset:0;width:100%;height:100%;-webkit-user-drag:none;user-select:none}
+.sl .fg{object-fit:cover}
+.sl .bg{object-fit:cover;filter:blur(24px) saturate(1.15);transform:scale(1.2);opacity:0}
+.sl.fit .bg{opacity:1}
+.sl.fit.plain{background:#fff}.sl.fit.plain .bg{opacity:0}
+.card .gal{aspect-ratio:1/1}
+.sl.fit .fg{object-fit:contain}
 .gal.empty{display:grid;place-items:center;color:var(--ink4);font:600 13px var(--f)}
 .ga{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(1,7,60,.18);display:grid;place-items:center;color:var(--v)}
 .ga:hover{background:#fff}.ga.l{left:10px}.ga.r{right:10px}
@@ -80,7 +90,7 @@ th:first-child{background:#FAF8FF;z-index:3}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(1,7,60,.82);display:grid;place-items:center;padding:24px}
 .lbc{position:relative;width:min(1100px,100%);}
 .lbc .gal{aspect-ratio:16/10;background:#fff;border-radius:22px;max-height:82vh}
-.lbc .gal img{cursor:default;object-fit:contain;padding:18px}
+.lbc .gal .sl .fg{object-fit:contain}
 .lbc .ga{width:48px;height:48px}.lbc .ga svg{width:22px;height:22px}
 .lbt{display:flex;justify-content:space-between;align-items:center;color:#fff;margin-bottom:12px;font:700 20px var(--f)}
 .lbt button{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:8px 18px;font:600 14px var(--f)}
@@ -114,23 +124,43 @@ const slug=m=>String(m).replace(/\s*-\s*/g,'-').replace(/\s+/g,'-');
 let ROWS=[],MAN={},VIEW='int',GRP='all';
 const AUTO=[];
 try{if(sessionStorage.getItem('instrView')==='cus')VIEW='cus';}catch(e){}
-/* the photos change by themselves every 2 seconds, in a loop, while they are on screen */
-setInterval(()=>{if(document.hidden||VIEW!=='cus')return;for(let k=AUTO.length-1;k>=0;k--){const g=AUTO[k];if(!g.isConnected){AUTO.splice(k,1);continue;}if(g._vis&&!g._hold&&Date.now()-g._t>=1900)g.show(g.idx()+1);}},500);
+/* the photos change by themselves every 3.5 seconds, with a slow fade, in a loop, while they are on screen */
+setInterval(()=>{if(document.hidden||VIEW!=='cus')return;for(let k=AUTO.length-1;k>=0;k--){const g=AUTO[k];if(!g.isConnected){AUTO.splice(k,1);continue;}if(g._vis&&!g._hold&&Date.now()-g._t>=3500)g.show(g.idx()+1);}},500);
 
 /* ── photos ── */
 const photos=m=>{const n=MAN[slug(m)]||0;return Array.from({length:n},(_,i)=>'instruments/'+slug(m)+'/'+(i+1)+'.jpg');};
 const ARW={l:'<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',r:'<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'};
 function gallery(host,model,opts){
-  opts=opts||{};const list=photos(model);let i=0;
+  opts=opts||{};const list=photos(model);let i=0,cur=0;
   const g=document.createElement('div');g.className='gal';
   if(!list.length){g.classList.add('empty');g.textContent='Photo coming soon';host.appendChild(g);return g;}
-  const img=document.createElement('img');img.alt=model;img.draggable=false;g.appendChild(img);
+  const mk=()=>{const d=document.createElement('div');d.className='sl';d.innerHTML='<img class="bg" alt="" draggable="false"><img class="fg" alt="" draggable="false">';return d;};
+  const sl=[mk(),mk()];sl.forEach(d=>g.appendChild(d));
+  /* a photo that is close to the frame's shape fills it; one that is not is shown whole, on a soft blur of itself, so nothing is cropped badly */
+  const setSlide=(d,url)=>{
+    const bg=d.querySelector('.bg'),fg=d.querySelector('.fg');
+    fg.alt=model;fg.onload=()=>{
+      const r=fg.naturalWidth/fg.naturalHeight,f=(g.clientWidth||4)/(g.clientHeight||3),q=r/f;
+      d.classList.toggle('fit',!(q>=0.8&&q<=1.25));
+      /* a photo on a plain white background is shown whole on white; a scene photo on a soft blur of itself */
+      try{const c=document.createElement('canvas');c.width=c.height=24;const x=c.getContext('2d');x.drawImage(fg,0,0,24,24);const a=x.getImageData(0,0,24,24).data;let t=0,n=0;
+        for(let k=0;k<24;k++)for(const [px,py] of [[k,0],[k,23],[0,k],[23,k]]){const o=(py*24+px)*4;t+=(a[o]+a[o+1]+a[o+2])/3;n++;}
+        d.classList.toggle('plain',t/n>236);}catch(e){}
+    };
+    bg.src=url;fg.src=url;
+  };
   let dots=null;
   if(list.length>1){
     g.insertAdjacentHTML('beforeend','<button class="ga l" aria-label="Previous photo">'+ARW.l+'</button><button class="ga r" aria-label="Next photo">'+ARW.r+'</button><div class="dots">'+list.map(()=>'<i></i>').join('')+'</div>');
     dots=[...g.querySelectorAll('.dots i')];
   }
-  const show=n=>{i=(n+list.length)%list.length;img.src=list[i];g._t=Date.now();if(dots)dots.forEach((d,k)=>d.classList.toggle('on',k===i));};
+  const show=n=>{
+    i=(n+list.length)%list.length;g._t=Date.now();
+    const nx=sl[1-cur];setSlide(nx,list[i]);
+    nx.classList.add('on');sl[cur].classList.remove('on');cur=1-cur;
+    if(dots)dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+    if(list.length>1){const pre=new Image();pre.src=list[(i+1)%list.length];}   // the next photo is ready before it is needed
+  };
   g.show=show;show(0);
   if(list.length>1){
     g.querySelector('.l').onclick=e=>{e.stopPropagation();show(i-1);};
@@ -140,7 +170,7 @@ function gallery(host,model,opts){
     g.addEventListener('pointerup',e=>{if(x0==null)return;const dx=e.clientX-x0;x0=null;if(Math.abs(dx)>40){show(i+(dx<0?1:-1));g._sw=1;setTimeout(()=>g._sw=0,50);}});
     g.addEventListener('pointercancel',()=>x0=null);
   }
-  if(!opts.big)img.onclick=()=>{if(!g._sw)openLb(model,i);};
+  if(!opts.big){g.classList.add('zoom');g.addEventListener('click',e=>{if(e.target.closest('.ga')||g._sw)return;openLb(model,i);});}
   host.appendChild(g);g.idx=()=>i;
   if(opts.auto&&list.length>1){g._vis=false;g._hold=false;g._t=Date.now();g.addEventListener('pointerenter',()=>g._hold=true);g.addEventListener('pointerleave',()=>g._hold=false);
     if('IntersectionObserver' in window){new IntersectionObserver(es=>{g._vis=es[es.length-1].isIntersecting;}).observe(g);}else g._vis=true;
@@ -185,7 +215,7 @@ function customer(){
     const c=document.createElement('div');c.className='card';
     const gh=document.createElement('div');c.appendChild(gh);gallery(gh,r.model,{auto:true});
     const mrp=Math.round(r.net/0.8/10)*10,off=mrp-r.net;
-    c.insertAdjacentHTML('beforeend','<div class="cat">'+esc(r.maker)+' · '+esc(r.cat)+'</div><div class="nm">'+esc(r.model)+'</div><div class="pr"><b>'+inr(r.net)+'</b>'+'<s>'+inr(mrp)+'</s>'+'</div><div class="dl">Inclusive of all taxes and delivery. Collect it from our academy.</div>'+(off?'<span class="save">You save '+inr(off)+'</span>':''));
+    c.insertAdjacentHTML('beforeend','<div class="cat">'+esc(r.maker)+' · '+esc(r.cat)+'</div><div class="nm">'+esc(r.model)+'</div><div class="pr"><b>'+inr(r.net)+'</b>'+'<s>'+inr(mrp)+'</s>'+'</div><div class="dl">Inclusive of all taxes and delivery. Collect it from our academy.</div>'+(off?'<span class="save">You save <b>'+inr(off)+'</b></span>':''));
     host.appendChild(c);
   });
   const w=document.createElement('div');w.appendChild(host);
