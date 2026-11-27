@@ -112,6 +112,17 @@ h1 em{font-style:normal;background:linear-gradient(90deg,#4101F7 0%,#DD30B1 60%,
 .md .ph{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;font:600 18px var(--f);color:var(--ink4);text-align:center}
 .md.empty{border:3px dashed #CDBDF7;background:rgba(255,255,255,.7);box-shadow:none}.md.empty .ph{color:var(--violet2)}
 .md.vthumb{background:linear-gradient(135deg,#4101F7,#DD30B1)}.md.vthumb .ph{color:#fff}
+/* a photo or video with a shape: as large as its space allows, centred in it */
+.mdo{position:relative;min-height:0;min-width:0;display:grid;place-items:center;container-type:size}
+.mdo>.md{aspect-ratio:16/9;width:min(100cqw,calc(100cqh * 16 / 9));height:auto}
+.mdo.o-p>.md{aspect-ratio:9/16;width:min(100cqw,calc(100cqh * 9 / 16))}
+.mdo.o-s>.md{aspect-ratio:1/1;width:min(100cqw,100cqh)}
+.mdo.o-q>.md{aspect-ratio:3/4;width:min(100cqw,calc(100cqh * 3 / 4))}
+.tx.fl{flex:1 1 0;min-width:0}
+.s-b.fxb{container-type:size;align-items:center}
+.fxb>.mg{flex:0 0 auto;width:min(calc((100cqh - var(--gv)) * var(--r) + var(--gh)),calc(100cqw - 594px));height:min(100cqh,calc((100cqw - 594px - var(--gh)) / var(--r) + var(--gv)))}
+.fxb>.tx{align-self:center;min-height:min(100cqh,calc((100cqw - 594px - var(--gh)) / var(--r) + var(--gv)));max-height:100cqh}
+.slot select.shp{width:100%;height:30px;border:1px solid var(--line);border-radius:8px;background:#F6F3FC;font:500 12px var(--f);color:var(--ink);padding:0 6px;margin-top:6px}
 .md .play{width:84px;height:84px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;margin:0 auto}
 .md .play svg{width:34px;height:34px;fill:var(--violet2);margin-left:6px}
 /* update cards: each takes the height of its text, in two columns; a slide that is too full continues on the next one */
@@ -387,8 +398,15 @@ async function loadImg(id){
   paint();
 }
 const PLAY='<div class="play"><svg viewBox="0 0 24 24"><path d="M6 4l14 8-14 8z"/></svg></div>';
+/* A photo or video can keep a shape: landscape 16:9, square 1:1, portrait 3:4 or portrait 9:16 (set when it is uploaded, changeable in Edit) */
+const SHAPE={l:16/9,s:1,q:3/4,p:9/16};
+const shapeOf=(w,h)=>{const r=Math.log((+w||16)/(+h||9));return Object.keys(SHAPE).reduce((a,k)=>Math.abs(Math.log(SHAPE[k])-r)<Math.abs(Math.log(SHAPE[a])-r)?k:a,'l');};
 function media(m,k,kind,thumb){
   if(!m)return`<div class="md empty"><div class="ph">${kind==='video'?'Video':'Photo'} ${k+1}</div></div>`;
+  if(SHAPE[m.o])return`<div class="mdo o-${m.o}">${tile(m,k,kind,thumb)}</div>`;
+  return tile(m,k,kind,thumb);
+}
+function tile(m,k,kind,thumb){
   const fit=m.fit==='contain'?' contain':'';
   if(m.kind==='video'){
     if(thumb)return`<div class="md vthumb"><div class="ph">${PLAY}</div></div>`;
@@ -434,6 +452,7 @@ function cardHtml(c,k){
 }
 /* One slide, 1600 × 900 */
 function slideHtml(page,s,i,n,thumb){
+  let fxOn='';
   const T=TPL[s.tpl]||TPL.upd;
   const title=s.title||(s.tpl==='upd'?(page.id==='key'?'Key updates':'Updates'):'Untitled slide');
   let body;
@@ -454,14 +473,23 @@ function slideHtml(page,s,i,n,thumb){
     for(let k=0;k<Math.max(cnt,(s.media||[]).length);k++)ms.push((s.media||[])[k]||null);
     const shownMs=VIEW==='edit'||thumb?ms:ms.filter(Boolean);
     const big=shownMs.length===3?'grid-row:1/3;':'';
-    const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
-    const tx=T[2]?`<div class="tx">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${rich(s.lines)}</ul>${s.bn?`<div class="big"><b>${esc(s.bn)}</b><span>${esc(s.bl||'')}</span></div>`:''}</div>`:'';
+    // when every photo or video has a shape, they take only the width that shape needs and the text box takes the rest
+    let fx='';
+    if(T[2]&&shownMs.length&&shownMs.every(m=>m&&SHAPE[m.o])){
+      const r=m=>SHAPE[m.o],g=grid(shownMs,shownMs.length,T[2]);
+      const ratio=shownMs.length===1?r(shownMs[0]):/rows/.test(g)?Math.max(...shownMs.map(r))/2:shownMs.reduce((a,m)=>a+r(m),0);
+      const rows=/rows/.test(g)&&shownMs.length>1;
+      fx=';';fxOn=`--r:${ratio.toFixed(4)};--gh:${rows?0:24*(shownMs.length-1)}px;--gv:${rows?24:0}px`;
+      // side by side: each column as wide as its own shape needs, so a portrait and a landscape sit at the same height
+      if(shownMs.length===2&&!/rows/.test(g))fx+=`;grid-template-columns:${shownMs.map(m=>r(m).toFixed(4)+'fr').join(' ')}`;}
+    const mg=shownMs.length?`<div class="mg" style="${grid(shownMs,shownMs.length,T[2])}${fx}">${shownMs.map((m,k)=>k===0&&big?media(m,k,T[3],thumb).replace('class="md','style="'+big+'" class="md'):media(m,k,T[3],thumb)).join('')}</div>`:'';
+    const tx=T[2]?`<div class="tx${fx?' fl':''}">${s.tag?`<span class="tg">${esc(s.tag)}</span>`:''}${s.head?`<h3>${esc(s.head)}</h3>`:''}<ul>${rich(s.lines)}</ul>${s.bn?`<div class="big"><b>${esc(s.bn)}</b><span>${esc(s.bl||'')}</span></div>`:''}</div>`:'';
     body=tx+mg||`<div class="s-empty">Nothing on this slide yet.</div>`;
   }
   const dots=n>1&&n<=14?`<span class="dots">${Array.from({length:n},(_,k)=>`<i${k===i?' class="on"':''}></i>`).join('')}</span>`:n>1?`<span>${i+1} of ${n}</span>`:'';
   return`<i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i><i class="cl c4"></i><div class="s-top"><div><div class="s-h">${titleHtml(title)}${s.cont?'<span class="cont">(continued)</span>':''}</div><div class="s-wk">${wkSlide(WEEK)}</div></div>
     <div class="logo"><img src="brand/lockup-violet.png" alt="Artium Academy" width="125" height="44"></div></div>
-    <div class="s-b">${body}</div><div class="s-f"><span>Artium Academy · Offline.</span>${dots}</div>`;
+    <div class="s-b${fxOn?' fxb':''}"${fxOn?` style="${fxOn}"`:''}>${body}</div><div class="s-f"><span>Artium Academy · Offline.</span>${dots}</div>`;
 }
 
 /* ── Rendering ── */
@@ -628,6 +656,7 @@ function renderEditor(){
       for(let k=0;k<T[5];k++){const m=ms[k];
         if(m)slots.push(`<div class="slot full" data-k="${k}"><div class="pv">${m.kind==='video'?'<div class="vi">▶ Video</div>':LOCAL[m.id]||IMG[m.id]&&IMG[m.id].length>2?`<img src="${LOCAL[m.id]||IMG[m.id]}" alt="">`:(loadImg(m.id),'')}</div>
           <div class="nm">${k+1}. ${esc(m.name||(m.kind==='video'?'Video':'Photo'))}</div>
+          <select class="shp" data-mf="o" aria-label="Shape">${[['l','Landscape 16:9'],['s','Square 1:1'],['q','Portrait 3:4'],['p','Portrait 9:16'],['','No fixed shape']].map(([v,t])=>`<option value="${v}"${(SHAPE[m.o]?m.o:'')===v?' selected':''}>${t}</option>`).join('')}</select>
           <div class="ctl">${m.kind==='image'?`<select data-mf="fit" aria-label="Fit"><option value="cover"${m.fit!=='contain'?' selected':''}>Fill the space</option><option value="contain"${m.fit==='contain'?' selected':''}>Show the whole photo</option></select>`:'<span style="flex:1"></span>'}
           <button class="ic" data-a="mleft" title="Move earlier"${k?'':' disabled'}>←</button><button class="ic" data-a="mright" title="Move later"${k<ms.length-1?'':' disabled'}>→</button><button class="ic del" data-a="unmedia" title="Remove">✕</button></div></div>`);
         else if(k===ms.length)slots.push(`<div class="slot" data-k="${k}">${s._up?`<div class="prog"><i style="width:${s._up.pct}%"></i></div><small>${esc(s._up.text)}</small>`
@@ -663,7 +692,7 @@ document.getElementById('ed').addEventListener('input',e=>{
   else if(t.dataset.cf){const c=s.cards[+t.closest('[data-c]').dataset.c],f=t.dataset.cf;
     if(f==='lines')c.lines=v.split('\n').map(x=>x.trim()).filter(String);
     else if(f==='done'||f==='of'){const x=v.replace(/[^0-9.]/g,'');if(x!==v)t.value=x;c[f]=x===''?null:+x;}else c[f]=v;}
-  else if(t.dataset.mf){const m=s.media[+t.closest('[data-k]').dataset.k];m.fit=v;}
+  else if(t.dataset.mf){const m=s.media[+t.closest('[data-k]').dataset.k];m[t.dataset.mf]=v;}
   else return;
   touch();refreshCanvas();
 });
@@ -741,7 +770,7 @@ async function upload(s,f){
       off=res.done?size:res.next;
       s._up={pct:Math.round(off/size*100),text:'Uploading '+Math.round(off/size*100)+'% of '+(size/1048576).toFixed(1)+' MB…'};if(cur()===s)renderEditor();
     }
-    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover'}).slice(0,T[5]);DIRTY=true;
+    LOCAL[res.id]=d.url;s.media=(s.media||[]).concat({id:res.id,kind,w,h,name:f.name,fit:'cover',o:shapeOf(w,h)}).slice(0,T[5]);DIRTY=true;
   }catch(err){alert('The upload stopped: '+err.message+'.');}
   delete s._up;UPLOADING--;renderEditor();
 }
