@@ -219,6 +219,22 @@ body.fs.intro #stage .slide{opacity:0;animation:inS .75s cubic-bezier(.2,.8,.2,1
 .lead{display:inline-flex;gap:3px;background:#EFEAF9;border-radius:12px;padding:3px}
 .lead button{border:0;background:none;cursor:pointer;padding:8px 16px;border-radius:9px;font:600 13px var(--f);color:var(--ink2)}
 .lead button[aria-pressed="true"]{background:#fff;color:#01073C;box-shadow:0 1px 2px rgba(1,7,60,.08)}
+/* Go to page: a button on the slide, and the page in a window over the presentation */
+.gopill{display:inline-flex;align-items:center;gap:12px;padding:12px 22px 12px 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#4101F7,#DD30B1);color:#fff;font:700 19px/1.15 var(--f);text-align:left;cursor:pointer;box-shadow:0 20px 40px -18px rgba(102,1,253,.8);margin-right:26px}
+.gopill i{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}
+.gopill i svg{width:17px;height:17px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.gopill small{display:block;font:700 11.5px var(--f);letter-spacing:.14em;text-transform:uppercase;opacity:.82}
+.s-f .fr{display:flex;align-items:center}
+.gov{position:fixed;inset:0;z-index:70;background:rgba(1,7,60,.38);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:gIn .25s ease both}
+.gow{position:absolute;inset:28px 36px;border-radius:26px;overflow:hidden;background:#fff;box-shadow:0 40px 90px -30px rgba(1,7,60,.6);display:flex;flex-direction:column;animation:gUp .3s cubic-bezier(.2,.8,.2,1) both}
+.gob{height:62px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 12px 0 20px;background:linear-gradient(90deg,#F4EEFF,#FCEFFA);border-bottom:1px solid #EDE6FB}
+.gob .nm{display:flex;align-items:center;gap:12px;font:700 16px var(--f);color:#01073C;min-width:0;white-space:nowrap;overflow:hidden}
+.gob .nm i{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#4101F7,#DD30B1);display:grid;place-items:center;flex:none}
+.gob .nm i svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.gob .nm small{font:500 13px var(--f);color:var(--ink3);overflow:hidden;text-overflow:ellipsis}
+.gob .bk{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border:0;border-radius:999px;background:linear-gradient(135deg,#4101F7,#DD30B1);color:#fff;font:700 14px var(--f);cursor:pointer;flex:none;box-shadow:0 12px 24px -12px rgba(102,1,253,.8)}
+.gow iframe{flex:1;border:0;width:100%;background:#FBFAFF}
+@keyframes gIn{from{opacity:0}}@keyframes gUp{from{opacity:0;transform:translateY(16px) scale(.985)}}
 /* Edit view */
 .ed{display:grid;grid-template-columns:236px minmax(0,1fr);gap:22px;align-items:start}
 .rail{background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh);padding:14px;display:flex;flex-direction:column;gap:12px;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
@@ -315,6 +331,7 @@ body.fs .studio,body.fs .strip{display:none!important}
 </div>
 <div class="fsb" id="fsb" hidden></div>
 <div id="intro"></div>
+<div id="gopage"></div>
 <div id="dlg"></div>
 
 <script>
@@ -451,6 +468,7 @@ function cardHtml(c,k){
     ${of?`<div class="meter"><div class="n">${done.toLocaleString('en-IN')}<small> / ${of.toLocaleString('en-IN')}</small></div><div class="bw"><div><span>${esc(c.unit||'')}</span><b>${pct}%</b></div><div class="tr"><i style="width:${Math.min(100,pct)}%"></i></div></div></div>`:''}</div>`;
 }
 /* One slide, 1600 × 900 */
+function goBtn(s,thumb){const pg=pageLink(s.go);return pg?`<button type="button" class="gopill"${thumb?' tabindex="-1"':` data-gopage="${esc(pg.id)}"`}><i>${GO_ICON}</i><span><small>Go to page</small>${esc(pg.name)}</span></button>`:'';}
 function slideHtml(page,s,i,n,thumb){
   let fxOn='';
   const T=TPL[s.tpl]||TPL.upd;
@@ -489,8 +507,32 @@ function slideHtml(page,s,i,n,thumb){
   const dots=n>1&&n<=14?`<span class="dots">${Array.from({length:n},(_,k)=>`<i${k===i?' class="on"':''}></i>`).join('')}</span>`:n>1?`<span>${i+1} of ${n}</span>`:'';
   return`<i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i><i class="cl c4"></i><div class="s-top"><div><div class="s-h">${titleHtml(title)}${s.cont?'<span class="cont">(continued)</span>':''}</div><div class="s-wk">${wkSlide(WEEK)}</div></div>
     <div class="logo"><img src="brand/lockup-violet.png" alt="Artium Academy" width="125" height="44"></div></div>
-    <div class="s-b${fxOn?' fxb':''}"${fxOn?` style="${fxOn}"`:''}>${body}</div><div class="s-f"><span>Artium Academy · Offline.</span>${dots}</div>`;
+    <div class="s-b${fxOn?' fxb':''}"${fxOn?` style="${fxOn}"`:''}>${body}</div><div class="s-f"><span>Artium Academy · Offline.</span><span class="fr">${goBtn(s,thumb)}${dots}</span></div>`;
 }
+
+/* ── Go to page ── */
+// the pages this person can open, as the site's menu lists them (the menu hides the ones they can't)
+function sitePages(){
+  try{const d=window.parent.document,seen={},out=[];
+    d.querySelectorAll('.tab[data-tab]:not([hidden])').forEach(b=>{const id=b.dataset.tab,fr=d.getElementById('frame-'+id);
+      if(!id||seen[id]||id==='review'||!fr||!fr.dataset.src)return;seen[id]=1;
+      const name=[...b.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim()||id;
+      const g=b.closest('.nav-g'),gt=g&&g.querySelector('.nav-t')?[...g.querySelector('.nav-t').childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('').trim():'';
+      out.push({id,name,src:fr.dataset.src,group:gt});});
+    return out;}catch(e){return[];}
+}
+const pageLink=id=>id?sitePages().find(p=>p.id===id)||null:null;
+const GO_ICON='<svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>';
+function openPage(id){
+  const pg=pageLink(id);if(!pg)return;
+  const x=document.body.classList.contains('fs')?SEQ[POS]:null,where=x?`slide ${x.i+1} of ${x.p.name}`:(pageOf(SUB)?`slide ${SL+1} of ${pageOf(SUB).name}`:'');
+  document.getElementById('gopage').innerHTML=`<div class="gov" id="gov"><div class="gow" role="dialog" aria-label="${esc(pg.name)}"><div class="gob"><span class="nm"><i>${GO_ICON}</i>${esc(pg.name)}${where?`<small>Opened from ${esc(where)}.</small>`:''}</span>
+    <button type="button" class="bk" id="goback"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back to presentation</button></div>
+    <iframe src="${esc(pg.src)}" title="${esc(pg.name)}" allow="fullscreen; autoplay"></iframe></div></div>`;
+}
+function closePage(){document.getElementById('gopage').innerHTML='';try{window.focus();}catch(e){}}
+document.getElementById('gopage').addEventListener('click',e=>{if(e.target.closest('#goback'))closePage();});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-gopage]');if(b){e.stopPropagation();openPage(b.dataset.gopage);}},true);
 
 /* ── Rendering ── */
 function renderSubs(){
@@ -634,6 +676,9 @@ function renderEditor(){
     let f=`<div class="fh"><b>Slide ${SEL+1}</b><span>${esc(T[0])}</span><span class="sp2"></span>
       <label class="chk"><input type="checkbox" data-f="show"${s.hide?'':' checked'}>In the slideshow</label>
       <button class="ic" data-a="up" title="Move earlier"${SEL?'':' disabled'}>↑</button><button class="ic" data-a="down" title="Move later"${SEL<n-1?'':' disabled'}>↓</button><button class="ic del" data-a="del" title="Delete this slide">✕</button></div>`;
+    {const ps=sitePages(),cur=s.go||'',gs=[...new Set(ps.map(p=>p.group))];
+     f+=`<div class="row" style="margin:-4px 0 16px"><label class="fl" style="flex:1">Go to page <small>Optional. A button on the slide opens this page in a window during the presentation, with a way back to the slide.</small>
+       <select data-f="go"><option value="">None</option>${gs.map(g=>`<optgroup label="${esc(g||'Pages')}">${ps.filter(p=>p.group===g).map(p=>`<option value="${esc(p.id)}"${p.id===cur?' selected':''}>${esc(p.name)}</option>`).join('')}</optgroup>`).join('')}${cur&&!ps.some(p=>p.id===cur)?`<option value="${esc(cur)}" selected>A page you can't open</option>`:''}</select></label></div>`;}
     if(s.tpl==='cii'){
       const ob=s.lead==='objective',box=(k,lab,hint,ph)=>`<div class="fl">${lab} <small>${hint}</small><div class="rtw"><div class="rtb" role="toolbar" aria-label="Text formatting"><button type="button" class="bh" data-rt="h1" title="Heading 1">H1</button><button type="button" class="bl" data-rt="insertUnorderedList" title="Bullet points (or type - and a space)"><svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="5" cy="17" r="1.4"/><path d="M10 7h10M10 12h10M10 17h10"/></svg></button><span class="sep"></span><button type="button" class="bb" data-rt="bold" title="Bold (Ctrl+B)">B</button><button type="button" class="bi" data-rt="italic" title="Italics (Ctrl+I)">I</button><button type="button" class="bu" data-rt="underline" title="Underline (Ctrl+U)">U</button></div><div class="rte" contenteditable="true" data-f="${k}" data-ph="${ph}">${toEd(s[k])}</div></div></div>`;
       f+=`<div class="fg"><div class="fc"><label class="fl">Slide title<input class="in" data-f="title" value="${esc(s.title)}" placeholder="e.g. Renewals in the first month"></label>
@@ -882,6 +927,7 @@ function wake(){const b=document.getElementById('fsb');b.classList.remove('idle'
 document.addEventListener('mousemove',()=>{if(document.body.classList.contains('fs'))wake();});
 document.addEventListener('keydown',e=>{
   if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName||''))return;
+  if(document.getElementById('gov'))return;
   if(document.getElementById('ov')){if(e.key==='Escape')closeDlg();return;}
   const fs=document.body.classList.contains('fs');
   const fwd=e.key==='ArrowRight'||e.key==='PageDown'||(fs&&e.key===' '),back=e.key==='ArrowLeft'||e.key==='PageUp';
