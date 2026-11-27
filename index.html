@@ -221,6 +221,9 @@
     .menu-btn{top:10px;left:12px;width:38px;height:38px;border-radius:12px}
     .sidebar{width:min(320px,86vw)}
   }
+  /* Instrument Sales catalog view: only the prices and photos, for showing a customer */
+  html.cat-mode .sidebar,html.cat-mode .menu-btn,html.cat-mode .edge,html.cat-mode .mtop,html.cat-mode #bell,html.cat-mode #rf{display:none!important}
+  html.cat-mode .frames,html.cat-mode body.docked .frames{left:0!important;top:0!important}
 </style>
 <script src="auth.js"></script>
 </head>
@@ -347,6 +350,7 @@
     if(!ArtiumAuth.user) return;   // nothing loads before sign-in
     const extra = String(name || "").includes("&") ? String(name).slice(String(name).indexOf("&")) : "";
     name = String(name || "").split("&")[0];
+    if(name !== "instruments") document.documentElement.classList.remove("cat-mode");   // catalog view hides the menu; leaving the page brings it back
     if(!document.getElementById("frame-" + name)) name = "start";
     if(!ArtiumAuth.pages.includes(name)) name = ArtiumAuth.pages[0];   // only pages this person may open
     if(!document.getElementById("frame-" + name)) name = ArtiumAuth.pages.find(k => document.getElementById("frame-" + k)) || "start";   // a page that has been retired

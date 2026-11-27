@@ -22,9 +22,17 @@ h1{font:700 50px/1.06 var(--f);letter-spacing:-1.6px;padding-bottom:4px;backgrou
 .sub{font-size:14px;color:var(--ink3);margin-top:6px}
 .right{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .badge{font:600 12px var(--f);padding:6px 12px;border-radius:999px;background:#F4F0FF;color:var(--v)}
-.view{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px;box-shadow:0 2px 10px #4101f710}
-.view button{border:0;background:none;padding:10px 22px;border-radius:999px;font:600 14px var(--f);color:var(--ink3)}
-.view button[aria-pressed="true"]{background:var(--v);color:#fff}
+.sw{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--v);background:#fff;color:var(--v);border-radius:999px;padding:11px 22px;font:700 14px var(--f);box-shadow:0 2px 10px #4101f710;transition:background .15s,color .15s}
+.sw svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sw:hover{background:#F4F0FF}
+.sw[aria-pressed="true"]{background:var(--v);color:#fff}.sw[aria-pressed="true"]:hover{background:#3500d0}
+.cf{position:fixed;inset:0;z-index:60;background:rgba(1,7,60,.55);display:grid;place-items:center;padding:20px}
+.cfb{background:#fff;border-radius:26px;max-width:460px;width:100%;padding:30px 30px 26px;box-shadow:0 40px 90px -30px rgba(1,7,60,.6)}
+.cfb h3{font:700 24px/1.2 var(--f);color:var(--ink);letter-spacing:-.4px}
+.cfb p{margin-top:10px;font-size:14.5px;line-height:1.5;color:var(--ink2)}
+.cfa{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.cfa button{flex:1 1 160px;border-radius:999px;padding:12px 18px;font:700 14px var(--f);border:1.5px solid var(--v)}
+.cfa .keep{background:var(--v);color:#fff}.cfa .go{background:#fff;color:var(--v)}
 .page{max-width:1600px;margin:0 auto;padding:0 48px 90px}
 .pills{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 18px}
 .pill{padding:9px 18px;border-radius:999px;background:#fff;border:1px solid var(--line);font:600 13px var(--f);color:var(--ink2)}
@@ -57,11 +65,11 @@ th:first-child{background:#FAF8FF;z-index:3}
 .nm{font:700 26px/1.15 var(--f);color:var(--ink);letter-spacing:-.01em;margin:2px 0 10px}
 .pr b{font:700 30px var(--f);color:var(--v)}.pr s{margin-left:10px;color:var(--ink4);font-size:15px}
 .dl{font-size:12px;color:var(--ink3);margin-top:3px}
-.save{display:inline-block;margin-top:10px;font:700 11px var(--f);color:var(--em);background:#FFF1EA;padding:5px 10px;border-radius:99px}
+.save{display:inline-block;margin-top:10px;font:700 12px var(--f);color:#0F7B4B;background:#E3F6EC;padding:6px 12px;border-radius:99px}
 .foot{margin-top:22px;color:var(--ink3);font-size:13px;display:flex;gap:24px;flex-wrap:wrap}
 /* gallery */
-.gal{position:relative;border-radius:16px;background:linear-gradient(135deg,#F4F0FF,#FFE9F8);aspect-ratio:4/3;overflow:hidden;touch-action:pan-y;user-select:none}
-.gal img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10px;cursor:zoom-in;-webkit-user-drag:none}
+.gal{position:relative;border-radius:16px;box-shadow:inset 0 0 0 1px #E9E2F7;background:linear-gradient(135deg,#F4F0FF,#FFE9F8);aspect-ratio:4/3;overflow:hidden;touch-action:pan-y;user-select:none}
+.gal img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in;-webkit-user-drag:none}
 .gal.empty{display:grid;place-items:center;color:var(--ink4);font:600 13px var(--f)}
 .ga{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(1,7,60,.18);display:grid;place-items:center;color:var(--v)}
 .ga:hover{background:#fff}.ga.l{left:10px}.ga.r{right:10px}
@@ -72,7 +80,7 @@ th:first-child{background:#FAF8FF;z-index:3}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(1,7,60,.82);display:grid;place-items:center;padding:24px}
 .lbc{position:relative;width:min(1100px,100%);}
 .lbc .gal{aspect-ratio:16/10;background:#fff;border-radius:22px;max-height:82vh}
-.lbc .gal img{cursor:default;padding:18px}
+.lbc .gal img{cursor:default;object-fit:contain;padding:18px}
 .lbc .ga{width:48px;height:48px}.lbc .ga svg{width:22px;height:22px}
 .lbt{display:flex;justify-content:space-between;align-items:center;color:#fff;margin-bottom:12px;font:700 20px var(--f)}
 .lbt button{border:0;background:rgba(255,255,255,.16);color:#fff;border-radius:999px;padding:8px 18px;font:600 14px var(--f)}
@@ -87,7 +95,7 @@ th:first-child{background:#FAF8FF;z-index:3}
 <div class="hero">
   <div><h1>Instrument Sales.</h1><div class="sub" id="sub">Pricing 2026-27</div></div>
   <div class="right"><span class="badge" id="badge"></span>
-    <div class="view" role="group" aria-label="View"><button id="vi" aria-pressed="true">Internal view</button><button id="vc" aria-pressed="false">Customer view</button></div>
+    <button class="sw" id="sw" type="button" aria-pressed="false"></button>
   </div>
 </div>
 <div class="page">
@@ -95,6 +103,7 @@ th:first-child{background:#FAF8FF;z-index:3}
   <div id="out"><div class="msg">Loading prices.</div></div>
 </div>
 <div class="lb" id="lb" hidden></div>
+<div class="cf" id="cf" hidden></div>
 <script>
 (function(){
 const $=s=>document.querySelector(s);
@@ -103,7 +112,10 @@ const GROUPS=[['all','All'],['kb','Keyboards & pianos'],['gt','Guitars'],['ac','
 const groupOf=c=>/guitar/i.test(c)?'gt':/keyboard stand|stand|accessor/i.test(c)?'ac':'kb';
 const slug=m=>String(m).replace(/\s*-\s*/g,'-').replace(/\s+/g,'-');
 let ROWS=[],MAN={},VIEW='int',GRP='all';
-try{const v=localStorage.getItem('instrView');if(v==='cus')VIEW='cus';}catch(e){}
+const AUTO=[];
+try{if(sessionStorage.getItem('instrView')==='cus')VIEW='cus';}catch(e){}
+/* the photos change by themselves every 2 seconds, in a loop, while they are on screen */
+setInterval(()=>{if(document.hidden||VIEW!=='cus')return;for(let k=AUTO.length-1;k>=0;k--){const g=AUTO[k];if(!g.isConnected){AUTO.splice(k,1);continue;}if(g._vis&&!g._hold&&Date.now()-g._t>=1900)g.show(g.idx()+1);}},500);
 
 /* ── photos ── */
 const photos=m=>{const n=MAN[slug(m)]||0;return Array.from({length:n},(_,i)=>'instruments/'+slug(m)+'/'+(i+1)+'.jpg');};
@@ -118,7 +130,7 @@ function gallery(host,model,opts){
     g.insertAdjacentHTML('beforeend','<button class="ga l" aria-label="Previous photo">'+ARW.l+'</button><button class="ga r" aria-label="Next photo">'+ARW.r+'</button><div class="dots">'+list.map(()=>'<i></i>').join('')+'</div>');
     dots=[...g.querySelectorAll('.dots i')];
   }
-  const show=n=>{i=(n+list.length)%list.length;img.src=list[i];if(dots)dots.forEach((d,k)=>d.classList.toggle('on',k===i));};
+  const show=n=>{i=(n+list.length)%list.length;img.src=list[i];g._t=Date.now();if(dots)dots.forEach((d,k)=>d.classList.toggle('on',k===i));};
   g.show=show;show(0);
   if(list.length>1){
     g.querySelector('.l').onclick=e=>{e.stopPropagation();show(i-1);};
@@ -129,7 +141,11 @@ function gallery(host,model,opts){
     g.addEventListener('pointercancel',()=>x0=null);
   }
   if(!opts.big)img.onclick=()=>{if(!g._sw)openLb(model,i);};
-  host.appendChild(g);g.idx=()=>i;return g;
+  host.appendChild(g);g.idx=()=>i;
+  if(opts.auto&&list.length>1){g._vis=false;g._hold=false;g._t=Date.now();g.addEventListener('pointerenter',()=>g._hold=true);g.addEventListener('pointerleave',()=>g._hold=false);
+    if('IntersectionObserver' in window){new IntersectionObserver(es=>{g._vis=es[es.length-1].isIntersecting;}).observe(g);}else g._vis=true;
+    AUTO.push(g);}
+  return g;
 }
 function openLb(model,start){
   const lb=$('#lb');lb.hidden=false;lb.innerHTML='<div class="lbc"><div class="lbt"><span></span><button id="lbx">Close</button></div><div id="lbh"></div></div>';
@@ -159,7 +175,7 @@ function internal(){
     h+='<tr><td><div class="mc"><button class="th'+(photos(r.model).length?'':' none')+'" data-k="'+ROWS.indexOf(r)+'" aria-label="Photos of '+esc(r.model)+'">'+(photos(r.model).length?'<img src="'+photos(r.model)[0]+'" alt="">':'—')+'</button><div class="mn">'+esc(r.model)+'<small>'+esc(r.maker)+' · '+esc(r.cat)+'</small></div></div></td>'
      +'<td>'+inr(r.mrp)+'</td><td>'+r.disc+'%</td><td>'+inr(r.netp)+'</td><td>'+inr(r.online)+'</td><td>'+inr(r.gross)+'</td><td>'+inr(r.net)+'</td><td>'+(r.addl>=0?'+':'−')+inr(Math.abs(r.addl))+'</td><td>'+inr(r.mb)+'</td>'
      +'<td class="'+(lo?'low':'')+'">'+inr(r.ma)+(lo?'<span class="fl">Low margin</span>':'')+'</td><td class="'+(lo?'low':'')+'">'+p.toFixed(1)+'%</td></tr>';});
-  h+='</tbody></table></div><div class="note">Internal view. Margins come from the Pricing - DMPL tab. Customer pays includes the ₹300 delivery, which is free on a single order above ₹50,000.</div>';
+  h+='</tbody></table></div><div class="note">Internal view. Margins come from the Pricing - DMPL tab. Customer pays is the net selling price, which includes the ₹300 delivery.</div>';
   return h;
 }
 function customer(){
@@ -167,20 +183,22 @@ function customer(){
   const host=document.createElement('div');host.className='grid';
   L.forEach(r=>{
     const c=document.createElement('div');c.className='card';
-    const gh=document.createElement('div');c.appendChild(gh);gallery(gh,r.model);
-    const off=r.mrp>r.gross?r.mrp-r.gross:0;
-    c.insertAdjacentHTML('beforeend','<div class="cat">'+esc(r.maker)+' · '+esc(r.cat)+'</div><div class="nm">'+esc(r.model)+'</div><div class="pr"><b>'+inr(r.gross)+'</b>'+(r.mrp>r.gross?'<s>'+inr(r.mrp)+'</s>':'')+'</div><div class="dl">'+(r.deliv?'+ '+inr(r.deliv)+' delivery':'Free delivery')+'</div>'+(off?'<span class="save">You save '+inr(off)+' on MRP</span>':''));
+    const gh=document.createElement('div');c.appendChild(gh);gallery(gh,r.model,{auto:true});
+    const mrp=Math.round(r.net/0.8/10)*10,off=mrp-r.net;
+    c.insertAdjacentHTML('beforeend','<div class="cat">'+esc(r.maker)+' · '+esc(r.cat)+'</div><div class="nm">'+esc(r.model)+'</div><div class="pr"><b>'+inr(r.net)+'</b>'+'<s>'+inr(mrp)+'</s>'+'</div><div class="dl">Inclusive of all taxes and delivery. Collect it from our academy.</div>'+(off?'<span class="save">You save '+inr(off)+'</span>':''));
     host.appendChild(c);
   });
   const w=document.createElement('div');w.appendChild(host);
-  w.insertAdjacentHTML('beforeend','<div class="foot"><span>Prices include GST.</span><span>Delivery ₹300 per order, free on orders above ₹50,000.</span></div>');
+  w.insertAdjacentHTML('beforeend','<div class="foot"><span>Everything is taken care of: the price includes all taxes and delivery.</span><span>Straight from the official distributor’s warehouse to our academy. Collect it from here.</span></div>');
   return w;
 }
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function render(){
-  $('#vi').setAttribute('aria-pressed',VIEW==='int');$('#vc').setAttribute('aria-pressed',VIEW==='cus');
-  $('#badge').textContent=VIEW==='int'?'Internal only. Do not show customers':'Safe to show customers';
-  $('#sub').textContent=VIEW==='int'?'Pricing 2026-27. Every figure, for the team only.':'Yamaha keyboards, guitars and accessories at Artium.';
+  const sw=$('#sw');sw.setAttribute('aria-pressed',VIEW==='cus');
+  sw.innerHTML='<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8"/></svg>'+(VIEW==='cus'?'Catalog view':'Switch to catalog');
+  $('#badge').hidden=VIEW==='cus';$('#badge').textContent='Internal only. Do not show customers';
+  try{parent.document.documentElement.classList.toggle('cat-mode',VIEW==='cus');}catch(e){}
+  $('#sub').textContent=VIEW==='int'?'Pricing 2026-27. Every figure, for the team only.':'Genuine Yamaha instruments, procured directly from Yamaha’s official distributor, always from the latest production batch.';
   pills();
   const out=$('#out');out.innerHTML='';
   if(!ROWS.length){out.innerHTML='<div class="msg">No prices found.</div>';return;}
@@ -188,8 +206,15 @@ function render(){
   if(typeof v==='string')out.innerHTML=v;else out.appendChild(v);
   out.querySelectorAll('.th[data-k]').forEach(b=>{if(!b.classList.contains('none'))b.onclick=()=>openLb(ROWS[+b.dataset.k].model,0);});
 }
-$('#vi').onclick=()=>{VIEW='int';try{localStorage.setItem('instrView','int');}catch(e){}render();};
-$('#vc').onclick=()=>{VIEW='cus';try{localStorage.setItem('instrView','cus');}catch(e){}render();};
+const setView=v=>{VIEW=v;try{sessionStorage.setItem('instrView',v);}catch(e){}render();};
+function askInternal(){
+  const cf=$('#cf');cf.hidden=false;
+  cf.innerHTML='<div class="cfb" role="alertdialog" aria-modal="true"><h3>Switch to the internal view?</h3><p>The internal view shows purchase prices, discounts and margins. Please check that no customer is looking at the screen.</p><div class="cfa"><button class="keep" id="cfk">Stay in catalog view</button><button class="go" id="cfg">Yes, switch to internal view</button></div></div>';
+  const close=()=>{cf.hidden=true;cf.innerHTML='';document.removeEventListener('keydown',key);};
+  const key=e=>{if(e.key==='Escape')close();};document.addEventListener('keydown',key);
+  $('#cfk').onclick=close;$('#cfg').onclick=()=>{close();setView('int');};cf.onclick=e=>{if(e.target===cf)close();};$('#cfk').focus();
+}
+$('#sw').onclick=()=>{if(VIEW==='int')setView('cus');else askInternal();};
 
 (async function(){
   try{
